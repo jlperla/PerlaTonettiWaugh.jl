@@ -4,3 +4,4 @@ NamedTuples
 BenchmarkTools
 Plots
 BandedMatrices
+Sundials
