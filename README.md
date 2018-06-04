@@ -1,7 +1,18 @@
-# To access with v0.6
-You will need to get the file in your path.  Download the repository to a `/projects` instead of your normal `Documents` directory or home directory, then
+# Unregistered package
+On v0.6:
 ```
-#To make it easier to load projects
-push!(LOAD_PATH, joinpath(homedir(), "Documents", "projects"))
+Pkg.clone("http://github.com/jlperla/PerlaTonettiWaugh.jl.git")
 ```
-This can be added to your julia startup in  `.juliarc.jl` for example
+To run the regression test,
+```
+Pkg.test("PerlaTonettiWaugh")
+```
+
+At that point, you can go
+```
+using PerlaTonettiWaugh
+```
+Or test everthing with
+```
+Pkg.test("PerlaTonettiWaugh")
+``
