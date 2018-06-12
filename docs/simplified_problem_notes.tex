@@ -54,7 +54,7 @@ While not listed above, in practice another boundary condition (e.g. transversal
 \end{align}
 Keep in mind that this is just a step in the numerical solution, rather than introducing a true reflecting barrier.  We will need to verify that it does not introduce issues by verifying the numeric solution matches the closed form solution for large $\bar{z}$.  Also note that if $\sigma = 0$, due to the upwind procedure this boundary value would be unnecessary and/or drop out of the solution.
 \subsection{Discretizing the State Space}\label{eq:discretization}
-Use backward-differences (i.e. an explicit Euler scheme) in time, backward differences in the first derivative, and central in space for the 2nd derivative.\footnote{Under a $g(t) > \gamma$ assumption (which may be a general requirement on parameter restrictions), the drift is negative, and the correct ``upwind'' finite difference scheme is always backwards.}  \textbf{TODO:} Are we sure backwards in time?  Forwards might converge to the correct steady state viscosity solution.
+This will discretize space with backward differences in the first derivative, and central in space for the 2nd derivative.\footnote{Under a $g(t) > \gamma$ assumption (which may be a general requirement on parameter restrictions), the drift is negative, and the correct ``upwind'' finite difference scheme is always backwards.}
 
 \paragraph{Some Setup and Notation}
 \begin{itemize}
