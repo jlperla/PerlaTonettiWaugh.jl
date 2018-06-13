@@ -1,0 +1,1 @@
+# Numerically solve for the stationary solution as a system of equatoins.  

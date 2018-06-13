@@ -1,0 +1,1 @@
+#Just implements the analytical solution we have in the notes returning back functions and g
