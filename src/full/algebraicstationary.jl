@@ -11,7 +11,9 @@ function stationary_algebraic_full(params)
 
     # Define auxiliary objects.
     F(z) = 1 - z^(-θ); # (H.1)
-
+    S(g) = θ * (g - μ - θ * v^2/2); # (H.2)
+    r(g) = ρ + γ*g + δ; # (H.6)
+    x = ζ * (1 - η + η * Θ/w); # (H.11)
     # Validate auxiliary objects. 
     # Define equilibrium equations. 
     # Solve equilibrium equations. 
