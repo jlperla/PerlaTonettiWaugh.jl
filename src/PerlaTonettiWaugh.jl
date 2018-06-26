@@ -6,9 +6,9 @@ using DifferentialEquations, NamedTuples, BenchmarkTools, BandedMatrices, Sundia
 include("diffusionoperators.jl")
 include("simple/ODEalgorithm.jl")
 include("simple/DAEalgorithm.jl")
-include("simple/analyticalstationary.jl")
+include("simple/algebraicstationary.jl")
 include("simple/numericalstationary.jl")
-include("full/analyticalstationary.jl")
+include("full/algebraicstationary.jl")
 export diffusionoperators, simplecreateODEproblem, simplecreateDAEproblem
 
 end # module
