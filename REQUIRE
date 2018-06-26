@@ -3,3 +3,5 @@ DifferentialEquations
 NamedTuples
 BandedMatrices
 Sundials
+Parameters
+NamedTuples

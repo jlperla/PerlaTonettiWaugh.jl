@@ -2,7 +2,7 @@
 
 using Parameters, NamedTuples
 
-function stationary_algebraic(params)
+function stationary_algebraic_simple(params)
     # Unpack parameters. 
     @unpack γ, σ, α, r, ζ = params
     # Validate parameters.
