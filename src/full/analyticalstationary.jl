@@ -1,4 +1,4 @@
-#Just implements the analytical solution we have in the notes returning back functions and g
+#= #Just implements the analytical solution we have in the notes returning back functions and g
 
 ### Start with substitutions from Appendix H 
 F(z::Real) = 1 - z^(-θ); # (H.1)
@@ -11,4 +11,4 @@ L̃ = Ω((N-1)(1 - F(ẑ))κ + (1-η)ζ(S+δ/χ)); # (H.7)
 # (H.8)
 ̂z = d(κ/̄πₘ)^(1/(σ - 1)) # (H.9)
 w = (1/̄σ)*̄z; # (H.10)
-x = ζ(1-η + ηΘ/w); # (H.11)
+x = ζ(1-η + ηΘ/w); # (H.11) =#
