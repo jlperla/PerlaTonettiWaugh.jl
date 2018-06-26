@@ -2,25 +2,34 @@
 
 # Arnav Sood: Jun. 26, 2018
 
-using Base.Test
+using Base.Test, NamedTuples, Parameters, MacroTools
 include("..\\..\\src\\simple\\algebraicstationary.jl"); 
 
-# Tests for default parameters 
-@test checkparams(simpleparams()) == true # Check that the default parameters are valid.  
-@test g(simpleparams()) ≈ 0.021118282603 # Check that the default parameter g value doesn't change. 
-@test υ(g(simpleparams()), simpleparams()) ≈ 1.753699551 # Check that the default parameter υ value doesn't change. 
-@test v(2, υ(g(simpleparams()), simpleparams()), simpleparams()) ≈ 165.3158126 # Check that the default parameter v value (at state 2) doesn't change. 
+#Generator for tuples with keyw
+macro with_kw(args...)
+    splits = map(args) do arg
+        @match arg begin
+            (a_ = b_) => (a, b)
+            any_ => error("All arguments must be assignments")
+        end
+    end
+    esc(:(
+        (;$(map(splits) do pair
+            Expr(:kw, pair[1], pair[2])
+        end...),) -> 
+        $NamedTuples.@NT($(map(splits) do pair
+            Expr(:kw, pair[1], pair[1])
+        end...))
+    ))
+end
 
-# Check parameter validation
+# Generate default parameters. 
+params = @with_kw(γ = 0.005, σ = 0.02, α = 2.1, r = 0.05, ζ = 14.5)
 
-# Check g
-
-# Check υ
-
-# Check v (function return)
-
-# Check v (value return)
-
-# Check stationary_algebraic (no z)
-
-# Check stationary_algebraic (with z)
+# Test them
+results = stationary_algebraic(params());
+@test results.g ≈ 0.0211182826;
+@test results.υ ≈ 1.75369955156;
+@test results.v(0) ≈ 35.04962283;
+@test results.v(2) ≈ 165.31581267;
+@test results.v(5) ≈ 3312.7957099;

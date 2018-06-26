@@ -1,14 +1,48 @@
-#= #Just implements the analytical solution we have in the notes returning back functions and g
+#Implements the algebraic stationary solution from the full model, returning back [WHAT IT RETURNS].
 
-### Start with substitutions from Appendix H 
-F(z::Real) = 1 - z^(-θ); # (H.1)
-S = θ(g - μ - θ*v^2*0.5); # (H.2)
-nu = (μ-g)/v^2 + √(((g-μ)/v^2)^2 + (r-g)/(0.5 * v^2)); # (H.3)
-a = (r - g - (σ - 1)*(μ - g + (σ -1)*v^2/2)); # (H.4)
-b = (1 - a(r-g))*d^(1 - σ)̂*̂z^(nu + σ - 1); # (H.5)
-r = ρ + γg + δ; # (H.6)
-L̃ = Ω((N-1)(1 - F(ẑ))κ + (1-η)ζ(S+δ/χ)); # (H.7)
-# (H.8)
-̂z = d(κ/̄πₘ)^(1/(σ - 1)) # (H.9)
-w = (1/̄σ)*̄z; # (H.10)
-x = ζ(1-η + ηΘ/w); # (H.11) =#
+using NamedTuples
+
+# Generate params. 
+function fullparams()
+    ans = @NT(ρ = 0.05, σ = 3, n = 10, θ = 3.22, γ = 0, d = 5.49, κ = 0.06, ζ = 1.9, η = 0, Θ = 1, χ = 1/3, υ = 0.01, μ = 0, δ = 0.01); # Default values taken from the `../code/transition_dynamics/default_transition_parameters.m` file in the MATLAB repo. 
+    return ans 
+end 
+
+# Validate params. 
+function checkparams(params)
+    # Put any parameter restrictions here. 
+    return true
+end 
+
+# Validate results. 
+function checkresults(results)
+    # Put any results validation here. 
+    return true 
+end
+
+# Calculate g, given params. 
+function g(params)
+    return true 
+end 
+
+# Calculate auxiliary objects. 
+function findauxiliaries(params)
+    # Unpack params. 
+    ρ = params.ρ; 
+    σ = params.σ; 
+    n = params.n;
+    θ = params.θ;  
+    γ = params.γ; 
+    d = params.d; 
+    κ = params.κ; 
+    ζ = params.ζ; 
+    η = params.η; 
+    Θ = params.Θ;
+    χ = params.χ; 
+    υ = params.υ; 
+    μ = params.μ; 
+    δ = params.δ; 
+    # Calculate objects. 
+    F(z) = 1 - z^(-θ) # (H.1)
+    S = θ*(g - μ)
+end 
