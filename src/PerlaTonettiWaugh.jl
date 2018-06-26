@@ -1,7 +1,7 @@
 module PerlaTonettiWaugh
 
 # package code goes here
-using DifferentialEquations, NamedTuples, Parameters, MacroTools, BenchmarkTools, BandedMatrices, Sundials
+using DifferentialEquations, NamedTuples, Parameters, MacroTools, BandedMatrices, Sundials
 
 include("diffusionoperators.jl")
 include("simple/ODEalgorithm.jl")

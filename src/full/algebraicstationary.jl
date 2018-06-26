@@ -1,7 +1,4 @@
 #Implements the algebraic stationary solution from the full model, returning back [WHAT IT RETURNS].
-
-using NamedTuples
-
 # Generate params. 
 function fullparams()
     ans = @NT(ρ = 0.05, σ = 3, n = 10, θ = 3.22, γ = 0, d = 5.49, κ = 0.06, ζ = 1.9, η = 0, Θ = 1, χ = 1/3, υ = 0.01, μ = 0, δ = 0.01); # Default values taken from the `../code/transition_dynamics/default_transition_parameters.m` file in the MATLAB repo. 

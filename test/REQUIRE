@@ -1,7 +1,2 @@
 BenchmarkTools
 Plots
-BandedMatrices
-Sundials
-MacroTools
-Parameters
-NamedTuples

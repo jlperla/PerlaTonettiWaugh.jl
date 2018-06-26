@@ -1,7 +1,4 @@
 #Implements the algebraic stationary solution from the [notes](https://github.com/jlperla/perla_tonetti_waugh/blob/master/code/dynamics_proof_of_concept/simplified_problem_notes.pdf), returning back functions (g, υ, v) as well as stationary_algebraic. 
-
-using Parameters, NamedTuples
-
 function stationary_algebraic_simple(params)
     # Unpack parameters. 
     @unpack γ, σ, α, r, ζ = params
