@@ -14,7 +14,7 @@ mu_tilde(t, x) = 0.1*x *(1.0 + 4.0 * t)
 basealgorithm = CVODE_BDF() #CVODE_CDF(linear_solver=:GMRES) #ImplicitEuler() #A reasonable alternative. Algorithms which don't work well: Rosenbrock23(), Rodas4(), KenCarp4()
 plotevery = 5
 
-prob = createsimpleODEproblem(c_tilde, sigma_tilde, mu_tilde, x_min, x_max, M, T, rho)
+prob = createODEproblem(c_tilde, sigma_tilde, mu_tilde, x_min, x_max, M, T, rho)
 sol = solve(prob, basealgorithm)
 plot(sol, vars=1:plotevery:M)
 @assert(issorted(sol[end]))
@@ -24,7 +24,7 @@ plot(sol, vars=1:plotevery:M)
 #u_ex(1:M) = u(), following the ODE
 #u_ex(M+1) = 1.0 #(i.e., a trivial linear function)
 
-probDAE = createsimpleDAEproblem(c_tilde, sigma_tilde, mu_tilde, x_min, x_max, M, T, rho)
+probDAE = createDAEproblem(c_tilde, sigma_tilde, mu_tilde, x_min, x_max, M, T, rho)
 solDAE = solve(probDAE, IDA())
 plot(solDAE, vars=1:plotevery:M)
 @show(issorted(solDAE[end][1:M]))

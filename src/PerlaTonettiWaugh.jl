@@ -10,6 +10,6 @@ include("simple/algebraicstationary.jl")
 include("simple/numericalstationary.jl")
 include("full/algebraicstationary.jl")
 include("utilities.jl")
-export diffusionoperators, createsimpleODEproblem, createsimpleDAEproblem, @with_kw, stationary_algebraic_simple
+export diffusionoperators, simplecreateODEproblem, simplecreateDAEproblem, @with_kw, stationary_algebraic_simple
 
 end # module
