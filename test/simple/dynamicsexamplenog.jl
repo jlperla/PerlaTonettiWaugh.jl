@@ -34,3 +34,17 @@ plot(solDAE, vars=1:plotevery:M)
 #Check they are "reasonably" close
 @show norm(sol[1] - solDAE[1][1:M])
 @show norm(sol[end] - solDAE[end][1:M])
+
+# This test for the non-uniform grid code, using a non-uniform x grid ending at 1
+
+x=linspace(x_min,x_max,M)
+x_add=linspace(x_min,x_max,M+10)
+x_comb=unique([x;x_add])
+
+prob_nonuni = createsimplenonuniformODEproblem(c_tilde, sigma_tilde, mu_tilde, x_comb, M, T, rho)
+sol_nonuni = solve(prob, basealgorithm)
+plot(sol, vars=1:plotevery:M)
+@assert(issorted(sol[end]))
+
+@show norm(sol[1]-sol_nonuni[1]) # check whether close to uniform solution
+@show norm(sol[end]-sol_nonuni[end])
