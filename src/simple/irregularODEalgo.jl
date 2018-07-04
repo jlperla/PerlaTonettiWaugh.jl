@@ -12,7 +12,7 @@ function createsimplenonuniformODEproblem(c_tilde, sigma_tilde, mu_tilde, x, M::
     L_T = rho*I - Diagonal(mu_tilde.(T, x)) * L_1_plus - Diagonal(sigma_tilde.(T, x).^2/2.0) * L_2
     u_T = L_T \ c_tilde.(T, x)
 
-    @assert(issorted(u_T)) #We are only solving versions that are increasing for now
+    #@assert(issorted(u_T)) #We are only solving versions that are increasing for now
 
     function f(du,u,p,t)
         L = (p.rho*I  - Diagonal(p.mu_tilde.(t, x)) * p.L_1_plus - Diagonal(p.sigma_tilde.(t, p.x).^2/2.0) * p.L_2)
