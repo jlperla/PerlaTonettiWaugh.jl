@@ -42,7 +42,7 @@ x_add=linspace(x_min,x_max,10)
 x_comb=unique(sort([x;x_add]))
 M_comb=size(x_comb,1)
 
-prob_nonuni = createsimplenonuniformODEproblem(c_tilde, sigma_tilde, mu_tilde, x_comb, M_comb, T, rho)
+prob_nonuni = createsimplenonuniformODEproblem(c_tilde, sigma_tilde, mu_tilde, x, M, T, rho)
 sol_nonuni = solve(prob_nonuni, basealgorithm)
 plot(sol, vars=1:plotevery:M)
 @assert(issorted(sol[end]))
