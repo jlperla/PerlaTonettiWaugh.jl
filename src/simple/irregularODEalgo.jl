@@ -1,5 +1,5 @@
 #Create DiffEq Problem for solving as a system of ODE using nonuniform grid
-function createsimplenonunifromODEproblem(c_tilde, sigma_tilde, mu_tilde, x, M::Int64, T::Float64, rho::Float64)
+function createsimplenonuniformODEproblem(c_tilde, sigma_tilde, mu_tilde, x, M::Int64, T::Float64, rho::Float64)
     x, L_1_plus, L_2  = irregulardiffusionoperators(x, M) #Discretize the operator
 
     p = @NT(L_1_plus = L_1_plus, L_2 = L_2, x = x, rho = rho, mu_tilde = mu_tilde, sigma_tilde = sigma_tilde, c_tilde = c_tilde, T = T) #Named tuple for parameters.
