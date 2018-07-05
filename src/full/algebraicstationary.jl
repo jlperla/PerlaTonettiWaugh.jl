@@ -5,7 +5,7 @@ using Parameters, NLsolve
 include("fullparams.jl")
 
 """
-Function to return the residuals for the equilibrium equations H.15-H.17 in-place, given the values of (g, Ω, π). 
+Function to return the residuals for the equilibrium equations H.15-H.17 in-place, given the values of (g, z, Ω). 
     
 function f!(F, x)
 """
@@ -13,21 +13,26 @@ function f!(G, x)
     # Unpack parameters and inputs. 
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = fullparams()
     g = x[1]
-    Ω = x[2]
-    π = x[3]
+    z_hat = x[2]
+    Ω = x[3]
+
+    # Validations
+    @assert υ > 0 
+    @assert κ > 0
+    @assert z_hat > 0 && Ω > 0 && g > 0
 
     # Compute interim quantities.
     F(z) = 1 - z^(-θ) # H.1 
-    z_hat = d*(κ/π)^(inv(σ-1)) # H.9
     r = ρ + γ*g + δ # H.6 
-    ν = (μ-g)/υ^2 + sqrt(((g-μ)/υ^2)^2 + (r-g)/(υ^2/2)) # H.3
-    a = inv(r - g - (σ - 1)*(μ - g + (σ - 1)*υ^2/2)) # H.4 
+    ν = (μ-g)/υ^2 + sqrt(((g-μ)/υ^2)^2.0 + (r-g)/(υ^(2.0)/2)) # H.3
+    a = inv(r - g - (σ - 1)*(μ - g + (σ - 1)*υ^(2.0)/2)) # H.4 
     b = (1 - a*(r-g))*d^(1-σ)*z_hat^(ν + σ - 1) # H.5 
-    S = θ * (g - μ - θ * υ^2/2) # H.2   
+    S = θ * (g - μ - θ * υ^(2.0)/2) # H.2   
     L_tilde = Ω * ((N-1)*(1-F(z_hat))*κ + (1-η)*ζ*(S + δ/χ)) # H.7
     z_bar = (Ω * (θ)/(1 + θ - σ) + (N-1)*(1-F(z_hat))*d^(1-σ)*(z_hat^(-1 + σ)*θ/(1 + θ - σ))) # H.8
     w = inv(σ)*z_bar # H.10
     x = ζ * (1- η + η * Theta / w) # H.11
+    π = (d^(σ-1) * κ)/(z_hat^(σ-1)) # Inversion of H.9
 
     # Calculate and assign residuals. 
     G[1] = x/π - a*(χ/(1-χ))*(σ + ν - 1)/(ν) # H.15
