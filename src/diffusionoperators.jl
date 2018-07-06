@@ -17,7 +17,6 @@ function diffusionoperators(x_min, x_max, M)
     d_2[end] = -1
     du_2 = ones(M-1)
     L_2 = Tridiagonal(dl_2, d_2, du_2)/(Δ^2)
-
     #BandedMatrix are much faster, probably because of better specializations in the composition
     return (x, BandedMatrix(L_1_plus, (1, 1)), BandedMatrix(L_2, (1, 1))) #The (1,1) are the off-diagonal bandwidths
 end
