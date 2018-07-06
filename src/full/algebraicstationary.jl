@@ -9,7 +9,7 @@ Function to return the residuals for the equilibrium equations H.15-H.17 in-plac
     
 function f!(G, x)
 """
-function f!(G, x; params = fullparams)
+function f!(G, x; params = fullparams, trace = false)
     # Unpack parameters and inputs. 
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params()
     g = x[1]
@@ -19,7 +19,6 @@ function f!(G, x; params = fullparams)
     # Validations
     @assert υ > 0 
     @assert κ > 0
-    @show g, z_hat, Ω
     @assert z_hat > 1 && Ω > 0 && g > 0
 
     # Compute interim quantities.
@@ -44,15 +43,18 @@ function f!(G, x; params = fullparams)
         num_2 = θ*(ν*(N-1)*d^(1-σ)*(θ+ν)*z_hat^(-θ + σ -1) + (ν + σ - 1)*(θ + ν - σ + 1)) # Part of H.16
     G[2] = 1 + (σ-1)/ν - (num_1/denom_1 + num_2)/big_denom + (χ/(1-χ))*(σ + ν - 1)/(ν) # H.16
     G[3] = π - (1- L_tilde)/((σ -1)*z_bar^(σ-1)) # H.17
-    @show L_tilde
-    @show z_bar
-    @show π
-    @show a
-    @show S 
-    @show b 
-    @show x 
-    @show r
-    @show ν
-    @show w
+    if trace 
+        @show g, z_hat, Ω
+        @show L_tilde
+        @show z_bar
+        @show π
+        @show a
+        @show S 
+        @show b 
+        @show x 
+        @show r
+        @show ν
+        @show w
+    end 
 end
 
