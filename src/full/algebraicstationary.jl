@@ -9,9 +9,9 @@ Function to return the residuals for the equilibrium equations H.15-H.17 in-plac
     
 function f!(G, x)
 """
-function f!(G, x)
+function f!(G, x; params = fullparams)
     # Unpack parameters and inputs. 
-    @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = fullparams()
+    @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params()
     g = x[1]
     z_hat = x[2]
     Ω = x[3]
@@ -19,6 +19,7 @@ function f!(G, x)
     # Validations
     @assert υ > 0 
     @assert κ > 0
+    @show g, z_hat, Ω
     @assert z_hat > 1 && Ω > 0 && g > 0
 
     # Compute interim quantities.

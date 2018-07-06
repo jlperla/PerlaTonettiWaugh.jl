@@ -11,7 +11,6 @@ include("simple/DAEalgorithm.jl")
 include("simple/algebraicstationary.jl")
 include("simple/numericalstationary.jl")
 include("utilities.jl")
-include("full/fullparams.jl")
 include("full/algebraicstationary.jl")
 export f!, diffusionoperators, createsimpleODEproblem, createsimpleDAEproblem, @with_kw, stationary_algebraic_simple, createsimplenonuniformODEproblem, irregulardiffusionoperators
 
