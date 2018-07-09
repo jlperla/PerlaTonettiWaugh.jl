@@ -12,6 +12,6 @@ include("simple/algebraicstationary.jl")
 include("simple/numericalstationary.jl")
 include("utilities.jl")
 include("full/algebraicstationary.jl")
-export f!, diffusionoperators, createsimpleODEproblem, createsimpleDAEproblem, @with_kw, stationary_algebraic_simple, createsimplenonuniformODEproblem, irregulardiffusionoperators
+export f!, diffusionoperators, createsimpleODEproblem, createsimpleDAEproblem, @kw_nt, stationary_algebraic_simple, createsimplenonuniformODEproblem, irregulardiffusionoperators
 
 end # module

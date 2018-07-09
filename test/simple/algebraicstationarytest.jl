@@ -4,7 +4,7 @@ using Base.Test
 using PerlaTonettiWaugh
 
 # Generate default parameters. 
-simple_algebraic_params = @with_kw(γ = 0.005, σ = 0.02, α = 2.1, r = 0.05, ζ = 14.5)
+simple_algebraic_params = @kw_nt(γ = 0.005, σ = 0.02, α = 2.1, r = 0.05, ζ = 14.5)
 
 # Test them
 results = stationary_algebraic_simple(simple_algebraic_params());

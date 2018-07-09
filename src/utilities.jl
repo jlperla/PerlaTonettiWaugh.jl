@@ -1,5 +1,5 @@
 #Generator for tuples with keyword arguments
-macro with_kw(args...)
+macro kw_nt(args...)
     splits = map(args) do arg
         @match arg begin
             (a_ = b_) => (a, b)
