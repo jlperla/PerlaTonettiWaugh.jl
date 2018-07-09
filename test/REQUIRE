@@ -1,2 +1,5 @@
 BenchmarkTools
 Plots
+NLsolve
+Sundials
+MacroTools 
