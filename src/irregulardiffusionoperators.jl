@@ -11,19 +11,19 @@ function irregulardiffusionoperators(x, M)
     Δ_p[1:end-1] = d;
 
     # I think l denote Z line, u dentoe X line
-    dl_1 = zeros(M-1)./Δ_m[end:-1:2] # This is flipped delta vector as the tridiagnal matrix is flipped? not sure
-    d_1 = -1 * ones(M)./Δ_m[end:-1:1]
+    dl_1 = zeros(M-1)./Δ_p[end:-1:2] # This is flipped delta vector as the tridiagnal matrix is flipped? not sure
+    d_1 = -1 * ones(M)./Δ_p[end:-1:1]
     d_1[end] = 0
-    du_1 = ones(M-1)./Δ_m[end:-1:2]
+    du_1 = ones(M-1)./Δ_p[end:-1:2]
     L_1_plus = Tridiagonal(dl_1, d_1, du_1)
 
     Δ=Δ_p+Δ_m
-    dl_2 = 2*ones(M-1)./(Δ_p[end:-1:2].*Δ[end:-1:2])
+    dl_2 = 2*ones(M-1)./(Δ_m[end:-1:2].*Δ[end:-1:2])
     d_2 = -2 * ones(M)
     d_2[1] = -1
     d_2[end] = -1
     d_2 = d_2./(Δ_p[end:-1:1].*Δ_m[end:-1:1])
-    du_2 = 2*ones(M-1)./(Δ_m[end:-1:2].*Δ[end:-1:2])
+    du_2 = 2*ones(M-1)./(Δ_p[end:-1:2].*Δ[end:-1:2])
     L_2 = Tridiagonal(dl_2, d_2, du_2)
 
     #BandedMatrix are much faster, probably because of better specializations in the composition
