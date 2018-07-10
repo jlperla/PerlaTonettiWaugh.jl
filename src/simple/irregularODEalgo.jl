@@ -23,7 +23,7 @@ function createsimplenonuniformODEproblem(c_tilde, sigma_tilde, mu_tilde, x, M::
     #Checks on the residual
     du_T = zeros(u_T)
     f(du_T, u_T, p, T)
-    #@show norm(du_T)
+    @show norm(du_T)
     @assert norm(du_T) < 1.0E-10
 
     return ODEProblem(f, u_T, (T, 0.0), p)
