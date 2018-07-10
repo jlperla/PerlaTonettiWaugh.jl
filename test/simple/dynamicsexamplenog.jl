@@ -10,8 +10,8 @@ rho = 0.15
 sigma_bar = 0.1
 c_tilde(t, x) = x + 0.0001*t
 sigma_tilde(t, x) =  sigma_bar
-#mu_tilde(t, x) = -0.1*x *(1.0 + 4.0 * t)
-mu_tilde(t, x) = -0.1*x + 1.5 +4.0*t
+mu_tilde(t, x) = 0.1*x *(1.0 + 4.0 * t)
+#mu_tilde(t, x) = -0.1*x + 1.5 +0.001*t
 basealgorithm = CVODE_BDF() #CVODE_CDF(linear_solver=:GMRES) #ImplicitEuler() #A reasonable alternative. Algorithms which don't work well: Rosenbrock23(), Rodas4(), KenCarp4()
 plotevery = 5
 
