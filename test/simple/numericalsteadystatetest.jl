@@ -12,13 +12,13 @@ z = linspace(z_min, z_max, M);
 temp = (rand(M) - 0.5)/100;
 temp[1] = 0
 temp[end] = 0
-z = z + temp;
+z = eye(M)*(z + temp);
 
 # Test
 results = stationary_numerical_simple(simple_numerical_params(), z)
 
 @test results.g ≈ 0.0211182826;
 @test results.ν ≈ 1.75369955156;
-@test results.v(0) ≈ 35.04962283;
-@test results.v(2) ≈ 165.31581267;
-@test results.v(5) ≈ 3312.7957099;
+@test results.v[1] ≈ 35.04962283;
+@test results.v[40] ≈ 165.31581267;
+@test results.v[end] ≈ 3312.7957099;
