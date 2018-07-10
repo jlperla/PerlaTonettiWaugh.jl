@@ -10,7 +10,7 @@ rho = 0.15
 sigma_bar = 0.1
 c_tilde(t, x) = x + 0.0001*t
 sigma_tilde(t, x) =  sigma_bar
-mu_tilde(t, x) = 0.1*x *(1.0 + 4.0 * t)
+mu_tilde(t, x) = -0.1*x *(1.0 + 4.0 * t)
 #mu_tilde(t, x) = -0.1*x + 1.5 +0.001*t
 basealgorithm = CVODE_BDF() #CVODE_CDF(linear_solver=:GMRES) #ImplicitEuler() #A reasonable alternative. Algorithms which don't work well: Rosenbrock23(), Rodas4(), KenCarp4()
 plotevery = 5
@@ -46,7 +46,7 @@ M_comb=size(x_comb,1)
 prob_nonuni = createsimplenonuniformODEproblem(c_tilde, sigma_tilde, mu_tilde, x_comb, M_comb, T, rho)
 sol_nonuni = solve(prob_nonuni, basealgorithm)
 plot(sol, vars=1:plotevery:M)
-@assert(issorted(sol[end]))
+@assert(issorted(sol_nonuni[end]))
 
 @show norm(sol[1]-sol_nonuni[1]) # check whether close to uniform solution
 @show norm(sol[end]-sol_nonuni[end])

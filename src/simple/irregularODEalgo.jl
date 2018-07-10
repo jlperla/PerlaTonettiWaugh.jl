@@ -1,10 +1,9 @@
 #Create DiffEq Problem for solving as a system of ODE using nonuniform grid
 function createsimplenonuniformODEproblem(c_tilde, sigma_tilde, mu_tilde, x, M::Int64, T::Float64, rho::Float64)
     x, L_1_minus, L_1_plus, L_2  = irregulardiffusionoperators(x, M) #Discretize the operator
-    
+
     #Check upwind direction
-    @assert minimum(mu_tilde.(T, x)) >= 0.0
-    @assert minimum(mu_tilde.(0.0, x)) >= 0.0
+
     if minimum(mu_tilde.(0.0,x)) >= 0.0
         p = @NT(L_1 = L_1_plus, L_2 = L_2, x = x, rho = rho, mu_tilde = mu_tilde, sigma_tilde = sigma_tilde, c_tilde = c_tilde, T = T) #Named tuple for parameters.
     elseif maximum(mu_tilde.(0.0,x)) <= 0.0
