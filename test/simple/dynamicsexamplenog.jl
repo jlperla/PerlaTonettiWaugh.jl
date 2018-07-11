@@ -17,7 +17,7 @@ plotevery = 5
 
 prob = createsimpleODEproblem(c_tilde, sigma_tilde, mu_tilde, x_min, x_max, M, T, rho)
 sol = solve(prob, basealgorithm)
-plot(sol, vars=1:plotevery:M)
+# plot(sol, vars=1:plotevery:M)
 @test issorted(sol[end])
 # @benchmark solve($prob, $basealgorithm) #Benchmark
 
@@ -27,7 +27,7 @@ plot(sol, vars=1:plotevery:M)
 
 probDAE = createsimpleDAEproblem(c_tilde, sigma_tilde, mu_tilde, x_min, x_max, M, T, rho)
 solDAE = solve(probDAE, IDA())
-plot(solDAE, vars=1:plotevery:M)
+# plot(solDAE, vars=1:plotevery:M)
 @show(issorted(solDAE[end][1:M]))
 
 # @benchmark solve($probDAE, IDA())
@@ -45,7 +45,7 @@ M_comb=size(x_comb,1)
 
 prob_nonuni = createsimplenonuniformODEproblem(c_tilde, sigma_tilde, mu_tilde, x_comb, M_comb, T, rho)
 sol_nonuni = solve(prob_nonuni, basealgorithm)
-plot(sol, vars=1:plotevery:M)
+# plot(sol, vars=1:plotevery:M)
 @test issorted(sol_nonuni[end])
 
 @show norm(sol[1,1]-sol_nonuni[1,1]) # check whether close to uniform solution
