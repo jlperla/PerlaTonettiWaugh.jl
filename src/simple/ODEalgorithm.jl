@@ -2,8 +2,6 @@
 function createsimpleODEproblem(c_tilde, sigma_tilde, mu_tilde, x_min::Float64, x_max::Float64, M::Int64, T::Float64, rho::Float64)
     x, L_1_minus, L_1_plus, L_2  = diffusionoperators(x_min, x_max, M) #Discretize the operator
 
-    p = @NT(L_1_plus = L_1_plus, L_2 = L_2, x = x, rho = rho, mu_tilde = mu_tilde, sigma_tilde = sigma_tilde, c_tilde = c_tilde, T = T) #Named tuple for parameters.
-
     #Check upwind direction
     bothpos = minimum(mu_tilde.(T, x)) >= 0.0 && minimum(mu_tilde.(0.0, x)) >= 0.0
     bothneg = minimum(mu_tilde.(T, x)) <= 0.0 && minimum(mu_tilde.(0.0, x)) <= 0.0
@@ -17,6 +15,8 @@ function createsimpleODEproblem(c_tilde, sigma_tilde, mu_tilde, x_min::Float64, 
     else 
         error("Not weakly positive or negative") # Not strictly required. 
     end
+
+    p = @NT(L_1 = L_1, L_2 = L_2, x = x, rho = rho, mu_tilde = mu_tilde, sigma_tilde = sigma_tilde, c_tilde = c_tilde, T = T) #Named tuple for parameters.
 
     #Calculating the stationary solution,
     L_T = rho*I - Diagonal(mu_tilde.(T, x)) * L_1 - Diagonal(sigma_tilde.(T, x).^2/2.0) * L_2
