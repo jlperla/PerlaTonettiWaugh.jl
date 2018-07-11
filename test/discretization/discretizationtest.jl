@@ -1,4 +1,5 @@
-using PerlaTonettiWaugh, Base.Test
+using PerlaTonettiWaugh, Base.Test, BandedMatrices
+
 include("../../src/irregulardiffusionoperators.jl")
 include("../../src/diffusionoperators.jl")
 

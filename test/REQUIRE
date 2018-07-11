@@ -4,3 +4,4 @@ NLsolve
 Sundials
 MacroTools 
 Parameters
+BandedMatrices

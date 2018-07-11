@@ -1,9 +1,9 @@
 using PerlaTonettiWaugh, Base.Test
 
 tic()
-@time @testset "Analytical Simple Steady State" begin include("simple/algebraicstationarytest.jl") end
-@time @testset "Numerical Simple Steady State" begin include("simple/numericalsteadystatetest.jl") end
-@time @testset "Regression Simple Steady State" begin include("simple/regressiontest.jl") end 
-@time @testset "Analytical Full Steady State" begin include("full/algebraicstationarytest.jl") end
+@time @testset "Analytical Simple Stationary" begin include("simple/algebraicstationarytest.jl") end
+@time @testset "Numerical Simple Stationary" begin include("simple/numericalstationarytest.jl") end
+@time @testset "Regression Simple Stationary" begin include("simple/regressiontest.jl") end 
+@time @testset "Analytical Full Stationary" begin include("full/algebraicstationarytest.jl") end
 @time @testset "Discretization Tests" begin include("discretization/discretizationtest.jl") end 
 toc()
