@@ -1,4 +1,4 @@
-using PerlaTonettiWaugh, Base.Test, NLsolve, BenchmarkTools
+@suppress using PerlaTonettiWaugh, Base.Test, NLsolve, BenchmarkTools
 include("../../src/full/fullparams.jl")
 
 # Run a basic test. (neglecting nlsolve stability)
