@@ -6,4 +6,5 @@ tic()
 @time @testset "Regression Simple Stationary" begin include("simple/regressiontest.jl") end 
 @time @testset "Analytical Full Stationary" begin include("full/algebraicstationarytest.jl") end
 @time @testset "Discretization Tests" begin include("discretization/discretizationtest.jl") end 
+@time @testset "ODE and DAE Tests" begin include("simple/dynamicsexamplenog.jl") end
 toc()

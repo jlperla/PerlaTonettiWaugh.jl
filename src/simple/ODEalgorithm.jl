@@ -8,9 +8,9 @@ function createsimpleODEproblem(c_tilde, sigma_tilde, mu_tilde, x_min::Float64, 
     @assert bothpos || bothneg
 
     # Dispatch L_1 based on direction initially
-    if all(mu_tilde.(0.0, x) <= 0)
+    if all(mu_tilde.(0.0, x) .<= 0)
         L_1 = L_1_minus
-    elseif all(mu_tilde.(0.0, x) >= 0)
+    elseif all(mu_tilde.(0.0, x) .>= 0)
         L_1 = L_1_plus
     else 
         error("Not weakly positive or negative") # Not strictly required. 

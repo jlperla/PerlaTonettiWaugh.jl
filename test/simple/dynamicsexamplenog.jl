@@ -53,3 +53,10 @@ plot(sol, vars=1:plotevery:M)
 
 @show sol[end]
 @show sol_nonuni[end]
+
+# Test for ODE with backwards drift. 
+mu_tilde(t, x) = -1 * 0.1*x *(1.0 + 4.0 * t)
+probBackODE = createsimpleODEproblem(c_tilde, sigma_tilde, mu_tilde, x_min, x_max, M, T, rho)
+solBackODE = solve(probBackODE, basealgorithm)
+@assert(issorted(sol[end]))
+
