@@ -6,11 +6,11 @@ x_min = 0.01
 x_max = 1.0
 M = 20
 T = 10.0
-rho = 0.15
-sigma_bar = 0.1
-c_tilde(t, x) = x + 0.0001*t
+rho = 0.0286
+sigma_bar = 0.02
+c_tilde(t, x) = x + 0.0000000*t
 sigma_tilde(t, x) =  sigma_bar
-mu_tilde(t, x) = 0.1*x *(1.0 + 4.0 * t)
+mu_tilde(t, x) = 0.0*x *(1.0 + 0.0 * t)-0.0161
 #mu_tilde(t, x) = -0.1*x + 1.5 +0.001*t
 basealgorithm = CVODE_BDF() #CVODE_CDF(linear_solver=:GMRES) #ImplicitEuler() #A reasonable alternative. Algorithms which don't work well: Rosenbrock23(), Rodas4(), KenCarp4()
 plotevery = 5
@@ -48,8 +48,5 @@ sol_nonuni = solve(prob_nonuni, basealgorithm)
 plot(sol, vars=1:plotevery:M)
 @assert(issorted(sol_nonuni[end]))
 
-@show norm(sol[1,1]-sol_nonuni[1,1]) # check whether close to uniform solution
-@show norm(sol[end,end]-sol_nonuni[end,end])
-
-@show sol[end]
-@show sol_nonuni[end]
+@show norm(sol[1]-sol_nonuni[1]) # check whether close to uniform solution
+@show norm(sol[end]-sol_nonuni[end])
