@@ -18,7 +18,7 @@ plotevery = 5
 prob = createsimpleODEproblem(c_tilde, sigma_tilde, mu_tilde, x_min, x_max, M, T, rho)
 sol = solve(prob, basealgorithm)
 plot(sol, vars=1:plotevery:M)
-@assert(issorted(sol[end]))
+@test issorted(sol[end])
 # @benchmark solve($prob, $basealgorithm) #Benchmark
 
 #Solve backwards with a DAE and a trivial algebraic equation
@@ -46,7 +46,7 @@ M_comb=size(x_comb,1)
 prob_nonuni = createsimplenonuniformODEproblem(c_tilde, sigma_tilde, mu_tilde, x_comb, M_comb, T, rho)
 sol_nonuni = solve(prob_nonuni, basealgorithm)
 plot(sol, vars=1:plotevery:M)
-@assert(issorted(sol_nonuni[end]))
+@test issorted(sol_nonuni[end])
 
 @show norm(sol[1,1]-sol_nonuni[1,1]) # check whether close to uniform solution
 @show norm(sol[end,end]-sol_nonuni[end,end])
@@ -58,5 +58,10 @@ plot(sol, vars=1:plotevery:M)
 mu_tilde(t, x) = -1 * 0.1*x *(1.0 + 4.0 * t)
 probBackODE = createsimpleODEproblem(c_tilde, sigma_tilde, mu_tilde, x_min, x_max, M, T, rho)
 solBackODE = solve(probBackODE, basealgorithm)
-@assert(issorted(sol[end]))
-
+# Monotonicity test
+@test issorted(solBackODE[end])
+# Some invariance/regression tests on the backwards solution
+@test solBackODE.u[1] ≈ [0.17211, 0.180156, 0.189957, 0.200501, 0.211449, 0.222651, 0.234025, 0.245525, 0.257119, 0.268787, 0.280515, 0.292291, 0.304109, 0.315961, 0.327842, 0.339749, 0.351679, 0.363628, 0.375588, 0.387297] atol = 1e-4
+@test solBackODE.u[5] ≈ [0.172132, 0.180285, 0.190226, 0.200922, 0.212028, 0.223389, 0.234924, 0.246585, 0.258342, 0.270173, 0.282063, 0.294003, 0.305983, 0.317998, 0.330043, 0.342113, 0.354206, 0.366318, 0.378442, 0.390302] atol = 1e-4
+@test solBackODE.alg == Sundials.CVODE_BDF{:Newton,:Dense}(0, 0, 0, 0, false, 10,
+5, 7, 3, 10)
