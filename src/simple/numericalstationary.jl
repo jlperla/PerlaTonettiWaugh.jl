@@ -7,9 +7,8 @@ function stationary_numerical_simple(params, z)
     @unpack γ, σ, α, r, ζ = params
 
     # Define the pdf of the truncated exponential distribution
-    ubound = z[end]
-    truncatedPDF = x -> x <= ubound && x > 0 ? (inv(α) * exp(-x * inv(α)))/(1 - exp(-1 * ubound/α)) : 0.0 # This gives us the pdf as a function x -> f(x) that returns 0.0 off-domain. 
-    ω = irregulartrapezoidweights(z, truncatedPDF)
+    ourDist = Truncated(Exponential(α), z[1], z[end])
+    ω = irregulartrapezoidweights(z, ourDist)
 
     function stationary_numerical_given_g(g)
         x, L_1_minus, L_1_plus, L_2  = irregulardiffusionoperators(z, M) #Discretize the operator
