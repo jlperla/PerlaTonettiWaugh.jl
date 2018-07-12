@@ -7,7 +7,7 @@ function stationary_numerical_simple(params, z)
     @unpack γ, σ, α, r, ζ = params
 
     # Define the pdf of the truncated exponential distribution
-    ourDist = Truncated(Exponential(α), z[1], z[end])
+    ourDist = Truncated(Exponential(1/α), z[1], z[end])
     ω = irregulartrapezoidweights(z, ourDist)
 
     function stationary_numerical_given_g(g)
@@ -17,11 +17,11 @@ function stationary_numerical_simple(params, z)
         π = exp.(z)
         v_T = L_T \ π
 
-        diff = v_T[1] + ζ - ω' * v_T
+        diff = v_T[1] + ζ - dot(ω, v_T)
         return diff
     end
 
-    g_T = find_zero(stationary_numerical_given_g, (1e-10, 0.75*r))
+    g_T = find_zero(stationary_numerical_given_g, (1e-10, 0.75*r), atol = 1e-10, rtol = 1e-10, xatol = 1e-10, xrtol = 1e-10)
 
     #assert(γ - g_T < 0)  # Error if γ - g is positive
 
