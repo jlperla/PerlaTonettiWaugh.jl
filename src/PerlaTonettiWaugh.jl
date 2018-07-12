@@ -13,6 +13,6 @@ include("simple/numericalstationary.jl")
 include("utilities.jl")
 include("full/algebraicstationary.jl")
 include("quadrature.jl")
-export f!, diffusionoperators, createsimpleODEproblem, createsimpleDAEproblem, @kw_nt, stationary_algebraic_simple, createsimplenonuniformODEproblem, irregulardiffusionoperators, stationary_numerical_simple
+export f!, diffusionoperators, createsimpleODEproblem, createsimpleDAEproblem, @kw_nt, stationary_algebraic_simple, createsimplenonuniformODEproblem, irregulardiffusionoperators, stationary_numerical_simple, irregulartrapezoidweights
 
 end # module

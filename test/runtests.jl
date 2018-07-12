@@ -7,4 +7,5 @@ tic()
 @time @testset "Analytical Full Stationary" begin include("full/algebraicstationarytest.jl") end
 @time @testset "Discretization Tests" begin include("discretization/discretizationtest.jl") end 
 @time @testset "ODE and DAE Tests" begin include("simple/dynamicsexamplenog.jl") end
+@time @testset "Quadrature Tests" begin include("discretization/quadrature.jl") end 
 toc()
