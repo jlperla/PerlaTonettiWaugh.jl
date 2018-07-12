@@ -10,8 +10,8 @@ z = unique([linspace(0.0, 1.0, 151)' linspace(1.0, 5.0, 201)'])
 # Test
 
 @test_broken results = stationary_numerical_simple(simple_numerical_params(), z)
-@test_broken results.g ≈ 0.0211182826;
-@test_broken results.ν ≈ 1.75369955156;
-@test_broken results.v[1] ≈ 35.04962283;
-@test_broken results.v[40] ≈ 165.31581267;
-@test_broken results.v[end] ≈ 3312.7957099;
+@test results.g ≈ 0.0211182826
+@test results.ν ≈ 1.75369955156
+@test_broken results.v[1] ≈ 35.04962283
+@test_broken results.v[40] ≈ 165.31581267
+@test_broken results.v[end] ≈ 3312.7957099

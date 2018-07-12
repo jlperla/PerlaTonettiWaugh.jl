@@ -22,7 +22,7 @@ function stationary_numerical_simple(params, z)
         return diff
     end
 
-    g_T = find_zero(stationary_numerical_given_g, (-1.0E-10, 0.5))
+    g_T = find_zero(stationary_numerical_given_g, (1e-10, 0.5))
 
     #assert(γ - g_T < 0)  # Error if γ - g is positive
 
