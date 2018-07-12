@@ -1,28 +1,17 @@
 # Numerically solve for the stationary solution as a system of equatoins.  
-using BandedMatrices, NamedTuples, Roots, Parameters
+using BandedMatrices, NamedTuples, Roots, Parameters, Distributions
 
 function stationary_numerical_simple(params, z)
     M = length(z)
     # Unpack parameters. 
     @unpack γ, σ, α, r, ζ = params
 
+    # Define the pdf of the truncated exponential distribution
+    ubound = z[end]
+    baseExponential = Exponential(α)
+    truncatedPDF = x -> x <= ubound && x > 0 ? (inv(α) * exp(-x * inv(α)))/(1 - exp(-1 * ubound/α)) : 0.0 # This gives us the pdf as a function x -> f(x) that returns 0.0 off-domain. 
+    ω = irregulartrapezoidweights(z, truncatedPDF)
 
-    d = diff(z)
-    Δ_m = zeros(M)
-    Δ_m[1] = d[1]    # using the first difference as diff from ghost node
-    Δ_m[2:end] = d
-    Δ_p = zeros(M)
-    Δ_p[end] = d[end]
-    Δ_p[1:end-1] = d
-
-    ω_bar = (Δ_p+Δ_m)/2
-    ω_bar[1] = Δ_p[1]/2
-    ω_bar[end] = Δ_m[end]/2
-    f_z = α * exp.(-α*z)
-    f_i = f_z ./ (1 - exp.(-α*z[end]))
-    ω = ω_bar .* f_i
-
-    
     function stationary_numerical_given_g(g)
         x, L_1_minus, L_1_plus, L_2  = irregulardiffusionoperators(z, M) #Discretize the operator
 
