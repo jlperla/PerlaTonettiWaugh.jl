@@ -15,7 +15,6 @@ E_val = dot(h.(z), omega)
 # Test for moments of a truncated exponential distribution
 λ = 3
 ubound = 3
-testDist2 = Exponential(λ)
 pdf2 = x -> x <= ubound && x > 0 ? (inv(λ) * exp(-x * inv(λ)))/(1 - exp(-1 * ubound/λ)) : 0.0
 k = ubound/λ
 mean1 = λ * (1 - (k+1)*e^(-k)) / (1 - e^(-k))

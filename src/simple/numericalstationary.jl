@@ -1,5 +1,5 @@
 # Numerically solve for the stationary solution as a system of equatoins.  
-using BandedMatrices, NamedTuples, Roots, Parameters, Distributions
+using BandedMatrices, NamedTuples, Roots, Parameters
 
 function stationary_numerical_simple(params, z)
     M = length(z)
@@ -8,7 +8,6 @@ function stationary_numerical_simple(params, z)
 
     # Define the pdf of the truncated exponential distribution
     ubound = z[end]
-    baseExponential = Exponential(α)
     truncatedPDF = x -> x <= ubound && x > 0 ? (inv(α) * exp(-x * inv(α)))/(1 - exp(-1 * ubound/α)) : 0.0 # This gives us the pdf as a function x -> f(x) that returns 0.0 off-domain. 
     ω = irregulartrapezoidweights(z, truncatedPDF)
 
