@@ -5,9 +5,9 @@ function createsimplenonuniformDAEproblem(c_tilde, sigma_tilde, mu_tilde, x, M::
     #Check upwind direction
 
     if all(mu_tilde.(0.0, x) .>= 0)
-        p = @NT(L_1 = L_1_plus, L_2 = L_2, x = x, rho = rho, mu_tilde = mu_tilde, sigma_tilde = sigma_tilde, c_tilde = c_tilde, T = T) #Named tuple for parameters.
+        p = @NT(L_1 = L_1_plus, L_2 = L_2, x = x, rho = rho, mu_tilde = mu_tilde, sigma_tilde = sigma_tilde, c_tilde = c_tilde, T = T, M=M) #Named tuple for parameters.
     elseif all(mu_tilde.(0.0, x) .<= 0)
-        p = @NT(L_1 = L_1_minus, L_2 = L_2, x = x, rho = rho, mu_tilde = mu_tilde, sigma_tilde = sigma_tilde, c_tilde = c_tilde, T = T) #Named tuple for parameters.
+        p = @NT(L_1 = L_1_minus, L_2 = L_2, x = x, rho = rho, mu_tilde = mu_tilde, sigma_tilde = sigma_tilde, c_tilde = c_tilde, T = T, M=M) #Named tuple for parameters.
     else 
         error("Not weakly positive or negative") # Not strictly necessary, but good to have redundancy here.
     end
