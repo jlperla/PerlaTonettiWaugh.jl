@@ -1,6 +1,6 @@
 # Not in the regression test
 using PerlaTonettiWaugh, Plots, BenchmarkTools, Sundials, Base.Test,Interpolations, QuantEcon
-
+solve(x,y)=Sundials.solve(x,y)
 # Testing code
 x_min = 0.01
 x_max = 1.0

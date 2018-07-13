@@ -1,4 +1,4 @@
-#Create DiffEq Problem for solving as a system of ODE using nonuniform grid
+#Create DiffEq Problem for solving as a system of DAE using nonuniform grid
 function createsimplenonuniformDAEproblem(c_tilde, sigma_tilde, mu_tilde, x, M::Int64, T::Float64, rho::Float64)
     x, L_1_minus, L_1_plus, L_2  = irregulardiffusionoperators(x, M) #Discretize the operator
 
