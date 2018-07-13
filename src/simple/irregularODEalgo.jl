@@ -4,10 +4,12 @@ function createsimplenonuniformODEproblem(c_tilde, sigma_tilde, mu_tilde, x, M::
 
     #Check upwind direction
 
-    if minimum(mu_tilde.(0.0,x)) >= 0.0
+    if all(mu_tilde.(0.0, x) .>= 0)
         p = @NT(L_1 = L_1_plus, L_2 = L_2, x = x, rho = rho, mu_tilde = mu_tilde, sigma_tilde = sigma_tilde, c_tilde = c_tilde, T = T) #Named tuple for parameters.
-    elseif maximum(mu_tilde.(0.0,x)) <= 0.0
+    elseif all(mu_tilde.(0.0, x) .<= 0)
         p = @NT(L_1 = L_1_minus, L_2 = L_2, x = x, rho = rho, mu_tilde = mu_tilde, sigma_tilde = sigma_tilde, c_tilde = c_tilde, T = T) #Named tuple for parameters.
+    else 
+        error("Not weakly positive or negative") # Not strictly necessary, but good to have redundancy here.
     end
     #Calculating the stationary solution,
     L_T = rho*I - Diagonal(mu_tilde.(T, x)) * p.L_1 - Diagonal(sigma_tilde.(T, x).^2/2.0) * L_2
