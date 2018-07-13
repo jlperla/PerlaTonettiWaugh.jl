@@ -1,5 +1,5 @@
 # Not in the regression test
-using PerlaTonettiWaugh, Plots, BenchmarkTools, Sundials, Base.Test
+using PerlaTonettiWaugh, Plots, BenchmarkTools, Sundials, Base.Test,Interpolations, QuantEcon
 
 # Testing code
 x_min = 0.01
@@ -51,8 +51,21 @@ sol_nonuni = solve(prob_nonuni, basealgorithm)
 @show norm(sol[1,1]-sol_nonuni[1,1]) # check whether close to uniform solution
 @show norm(sol[end,end]-sol_nonuni[end,end])
 
-@show sol[end]
-@show sol_nonuni[end]
+# interpolate uniform onto non uniform grid
+sol_int=LinInterp(x, sol[end])
+@show norm(sol_int.(x_comb)-sol_nonuni[end])
+
+# Test for DAE irregular
+probDAE_nonuni = createsimplenonuniformDAEproblem(c_tilde, sigma_tilde, mu_tilde, x_comb, M_comb, T, rho)
+solDAE_nonuni = solve(probDAE_nonuni, IDA())
+# plot(solDAE, vars=1:plotevery:M)
+@show(issorted(solDAE_nonuni[end][1:M_comb]))
+
+# @benchmark solve($probDAE, IDA())
+
+#Check they are "reasonably" close
+@show norm(sol_nonuni[1] - solDAE_nonuni[1][1:M])
+@show norm(sol_nonuni[end] - solDAE_nonuni[end][1:M])
 
 # Test for ODE with backwards drift. 
 mu_tilde(t, x) = -1 * 0.1*x *(1.0 + 4.0 * t)

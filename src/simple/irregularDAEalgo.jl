@@ -1,5 +1,5 @@
 #Create DiffEq Problem for solving as a system of ODE using nonuniform grid
-function createsimplenonuniformODEproblem(c_tilde, sigma_tilde, mu_tilde, x, M::Int64, T::Float64, rho::Float64)
+function createsimplenonuniformDAEproblem(c_tilde, sigma_tilde, mu_tilde, x, M::Int64, T::Float64, rho::Float64)
     x, L_1_minus, L_1_plus, L_2  = irregulardiffusionoperators(x, M) #Discretize the operator
 
     #Check upwind direction
@@ -15,19 +15,26 @@ function createsimplenonuniformODEproblem(c_tilde, sigma_tilde, mu_tilde, x, M::
     L_T = rho*I - Diagonal(mu_tilde.(T, x)) * p.L_1 - Diagonal(sigma_tilde.(T, x).^2/2.0) * L_2
     u_T = L_T \ c_tilde.(T, x)
 
-    #@assert(issorted(u_T)) #We are only solving versions that are increasing for now
+    u_ex_T = [u_T; 1.0] #Closed form for the trivial linear function we are adding
 
-    function f(du,u,p,t)
+    @assert(issorted(u_T)) #We are only solving versions that are increasing for now
+
+
+    function f(resid,du_ex,u_ex,p,t)
         L = (p.rho*I  - Diagonal(p.mu_tilde.(t, x)) * p.L_1 - Diagonal(p.sigma_tilde.(t, p.x).^2/2.0) * p.L_2)
-        A_mul_B!(du,L,u)
-        du .-= p.c_tilde.(t, p.x)
+        u = u_ex[1:p.M]
+        resid[1:M] .= L * u_ex[1:p.M] - p.c_tilde.(t, p.x)
+        resid[M+1] .= u_ex[M+1] - 1.0
+        resid .-= du_ex
     end
 
-    #Checks on the residual
-    du_T = zeros(u_T)
-    f(du_T, u_T, p, T)
-    @show norm(du_T)
-    @assert norm(du_T) < 1.0E-10
+    #Should Verifying that the initial condition is solid
+    resid_T = zeros(u_ex_T) #preallocation
+    du_ex_T = zeros(u_ex_T)
+    f(resid_T, du_ex_T, u_ex_T, p, T)
+    @show norm(resid_T)
+    @assert norm(resid_T) < 1.0E-10
 
-    return ODEProblem(f, u_T, (T, 0.0), p)
+    tspan = (T, 0.0)
+    return DAEProblem(f, zeros(u_ex_T), u_ex_T, tspan, differential_vars = [trues(u_T); false], p)
 end
