@@ -64,8 +64,8 @@ solDAE_nonuni = solve(probDAE_nonuni, IDA())
 # @benchmark solve($probDAE, IDA())
 
 #Check they are "reasonably" close
-@show norm(sol_nonuni[1] - solDAE_nonuni[1][1:M])
-@show norm(sol_nonuni[end] - solDAE_nonuni[end][1:M])
+@show norm(sol_nonuni[1] - solDAE_nonuni[1][1:M_comb])
+@show norm(sol_nonuni[end] - solDAE_nonuni[end][1:M_comb])
 
 # Test for ODE with backwards drift. 
 mu_tilde(t, x) = -1 * 0.1*x *(1.0 + 4.0 * t)
