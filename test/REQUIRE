@@ -1,6 +1,5 @@
 BenchmarkTools
 Hiccup
-
 Plots
 NLsolve
 Sundials
@@ -8,3 +7,4 @@ MacroTools
 Parameters
 BandedMatrices
 Distributions
+Interpolations
