@@ -1,5 +1,5 @@
 # This function generate ODE problem with r,π and ζ and g time varying
-function simple_dynamics_ODE(params,settings)
+function create_dynamic_ODE(params,settings)
     # Unpacking
     gamma=params.gamma;
     sigma=params.sigma;
@@ -31,5 +31,19 @@ function simple_dynamics_ODE(params,settings)
     L_T = Diagonal(rho_p(T,z)) - Diagonal(mu_tilde.(T, z)) * p.L_1 - Diagonal(sigma.(T, z).^2/2.0) * L_2
     u_T = L_T \ π.(T, z)
     @assert(issorted(u_T))
+
+    function f(du,u,p,t)
+        L = (Diagonal(rho_p(T,z)) - Diagonal(p.mu_tilde.(t, z)) * p.L_1 - Diagonal(p.sigma.(t, p.z).^2/2.0) * p.L_2)
+        A_mul_B!(du,L,u)
+        du .-= p.π.(t, p.z)
+    end
+
+    #Checks on the residual
+    du_T = zeros(u_T)
+    f(du_T, u_T, p, T)
+    @show norm(du_T)
+    @assert norm(du_T) < 1.0E-10
+
+    return ODEProblem(f, u_T, (T, 0.0), p)
 
 end

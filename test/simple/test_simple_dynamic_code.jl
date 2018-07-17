@@ -21,3 +21,7 @@ settings=@NT(z = z,g = g, T = T)
 basealgorithm = CVODE_BDF() #CVODE_CDF(linear_solver=:GMRES) #ImplicitEuler() #A reasonable alternative. Algorithms which don't work well: Rosenbrock23(), Rodas4(), KenCarp4()
 plotevery = 5
 
+prob = create_dynamic_ODE(params,settings)
+sol = solve(prob, basealgorithm)
+# plot(sol, vars=1:plotevery:M)
+@test issorted(sol[end])
