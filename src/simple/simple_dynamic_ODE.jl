@@ -22,9 +22,9 @@ function create_dynamic_ODE(params,settings)
         #Check upwind direction
 
         if all(mu_tilde.(0.0, z) .>= 0)
-            p = @NT(L_1 = L_1_plus, L_2 = L_2, z = z, rho_p = rho_p, mu_tilde = mu_tilde, sigma = sigma, π=π, T = T) #Named tuple for parameters.
+            p = @NT(L_1 = L_1_plus, L_2 = L_2, z = z, rho_p = rho_p, mu_tilde = mu_tilde, σ = σ, π=π, T = T) #Named tuple for parameters.
         elseif all(mu_tilde.(0.0, z) .<= 0)
-            p = @NT(L_1 = L_1_minus, L_2 = L_2, z = z, rho_p = rho_p, mu_tilde = mu_tilde, sigma = sigma, π=π, T = T) #Named tuple for parameters.
+            p = @NT(L_1 = L_1_minus, L_2 = L_2, z = z, rho_p = rho_p, mu_tilde = mu_tilde, σ = σ, π=π, T = T) #Named tuple for parameters.
         else 
             error("Not weakly positive or negative") # Not strictly necessary, but good to have redundancy here.
         end
