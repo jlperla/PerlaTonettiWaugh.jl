@@ -29,12 +29,12 @@ function create_dynamic_ODE(params,settings)
             error("Not weakly positive or negative") # Not strictly necessary, but good to have redundancy here.
         end
     #Calculating the stationary solution,
-    L_T = Diagonal(rho_p(T,z)) - Diagonal(mu_tilde.(T, z)) * p.L_1 - Diagonal(σ.^2/2.0) * L_2
+    L_T = Diagonal(rho_p(T,z)) - Diagonal(mu_tilde.(T, z)) * p.L_1 - Diagonal(σ(T,z).^2/2.0) * L_2
     v_T = L_T \ π.(T, z)
     @assert(issorted(v_T))
 
     function f(du,u,p,t)
-        L = (Diagonal(rho_p(T,z)) - Diagonal(p.mu_tilde.(t, z)) * p.L_1 - Diagonal(σ.^2/2.0) * p.L_2)
+        L = (Diagonal(rho_p(T,z)) - Diagonal(p.mu_tilde.(t, z)) * p.L_1 - Diagonal(σ(T,z).^2/2.0) * p.L_2)
         A_mul_B!(du,L,u)
         du .-= p.π.(t, p.z)
     end

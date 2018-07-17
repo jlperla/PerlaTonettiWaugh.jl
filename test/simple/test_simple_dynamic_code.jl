@@ -9,12 +9,13 @@ M = 100
 z=linspace(z_min,z_max,M)
 T = 10.0
 π(t, x) = exp(x)*(1.0+0.0*t);
-σ = 0.02
+σ_n = 0.02
 α = 2.1
 ζ_n = 14.5
 r_n = 0.05
 ζ(t, x) = ζ_n + 0.0*x + 0.0*t
 r(t, x) = r_n + 0.0*x + 0.0*t
+σ(t, x) = σ_n + 0.0*x + 0.0*t
 γ=0.005;
 
 # solve for numerical g_T as test
@@ -37,6 +38,6 @@ sol = solve(prob, basealgorithm)
 # plot(sol, vars=1:plotevery:M)
 @test issorted(sol[end])
 @show sol[end]
-
+@show norm(v_analytic-sol[end])
 # test whether ODE result close to analytic
 
