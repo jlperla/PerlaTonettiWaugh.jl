@@ -33,11 +33,42 @@ settings=@NT(z = z,g = g, T = T)
 basealgorithm = CVODE_BDF() #CVODE_CDF(linear_solver=:GMRES) #ImplicitEuler() #A reasonable alternative. Algorithms which don't work well: Rosenbrock23(), Rodas4(), KenCarp4()
 plotevery = 5
 
+# 1. test starting from g_analytic, v_T are close to analytical result
 prob = create_dynamic_ODE(params,settings)
 sol = solve(prob, basealgorithm)
 # plot(sol, vars=1:plotevery:M)
 @test issorted(sol[end])
 @show sol[end]
-@show norm(v_analytic-sol[end])
-# test whether ODE result close to analytic
 
+
+# 2. test whether ODE result close to analytic
+tol=1e-8
+@test norm(v_analytic-sol[end])<tol
+
+# If start at some time varying function of g(t) (change g grid), notice we shouldn't expect this is close to v_analytic
+
+g_g(t, x) = g_analytic + 0.0*x + 0.01*t;
+
+settings_g=@NT(z = z,g = g_g, T = T)
+
+prob_g = create_dynamic_ODE(params,settings_g)
+sol_g = solve(prob_g, basealgorithm)
+@show sol_g[end]
+@test issorted(sol_g[end])
+
+# 3. Test non uniform grid z
+
+z_add=linspace(z_min,z_max,37)
+z_comb=unique(sort([z;z_add]))
+
+settings_ir=@NT(z = z_comb,g = g, T = T)
+
+prob_ir = create_dynamic_ODE(params,settings_ir)
+sol_ir = solve(prob_ir, basealgorithm)
+@show sol_ir[end]
+@test issorted(sol_ir[end])
+
+# interpolate uniform onto non uniform grid
+sol_int=LinInterp(z, sol[end])
+@show norm(sol_int.(z_comb)-sol_ir[end])
+@show norm(sol_ir[end,end]-sol[end,end])<1e-2
