@@ -3,7 +3,7 @@
 using PerlaTonettiWaugh, Plots, BenchmarkTools, Sundials, Base.Test,Interpolations, QuantEcon, NamedTuples
 solve(x,y)=Sundials.solve(x,y)
 # setting up
-z_min = 0.01
+z_min = 0.0
 z_max = 5.0
 M = 100
 z=linspace(z_min,z_max,M)
