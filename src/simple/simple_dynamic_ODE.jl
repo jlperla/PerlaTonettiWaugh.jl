@@ -34,7 +34,7 @@ function create_dynamic_ODE(params,settings)
     @assert(issorted(v_T))
 
     function f(du,u,p,t)
-        L = (Diagonal(rho_p(T,z)) - Diagonal(p.mu_tilde.(t, z)) * p.L_1 - Diagonal(σ(T,z).^2/2.0) * p.L_2)
+        L = (Diagonal(rho_p(t,z)) - Diagonal(p.mu_tilde.(t, z)) * p.L_1 - Diagonal(σ(t,z).^2/2.0) * p.L_2)
         A_mul_B!(du,L,u)
         du .-= p.π.(t, p.z)
     end
