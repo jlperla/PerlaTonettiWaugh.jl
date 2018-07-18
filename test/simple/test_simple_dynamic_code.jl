@@ -93,4 +93,29 @@ settings_uni1=@NT(z = z,g = g, T = T, flag_u=0)
 prob_uni1 = create_dynamic_ODE(params,settings_uni1)
 sol_uni1 = solve(prob_uni1, basealgorithm)
 
-@show norm(sol[end]-sol_uni1[end])
+@test norm(sol[end]-sol_uni1[end])<1e-8
+
+# 5. check the uniform operator, adding points
+M_uni=701;
+z_uni=linspace(z_min,z_max,M_uni)
+
+settings_uni2=@NT(z = z_uni,g = g, T = T, flag_u=0)
+prob_uni2 = create_dynamic_ODE(params,settings_uni2)
+sol_uni2 = solve(prob_uni2, basealgorithm)
+
+@show norm(sol_uni2[end,end]-sol_uni1[end,end])
+
+# 6. test results from irregular grid with irregular but more dense grid
+
+z_comb2= unique([linspace(z_min, 1.0, 500)' linspace(1.0,2.0, 120)' linspace(2.0, z_max, 81)'])
+
+settings_ir2=@NT(z = z_comb2,g = g, T = T, flag_u=flag_u)
+
+prob_ir2 = create_dynamic_ODE(params,settings_ir2)
+sol_ir2 = solve(prob_ir2, basealgorithm)
+
+# interpolate uniform onto non uniform grid
+sol_int2=LinInterp(z_comb2, sol_ir2[end])
+@show norm(sol_int.(z_comb)-sol_ir[end])
+@show norm(sol_ir2[end,end]-sol_ir[end,end]) #at bottom
+@show norm(sol_ir2[1,end]-sol_ir[1,end]) # at top
