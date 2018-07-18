@@ -1,7 +1,7 @@
 using Base.Test, PerlaTonettiWaugh 
 
 # Define parameters and get results from each function. 
-simple_algebraic_params = @kw_nt(γ = 0.005, σ = 0.02, α = 2.1, r = 0.05, ζ = 14.5)
+simple_algebraic_params = @with_kw (γ = 0.005, σ = 0.02, α = 2.1, r = 0.05, ζ = 14.5)
 algebraic = stationary_algebraic_simple(simple_algebraic_params());
 # numerical = stationary_numerical_simple(simple_algebraic_params()); # Or whatever the API is. 
 

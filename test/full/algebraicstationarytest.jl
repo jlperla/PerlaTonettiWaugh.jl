@@ -17,7 +17,7 @@ result = nlsolve(f!, [0.01, 4.3, 2.0])
 @test_throws AssertionError nlsolve(f!, [0.01, 2.2, 2.0]; method = :anderson) # Test failure for Anderson.
 
 # Different case (custom params test)
-params2 = @kw_nt(ρ = 0.5, σ = 3.0, N = 10.0, θ = 3.22, γ = 0, d = 5.49, κ = 0.06, ζ = 1.9, η = 0, Theta = 1.0, χ = 1/3, υ = 0.01, μ = 0, δ = 0.01)
+params2 = @with_kw (ρ = 0.5, σ = 3.0, N = 10.0, θ = 3.22, γ = 0, d = 5.49, κ = 0.06, ζ = 1.9, η = 0, Theta = 1.0, χ = 1/3, υ = 0.01, μ = 0, δ = 0.01)
 result = nlsolve((G, x) -> f!(G, x; params=params2), [0.12, 1.2, 0.04])
 @test round.(result.zero, 5) ≈ [0.24444, 1.33895, 0.12194]
 

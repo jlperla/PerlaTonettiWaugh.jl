@@ -20,7 +20,7 @@ r(t, x) = r_n + 0.0*x + 0.0*t
 σ(t, x) = σ_n + 0.0*x + 0.0*t
 γ=0.005;
 params=@NT(γ=γ, σ=σ, π=π, ζ=ζ, r = r, α=α)
-params_n=@kw_nt(γ=0.005, σ=0.02, α=2.1, r=0.05, ζ=14.5)
+params_n=@with_kw (γ=0.005, σ=0.02, α=2.1, r=0.05, ζ=14.5)
 
 # solve for numerical g_T as test
 res=stationary_numerical_simple(params_n(),z)

@@ -20,7 +20,7 @@ r(t, x) = r_n + 0.0*x + 0.0*t
 flag_u=1; # this is for non uniform grid, change to 0 if uniform
 
 # solve for numerical g_T as test
-params_n=@kw_nt(γ=0.005, σ=0.02, α=2.1, r=0.05, ζ=14.5)
+params_n=@with_kw (γ=0.005, σ=0.02, α=2.1, r=0.05, ζ=14.5)
 
 res=stationary_numerical_simple(params_n(),z)
 g_analytic=res.g
