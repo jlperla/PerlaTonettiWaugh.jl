@@ -18,8 +18,8 @@ function create_dynamic_ODE(params,settings)
     if flag_u==1
         z, L_1_minus, L_1_plus, L_2  = irregulardiffusionoperators(z, M); #Discretize the operator
     else
-        z_min=min(z);
-        z_max=max(z);
+        z_min=minimum(z);
+        z_max=maximum(z);
         z, L_1_minus, L_1_plus, L_2  = diffusionoperators(z_min,z_max, M);
     end
     
