@@ -3,5 +3,5 @@ DifferentialEquations
 NamedTuples
 BandedMatrices
 Sundials
-Parameters
+Parameters 0.9.1
 Distributions
