@@ -85,6 +85,8 @@ prob_ir2 = create_dynamic_ODE(params,settings_ir2)
 sol_ir2 = solve(prob_ir2, basealgorithm)
 
 @show norm(v_acomb-sol_ir2[end])
+# 7. compare sol_ir2 which is chaning both z and g, with the interpolated sol_ir
+@show norm(sol_ir2[end]-sol_ir[end])
 
 # 4. check the uniform operator, setting flag_u=0, use same g_analytic
 
@@ -107,15 +109,24 @@ sol_uni2 = solve(prob_uni2, basealgorithm)
 
 # 6. test results from irregular grid with irregular but more dense grid
 
-z_comb2= unique([linspace(z_min, 1.0, 500)' linspace(1.0,2.0, 120)' linspace(2.0, z_max, 81)'])
+z_comb3= unique([linspace(z_min, 1.0, 500)' linspace(1.0,2.0, 120)' linspace(2.0, z_max, 81)'])
 
-settings_ir2=@NT(z = z_comb2,g = g, T = T, flag_u=flag_u)
+settings_ir3=@NT(z = z_comb3,g = g, T = T, flag_u=flag_u)
 
-prob_ir2 = create_dynamic_ODE(params,settings_ir2)
-sol_ir2 = solve(prob_ir2, basealgorithm)
+prob_ir3 = create_dynamic_ODE(params,settings_ir3)
+sol_ir3 = solve(prob_ir3, basealgorithm)
 
 # interpolate uniform onto non uniform grid
-sol_int2=LinInterp(z_comb2, sol_ir2[end])
+sol_int3=LinInterp(z_comb3, sol_ir3[end])
 @show norm(sol_int.(z_comb)-sol_ir[end])
-@show norm(sol_ir2[end,end]-sol_ir[end,end]) #at bottom
-@show norm(sol_ir2[1,end]-sol_ir[1,end]) # at top
+@show norm(sol_ir3[end,end]-sol_ir[end,end]) #at bottom
+@show norm(sol_ir3[1,end]-sol_ir[1,end]) # at top
+
+@show g_analytic
+@show g_acomb
+
+# 8. check sol_ir2 with sol, which change both z_grid and g_grid
+
+
+sol_int2=LinInterp(z_comb, sol_ir2[end])
+@show norm(sol_int2.(z)-sol[end])
