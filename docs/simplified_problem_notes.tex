@@ -53,6 +53,36 @@ While not listed above, in practice another boundary condition (e.g. transversal
 	\D[z]v(\bar{z},t) &= 0\label{eq:reflecting-GBM-dynamic}
 \end{align}
 Keep in mind that this is just a step in the numerical solution, rather than introducing a true reflecting barrier.  We will need to verify that it does not introduce issues by verifying the numeric solution matches the closed form solution for large $\bar{z}$.  Also note that if $\sigma = 0$, due to the upwind procedure this boundary value would be unnecessary and/or drop out of the solution.
+
+\subsection{Change of Variables to Normalize}
+Take \cref{eq:sp-GBM-dynamic} and let $\tilde{v}(t,x) \equiv e^{-z}v(t,z)$.  Then,
+\begin{align}
+	\D[z]v(t,z) &= e^z\left(\tilde{v}(t,z) + \D[z]\tilde{v}(t,z) \right)\\
+	\D[zz]v(t,z) &= e^z\left(\tilde{v}(t,z) + 2 \D[z]\tilde{v}(t,z) + \D[zz]\tilde{v}(t,z)  \right)\\	
+	\D[t]v(t,z) &= e^z \D[t] \tilde{v}(t,z)
+\end{align}
+Define $\tilde{\pi}(z,t) = e^{-z}\pi(t,z)$ so that if $\pi(t,z) = e^z$ then $\tilde{\pi}(t,z) = 1$.  Substitute into \cref{eq:sp-GBM-dynamic}, divide by $e^z$ and simplify,
+
+\begin{align}
+	\left(r - \gamma - \frac{\sigma^2}{2}\right) \tilde{v}(z,t) &= \tilde{\pi}(z,t) + (\gamma + \sigma^2 - g(t)) \D[z] \tilde{v}(z,t) + \tfrac{\sigma^2}{2} \D[zz] \tilde{v}(z,t) + \D[t]\tilde{v}(z,t)\label{eq:bellman-GBM-dynamic-normalized}
+\end{align}
+Now, substitute into the boundary condition $\D[z]v(0,t) = 0$ and the artificial reflecting barrier at the top, $\D[z]v(\bar{z},t) = 0$ to find,
+\begin{align}
+	\tilde{v}(0,t) + \D[z]\tilde{v}(0,t ) &= 0\\
+	\tilde{v}(\bar{z},t) + \D[z]\tilde{v}(\bar{z},t) &= 0
+\end{align}	
+Finally, in the value matching condition, $v(0,t) = e^{0}\tilde{v}(0,t)$ where if the $F'(z) = \alpha e^{-\alpha z}$ then,
+\begin{align}
+	\tilde{v}(0,t) &= \int_{0}^{\infty} \tilde{v}(z,t) \left(e^z F'(z)\right) \diff z - x(t)\label{eq:vm-GBM-dynamic-normalized}
+\end{align}	
+
+
+
+
+% v(0,t) &= \int_{0}^{\infty} v(z,t) F'(z)\diff z - x(t)\label{eq:vm-GBM-dynamic}\\
+% \D[z]v(0,t) &= 0\label{eq:sp-GBM-dynamic-normalized}
+% \end{align}
+
 \subsection{Discretizing the State Space}\label{eq:discretization}
 This will discretize space with backward differences in the first derivative, and central in space for the 2nd derivative.\footnote{Under a $g(t) > \gamma$ assumption (which may be a general requirement on parameter restrictions), the drift is negative, and the correct ``upwind'' finite difference scheme is always backwards.}
 
