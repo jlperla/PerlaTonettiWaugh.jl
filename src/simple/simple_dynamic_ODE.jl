@@ -14,7 +14,14 @@ function create_dynamic_ODE(params,settings)
     M=length(z);
     T=settings.T;
     g=settings.g;
-    z, L_1_minus, L_1_plus, L_2  = irregulardiffusionoperators(z, M); #Discretize the operator
+    flag_u=settings.flag_u; # 1 if non uniform grid
+    if flag_u==1
+        z, L_1_minus, L_1_plus, L_2  = irregulardiffusionoperators(z, M); #Discretize the operator
+    else
+        z_min=minimum(z);
+        z_max=maximum(z);
+        z, L_1_minus, L_1_plus, L_2  = diffusionoperators(z_min,z_max, M);
+    end
     
     mu_tilde(t,x)=γ.-g(t,x);
     rho_p(t,x)=r(t,x).-g(t,x);

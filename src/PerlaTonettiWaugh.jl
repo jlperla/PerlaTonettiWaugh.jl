@@ -1,7 +1,8 @@
 module PerlaTonettiWaugh
 
 # package code goes here
-using DifferentialEquations, NamedTuples, Parameters, MacroTools, BandedMatrices, Sundials, Distributions
+using DifferentialEquations, NamedTuples, BandedMatrices, Sundials, Distributions
+import Parameters: @with_kw, @unpack
 
 include("diffusionoperators.jl")
 include("simple/ODEalgorithm.jl")
@@ -16,6 +17,7 @@ include("simple/calculate_residuals.jl")
 include("utilities.jl")
 include("full/algebraicstationary.jl")
 include("quadrature.jl")
-export f!, diffusionoperators, createsimpleODEproblem, createsimpleDAEproblem, @kw_nt, stationary_algebraic_simple, createsimplenonuniformODEproblem, irregulardiffusionoperators, stationary_numerical_simple, irregulartrapezoidweights, createsimplenonuniformDAEproblem, create_dynamic_ODE, calculate_residuals
+
+export f!, diffusionoperators, createsimpleODEproblem, createsimpleDAEproblem, @with_kw, @unpack, stationary_algebraic_simple, createsimplenonuniformODEproblem, irregulardiffusionoperators, stationary_numerical_simple, irregulartrapezoidweights, createsimplenonuniformDAEproblem, create_dynamic_ODE, calculate_residuals
 
 end # module

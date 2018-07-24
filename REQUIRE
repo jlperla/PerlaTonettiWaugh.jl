@@ -3,6 +3,5 @@ DifferentialEquations
 NamedTuples
 BandedMatrices
 Sundials
-Parameters
-MacroTools
+Parameters 0.9.1
 Distributions
