@@ -14,7 +14,6 @@ include("simple/DAEalgorithm.jl")
 include("simple/algebraicstationary.jl")
 include("simple/numericalstationary.jl")
 include("simple/calculate_residuals.jl")
-include("utilities.jl")
 include("full/algebraicstationary.jl")
 include("quadrature.jl")
 
