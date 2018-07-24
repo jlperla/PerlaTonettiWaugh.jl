@@ -1,4 +1,4 @@
-# This is a test of calculate_residual.jl
+# This is a test of calculate_residuals.jl
 
 using PerlaTonettiWaugh, BenchmarkTools, Sundials, Base.Test,Interpolations, QuantEcon, NamedTuples
 
