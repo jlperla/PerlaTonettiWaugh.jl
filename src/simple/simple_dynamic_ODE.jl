@@ -14,20 +14,12 @@ function create_dynamic_ODE(params,settings)
     M=length(z);
     T=settings.T;
     g=settings.g;
-    flag_u=settings.flag_u; # 1 if non uniform grid
-    if flag_u==1
-        z, L_1_minus, L_1_plus, L_2  = irregulardiffusionoperators(z, M); #Discretize the operator
-    else
-        z_min=minimum(z);
-        z_max=maximum(z);
-        z, L_1_minus, L_1_plus, L_2  = diffusionoperators(z_min,z_max, M);
-    end
+    z, L_1_minus, L_1_plus, L_2  = diffusionoperators(z)
     
-    mu_tilde(t,x)=γ.-g(t,x);
+    mu_tilde(t,x)=γ.-g(t,x); # Check that this broadcasting is done properly. 
     rho_p(t,x)=r(t,x).-g(t,x);
 
         #Check upwind direction
-
         if all(mu_tilde.(0.0, z) .>= 0)
             p = @NT(L_1 = L_1_plus, L_2 = L_2, z = z, rho_p = rho_p, mu_tilde = mu_tilde, σ = σ, π=π, T = T) #Named tuple for parameters.
         elseif all(mu_tilde.(0.0, z) .<= 0)

@@ -6,7 +6,7 @@ testDist1 = TruncatedNormal(0, 1, -1.5, 1.5)
 var1 = 0.5515244157615512
 pdf1 = x -> pdf(testDist1, x)
 
-z = collect(linspace(-1.5, 1.5, 1000)) # Grid of 1000 uniform points 
+z = linspace(-1.5, 1.5, 1000) # Grid of 1000 uniform points 
 
 omega = irregulartrapezoidweights(z, pdf1)
 omega_prime = irregulartrapezoidweights(z, testDist1)

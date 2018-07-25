@@ -1,11 +1,10 @@
 # This function calculatesthe residual at all points given on g.
 using NamedTuples, QuantEcon, Parameters
 
-function calculate_residuals(params, g_function, z, T, flag_u)
-
+function calculate_residuals(params, g_function, z, T)
     # Setup
-    @unpack γ, σ, α, r, ζ = params
-    settings=@NT(z = z,g = g_function, T = T, flag_u = flag_u)
+    @unpack γ, σ, α, r, ζ, π = params # We don't need pi explicitly here, but the create_dynamic_ODE() call requires it. 
+    settings=@NT(z = z, g = g_function, T = T)
     basealgorithm = CVODE_BDF()
 
     # Quadrature weighting

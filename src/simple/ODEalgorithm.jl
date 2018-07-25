@@ -1,6 +1,6 @@
 #Create DiffEq Problem for solving as a system of ODE
-function createsimpleODEproblem(c_tilde, sigma_tilde, mu_tilde, x_min::Float64, x_max::Float64, M::Int64, T::Float64, rho::Float64)
-    x, L_1_minus, L_1_plus, L_2  = diffusionoperators(x_min, x_max, M) #Discretize the operator
+function createsimpleODEproblem(c_tilde, sigma_tilde, mu_tilde, x::AbstractArray, T::Float64, rho::Float64)
+    x, L_1_minus, L_1_plus, L_2  = diffusionoperators(x) #Discretize the operator
 
     #Check upwind direction
     bothpos = minimum(mu_tilde.(T, x)) >= 0.0 && minimum(mu_tilde.(0.0, x)) >= 0.0

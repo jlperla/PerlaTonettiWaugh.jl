@@ -1,6 +1,7 @@
-function createsimpleDAEproblem(c_tilde, sigma_tilde, mu_tilde, x_min, x_max, M, T, rho)
-    x, L_1_minus, L_1_plus, L_2  = diffusionoperators(x_min, x_max, M) #Discretize the operator
-
+function createsimpleDAEproblem(c_tilde, sigma_tilde, mu_tilde, x, T, rho)
+    x, L_1_minus, L_1_plus, L_2  = diffusionoperators(x) #Discretize the operator
+    M = length(x)
+    
     #Check upwind direction
     bothpos = minimum(mu_tilde.(T, x)) >= 0.0 && minimum(mu_tilde.(0.0, x)) >= 0.0
     bothneg = minimum(mu_tilde.(T, x)) <= 0.0 && minimum(mu_tilde.(0.0, x)) <= 0.0
