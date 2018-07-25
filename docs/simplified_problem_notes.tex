@@ -64,7 +64,7 @@ Take \cref{eq:sp-GBM-dynamic} and let $\tilde{v}(t,z) \equiv e^{-\xi z}v(t,z)$. 
 Define $\tilde{\pi}(z,t) = e^{-\xi z}\pi(t,z)$ so that if $\pi(t,z) = e^{\xi z}$ then $\tilde{\pi}(t,z) = 1$.  Substitute into \cref{eq:sp-GBM-dynamic}, divide by $e^{\xi z}$ and simplify,
 
 \begin{align}
-	\left(r - \gamma - \frac{\sigma^2}{2}\xi^2\right) \tilde{v}(z,t) &= \tilde{\pi}(z,t) + (\gamma + \sigma^2\xi - g(t)) \D[z] \tilde{v}(z,t) + \tfrac{\sigma^2}{2} \D[zz] \tilde{v}(z,t) + \D[t]\tilde{v}(z,t)\label{eq:bellman-GBM-dynamic-normalized}
+	\left(r - g(t)- \xi(\gamma-g(t)) - \frac{\sigma^2}{2}\xi^2\right) \tilde{v}(z,t) &= \tilde{\pi}(z,t) + (\gamma + \sigma^2\xi - g(t)) \D[z] \tilde{v}(z,t) + \tfrac{\sigma^2}{2} \D[zz] \tilde{v}(z,t) + \D[t]\tilde{v}(z,t)\label{eq:bellman-GBM-dynamic-normalized}
 \end{align}
 Now, substitute into the boundary condition $\D[z]v(0,t) = 0$ and the artificial reflecting barrier at the top, $\D[z]v(\bar{z},t) = 0$ to find,
 \begin{align}
