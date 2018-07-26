@@ -55,29 +55,69 @@ While not listed above, in practice another boundary condition (e.g. transversal
 Keep in mind that this is just a step in the numerical solution, rather than introducing a true reflecting barrier.  We will need to verify that it does not introduce issues by verifying the numeric solution matches the closed form solution for large $\bar{z}$.  Also note that if $\sigma = 0$, due to the upwind procedure this boundary value would be unnecessary and/or drop out of the solution.
 
 \subsection{Change of Variables to Normalize}
-Take \cref{eq:sp-GBM-dynamic} and let $\tilde{v}(t,x) \equiv e^{-z}v(t,z)$.  Then,
+Take \cref{eq:sp-GBM-dynamic} and let $\tilde{v}(t,z) \equiv e^{-\xi z}v(t,z)$.  Then,
 \begin{align}
-	\D[z]v(t,z) &= e^z\left(\tilde{v}(t,z) + \D[z]\tilde{v}(t,z) \right)\\
-	\D[zz]v(t,z) &= e^z\left(\tilde{v}(t,z) + 2 \D[z]\tilde{v}(t,z) + \D[zz]\tilde{v}(t,z)  \right)\\	
-	\D[t]v(t,z) &= e^z \D[t] \tilde{v}(t,z)
+	\D[z]v(t,z) &= e^{\xi z}\left(\xi\tilde{v}(t,z) + \D[z]\tilde{v}(t,z) \right)\\
+	\D[zz]v(t,z) &= e^{\xi z}\left(\xi^{2}\tilde{v}(t,z) + 2 \xi\D[z]\tilde{v}(t,z) + \D[zz]\tilde{v}(t,z)  \right)\\	
+	\D[t]v(t,z) &= e^{\xi z} \D[t] \tilde{v}(t,z)
 \end{align}
-Define $\tilde{\pi}(z,t) = e^{-z}\pi(t,z)$ so that if $\pi(t,z) = e^z$ then $\tilde{\pi}(t,z) = 1$.  Substitute into \cref{eq:sp-GBM-dynamic}, divide by $e^z$ and simplify,
+Define $\tilde{\pi}(z,t) = e^{-\xi z}\pi(t,z)$ so that if $\pi(t,z) = e^{\xi z}$ then $\tilde{\pi}(t,z) = 1$.  Substitute into \cref{eq:sp-GBM-dynamic}, divide by $e^{\xi z}$ and simplify,
 
 \begin{align}
-	\left(r - \gamma - \frac{\sigma^2}{2}\right) \tilde{v}(z,t) &= \tilde{\pi}(z,t) + (\gamma + \sigma^2 - g(t)) \D[z] \tilde{v}(z,t) + \tfrac{\sigma^2}{2} \D[zz] \tilde{v}(z,t) + \D[t]\tilde{v}(z,t)\label{eq:bellman-GBM-dynamic-normalized}
+	\left(r - g(t)- \xi(\gamma-g(t)) - \frac{\sigma^2}{2}\xi^2\right) \tilde{v}(z,t) &= \tilde{\pi}(z,t) + (\gamma + \sigma^2\xi - g(t)) \D[z] \tilde{v}(z,t) + \tfrac{\sigma^2}{2} \D[zz] \tilde{v}(z,t) + \D[t]\tilde{v}(z,t)\label{eq:bellman-GBM-dynamic-normalized}
 \end{align}
 Now, substitute into the boundary condition $\D[z]v(0,t) = 0$ and the artificial reflecting barrier at the top, $\D[z]v(\bar{z},t) = 0$ to find,
 \begin{align}
-	\tilde{v}(0,t) + \D[z]\tilde{v}(0,t ) &= 0\\
-	\tilde{v}(\bar{z},t) + \D[z]\tilde{v}(\bar{z},t) &= 0
+	\xi\tilde{v}(0,t) + \D[z]\tilde{v}(0,t ) &= 0\label{eq:new-BC1}\\
+	\xi\tilde{v}(\bar{z},t) + \D[z]\tilde{v}(\bar{z},t) &= 0\label{eq:new-BC2}
 \end{align}	
 Finally, in the value matching condition, $v(0,t) = e^{0}\tilde{v}(0,t)$ where if the $F'(z) = \alpha e^{-\alpha z}$ then,
 \begin{align}
-	\tilde{v}(0,t) &= \int_{0}^{\infty} \tilde{v}(z,t) \left(e^z F'(z)\right) \diff z - x(t)\label{eq:vm-GBM-dynamic-normalized}
+	\tilde{v}(0,t) &= \int_{0}^{\infty} \tilde{v}(z,t) \left(e^{\xi z} F'(z)\right) \diff z - x(t)\label{eq:vm-GBM-dynamic-normalized}
 \end{align}	
 
+\subsection{Discretization Operator for Change of Variable Case}
 
+The general discretization using finite differences is discussed later, a more detailed derivation for this method please refer to notes on finite difference discretization operator. In this subsection we only discuss the construction of discretization operator by applying new \textbf{Boundary Conditions} \cref{eq:new-BC1} and \cref{eq:new-BC2}
 
+\paragraph{Interior of $A$:}
+To better understand the construction of $A$ and $b$, look at individual rows of $A$ with the ODE.
+
+In the interior ($1 < i < I$), the discretization of finite difference operator is:
+\begin{align}
+\mathcal{A} \tilde{v}(z_i) 
+&= \underbrace{\left(-\frac{\mu_i^{-}}{\Delta_{i,-}} +\frac{\sigma_i^2}{\Delta_{i,-}(\Delta_{i,+}+\Delta_{i,-})}\right)}_{\equiv X_i}\tilde{v}_{i-1} + \underbrace{\left(\frac{\mu_i^{-}}{\Delta_{i,-}} - \frac{\mu_i^{+}}{\Delta_{i,+}}-\frac{\sigma_i^2}{\Delta_{i,-}\Delta_{i,+}}\right)}_{\equiv Y_i}\tilde{v}_i +\nonumber\\ &\underbrace{\left(\frac{\mu_i^{+}}{\Delta_{i,+}} + \frac{\sigma_i^2}{\Delta_{i,+}(\Delta_{i,+}+\Delta_{i,-})}\right)}_{\equiv Z_i}\tilde{v}_{i+1}\label{eq:A-collected-interior-with-nonuniform-grid}
+\end{align}
+
+\paragraph{Boundary Value at $\underline{x}$:}
+As $i =1$, given the ``ghost node'' $x_0$, we recall the assumption that $\Delta_{1,-} = \Delta_{1,+}$.  Hence, the discretized operator from \cref{eq:A-collected-interior-with-nonuniform-grid} is
+\begin{align}
+\mathcal{A} \tilde{v}(z_1) &\approx \left(-\frac{\mu_1^{-}}{\Delta_{1,+}} +\frac{\sigma_1^2}{2 \Delta_{1,+}^2}\right)\tilde{v}_0 + \left(\frac{\mu_1^{-} - \mu_1^{+}}{\Delta_{1,+}}-\frac{\sigma_1^2}{\Delta_{1,+}^2}\right) \tilde{v}_1 + \left(\frac{\mu_1^{+}}{\Delta_{1,+}} + \frac{\sigma_1^2}{2 \Delta_{1,+}^2}\right)\tilde{v}_2\label{eq:A-collected-with-nonuniform-grid-left}\\
+\intertext{If the boundary value is $\tilde{v}'(\underline{z}) = 0$, take \cref{eq:A-collected-with-nonuniform-grid-left} and use $v'(\underline{z}) \approx \frac{\tilde{v}_1-\tilde{v}_0}{\Delta_{1,-}} +\tilde{v}_1= 0, \implies \tilde{v}_0 = \tilde{v}_1(1+\Delta_{1,-})$, so}
+ &\approx \left(\underbrace{\left(\frac{-\mu_1^{-}}{\Delta_{1,-}} +\frac{\sigma_1^2}{\Delta_{1,-}(\Delta_{1,+}+\Delta_{1,-})}\right)}_{\equiv X_1}(1+\Delta_{1,-}) + \underbrace{\left(\mu_1^{-} - \frac{\mu_1^{+}}{\Delta_{1,+}}-\frac{\sigma_1^2}{\Delta_{1,+}\Delta_{1,-}}\right)}_{\equiv Y_1}\right)\tilde{v}_1 + \nonumber\\
+ & \underbrace{\left(\frac{\mu_1^{+}}{\Delta_{1,+}} + \frac{\sigma_1^2}{2 \Delta_{1,+}\Delta_{1,-}}\right)}_{\equiv Z_1}\tilde{v}_2\label{eq:reflecting-left-nonuniform}
+\end{align}
+
+\paragraph{Boundary Value at $\bar{z}$:}
+As $i=I$, given the ``ghost node'' $z_{I+1}$, and the assumption  $\Delta_{I,+} = \Delta_{I,-}$, from \cref{eq:A-collected-interior-with-nonuniform-grid}:
+\begin{align}
+\mathcal{A}  \tilde{v}(x_I)&\approx \left(-\frac{\mu_I^{-}}{\Delta_{I,-}} +\frac{\sigma_I^2}{2 \Delta_{I,-}^2}\right)\tilde{v}_{I-1} + \left(\frac{\mu_I^{-} - \mu_I^{+}}{\Delta_{I,-}}-\frac{\sigma_I^2}{\Delta_{I,-}^2}\right)\tilde{v}_I + \left(\frac{\mu_I^{+}}{\Delta_{I,-}} + \frac{\sigma_I^2}{2 \Delta_{I,-}^2}\right)\tilde{v}_{I+1}\\
+\intertext{For a reflecting barrier, the boundary value $v'(\bar{z}) \approx \frac{\tilde{v}_{I+1}-\tilde{v}_I}{\Delta_{I,+}}+\tilde{v}_{I} = 0, \implies \tilde{v}_{I+1} = (1-\Delta_{I,+})\tilde{v}_I$,}
+&\approx \underbrace{\left(-\frac{\mu_I^{-}}{\Delta_{I,-}} +\frac{\sigma_I^2}{\Delta_{I,-}(\Delta_{I,+}+\Delta_{I,-})}\right)}_{\equiv X_I} \tilde{v}_{I-1}\nonumber\\
+&+ \left(\underbrace{\left(\frac{\mu_I^{-}}{\Delta_{I,-}} - \frac{\mu_I^{+}}{\Delta_{I,+}}-\frac{\sigma_I^2}{\Delta_{I,-}\Delta_{I,+}}\right)}_{\equiv Y_I} + \underbrace{\left(\frac{\mu_I^{+}}{\Delta_{I,+}} + \frac{\sigma_I^2}{\Delta_{I,+}(\Delta_{I,+}+\Delta_{I,-})}\right)}_{\equiv Z_I}(1-\Delta_{I,+}) \right) \tilde{v}_I \label{eq:reflecting-right-nonuniform}
+\end{align}
+
+\paragraph{Discretization Operator:} Apply the boundary conditions at the corner of discretization matrix at each time step $n$:
+
+\begin{align}
+		A^n &\equiv \begin{bmatrix}
+	X_{1}^n(1+\Delta_{1,-})+Y_1^n & Z_1^n & 0 & \ldots & \ldots & \ldots & 0\\
+	X^n_2 & Y^n_2 & Z^n_2 & 0 & 0 & \ldots & 0\\
+	\vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots\\		
+	0 & 0 & 0 & \ldots & X^n_{I-1} & Y^n_{I-1} & Z^n_{I-1}\\
+	0 & \ldots & \ldots & \ldots & 0 & X_I^n & Y_I^n+Z_I^n(1-\Delta_{I,+})
+\end{bmatrix}\in\R^{I\times I}\label{eq:A-n}
+\end{align}
 
 % v(0,t) &= \int_{0}^{\infty} v(z,t) F'(z)\diff z - x(t)\label{eq:vm-GBM-dynamic}\\
 % \D[z]v(0,t) &= 0\label{eq:sp-GBM-dynamic-normalized}
