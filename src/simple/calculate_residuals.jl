@@ -1,21 +1,22 @@
 # This function calculatesthe residual at all points given on g.
-using NamedTuples, QuantEcon, Parameters
-
-function calculate_residuals(params, g_function, z, T)
+function calculate_residuals(params::NamedTuple, π::Function, g_function::Function, x::AbstractArray, T::Integer) # To keep the params consistent with other tuples. 
     # Setup
-    @unpack γ, σ, α, r, ζ, π = params # We don't need pi explicitly here, but the create_dynamic_ODE() call requires it. 
-    settings=@NT(z = z, g = g_function, T = T)
+    @unpack γ, σ, α, r, ζ = params
+    @assert isa(ζ, Function) && isa(r, Function) # Assert that the functional parameters have the right type.
+    @assert isa(γ, Number) && isa(σ, Number) && isa(α, Number) # Assert that the constant parameters have the right type. 
+    settings=@NT(x = x, g = g_function, T = T, π = π)
     basealgorithm = CVODE_BDF()
 
     # Quadrature weighting
-    ourDist = Truncated(Exponential(1/α), z[1], z[end])
-    ω = irregulartrapezoidweights(z, ourDist)
+    ourDist = Truncated(Exponential(1/α), x[1], x[end])
+    ω = irregulartrapezoidweights(x, ourDist)
 
-    prob = create_dynamic_ODE(params, settings)
+    # Define and solve dynamic ODE. 
+    prob = simpledynamicODEproblem(params, settings)
     sol = Sundials.solve(prob, basealgorithm)
     t_vals = sol.t
 
-    # calculate the residual at each time point
+    # Calculate the residual at each time point
     resid = zeros(length(t_vals))
     for (i, t) in enumerate(t_vals)
         v_t = sol(t)    #i.e., the value function at the point.

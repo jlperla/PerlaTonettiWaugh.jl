@@ -1,8 +1,6 @@
 # Implements the algebraic stationary solution for the full model. Returns the equilibrium quantities (g, Ω, π) determined by equations H.15-H.17.
 
 # Dependencies. 
-using Parameters, NLsolve
-import Parameters: @with_kw
 include("fullparams.jl")
 
 """

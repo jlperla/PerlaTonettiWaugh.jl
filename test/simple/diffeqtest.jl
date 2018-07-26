@@ -1,32 +1,34 @@
 # Global constants. 
-    solve(x,y)=Sundials.solve(x,y)
-    # For the test grid. 
+    # State grid. 
     x_min = 0.01
     x_max = 1.0
     M = 20
     x=linspace(x_min,x_max,M) # Since we only use the grid now. 
-    # For the time boundary. 
-    T = 10.0
-    # Individual model parameters. 
-    rho = 0.15
-    sigma_bar = 0.1
-    c_tilde(t, x) = x + 0.0001*t
-    sigma_tilde(t, x) =  sigma_bar
-    mu_tilde(t, x) = 0.1*x *(1.0 + 4.0 * t)
+    
+    # Time boundary. 
+    T_val = 10.0
+
+    # Parameters and param generator. 
+    σ_val = 0.1 # Currently, the only σ we use.  
+    sigma_tilde = (t, x) -> σ_val # This IS potentially idiosyncratic here. 
+    mu_tilde = (t, x) -> 0.1*x * (1.0 + 4.0 * t)
+    ρ_val = 0.15
+    c_tilde = (t, x) -> x + 0.0001*t # Old `c_tilde`
     # Solver settings. 
     basealgorithm = CVODE_BDF() 
-    # plotevery = 5 irrelevant now, since there is no more plotting. 
+    params = @with_kw (ρ = ρ_val, c̃ = c_tilde, μ̃ = mu_tilde, σ̃ = sigma_tilde, T = T_val) # Because this does't vary 
+    mainparams = params()
 
 #= 
     Tests on vanilla examples. 
 =#
     # Vanilla example ODE. 
-    prob = createsimpleODEproblem(c_tilde, sigma_tilde, mu_tilde, x,  T, rho)
+    prob = simpleODEproblem(mainparams, x)
     sol = solve(prob, basealgorithm)
     @test issorted(sol[end])
 
     # Vanilla example DAE.
-    probDAE = createsimpleDAEproblem(c_tilde, sigma_tilde, mu_tilde, x,  T, rho)
+    probDAE = simpleDAEproblem(mainparams, x)
     solDAE = solve(probDAE, IDA())
     @show(issorted(solDAE[end][1:M]))
 
@@ -44,7 +46,7 @@
     M_comb = length(x_comb)
 
     # Test new ODE. 
-    prob_nonuni = createsimpleODEproblem(c_tilde, sigma_tilde, mu_tilde, x_comb, T, rho)
+    prob_nonuni = simpleODEproblem(mainparams, x_comb)
     sol_nonuni = solve(prob_nonuni, basealgorithm)
     @test issorted(sol_nonuni[end])
 
@@ -57,7 +59,7 @@
     @show norm(sol_int.(x_comb)-sol_nonuni[end])
 
     # Test new DAE. 
-    probDAE_nonuni = createsimpleDAEproblem(c_tilde, sigma_tilde, mu_tilde, x_comb, T, rho)
+    probDAE_nonuni = simpleDAEproblem(mainparams, x_comb)
     solDAE_nonuni = solve(probDAE_nonuni, IDA())
     @show(issorted(solDAE_nonuni[end][1:M_comb]))
 
@@ -69,8 +71,8 @@
     Backwards tests. 
 =#
     # Test for ODE with backwards drift. 
-    mu_tilde(t, x) = -1 * 0.1*x *(1.0 + 4.0 * t)
-    probBackODE = createsimpleODEproblem(c_tilde, sigma_tilde, mu_tilde, x,  T, rho)
+    mu_tilde_backwards(t, x) = -1 * 0.1*x *(1.0 + 4.0 * t)
+    probBackODE = simpleODEproblem(params(μ̃ = mu_tilde_backwards), x)
     solBackODE = solve(probBackODE, basealgorithm)
 
     # Monotonicity test
