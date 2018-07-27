@@ -1,3 +1,24 @@
+#=
+    Rescaled discretization tests. 
+=#
+
+ξ_1 = 1.0 
+ξ_2 = 2.0
+x_uniform = 1:5 
+x_irregular = [1, 2.2, 3, 4, 5]
+
+# Test for uniform grid code, ξ_1.
+# Test for irregular grid code, ξ_1. 
+# Uniform ... ξ_2. 
+# Irregular ... ξ_2.  
+
+# Test for error handling on ξ (i.e., if ξ can't be negative or is bounded or something like that) for each method. 
+# Test for proper dispatch (i.e., type of the first return from uniform is a Range).
+
+#=
+    Vanilla discretization tests. 
+=#
+
 ## REGULAR DISCRETIZATION
 σ = 1; μ = -1;
 x, L_1_minus, L_1_plus, L_2 = diffusionoperators(1:5) # Dispatches on the discrete code. 

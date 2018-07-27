@@ -11,7 +11,7 @@
     t = linspace(0.0, T_val, N) # For interpolation purposes only. 
 
     # Functional parameters. 
-    π_func = (t, x) -> exp(x) # Potentially idiosyncrtaic. 
+    π_func = (t, x) -> exp(x) # Potentially idiosyncratic. 
     ζ_func = t -> ζ_val # Not idiosyncratic, per equation (4)
     r_func = t -> r_val # Not idiosyncratic, per intro to doc. 
 

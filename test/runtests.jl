@@ -8,7 +8,8 @@ tic()
 @time @testset "Discretization Tests" begin include("discretization/discretizationtest.jl") end 
 @time @testset "Quadrature Tests" begin include("discretization/quadrature.jl") end 
 @time @testset "Residuals/Dynamic ODE Tests" begin include("simple/residualstest.jl") end 
-@time @testset "ODE and DAE Tests" begin include("simple/diffeqtest.jl") end
+@time @testset "ODE and DAE Tests" begin include("diffeqs/diffeqtest.jl") end
+@time @testset "Rescaling Tests" begin include("diffeqs/checkODEscaling.jl") end 
 toc()
 
 
