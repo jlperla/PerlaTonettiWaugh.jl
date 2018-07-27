@@ -1,7 +1,7 @@
 module PerlaTonettiWaugh
 
 # Dependencies. 
-using NLsolve, DifferentialEquations, NamedTuples, BandedMatrices, Sundials, Distributions
+using NLsolve, DifferentialEquations, NamedTuples, BandedMatrices, Sundials, Distributions, Roots
 import Parameters: @with_kw, @unpack
 
 # General discretization files. 
@@ -15,6 +15,6 @@ include("simple/calculate_residuals.jl")
 # Full model. 
 include("full/algebraicstationary.jl") # Includes params.
 
-export f!, diffusionoperators, simpleODEproblem, simpleDAEproblem, @with_kw, @unpack, stationary_algebraic_simple, stationary_numerical_simple, irregulartrapezoidweights, simpledynamicODEproblem, calculate_residuals
+export f!, diffusionoperators, simpleODEproblem, simpleDAEproblem, simpledynamicODEproblem, @with_kw, @unpack, stationary_algebraic_simple, stationary_numerical_simple, irregulartrapezoidweights, calculate_residuals
 
 end # module

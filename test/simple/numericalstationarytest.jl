@@ -1,7 +1,6 @@
-using PerlaTonettiWaugh, Base.Test, Parameters, NamedTuples
 include("matlabobjects.jl")
-# Generate default parameters. 
 
+# Generate default parameters. 
 simple_numerical_params = @with_kw (γ = 0.005, σ = 0.02, α = 2.1, r = 0.05, ζ = 14.5)
 
 # Test for one particular grid. MATLAB solve_nonlinear_system = false. 

@@ -1,10 +1,12 @@
 # This function calculatesthe residual at all points given on g.
-function calculate_residuals(params::NamedTuple, π::Function, g_function::Function, x::AbstractArray, T::Integer) # To keep the params consistent with other tuples. 
+function calculate_residuals(params::NamedTuple, settings::NamedTuple) # To keep the params consistent with other tuples. 
     # Setup
     @unpack γ, σ, α, r, ζ = params
-    @assert isa(ζ, Function) && isa(r, Function) # Assert that the functional parameters have the right type.
-    @assert isa(γ, Number) && isa(σ, Number) && isa(α, Number) # Assert that the constant parameters have the right type. 
-    settings=@NT(x = x, g = g_function, T = T, π = π)
+    @unpack x, g, T, π = settings 
+    # Asserts
+    @assert isa(ζ, Function) && isa(r, Function) #  functional parameters 
+    @assert isa(γ, Number) && isa(σ, Number) && isa(α, Number) # constant parameters 
+    # Solver setting 
     basealgorithm = CVODE_BDF()
 
     # Quadrature weighting

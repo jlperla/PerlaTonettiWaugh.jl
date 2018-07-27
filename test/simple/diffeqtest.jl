@@ -9,11 +9,11 @@
     T_val = 10.0
 
     # Parameters and param generator. 
-    σ_val = 0.1 # Currently, the only σ we use.  
-    sigma_tilde = (t, x) -> σ_val # This IS potentially idiosyncratic here. 
-    mu_tilde = (t, x) -> 0.1*x * (1.0 + 4.0 * t)
     ρ_val = 0.15
-    c_tilde = (t, x) -> x + 0.0001*t # Old `c_tilde`
+    σ_val = 0.1
+    c_tilde = (t, x) -> x + 0.0001*t # For the non-model-specific code. 
+    sigma_tilde = (t, x) -> σ_val 
+    mu_tilde = (t, x) -> 0.1*x * (1.0 + 4.0 * t) # For the non-model-specific code. 
     # Solver settings. 
     basealgorithm = CVODE_BDF() 
     params = @with_kw (ρ = ρ_val, c̃ = c_tilde, μ̃ = mu_tilde, σ̃ = sigma_tilde, T = T_val) # Because this does't vary 
@@ -24,17 +24,17 @@
 =#
     # Vanilla example ODE. 
     prob = simpleODEproblem(mainparams, x)
-    sol = solve(prob, basealgorithm)
+    sol = Sundials.solve(prob, basealgorithm)
     @test issorted(sol[end])
 
     # Vanilla example DAE.
     probDAE = simpleDAEproblem(mainparams, x)
-    solDAE = solve(probDAE, IDA())
-    @show(issorted(solDAE[end][1:M]))
+    solDAE = Sundials.solve(probDAE, IDA())
+    @test issorted(solDAE[end][1:M])
 
     #Check they are "reasonably" close
-    @show norm(sol[1] - solDAE[1][1:M])
-    @show norm(sol[end] - solDAE[end][1:M])
+    @test norm(sol[1] - solDAE[1][1:M]) ≈ 0.0 atol = 1e-5
+    @test_broken norm(sol[end] - solDAE[end][1:M]) ≈ 0.0 atol = 1e-5
 
 #=
     Test for nonuniform. 
@@ -47,33 +47,32 @@
 
     # Test new ODE. 
     prob_nonuni = simpleODEproblem(mainparams, x_comb)
-    sol_nonuni = solve(prob_nonuni, basealgorithm)
+    sol_nonuni = Sundials.solve(prob_nonuni, basealgorithm)
     @test issorted(sol_nonuni[end])
 
     # Test its closeness to the uniform ODE. 
-    @show norm(sol[1,1]-sol_nonuni[1,1])
-    @show norm(sol[end,end]-sol_nonuni[end,end])
+    @test_broken norm(sol[1,1]-sol_nonuni[1,1]) ≈ 0.0 atol = 1e-5
+    @test_broken norm(sol[end,end]-sol_nonuni[end,end]) ≈ 0.0 atol = 1e-5
 
     # interpolate uniform onto non uniform grid 
     sol_int=LinInterp(x, sol[end])
-    @show norm(sol_int.(x_comb)-sol_nonuni[end])
+    @test_broken norm(sol_int.(x_comb)-sol_nonuni[end]) ≈ 0 atol = 1e-5
 
     # Test new DAE. 
     probDAE_nonuni = simpleDAEproblem(mainparams, x_comb)
-    solDAE_nonuni = solve(probDAE_nonuni, IDA())
-    @show(issorted(solDAE_nonuni[end][1:M_comb]))
+    solDAE_nonuni = Sundials.solve(probDAE_nonuni, IDA())
+    @test issorted(solDAE_nonuni[end][1:M_comb])
 
     #Check they are "reasonably" close
-    @show norm(sol_nonuni[1] - solDAE_nonuni[1][1:M_comb])
-    @show norm(sol_nonuni[end] - solDAE_nonuni[end][1:M_comb])
-
+    @test norm(sol_nonuni[1] - solDAE_nonuni[1][1:M_comb]) ≈ 0.0 atol = 1e-5 
+    @test_broken norm(sol_nonuni[end] - solDAE_nonuni[end][1:M_comb]) ≈ 0.0 atol = 1e-5
 #= 
     Backwards tests. 
 =#
     # Test for ODE with backwards drift. 
     mu_tilde_backwards(t, x) = -1 * 0.1*x *(1.0 + 4.0 * t)
     probBackODE = simpleODEproblem(params(μ̃ = mu_tilde_backwards), x)
-    solBackODE = solve(probBackODE, basealgorithm)
+    solBackODE = Sundials.solve(probBackODE, basealgorithm)
 
     # Monotonicity test
     @test issorted(solBackODE[end])

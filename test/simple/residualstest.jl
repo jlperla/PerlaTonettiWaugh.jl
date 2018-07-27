@@ -3,17 +3,17 @@
     x_min = 0.0 # Rename to X for consistency. 
     x_max = 5.0
     M = 100
-    x=linspace(x_min,x_max,M) # Since we only care about the grid. 
+    x_grid = linspace(x_min,x_max,M) # Since we only care about the grid. 
 
     # Time grid. 
-    T = 10.0
+    T_val = 10.0
     N = 10
-    t = linspace(0.0, T, N)
+    t = linspace(0.0, T_val, N) # For interpolation purposes only. 
 
     # Functional parameters. 
-    π_func = (t, x) -> exp(x)
+    π_func = (t, x) -> exp(x) # Potentially idiosyncrtaic. 
     ζ_func = t -> ζ_val # Not idiosyncratic, per equation (4)
-    r_func = t -> r_val # Not idiosyncratic.
+    r_func = t -> r_val # Not idiosyncratic, per intro to doc. 
 
     # Constant parameters. 
     σ_val = 0.02
@@ -29,21 +29,26 @@
 
 # Solutions. 
     # Solve for the numerical stationary g_T as test. 
-    result_ns = stationary_numerical_simple(params_const, x)
+    result_ns = stationary_numerical_simple(params_const, x_grid)
     g_stationary = result_ns.g # This is the level. 
 
     # Test that this residual is close to 0. 
-    ourDist = Truncated(Exponential(1/α_val), x[1], x[end]) 
-    ω = irregulartrapezoidweights(x, ourDist)
+    ourDist = Truncated(Exponential(1/α_val), x_grid[1], x_grid[end]) 
+    ω = irregulartrapezoidweights(x_grid, ourDist)
     @test result_ns.v[1] + ζ_val - dot(ω, result_ns.v) ≈ 0 atol = 1e-10
 
+    
     # Create the interpolation object of g
     g_vector = g_stationary + 0.01 * t
     g_int=LinInterp(t, g_vector)
     g_func = t -> g_int(t) # Not idiosyncratic. 
 
+    # Create settings object.
+    settings = @with_kw (x = x_grid, T = T_val, π = π_func, g = g_func)
+
+
     # Calculate residuals. 
-    resid= calculate_residuals(params_func, π_func, g_func, x, T)
+    resid= calculate_residuals(params_func, settings())
 
     # Show the residual vector. 
     @show resid
