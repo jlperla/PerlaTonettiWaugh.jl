@@ -89,33 +89,58 @@ In the interior ($1 < i < I$), the discretization of finite difference operator 
 &= \underbrace{\left(-\frac{\mu_i^{-}}{\Delta_{i,-}} +\frac{\sigma_i^2}{\Delta_{i,-}(\Delta_{i,+}+\Delta_{i,-})}\right)}_{\equiv X_i}\tilde{v}_{i-1} + \underbrace{\left(\frac{\mu_i^{-}}{\Delta_{i,-}} - \frac{\mu_i^{+}}{\Delta_{i,+}}-\frac{\sigma_i^2}{\Delta_{i,-}\Delta_{i,+}}\right)}_{\equiv Y_i}\tilde{v}_i +\nonumber\\ &\underbrace{\left(\frac{\mu_i^{+}}{\Delta_{i,+}} + \frac{\sigma_i^2}{\Delta_{i,+}(\Delta_{i,+}+\Delta_{i,-})}\right)}_{\equiv Z_i}\tilde{v}_{i+1}\label{eq:A-collected-interior-with-nonuniform-grid}
 \end{align}
 
-\paragraph{Boundary Value at $\underline{x}$:}
-As $i =1$, given the ``ghost node'' $x_0$, we recall the assumption that $\Delta_{1,-} = \Delta_{1,+}$.  Hence, the discretized operator from \cref{eq:A-collected-interior-with-nonuniform-grid} is
+\paragraph{Boundary Value at $x=0$:}
+%As $i =1$, given the ``ghost node'' $x_0$, we recall the assumption that $\Delta_{1,-} = \Delta_{1,+}$.  Hence, the discretized operator from \cref{eq:A-collected-interior-with-nonuniform-grid} is
+%\begin{align}
+%\mathcal{A} \tilde{v}(z_1) &\approx \left(-\frac{\mu_1^{-}}{\Delta_{1,+}} +\frac{\sigma_1^2}{2 \Delta_{1,+}^2}\right)\tilde{v}_0 + \left(\frac{\mu_1^{-} - \mu_1^{+}}{\Delta_{1,+}}-\frac{\sigma_1^2}{\Delta_{1,+}^2}\right) \tilde{v}_1 + \left(\frac{\mu_1^{+}}{\Delta_{1,+}} + \frac{\sigma_1^2}{2 \Delta_{1,+}^2}\right)\tilde{v}_2\label{eq:A-collected-with-nonuniform-grid-left}\\
+%\end{align}
+If the boundary value is $\xi\tilde{v}(0,t) + \D[z]\tilde{v}(0,t )= 0$, use the backward difference approximation $\tilde{v}'(z_i) \approx \frac{\tilde{v}_i-\tilde{v}_{i-1}}{\Delta_{i,-}}$.  Then substituting into the boundary condition we get
 \begin{align}
-\mathcal{A} \tilde{v}(z_1) &\approx \left(-\frac{\mu_1^{-}}{\Delta_{1,+}} +\frac{\sigma_1^2}{2 \Delta_{1,+}^2}\right)\tilde{v}_0 + \left(\frac{\mu_1^{-} - \mu_1^{+}}{\Delta_{1,+}}-\frac{\sigma_1^2}{\Delta_{1,+}^2}\right) \tilde{v}_1 + \left(\frac{\mu_1^{+}}{\Delta_{1,+}} + \frac{\sigma_1^2}{2 \Delta_{1,+}^2}\right)\tilde{v}_2\label{eq:A-collected-with-nonuniform-grid-left}\\
-\intertext{If the boundary value is $\tilde{v}'(\underline{z}) = 0$, take \cref{eq:A-collected-with-nonuniform-grid-left} and use $v'(\underline{z}) \approx \frac{\tilde{v}_1-\tilde{v}_0}{\Delta_{1,-}} +\tilde{v}_1= 0, \implies \tilde{v}_0 = \tilde{v}_1(1+\Delta_{1,-})$, so}
- &\approx \left(\underbrace{\left(\frac{-\mu_1^{-}}{\Delta_{1,-}} +\frac{\sigma_1^2}{\Delta_{1,-}(\Delta_{1,+}+\Delta_{1,-})}\right)}_{\equiv X_1}(1+\Delta_{1,-}) + \underbrace{\left(\mu_1^{-} - \frac{\mu_1^{+}}{\Delta_{1,+}}-\frac{\sigma_1^2}{\Delta_{1,+}\Delta_{1,-}}\right)}_{\equiv Y_1}\right)\tilde{v}_1 + \nonumber\\
- & \underbrace{\left(\frac{\mu_1^{+}}{\Delta_{1,+}} + \frac{\sigma_1^2}{2 \Delta_{1,+}\Delta_{1,-}}\right)}_{\equiv Z_1}\tilde{v}_2\label{eq:reflecting-left-nonuniform}
+0 = \xi\tilde{v}(0,t) + \D[z]\tilde{v}(0,t ) &\approx \xi \tilde{v}_1 + \frac{\tilde{v}_1-\tilde{v}_0}{\Delta_{1,-}}\\
+\intertext{Rearrange, use $\Delta_{1,-} = \Delta_{1,+}$, and solve for $\tilde{v}_0$,}
+\tilde{v}_0 &= (1 + \xi \Delta_{1,+})\tilde{v}_1\label{eq:rescaled-bc-sub}\\
+\intertext{Now, take \cref{eq:A-collected-interior-with-nonuniform-grid}, and remember that given a $\tilde{v}_0$ the function is well defined under the assumption that $\Delta_{1,-} = \Delta_{1,+}$}
+\mathcal{A} \tilde{v}(z_1) &\approx X_1 \tilde{v}_0 + Y_1 \tilde{v}_1 + Z_1 \tilde{v}_2
+\intertext{Substitute in \cref{eq:rescaled-bc-sub} to get}
+\mathcal{A} \tilde{v}(z_1) &\approx \left((1 + \xi \Delta_{1,+})X_1 + Y_1\right) \tilde{v}_1 + Z_1 \tilde{v}_2\label{eq:reflecting-left-nonuniform}
+%\intertext{Substitute this into \cref{eq:A-collected-with-nonuniform-grid-left}}
+% &\approx \left(\underbrace{\left(\frac{-\mu_1^{-}}{\Delta_{1,-}} +\frac{\sigma_1^2}{\Delta_{1,-}(\Delta_{1,+}+\Delta_{1,-})}\right)}_{\equiv X_1}(1+\Delta_{1,-}) + \underbrace{\left(\mu_1^{-} - \frac{\mu_1^{+}}{\Delta_{1,+}}-\frac{\sigma_1^2}{\Delta_{1,+}\Delta_{1,-}}\right)}_{\equiv Y_1}\right)\tilde{v}_1 + \nonumber\\
+% & \underbrace{\left(\frac{\mu_1^{+}}{\Delta_{1,+}} + \frac{\sigma_1^2}{2 \Delta_{1,+}\Delta_{1,-}}\right)}_{\equiv Z_1}\tilde{v}_2\label{eq:reflecting-left-nonuniform}
 \end{align}
+So from \cref{eq:reflecting-left-nonuniform} the top left corner of $A$ matrix is now $\left((1 + \xi \Delta_{1,+})X_1 + Y_1\right)$.  Note that this nests the typical reflecting barrier since if the scaling is $e^{0} = 1$, then the corner, is $X_1 + Y_1$, matches the standard reflecting barrier without rescaling.
 
-\paragraph{Boundary Value at $\bar{z}$:}
-As $i=I$, given the ``ghost node'' $z_{I+1}$, and the assumption  $\Delta_{I,+} = \Delta_{I,-}$, from \cref{eq:A-collected-interior-with-nonuniform-grid}:
+\paragraph{Boundary Value at $\bar{z}$}
+If the boundary value is $\xi\tilde{v}(\bar{z},t) + \D[z]\tilde{\bar{z}}(0,t )= 0$, use the forward difference approximation $\tilde{v}'(z_i) \approx \frac{\tilde{v}_{i+1}-\tilde{v}_{i}}{\Delta_{i,+}}$.  Then substituting into the boundary condition we get
 \begin{align}
-\mathcal{A}  \tilde{v}(x_I)&\approx \left(-\frac{\mu_I^{-}}{\Delta_{I,-}} +\frac{\sigma_I^2}{2 \Delta_{I,-}^2}\right)\tilde{v}_{I-1} + \left(\frac{\mu_I^{-} - \mu_I^{+}}{\Delta_{I,-}}-\frac{\sigma_I^2}{\Delta_{I,-}^2}\right)\tilde{v}_I + \left(\frac{\mu_I^{+}}{\Delta_{I,-}} + \frac{\sigma_I^2}{2 \Delta_{I,-}^2}\right)\tilde{v}_{I+1}\\
-\intertext{For a reflecting barrier, the boundary value $v'(\bar{z}) \approx \frac{\tilde{v}_{I+1}-\tilde{v}_I}{\Delta_{I,+}}+\tilde{v}_{I} = 0, \implies \tilde{v}_{I+1} = (1-\Delta_{I,+})\tilde{v}_I$,}
-&\approx \underbrace{\left(-\frac{\mu_I^{-}}{\Delta_{I,-}} +\frac{\sigma_I^2}{\Delta_{I,-}(\Delta_{I,+}+\Delta_{I,-})}\right)}_{\equiv X_I} \tilde{v}_{I-1}\nonumber\\
-&+ \left(\underbrace{\left(\frac{\mu_I^{-}}{\Delta_{I,-}} - \frac{\mu_I^{+}}{\Delta_{I,+}}-\frac{\sigma_I^2}{\Delta_{I,-}\Delta_{I,+}}\right)}_{\equiv Y_I} + \underbrace{\left(\frac{\mu_I^{+}}{\Delta_{I,+}} + \frac{\sigma_I^2}{\Delta_{I,+}(\Delta_{I,+}+\Delta_{I,-})}\right)}_{\equiv Z_I}(1-\Delta_{I,+}) \right) \tilde{v}_I \label{eq:reflecting-right-nonuniform}
+0 = \xi\tilde{v}(\bar{z},t) + \D[z]\tilde{v}(\bar{z},t ) &\approx \xi \tilde{v}_I + \frac{\tilde{v}_{I+1}-\tilde{v}_I}{\Delta_{I,+}}\\
+\intertext{Rearrange and solve for $\tilde{v}_0$ and use $\Delta_{I,+} = \Delta_{I,-}$,}
+\tilde{v}_{I+1} &= (1 - \xi \Delta_{I,-})\tilde{v}_I\label{eq:rescaled-bc-sub-right}\\
+\intertext{Now, take \cref{eq:A-collected-interior-with-nonuniform-grid}, and remember that given a $\tilde{v}_{I+1}$ the function is well defined under the assumption that $\Delta_{I,-} = \Delta_{I,+}$}
+\mathcal{A} \tilde{v}(z_I) &\approx X_1 \tilde{v}_{I-1} + Y_1 \tilde{v}_I + Z_1 \tilde{v}_{I+1}
+\intertext{Substitute in \cref{eq:rescaled-bc-sub-right} to get}
+\mathcal{A} \tilde{v}(z_I) &\approx X_I \tilde{v}_{I-1} + \left(Y_I + (1 - \xi \Delta_{I,-})Z_I\right) \tilde{v}_I\label{eq:reflecting-right-nonuniform}
 \end{align}
+So from \cref{eq:reflecting-right-nonuniform} the bottom right corner of $A$ matrix is now $\left(Y_I + (1 - \xi \Delta_{I,-})Z_I\right)$.  Note that this nests the typical reflecting barrier since if the scaling is $e^{0} = 1$, then the corner, is $X_1 + Y_1$, matches the standard reflecting barrier without rescaling.
+
+%Can remove if we think the above is correct
+% \paragraph{Boundary Value at $\bar{z}$:}
+% As $i=I$, given the ``ghost node'' $z_{I+1}$, and the assumption  $\Delta_{I,+} = \Delta_{I,-}$, from \cref{eq:A-collected-interior-with-nonuniform-grid}:
+% \begin{align}
+% \mathcal{A}  \tilde{v}(x_I)&\approx \left(-\frac{\mu_I^{-}}{\Delta_{I,-}} +\frac{\sigma_I^2}{2 \Delta_{I,-}^2}\right)\tilde{v}_{I-1} + \left(\frac{\mu_I^{-} - \mu_I^{+}}{\Delta_{I,-}}-\frac{\sigma_I^2}{\Delta_{I,-}^2}\right)\tilde{v}_I + \left(\frac{\mu_I^{+}}{\Delta_{I,-}} + \frac{\sigma_I^2}{2 \Delta_{I,-}^2}\right)\tilde{v}_{I+1}\\
+% \intertext{For a reflecting barrier, the boundary value $v'(\bar{z}) \approx \frac{\tilde{v}_{I+1}-\tilde{v}_I}{\Delta_{I,+}}+\tilde{v}_{I} = 0, \implies \tilde{v}_{I+1} = (1-\Delta_{I,+})\tilde{v}_I$,}
+% &\approx \underbrace{\left(-\frac{\mu_I^{-}}{\Delta_{I,-}} +\frac{\sigma_I^2}{\Delta_{I,-}(\Delta_{I,+}+\Delta_{I,-})}\right)}_{\equiv X_I} \tilde{v}_{I-1}\nonumber\\
+% &+ \left(\underbrace{\left(\frac{\mu_I^{-}}{\Delta_{I,-}} - \frac{\mu_I^{+}}{\Delta_{I,+}}-\frac{\sigma_I^2}{\Delta_{I,-}\Delta_{I,+}}\right)}_{\equiv Y_I} + \underbrace{\left(\frac{\mu_I^{+}}{\Delta_{I,+}} + \frac{\sigma_I^2}{\Delta_{I,+}(\Delta_{I,+}+\Delta_{I,-})}\right)}_{\equiv Z_I}(1-\Delta_{I,+}) \right) \tilde{v}_I \label{eq:reflecting-right-nonuniform}
+% \end{align}
 
 \paragraph{Discretization Operator:} Apply the boundary conditions at the corner of discretization matrix at each time step $n$:
 
 \begin{align}
 		A^n &\equiv \begin{bmatrix}
-	X_{1}^n(1+\Delta_{1,-})+Y_1^n & Z_1^n & 0 & \ldots & \ldots & \ldots & 0\\
+	X_{1}^n(1+\xi\Delta_{1,+})+Y_1^n & Z_1^n & 0 & \ldots & \ldots & \ldots & 0\\
 	X^n_2 & Y^n_2 & Z^n_2 & 0 & 0 & \ldots & 0\\
 	\vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots\\		
 	0 & 0 & 0 & \ldots & X^n_{I-1} & Y^n_{I-1} & Z^n_{I-1}\\
-	0 & \ldots & \ldots & \ldots & 0 & X_I^n & Y_I^n+Z_I^n(1-\Delta_{I,+})
+	0 & \ldots & \ldots & \ldots & 0 & X_I^n & Y_I^n+Z_I^n(1-\xi\Delta_{I,-})
 \end{bmatrix}\in\R^{I\times I}\label{eq:A-n}
 \end{align}
 
