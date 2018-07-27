@@ -46,9 +46,10 @@
     # Create settings object.
     settings = @with_kw (x = x_grid, T = T_val, π = π_func, g = g_func)
 
-
     # Calculate residuals. 
-    resid= calculate_residuals(params_func, settings())
+    resid = calculate_residuals(params_func, settings())
+    @show resid # Need this one for now, I think. 
 
-    # Show the residual vector. 
-    @show resid
+    # Test the stationary residual is close to zero.
+    resid2 = calculate_residuals(params_func, settings(g = t -> g_stationary))
+    @test norm(resid2) ≈ 0 atol = 1e-10
