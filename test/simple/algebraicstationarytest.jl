@@ -1,8 +1,3 @@
-# Unit testing for the algebraic stationary solution, simple model. 
-
-using Base.Test
-using PerlaTonettiWaugh
-
 # Generate default parameters. 
 simple_algebraic_params = @with_kw (γ = 0.005, σ = 0.02, α = 2.1, r = 0.05, ζ = 14.5)
 

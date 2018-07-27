@@ -1,7 +1,9 @@
 julia 0.6
+NLsolve
 DifferentialEquations
 NamedTuples
 BandedMatrices
 Sundials
-Parameters 0.9.1
 Distributions
+Roots
+Parameters 0.9.1

@@ -1,5 +1,3 @@
-using Distributions
-
 # New method, accepts a Distribution
 function irregulartrapezoidweights(z, d::Distributions.UnivariateDistribution)
     #= 

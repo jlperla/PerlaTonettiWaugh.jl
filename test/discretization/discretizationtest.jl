@@ -1,10 +1,6 @@
-using PerlaTonettiWaugh, Base.Test, BandedMatrices
-
-include("../../src/diffusionoperators.jl")
-
 ## REGULAR DISCRETIZATION
 σ = 1; μ = -1;
-x, L_1_minus, L_1_plus, L_2 = diffusionoperators(1:5)
+x, L_1_minus, L_1_plus, L_2 = diffusionoperators(1:5) # Dispatches on the discrete code. 
 row1 = [-0.5, 0.5, 0.0, 0.0, 0.0]'
 row2 = [1.5, -2.0, 0.5, 0.0, 0.0]'
 row3 = [0.0, 1.5, -2.0, 0.5, 0.0]'

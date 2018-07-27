@@ -1,6 +1,4 @@
 # Numerically solve for the stationary solution as a system of equatoins.  
-using BandedMatrices, NamedTuples, Roots, Parameters
-
 function stationary_numerical_simple(params, z)
     M = length(z)
     # Unpack parameters. 
