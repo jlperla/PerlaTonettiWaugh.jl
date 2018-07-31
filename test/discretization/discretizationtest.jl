@@ -11,7 +11,7 @@ x_irregular = [1, 2, 3, 4, 5] # This is an AbstractArray and not a Range, so it 
 
 σ = 1; μ = -1;
 x, L_1_minus, L_1_plus, L_2 = rescaled_diffusionoperators(x_uniform,ξ_1) # Dispatches on the discrete code. 
-row1 = [-1 + (1+ξ_1) + (-2+1-ξ_1)/2 , 0.5, 0.0, 0.0, 0.0]'
+row1 = [-1 + (1+ξ_1) + (-2+1+ξ_1)/2 , 0.5, 0.0, 0.0, 0.0]'
 row2 = [1.5, -2.0, 0.5, 0.0, 0.0]'
 row3 = [0.0, 1.5, -2.0, 0.5, 0.0]'
 row4 = [0.0, 0.0, 1.5, -2.0, 0.5]'
@@ -21,7 +21,7 @@ row5 = [0.0, 0.0, 0.0, 1.5, -1 + (-2 + 1-ξ_1)/2]'
 # Test irregular grid function produce proper regular grid
 σ = 1; μ = -1;
 x, L_1_minus, L_1_plus, L_2 = rescaled_diffusionoperators(x_irregular,ξ_1) # Dispatches on the discrete code. 
-row1 = [-1 + (1+ξ_1) + (-2+1-ξ_1)/2 , 0.5, 0.0, 0.0, 0.0]'
+row1 = [-1 + (1+ξ_1) + (-2+1+ξ_1)/2 , 0.5, 0.0, 0.0, 0.0]'
 row2 = [1.5, -2.0, 0.5, 0.0, 0.0]'
 row3 = [0.0, 1.5, -2.0, 0.5, 0.0]'
 row4 = [0.0, 0.0, 1.5, -2.0, 0.5]'
@@ -30,7 +30,7 @@ row5 = [0.0, 0.0, 0.0, 1.5, -1 + (-2 + 1-ξ_1)/2]'
 # Uniform ... ξ_2. 
 σ = 1; μ = -1;
 x, L_1_minus, L_1_plus, L_2 = rescaled_diffusionoperators(x_uniform,ξ_2) # Dispatches on the discrete code. 
-row1 = [-1 + (1+ξ_2) + (-2+1-ξ_2)/2 , 0.5, 0.0, 0.0, 0.0]'
+row1 = [-1 + (1+ξ_2) + (-2+1+ξ_2)/2 , 0.5, 0.0, 0.0, 0.0]'
 row2 = [1.5, -2.0, 0.5, 0.0, 0.0]'
 row3 = [0.0, 1.5, -2.0, 0.5, 0.0]'
 row4 = [0.0, 0.0, 1.5, -2.0, 0.5]'
@@ -39,7 +39,7 @@ row5 = [0.0, 0.0, 0.0, 1.5, -1 + (-2 + 1-ξ_2)/2]'
 # Irregular ... ξ_2.  
 σ = 1; μ = -1;
 x, L_1_minus, L_1_plus, L_2 = rescaled_diffusionoperators(x_irregular,ξ_2) # Dispatches on the discrete code. 
-row1 = [-1 + (1+ξ_2) + (-2+1-ξ_2)/2 , 0.5, 0.0, 0.0, 0.0]'
+row1 = [-1 + (1+ξ_2) + (-2+1+ξ_2)/2 , 0.5, 0.0, 0.0, 0.0]'
 row2 = [1.5, -2.0, 0.5, 0.0, 0.0]'
 row3 = [0.0, 1.5, -2.0, 0.5, 0.0]'
 row4 = [0.0, 0.0, 1.5, -2.0, 0.5]'
