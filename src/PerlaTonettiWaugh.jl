@@ -15,6 +15,6 @@ include("simple/calculate_residuals.jl")
 # Full model. 
 include("full/algebraicstationary.jl") # Includes params.
 
-export f!, diffusionoperators, simpleODEproblem, simpleDAEproblem, simpledynamicODEproblem, @with_kw, @unpack, stationary_algebraic_simple, stationary_numerical_simple, irregulartrapezoidweights, calculate_residuals
+export f!, diffusionoperators, simpleODEproblem, simpleDAEproblem, simpledynamicODEproblem, @with_kw, @unpack, stationary_algebraic_simple, stationary_numerical_simple, irregulartrapezoidweights, calculate_residuals, rescaled_diffusionoperators
 
 end # module

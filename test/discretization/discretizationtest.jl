@@ -5,12 +5,46 @@
 ξ_1 = 1.0 
 ξ_2 = 2.0
 x_uniform = 1:5 
-x_irregular = [1, 2.2, 3, 4, 5]
+x_irregular = [1, 2, 3, 4, 5] # This is an AbstractArray and not a Range, so it calls the right method. 
 
 # Test for uniform grid code, ξ_1.
+
+σ = 1; μ = -1;
+x, L_1_minus, L_1_plus, L_2 = rescaled_diffusionoperators(x_uniform,ξ_1) # Dispatches on the discrete code. 
+row1 = [-1 + (1+ξ_1) + (-2+1-ξ_1)/2 , 0.5, 0.0, 0.0, 0.0]'
+row2 = [1.5, -2.0, 0.5, 0.0, 0.0]'
+row3 = [0.0, 1.5, -2.0, 0.5, 0.0]'
+row4 = [0.0, 0.0, 1.5, -2.0, 0.5]'
+row5 = [0.0, 0.0, 0.0, 1.5, -1 + (-2 + 1-ξ_1)/2]'
+@test μ * L_1_minus + σ^2/2 * L_2 == cat(1, row1, row2, row3, row4, row5) # only test for backwards now
 # Test for irregular grid code, ξ_1. 
+# Test irregular grid function produce proper regular grid
+σ = 1; μ = -1;
+x, L_1_minus, L_1_plus, L_2 = rescaled_diffusionoperators(x_irregular,ξ_1) # Dispatches on the discrete code. 
+row1 = [-1 + (1+ξ_1) + (-2+1-ξ_1)/2 , 0.5, 0.0, 0.0, 0.0]'
+row2 = [1.5, -2.0, 0.5, 0.0, 0.0]'
+row3 = [0.0, 1.5, -2.0, 0.5, 0.0]'
+row4 = [0.0, 0.0, 1.5, -2.0, 0.5]'
+row5 = [0.0, 0.0, 0.0, 1.5, -1 + (-2 + 1-ξ_1)/2]'
+@test μ * L_1_minus + σ^2/2 * L_2 == cat(1, row1, row2, row3, row4, row5) # only test for backwards now
 # Uniform ... ξ_2. 
+σ = 1; μ = -1;
+x, L_1_minus, L_1_plus, L_2 = rescaled_diffusionoperators(x_uniform,ξ_2) # Dispatches on the discrete code. 
+row1 = [-1 + (1+ξ_2) + (-2+1-ξ_2)/2 , 0.5, 0.0, 0.0, 0.0]'
+row2 = [1.5, -2.0, 0.5, 0.0, 0.0]'
+row3 = [0.0, 1.5, -2.0, 0.5, 0.0]'
+row4 = [0.0, 0.0, 1.5, -2.0, 0.5]'
+row5 = [0.0, 0.0, 0.0, 1.5, -1 + (-2 + 1-ξ_2)/2]'
+@test μ * L_1_minus + σ^2/2 * L_2 == cat(1, row1, row2, row3, row4, row5) # only test for backwards now
 # Irregular ... ξ_2.  
+σ = 1; μ = -1;
+x, L_1_minus, L_1_plus, L_2 = rescaled_diffusionoperators(x_irregular,ξ_2) # Dispatches on the discrete code. 
+row1 = [-1 + (1+ξ_2) + (-2+1-ξ_2)/2 , 0.5, 0.0, 0.0, 0.0]'
+row2 = [1.5, -2.0, 0.5, 0.0, 0.0]'
+row3 = [0.0, 1.5, -2.0, 0.5, 0.0]'
+row4 = [0.0, 0.0, 1.5, -2.0, 0.5]'
+row5 = [0.0, 0.0, 0.0, 1.5, -1 + (-2 + 1-ξ_2)/2]'
+@test μ * L_1_minus + σ^2/2 * L_2 == cat(1, row1, row2, row3, row4, row5) # only test for backwards now
 
 # Test for error handling on ξ (i.e., if ξ can't be negative or is bounded or something like that) for each method. 
 # Test for proper dispatch (i.e., type of the first return from uniform is a Range).
