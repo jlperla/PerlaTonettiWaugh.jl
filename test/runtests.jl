@@ -1,5 +1,5 @@
 using PerlaTonettiWaugh, Base.Test
-using Distributions, Sundials, BenchmarkTools, QuantEcon, Interpolations, Parameters, NamedTuples, NLsolve
+using Distributions, Sundials, BenchmarkTools, QuantEcon, Interpolations, Parameters, NamedTuples, NLsolve, Plots
 
 tic()
 @time @testset "Analytical Simple Stationary" begin include("simple/algebraicstationarytest.jl") end

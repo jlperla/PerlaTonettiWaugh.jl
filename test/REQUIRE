@@ -1,7 +1,6 @@
 BenchmarkTools
 Hiccup
-Plots
-NLsolve
+NLsolve 0.7 2.0
 Sundials
 Parameters
 BandedMatrices
@@ -10,3 +9,4 @@ Interpolations
 QuantEcon
 NamedTuples
 Distributions
+Plots

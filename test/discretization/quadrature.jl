@@ -5,7 +5,6 @@ pdf1 = x -> pdf(testDist1, x)
 
 z = linspace(-1.5, 1.5, 1000) # Grid of 1000 uniform points 
 
-@test_warn "This is an older method that isn't as robust; use (::AbstractVector, ::UnivariateDistribution instead.)" omega = irregulartrapezoidweights(z, pdf1)
 omega_prime = irregulartrapezoidweights(z, testDist1)
 h = x -> (x-0)^2
 E_val_prime = dot(h.(z), omega_prime)
@@ -18,7 +17,6 @@ testDist2 = Truncated(Exponential(λ), 0, ubound)
 pdf2 = x -> pdf(testDist2, x)
 k = ubound/λ
 z = collect(linspace(0, 3.0, 1000))
-@test_warn "This is an older method that isn't as robust; use (::AbstractVector, ::UnivariateDistribution instead.)" omega = irregulartrapezoidweights(z, pdf2)
 omega_prime = irregulartrapezoidweights(z, testDist2)
 
     # Test mean

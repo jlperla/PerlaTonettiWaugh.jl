@@ -3,7 +3,7 @@
 =#
 
     # DAE with time-varying objects. 
-    function simpleDAEproblem(params::NamedTuple, x::AbstractArray)
+    function simpleDAEproblem(params, x)
         # Unpack parameters. 
         @unpack ρ, c̃, μ̃, σ̃, T = params
 
@@ -60,7 +60,7 @@
 =# 
 
     # ODE with constant parameters.
-    function simpleODEproblem(params::NamedTuple, x::AbstractArray)
+    function simpleODEproblem(params, x)
         # Unpack params. 
         @unpack ρ, c̃, μ̃, σ̃, T = params 
 
