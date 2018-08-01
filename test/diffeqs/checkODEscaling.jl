@@ -32,8 +32,7 @@ Test on reascaling method and make comparison
         # Do the conversion
         v_rescale = v_tild.* exp.(ξ*x)
         # Check for absolute similarity (norms, etc.)
-        @show norm(v-v_rescale)
-        @show norm(v-v_rescale,Inf)
+        @test_broken norm(v-v_rescale,Inf) ≈ 0.0 atol = 1e-2
 
         # Check for greater stability with the rescaled problem. 
         x_alt = linspace(x_min,x_max,M+100)
@@ -47,23 +46,23 @@ Test on reascaling method and make comparison
         
         # test the pre-conversion difference of v_tild
         v_int_tild=LinInterp(x, v_tild)
-        @show norm(v_tild_alt-v_int_tild.(x_alt))
+        @test norm(v_tild_alt-v_int_tild.(x_alt)) ≈ 0.0 atol = 3e-1
 
         # conversion to v
         v_rescale_alt = v_tild_alt.*exp.(ξ*x_alt)
         v_int=LinInterp(x, v_rescale)
-        @show norm(v_rescale_alt-v_int.(x_alt))
+        @test_broken norm(v_rescale_alt-v_int.(x_alt)) ≈ 0.0 atol = 1e-2
 
         # use the ordinary method
         x_alt, L_1, L_1_plus, L_2 = diffusionoperators(x_alt) # Regular code. 
         L_T = r*I - μ_val2*L_1 - σ_val2^2/2 * L_2 # Construct the aggregate operator. 
         v_alt = L_T \ π(ξ).(x_alt) # Solution to the differential equation. 
         v_int_old=LinInterp(x, v)
-        @show norm(v_alt-v_int_old.(x_alt))
+        @test_broken norm(v_alt-v_int_old.(x_alt)) ≈ 0.0 atol = 1e-2
 
         # Plot of v 
-        plot(x,v_tild)
-        plot!(x_alt,v_tild_alt)
+        #plot(x,v_tild)
+        #plot!(x_alt,v_tild_alt)
 
     #Tests for stability of irregular grid
         x_irregular=unique([linspace(x_min, 1.0, 500)' linspace(1.0, x_max, 201)'])
@@ -100,9 +99,9 @@ Test on reascaling method and make comparison
         v_int2=LinInterp(x_irregular_add2, v_tild_irregular_add2)
         v_int3=LinInterp(x_irregular_add3, v_tild_irregular_add3)
 
-        @show norm(v_int1.(x_irregular)-v_tild_irregular,Inf)
-        @show norm(v_int2.(x_irregular)-v_tild_irregular,Inf)
-        @show norm(v_int3.(x_irregular)-v_tild_irregular,Inf)
+        @test norm(v_int1.(x_irregular)-v_tild_irregular,Inf)≈ 0.0 atol = 1e-2
+        @test norm(v_int2.(x_irregular)-v_tild_irregular,Inf)≈ 0.0 atol = 1e-2
+        @test norm(v_int3.(x_irregular)-v_tild_irregular,Inf)≈ 0.0 atol = 3e-1
 
         plot(x_irregular,v_tild_irregular)
         plot!(x_irregular_add1,v_tild_irregular_add1)
@@ -114,11 +113,10 @@ Test on reascaling method and make comparison
         v_rescale_irr_add2 = v_int2.(x_irregular).*exp.(ξ*x_irregular)
         v_rescale_irr_add3 = v_int3.(x_irregular).*exp.(ξ*x_irregular)
 
-        @show norm(v_rescale_irr-v_rescale_irr_add1,Inf)
-        @show norm(v_rescale_irr-v_rescale_irr_add2,Inf)
-        @show norm(v_rescale_irr-v_rescale_irr_add3,Inf)
+        @test norm(v_rescale_irr-v_rescale_irr_add1,Inf)≈ 0.0 atol = 1e-2
 
         # For the 3rd case
         indx=maximum(find(x_irregular.<=4))
-        @show norm(v_int3.(x_irregular[1:indx])-v_tild_irregular[1:indx],Inf)
+        @test norm(v_int2.(x_irregular[1:indx])-v_tild_irregular[1:indx],Inf)≈ 0.0 atol = 1e-2
+        @test norm(v_int3.(x_irregular[1:indx])-v_tild_irregular[1:indx],Inf)≈ 0.0 atol = 1e-2
         
