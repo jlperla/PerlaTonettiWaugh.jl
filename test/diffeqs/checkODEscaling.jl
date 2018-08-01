@@ -108,3 +108,12 @@ Test on reascaling method and make comparison
         plot!(x_irregular_add1,v_tild_irregular_add1)
         plot!(x_irregular_add2,v_tild_irregular_add2)
         plot!(x_irregular_add3,v_tild_irregular_add3)
+
+        v_rescale_irr = v_tild_irregular.*exp.(ξ*x_irregular)
+        v_rescale_irr_add1 = v_int1.(x_irregular).*exp.(ξ*x_irregular)
+        v_rescale_irr_add2 = v_int2.(x_irregular).*exp.(ξ*x_irregular)
+        v_rescale_irr_add3 = v_int3.(x_irregular).*exp.(ξ*x_irregular)
+
+        @show norm(v_rescale_irr-v_rescale_irr_add1)
+        @show norm(v_rescale_irr-v_rescale_irr_add2)
+        @show norm(v_rescale_irr-v_rescale_irr_add3)
