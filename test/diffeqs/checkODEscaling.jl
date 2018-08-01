@@ -114,6 +114,11 @@ Test on reascaling method and make comparison
         v_rescale_irr_add2 = v_int2.(x_irregular).*exp.(ξ*x_irregular)
         v_rescale_irr_add3 = v_int3.(x_irregular).*exp.(ξ*x_irregular)
 
-        @show norm(v_rescale_irr-v_rescale_irr_add1)
-        @show norm(v_rescale_irr-v_rescale_irr_add2)
-        @show norm(v_rescale_irr-v_rescale_irr_add3)
+        @show norm(v_rescale_irr-v_rescale_irr_add1,Inf)
+        @show norm(v_rescale_irr-v_rescale_irr_add2,Inf)
+        @show norm(v_rescale_irr-v_rescale_irr_add3,Inf)
+
+        # For the 3rd case
+        indx=maximum(find(x_irregular.<=4))
+        @show norm(v_int3.(x_irregular[1:indx])-v_tild_irregular[1:indx],Inf)
+        
