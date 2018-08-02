@@ -22,3 +22,8 @@ results = stationary_numerical_simple(simple_numerical_params(), z)
 z = unique([linspace(0.0, 1.0, 1000)' linspace(1.0, 2.0, 60)' linspace(2.0, 10.0, 40)'])
 results = stationary_numerical_simple(simple_numerical_params(), z)
 @test results.g ≈ 0.02123967993879092 # Growth rate 
+
+# a baseline grid z 
+z = unique([linspace(0.0, 1.0, 300)' linspace(1.0, 2.0, 50)' linspace(2.0, 7.0, 50)'])
+results = stationary_numerical_simple(simple_numerical_params(), z)
+@test results.g ≈ 0.0211710310711 # Growth rate 
