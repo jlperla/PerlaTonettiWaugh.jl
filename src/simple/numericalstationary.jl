@@ -15,7 +15,7 @@ function stationary_numerical_simple(params, z)
         μ_tild = γ - g + σ^2*ξ;
         π_tild(z) = 1;
         L_T = r_tild*I - μ_tild*L_1_minus - σ^2/2 * L_2 # Construct the aggregate operator. 
-        v_T = L_T \ π_tild(z) # Solution to the rescaled differential equation. 
+        v_T = L_T \ π_tild.(z) # Solution to the rescaled differential equation. 
 
         diff = v_T[1] + ζ - dot(ω, exp.(ξ.*z).*v_T)
         return diff
@@ -32,6 +32,6 @@ function stationary_numerical_simple(params, z)
     μ_tild = γ - g_T + σ^2*ξ;
     π_tild(z) = 1;
     L_T = r_tild*I - μ_tild*L_1_minus - σ^2/2 * L_2 # Construct the aggregate operator. 
-    v_T = L_T \ π_tild(z) # Solution to the rescaled differential equation. 
+    v_T = L_T \ π_tild.(z) # Solution to the rescaled differential equation. 
     return @NT(g = g_T, v = v_T)
 end 
