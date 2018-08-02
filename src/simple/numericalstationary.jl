@@ -6,7 +6,7 @@ function stationary_numerical_simple(params, z)
 
     # Define the pdf of the truncated exponential distribution
     ourDist = Truncated(Exponential(1/α), z[1], z[end])
-    ω = irregulartrapezoidweights(z, ourDist)
+    ω = irregulartrapezoidweights(z, ourDist).*exp.(ξ.*z)
 
     function stationary_numerical_given_g(g)
         z, L_1_minus, L_1_plus, L_2  = rescaled_diffusionoperators(z, ξ) #Discretize the operator
@@ -17,7 +17,7 @@ function stationary_numerical_simple(params, z)
         L_T = r_tild*I - μ_tild*L_1_minus - σ^2/2 * L_2 # Construct the aggregate operator. 
         v_T = L_T \ π_tild.(z) # Solution to the rescaled differential equation. 
 
-        diff = v_T[1] + ζ - dot(ω, exp.(ξ.*z).*v_T)
+        diff = v_T[1] + ζ - dot(ω, v_T)
         return diff
     end
 
