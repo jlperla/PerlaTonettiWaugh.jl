@@ -17,3 +17,8 @@ results = stationary_numerical_simple(simple_numerical_params(), z)
 z = unique([linspace(0.0, 1.0, 1000)' linspace(1.0, 2.0, 60)' linspace(2.0, 8.0, 40)'])
 results = stationary_numerical_simple(simple_numerical_params(), z)
 @test results.g ≈ 0.0211796240274 # Growth rate 
+
+# Test for change zbar for grid and add points. 
+z = unique([linspace(0.0, 1.0, 1000)' linspace(1.0, 2.0, 60)' linspace(2.0, 10.0, 40)'])
+results = stationary_numerical_simple(simple_numerical_params(), z)
+@test results.g ≈ 0.02123967993879092 # Growth rate 
