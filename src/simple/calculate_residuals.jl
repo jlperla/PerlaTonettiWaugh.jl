@@ -11,7 +11,7 @@ function calculate_residuals(params, settings) # To keep the params consistent w
     ω = irregulartrapezoidweights(x, ourDist)
 
     # Define and solve dynamic ODE. 
-    prob = simpledynamicODEproblem(params, settings)
+    prob = simpleODE(params, settings)
     sol = Sundials.solve(prob, basealgorithm)
     t_vals = sol.t
 

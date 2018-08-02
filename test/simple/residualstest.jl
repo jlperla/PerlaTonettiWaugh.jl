@@ -21,9 +21,10 @@
     ζ_val = 14.5
     r_val = 0.05
     γ_val = 0.005
+    ξ_val = 1 # Rescaling
     
     # Param generators and param NTs. 
-    params = @with_kw (γ = γ_val, r = r_val, ζ = ζ_val, α = α_val, σ = σ_val) # Callable generator. 
+    params = @with_kw (γ = γ_val, r = r_val, ζ = ζ_val, α = α_val, σ = σ_val, ξ = ξ_val) # Callable generator. 
     params_const = params()
     params_func = params(r = r_func, ζ = ζ_func) 
 

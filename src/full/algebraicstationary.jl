@@ -1,16 +1,14 @@
 # Implements the algebraic stationary solution for the full model. Returns the equilibrium quantities (g, Ω, π) determined by equations H.15-H.17.
 
-# Dependencies. 
-include("fullparams.jl")
-
 """
 Function to return the residuals for the equilibrium equations H.15-H.17 in-place, given the values of (g, z, Ω). 
     
 function f!(G, x)
 """
-function f!(G, x; params = fullparams, trace = false)
+
+function f!(G, x; params::NamedTuple = @NT(parameters = :needed), trace = false) 
     # Unpack parameters and inputs. 
-    @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params()
+    @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params
     g = x[1]
     z_hat = x[2]
     Ω = x[3]
