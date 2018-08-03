@@ -1,5 +1,5 @@
 @testset "ODE scaling" begin
-    #= 
+#= 
 Test on reascaling method and make comparison
 =#
     # Parameters
@@ -23,7 +23,7 @@ Test on reascaling method and make comparison
 # New solution. 
     x, L_1_tild, L_1_plus_tild, L_2_tild = rescaled_diffusionoperators(x, ξ)
     # modify r and μ_val2 ,π to match (13)
-    r_tild = r - ξ*μ_val2 - σ_val2^2/2*ξ^2;
+    r_tild = r - ξ*μ_val2 - (σ_val2^2/2)*ξ^2;
     μ_tild = μ_val2 + σ_val2^2*ξ;
     π_tild(x) = 1;
     L_T_tild = r_tild*I - μ_tild*L_1_tild - σ_val2^2/2 * L_2_tild # Construct the aggregate operator. 
@@ -31,7 +31,7 @@ Test on reascaling method and make comparison
 
 # Tests for uniform grid
     # Do the conversion
-    v_rescale = v_tild.* exp.(ξ*x)
+    v_rescale = v_tild .* exp.(ξ*x)
     # Check for absolute similarity (norms, etc.)
     @test_broken norm(v-v_rescale,Inf) ≈ 0.0 atol = 1e-2
 
@@ -47,19 +47,19 @@ Test on reascaling method and make comparison
     
     # test the pre-conversion difference of v_tild
     v_int_tild=LinInterp(x, v_tild)
-    @test norm(v_tild_alt-v_int_tild.(x_alt)) ≈ 0.0 atol = 3e-1
+    @test norm(v_tild_alt-v_int_tild.(x_alt)) ≈ 0.0 atol = 1e-1
 
     # conversion to v
     v_rescale_alt = v_tild_alt.*exp.(ξ*x_alt)
     v_int=LinInterp(x, v_rescale)
-    @test_broken norm(v_rescale_alt-v_int.(x_alt)) ≈ 0.0 atol = 1e-2
+    @test norm(v_rescale_alt-v_int.(x_alt)) ≈ 0.0 atol = 2e-1
 
     # use the ordinary method
     x_alt, L_1, L_1_plus, L_2 = diffusionoperators(x_alt) # Regular code. 
     L_T = r*I - μ_val2*L_1 - σ_val2^2/2 * L_2 # Construct the aggregate operator. 
     v_alt = L_T \ π(ξ).(x_alt) # Solution to the differential equation. 
     v_int_old=LinInterp(x, v)
-    @test_broken norm(v_alt-v_int_old.(x_alt)) ≈ 0.0 atol = 1e-2
+    @test norm(v_alt-v_int_old.(x_alt)) ≈ 0.0 atol = 2e-1
 
 #Tests for stability of irregular grid
     x_irregular=unique([linspace(x_min, 1.0, 500)' linspace(1.0, x_max, 201)'])

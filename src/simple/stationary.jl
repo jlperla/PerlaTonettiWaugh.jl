@@ -25,8 +25,7 @@ function stationary_numerical_simple(params, z)
     ω = irregulartrapezoidweights(z, ourDist).*exp.(ξ.*z)
 
     function stationary_numerical_given_g(g)
-        z, L_1_minus, L_1_plus, L_2  = rescaled_diffusionoperators(z, ξ) #Discretize the operator
-
+        x, L_1_minus, L_1_plus, L_2 = rescaled_diffusionoperators(z, ξ) #Discretize the operator
         r_tild = r - g - ξ*(γ - g) - σ^2/2*ξ^2;
         μ_tild = γ - g + σ^2*ξ;
         π_tild(z) = 1;

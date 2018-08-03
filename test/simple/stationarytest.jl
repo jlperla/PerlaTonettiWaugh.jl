@@ -20,7 +20,7 @@ results_num2 = stationary_numerical_simple(simple_params(), z)
 @test results_num2.g ≈ 0.021404753523204 atol = 1e-2 # Growth rate 
 
 # Test approximateness on the value function. 
-@test_broken norm(results_num1.v - results_algebraic.v.(z1)) atol = 1e-6
+@test norm(results_num1.v.*exp.(ξ*z1) - results_algebraic.v.(z1), Inf) ≈ 0 atol = 1e-6
 
 # Test for change zbar for grid and add points.
 z = unique([linspace(0.0, 1.0, 1000)' linspace(1.0, 2.0, 60)' linspace(2.0, 8.0, 40)'])
