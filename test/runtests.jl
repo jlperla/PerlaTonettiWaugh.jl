@@ -7,6 +7,3 @@ tic()
 @time @testset "Discretization and Rescaling Tests" begin include("discretizationtest.jl") end 
 @time @testset "Residuals/Dynamic ODE Tests" begin include("simple/residualstest.jl") end 
 toc()
-
-
-
