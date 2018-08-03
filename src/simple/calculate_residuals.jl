@@ -1,14 +1,13 @@
 # This function calculatesthe residual at all points given on g.
 function calculate_residuals(params, settings) # To keep the params consistent with other tuples. 
     # Setup
-    @unpack γ, σ, α, r, ζ = params
+    @unpack γ, σ, α, r, ζ, ξ = params
     @unpack x, g, T, π = settings 
     # Solver setting 
     basealgorithm = CVODE_BDF()
 
     # Quadrature weighting
-    ourDist = Truncated(Exponential(1/α), x[1], x[end])
-    ω = irregulartrapezoidweights(x, ourDist)
+    ω = ω_weights(x, α, ξ)
 
     # Define and solve dynamic ODE. 
     prob = simpleODE(params, settings)

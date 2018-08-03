@@ -21,8 +21,7 @@ function stationary_numerical_simple(params, z)
     @unpack γ, σ, α, r, ζ, ξ = params
 
     # Define the pdf of the truncated exponential distribution
-    ourDist = Truncated(Exponential(1/α), z[1], z[end])
-    ω = irregulartrapezoidweights(z, ourDist).*exp.(ξ.*z)
+    ω = ω_weights(z, α, ξ)
 
     function stationary_numerical_given_g(g)
         x, L_1_minus, L_1_plus, L_2 = rescaled_diffusionoperators(z, ξ) #Discretize the operator

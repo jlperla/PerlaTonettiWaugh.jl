@@ -34,8 +34,7 @@
     g_stationary = result_ns.g # This is the level. 
 
     # Test that this residual is close to 0. 
-    ourDist = Truncated(Exponential(1/α_val), x_grid[1], x_grid[end]) 
-    ω = irregulartrapezoidweights(x_grid, ourDist).* exp.(ξ_val.*x_grid)
+    ω = ω_weights(x_grid, α_val, ξ_val)
     @test result_ns.v[1] + ζ_val - dot(ω, result_ns.v) ≈ 0 atol = 1e-10
 
     # Create the interpolation object of g
