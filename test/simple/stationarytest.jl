@@ -1,5 +1,5 @@
 # Generate default parameters. 
-simple_params = @with_kw (γ = 0.005, σ = 0.02, α = 2.1, r = 0.05, ζ = 14.5, ξ = 1.0)
+simple_params = @with_kw (γ = 0.005, σ = 0.02, α = 2.1, r = 0.05, ζ = 14.5, ξ = 1.0, π_tilde = x -> 1)
 
 # Test them
 results_algebraic = stationary_algebraic_simple(simple_params());

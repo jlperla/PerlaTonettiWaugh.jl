@@ -11,7 +11,7 @@
     t = linspace(0.0, T_val, N) # For interpolation purposes only. 
 
     # Functional parameters. 
-    π_func = (t, x) -> exp(x) # Potentially idiosyncratic. 
+    π_func = (t, x) -> exp.(x) # Potentially idiosyncratic. 
     ζ_func = t -> ζ_val # Not idiosyncratic, per equation (4)
     r_func = t -> r_val # Not idiosyncratic, per intro to doc. 
 
@@ -30,7 +30,7 @@
 
 # Solutions. 
     # Solve for the numerical stationary g_T as test. 
-    result_ns = stationary_numerical_simple(params_const, x_grid)
+    result_ns = stationary_numerical_simple(@NT(γ = γ_val, r = r_val, ζ = ζ_val, α = α_val, σ = σ_val, ξ = 1, π_tilde = x -> 1), x_grid)
     g_stationary = result_ns.g # This is the level. 
 
     # Test that this residual is close to 0. 

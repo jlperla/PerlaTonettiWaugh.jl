@@ -8,7 +8,6 @@ function simpleODE(params, settings)
 
     # Discretize the operator. 
     x, L_1, L_1_plus, L_2 = diffusionoperators(x) # L_1_minus ≡ L_1 is the only one we use. 
-    
 
     #Calculate the stationary solution.
     (γ - g(T)) < 0 || error("γ - g must be strictly negative at all times") # How we validate the upwind scheme. 

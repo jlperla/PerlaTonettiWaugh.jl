@@ -21,36 +21,36 @@ Test on reascaling method and make comparison
     v = L_T \ π(ξ).(x) # Solution to the differential equation. 
 
 # New solution. 
-    x, L_1_tild, L_1_plus_tild, L_2_tild = rescaled_diffusionoperators(x, ξ)
+    x, L_1_tilde, L_1_plus_tilde, L_2_tilde = rescaled_diffusionoperators(x, ξ)
     # modify r and μ_val2 ,π to match (13)
-    r_tild = r - ξ*μ_val2 - (σ_val2^2/2)*ξ^2;
-    μ_tild = μ_val2 + σ_val2^2*ξ;
-    π_tild(x) = 1;
-    L_T_tild = r_tild*I - μ_tild*L_1_tild - σ_val2^2/2 * L_2_tild # Construct the aggregate operator. 
-    v_tild = L_T_tild \ π_tild.(x) # Solution to the rescaled differential equation.        
+    r_tilde = r - ξ*μ_val2 - (σ_val2^2/2)*ξ^2;
+    μ_tilde = μ_val2 + σ_val2^2*ξ;
+    π_tilde(x) = 1;
+    L_T_tilde = r_tilde*I - μ_tilde*L_1_tilde - σ_val2^2/2 * L_2_tilde # Construct the aggregate operator. 
+    v_tilde = L_T_tilde \ π_tilde.(x) # Solution to the rescaled differential equation.        
 
 # Tests for uniform grid
     # Do the conversion
-    v_rescale = v_tild .* exp.(ξ*x)
+    v_rescale = v_tilde .* exp.(ξ*x)
     # Check for absolute similarity (norms, etc.)
     @test_broken norm(v-v_rescale,Inf) ≈ 0.0 atol = 1e-2
 
     # Check for greater stability with the rescaled problem. 
     x_alt = linspace(x_min,x_max,M+100)
-    x_alt, L_1_tild, L_1_plus_tild, L_2_tild = rescaled_diffusionoperators(x_alt, ξ)
+    x_alt, L_1_tilde, L_1_plus_tilde, L_2_tilde = rescaled_diffusionoperators(x_alt, ξ)
     # modify r and μ_val2 ,π to match (13)
-    r_tild = r - ξ*μ_val2 - σ_val2^2/2*ξ^2;
-    μ_tild = μ_val2 + σ_val2^2*ξ;
-    π_tild(x) = 1;
-    L_T_tild = r_tild*I - μ_tild*L_1_tild - σ_val2^2/2 * L_2_tild # Construct the aggregate operator. 
-    v_tild_alt = L_T_tild \ π_tild.(x_alt) # Solution to the rescaled differential equation. 
+    r_tilde = r - ξ*μ_val2 - σ_val2^2/2*ξ^2;
+    μ_tilde = μ_val2 + σ_val2^2*ξ;
+    π_tilde(x) = 1;
+    L_T_tilde = r_tilde*I - μ_tilde*L_1_tilde - σ_val2^2/2 * L_2_tilde # Construct the aggregate operator. 
+    v_tilde_alt = L_T_tilde \ π_tilde.(x_alt) # Solution to the rescaled differential equation. 
     
-    # test the pre-conversion difference of v_tild
-    v_int_tild=LinInterp(x, v_tild)
-    @test norm(v_tild_alt-v_int_tild.(x_alt)) ≈ 0.0 atol = 3e-1
+    # test the pre-conversion difference of v_tilde
+    v_int_tilde=LinInterp(x, v_tilde)
+    @test norm(v_tilde_alt-v_int_tilde.(x_alt)) ≈ 0.0 atol = 3e-1
 
     # conversion to v
-    v_rescale_alt = v_tild_alt.*exp.(ξ*x_alt)
+    v_rescale_alt = v_tilde_alt.*exp.(ξ*x_alt)
     v_int=LinInterp(x, v_rescale)
     @test_broken norm(v_rescale_alt-v_int.(x_alt), Inf) ≈ 0.0 atol = 2e-1
 
@@ -71,36 +71,36 @@ Test on reascaling method and make comparison
     x_irregular_add3=unique([linspace(x_min, 1.0, 500)' linspace(1.0, x_max+1.0, 201)'])
 
     #Rescaling method
-    x_irregular, L_1_tild, L_1_plus_tild, L_2_tild = rescaled_diffusionoperators(x_irregular, ξ)
+    x_irregular, L_1_tilde, L_1_plus_tilde, L_2_tilde = rescaled_diffusionoperators(x_irregular, ξ)
     # modify r and μ_val2 ,π to match (13)
-    r_tild = r - ξ*μ_val2 - σ_val2^2/2*ξ^2;
-    μ_tild = μ_val2 + σ_val2^2*ξ;
-    π_tild(x) = 1;
-    L_T_tild_irregular = r_tild*I - μ_tild*L_1_tild - σ_val2^2/2 * L_2_tild # Construct the aggregate operator. 
-    v_tild_irregular = L_T_tild_irregular \ π_tild.(x_irregular) # Solution to the rescaled differential equation. 
+    r_tilde = r - ξ*μ_val2 - σ_val2^2/2*ξ^2;
+    μ_tilde = μ_val2 + σ_val2^2*ξ;
+    π_tilde(x) = 1;
+    L_T_tilde_irregular = r_tilde*I - μ_tilde*L_1_tilde - σ_val2^2/2 * L_2_tilde # Construct the aggregate operator. 
+    v_tilde_irregular = L_T_tilde_irregular \ π_tilde.(x_irregular) # Solution to the rescaled differential equation. 
     # Use addpoint Grid
-    x_irregular_add1, L_1_tild, L_1_plus_tild, L_2_tild = rescaled_diffusionoperators(x_irregular_add1, ξ)
-    L_T_tild_irregular_add1 = r_tild*I - μ_tild*L_1_tild - σ_val2^2/2 * L_2_tild # Construct the aggregate operator. 
-    v_tild_irregular_add1 = L_T_tild_irregular_add1 \ π_tild.(x_irregular_add1)
+    x_irregular_add1, L_1_tilde, L_1_plus_tilde, L_2_tilde = rescaled_diffusionoperators(x_irregular_add1, ξ)
+    L_T_tilde_irregular_add1 = r_tilde*I - μ_tilde*L_1_tilde - σ_val2^2/2 * L_2_tilde # Construct the aggregate operator. 
+    v_tilde_irregular_add1 = L_T_tilde_irregular_add1 \ π_tilde.(x_irregular_add1)
     # Use addpoint grid in top
-    x_irregular_add2, L_1_tild, L_1_plus_tild, L_2_tild = rescaled_diffusionoperators(x_irregular_add2, ξ)
-    L_T_tild_irregular_add2 = r_tild*I - μ_tild*L_1_tild - σ_val2^2/2 * L_2_tild # Construct the aggregate operator. 
-    v_tild_irregular_add2 = L_T_tild_irregular_add2 \ π_tild.(x_irregular_add2)
+    x_irregular_add2, L_1_tilde, L_1_plus_tilde, L_2_tilde = rescaled_diffusionoperators(x_irregular_add2, ξ)
+    L_T_tilde_irregular_add2 = r_tilde*I - μ_tilde*L_1_tilde - σ_val2^2/2 * L_2_tilde # Construct the aggregate operator. 
+    v_tilde_irregular_add2 = L_T_tilde_irregular_add2 \ π_tilde.(x_irregular_add2)
     # Use change x_max grid 
-    x_irregular_add3, L_1_tild, L_1_plus_tild, L_2_tild = rescaled_diffusionoperators(x_irregular_add3, ξ)
-    L_T_tild_irregular_add3 = r_tild*I - μ_tild*L_1_tild - σ_val2^2/2 * L_2_tild # Construct the aggregate operator. 
-    v_tild_irregular_add3 = L_T_tild_irregular_add3 \ π_tild.(x_irregular_add3)
+    x_irregular_add3, L_1_tilde, L_1_plus_tilde, L_2_tilde = rescaled_diffusionoperators(x_irregular_add3, ξ)
+    L_T_tilde_irregular_add3 = r_tilde*I - μ_tilde*L_1_tilde - σ_val2^2/2 * L_2_tilde # Construct the aggregate operator. 
+    v_tilde_irregular_add3 = L_T_tilde_irregular_add3 \ π_tilde.(x_irregular_add3)
 
     # Interpolaration
-    v_int1=LinInterp(x_irregular_add1, v_tild_irregular_add1)
-    v_int2=LinInterp(x_irregular_add2, v_tild_irregular_add2)
-    v_int3=LinInterp(x_irregular_add3, v_tild_irregular_add3)
+    v_int1=LinInterp(x_irregular_add1, v_tilde_irregular_add1)
+    v_int2=LinInterp(x_irregular_add2, v_tilde_irregular_add2)
+    v_int3=LinInterp(x_irregular_add3, v_tilde_irregular_add3)
 
-    @test norm(v_int1.(x_irregular)-v_tild_irregular,Inf)≈ 0.0 atol = 1e-2
-    @test norm(v_int2.(x_irregular)-v_tild_irregular,Inf)≈ 0.0 atol = 1e-2
-    @test norm(v_int3.(x_irregular)-v_tild_irregular,Inf)≈ 0.0 atol = 3e-1
+    @test norm(v_int1.(x_irregular)-v_tilde_irregular,Inf)≈ 0.0 atol = 1e-2
+    @test norm(v_int2.(x_irregular)-v_tilde_irregular,Inf)≈ 0.0 atol = 1e-2
+    @test norm(v_int3.(x_irregular)-v_tilde_irregular,Inf)≈ 0.0 atol = 3e-1
 
-    v_rescale_irr = v_tild_irregular.*exp.(ξ*x_irregular)
+    v_rescale_irr = v_tilde_irregular.*exp.(ξ*x_irregular)
     v_rescale_irr_add1 = v_int1.(x_irregular).*exp.(ξ*x_irregular)
     v_rescale_irr_add2 = v_int2.(x_irregular).*exp.(ξ*x_irregular)
     v_rescale_irr_add3 = v_int3.(x_irregular).*exp.(ξ*x_irregular)
@@ -109,8 +109,8 @@ Test on reascaling method and make comparison
 
     # For the 3rd case
     indx=maximum(find(x_irregular.<=4))
-    @test norm(v_int2.(x_irregular[1:indx])-v_tild_irregular[1:indx],Inf)≈ 0.0 atol = 1e-2
-    @test norm(v_int3.(x_irregular[1:indx])-v_tild_irregular[1:indx],Inf)≈ 0.0 atol = 1e-2
+    @test norm(v_int2.(x_irregular[1:indx])-v_tilde_irregular[1:indx],Inf)≈ 0.0 atol = 1e-2
+    @test norm(v_int3.(x_irregular[1:indx])-v_tilde_irregular[1:indx],Inf)≈ 0.0 atol = 1e-2
 end 
 
 @testset "Operator discretization" begin
