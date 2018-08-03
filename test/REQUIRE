@@ -1,5 +1,4 @@
 BenchmarkTools
-Hiccup
 NLsolve 
 Sundials
 Parameters
@@ -9,4 +8,3 @@ Interpolations
 QuantEcon
 NamedTuples
 Distributions
-Plots

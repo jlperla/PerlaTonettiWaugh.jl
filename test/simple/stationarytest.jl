@@ -1,5 +1,5 @@
 # Generate default parameters. 
-simple_params = @with_kw (γ = 0.005, σ = 0.02, α = 2.1, r = 0.05, ζ = 14.5, ξ = 1)
+simple_params = @with_kw (γ = 0.005, σ = 0.02, α = 2.1, r = 0.05, ζ = 14.5, ξ = 1.0)
 
 # Test them
 results_algebraic = stationary_algebraic_simple(simple_params());
@@ -21,3 +21,18 @@ results_num2 = stationary_numerical_simple(simple_params(), z)
 
 # Test approximateness on the value function. 
 @test_broken norm(results_num1.v - results_algebraic.v.(z1)) atol = 1e-6
+
+# Test for change zbar for grid and add points.
+z = unique([linspace(0.0, 1.0, 1000)' linspace(1.0, 2.0, 60)' linspace(2.0, 8.0, 40)'])
+results = stationary_numerical_simple(simple_params(), z)
+@test results.g ≈ 0.0211796240274 # Growth rate
+
+# Test for change zbar for grid and add points.
+z = unique([linspace(0.0, 1.0, 1000)' linspace(1.0, 2.0, 60)' linspace(2.0, 10.0, 40)'])
+results = stationary_numerical_simple(simple_params(), z)
+@test results.g ≈ 0.02123967993879092 # Growth rate
+
+# a baseline grid z
+z = unique([linspace(0.0, 1.0, 300)' linspace(1.0, 2.0, 50)' linspace(2.0, 7.0, 50)'])
+results = stationary_numerical_simple(simple_params(), z)
+@test results.g ≈ 0.0211710310711 # Growth rate

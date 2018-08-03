@@ -4,16 +4,16 @@ fullparams = @with_kw (ρ = 0.05, σ = 3.0, N = 10.0, θ = 3.22, γ = 0, d = 5.4
 # Run basic tests. 
 MATLAB_eq = [0.0260, 3.7504, 1.0615] # Equilibrium for default fullparams() from MATLAB.
 init_x = copy(MATLAB_eq)
-@btime result = nlsolve((G, x) ->f!(G, x; params = fullparams()), init_x)
-@btime result = nlsolve((G, x) ->f!(G, x; params = fullparams()), [0.01, 4.3, 2.0])
+@btime result = nlsolve((G, x) -> f!(G, x; params = fullparams()), init_x)
+@btime result = nlsolve((G, x) -> f!(G, x; params = fullparams()), [0.01, 4.3, 2.0])
 
-result = nlsolve(f!(G, x; params = fullparams()), init_x)
+result = nlsolve((G, x) -> f!(G, x; params = fullparams()), init_x)
 @test round.(result.zero, 4) ≈ MATLAB_eq # Test if we're nearby 
-result = nlsolve(f!(G, x; params = fullparams()), [0.01, 4.3, 2.0])
+result = nlsolve((G, x) -> f!(G, x; params = fullparams()), [0.01, 4.3, 2.0])
 @test round.(result.zero, 4) ≈ MATLAB_eq # Test success for a different starting point. 
 
-@test_throws AssertionError nlsolve((G, x) ->f!(G, x; params = fullparams()), [0.01, 2.2, 2.0]) # Test for <0 value failure (low z_hat guess.)
-@test_throws AssertionError nlsolve((G, x) ->f!(G, x; params = fullparams()), [0.01, 2.2, 1.0]) # Another broken test.  
+@test_throws AssertionError nlsolve((G, x) -> f!(G, x; params = fullparams()), [0.01, 2.2, 2.0]) # Test for <0 value failure (low z_hat guess.)
+@test_throws AssertionError nlsolve((G, x) -> f!(G, x; params = fullparams()), [0.01, 2.2, 1.0]) # Another broken test.  
 @test_throws AssertionError nlsolve((G, x) -> f!(G, x; params = fullparams()), [0.01, 2.2, 2.0]; method = :anderson) # Test failure for Anderson.
 
 # Different case (custom params test)

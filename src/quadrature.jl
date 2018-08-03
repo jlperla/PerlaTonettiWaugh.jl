@@ -1,4 +1,3 @@
-# New method, accepts a Distribution
 function irregulartrapezoidweights(x, d)
     #= 
         Notation: z consists of M points z_1, z_2, ..., z_M.  
