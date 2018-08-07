@@ -1,5 +1,5 @@
 #=
-    Rescaling functions. 
+    Discretization code with rescaling. 
 =#
 
 # Regular grids. 
@@ -69,9 +69,6 @@ function rescaled_diffusionoperators(x::AbstractArray, ξ)
     return (x, BandedMatrix(L_1_minus, (1, 1)),BandedMatrix(L_1_plus, (1, 1)), BandedMatrix(L_2, (1, 1))) #The (1,1) are the off-diagonal bandwidths
 end 
 
-#=
-    Vanilla functions. 
-=#
 
 # Method for regular grids. 
 function diffusionoperators(x::Range)
@@ -137,4 +134,3 @@ function diffusionoperators(x::AbstractArray)
     #BandedMatrix are much faster, probably because of better specializations in the composition
     return (x, BandedMatrix(L_1_minus, (1, 1)),BandedMatrix(L_1_plus, (1, 1)), BandedMatrix(L_2, (1, 1))) #The (1,1) are the off-diagonal bandwidths
 end 
-
