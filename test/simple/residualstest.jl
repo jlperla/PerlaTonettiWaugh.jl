@@ -28,14 +28,10 @@
     params_const = params()
     params_func = params(r = r_func, ζ = ζ_func) 
 
-# Solutions. 
-    # Solve for the numerical stationary g_T as test. 
-    result_ns = stationary_numerical_simple(@NT(γ = γ_val, r = r_val, ζ = ζ_val, α = α_val, σ = σ_val, ξ = 1, π_tilde = x -> 1), x_grid)
+# Solutions.
+    # Solve for the numerical stationary g_T. 
+    result_ns = stationary_numerical_simple(params_const, x_grid)
     g_stationary = result_ns.g # This is the level. 
-
-    # Test that this residual is close to 0. 
-    ω = ω_weights(x_grid, α_val, ξ_val)
-    @test result_ns.v[1] + ζ_val - dot(ω, result_ns.v) ≈ 0 atol = 1e-10
 
     # Create the interpolation object of g
     g_vector = g_stationary + 0.01 * t

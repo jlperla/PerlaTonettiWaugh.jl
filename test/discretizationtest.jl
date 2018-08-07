@@ -25,7 +25,7 @@ Test on reascaling method and make comparison
     # modify r and μ_val2 ,π to match (13)
     r_tilde = r - ξ*μ_val2 - (σ_val2^2/2)*ξ^2;
     μ_tilde = μ_val2 + σ_val2^2*ξ;
-    π_tilde(x) = 1;
+    π_tilde = x -> 1;
     L_T_tilde = r_tilde*I - μ_tilde*L_1_tilde - σ_val2^2/2 * L_2_tilde # Construct the aggregate operator. 
     v_tilde = L_T_tilde \ π_tilde.(x) # Solution to the rescaled differential equation.        
 
@@ -91,7 +91,7 @@ Test on reascaling method and make comparison
     L_T_tilde_irregular_add3 = r_tilde*I - μ_tilde*L_1_tilde - σ_val2^2/2 * L_2_tilde # Construct the aggregate operator. 
     v_tilde_irregular_add3 = L_T_tilde_irregular_add3 \ π_tilde.(x_irregular_add3)
 
-    # Interpolaration
+    # Interpolation
     v_int1=LinInterp(x_irregular_add1, v_tilde_irregular_add1)
     v_int2=LinInterp(x_irregular_add2, v_tilde_irregular_add2)
     v_int3=LinInterp(x_irregular_add3, v_tilde_irregular_add3)

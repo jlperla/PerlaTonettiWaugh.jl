@@ -12,7 +12,7 @@ function ω_weights(z, α, ξ)
     # Define the distribution.
     @assert z[1] == 0.0
     z_bar = z[end]
-    d = Truncated(Exponential(1/α), 0.0, z_bar)
+    d = Truncated(Exponential(1/α), 0.0, z_bar) # Assuming a z_min of 0.0; i.e., our distribution is not doubly-truncated. 
     # Get the vector of probability weights. 
     f_vec = (α * exp.(z * (ξ - α)))/(1 - exp(-α*z_bar))
     # Turn these into weights.

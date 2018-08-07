@@ -12,7 +12,7 @@ include("simple/dynamic.jl")
 include("simple/stationary.jl")
 include("simple/calculate_residuals.jl")
 # Full model.
-include("full/algebraicstationary.jl") # Includes params.
+include("full/stationary.jl") # Includes params.
 
 export f!, simpleODE, @with_kw, @unpack, stationary_algebraic_simple, stationary_numerical_simple, ω_weights, calculate_residuals, rescaled_diffusionoperators, diffusionoperators
 
