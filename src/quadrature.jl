@@ -10,9 +10,8 @@ function ω_weights(z, α, ξ)
     M = length(z)
     prepend!(Δ, NaN) # To keep the indexing straight. Now, Δ[2] = Δ_2 = z_2 - z_1. And NaN will throw an error if we try to use it.
     # Define the distribution.
-    @assert z[1] == 0.0
+    @assert z[1] == 0.0 # Check that our minimum is 0.0 
     z_bar = z[end]
-    d = Truncated(Exponential(1/α), 0.0, z_bar) # Assuming a z_min of 0.0; i.e., our distribution is not doubly-truncated. 
     # Get the vector of probability weights. 
     f_vec = (α * exp.(z * (ξ - α)))/(1 - exp(-α*z_bar))
     # Turn these into weights.
