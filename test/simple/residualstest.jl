@@ -47,4 +47,4 @@
 
     # Test the stationary residual is close to zero.
     resid2 = calculate_residuals(params_func, settings(g = t -> g_stationary))
-    @test_broken norm(resid2) ≈ 0 atol = 1e-10
+    @test norm(resid2) ≈ 0 atol = 1e-10

@@ -14,6 +14,7 @@ function simpleODE(params, settings)
     g_T = g(T)
     π_tilde_T = x -> π_tilde(T, x)
 
+    # NOTE: the following two lines overlap with stationary solution
     L_T = (r_T - g_T - ξ*(γ - g_T) - σ^2/2*ξ^2)*I - (γ - g_T + σ^2*ξ)*L_1_minus - σ^2/2 * L_2 # Construct the aggregate operator.
     v_T = L_T \ π_tilde_T.(x) # Solution to the rescaled differential equation.
 
@@ -26,7 +27,7 @@ function simpleODE(params, settings)
         # Validate upwind scheme direction. 
         (γ - g(t)) < 0 || error("μ - g must be strictly negative at all times")
         # Carry out calculations. 
-        L = (r(t) - g(t))*I - (γ - g(t)) * L_1 - σ^2/2.0 * L_2 # Aggregated discrete operator. 
+        L = (r(t) - g(t) - ξ*(γ - g(t)) - σ^2/2*ξ^2)*I - (γ - g(t) + σ^2*ξ)*L_1 - σ^2/2 * L_2
         A_mul_B!(du,L,u)
         du .-= π_tilde.(t, x)
     end
