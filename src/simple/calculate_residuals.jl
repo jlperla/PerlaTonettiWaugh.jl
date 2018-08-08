@@ -1,8 +1,8 @@
 # This function calculatesthe residual at all points given on g.
 function calculate_residuals(params, settings) # To keep the params consistent with other tuples. 
     # Setup
-    @unpack γ, σ, α, r, ζ, ξ = params
-    @unpack x, g, T, π = settings 
+    @unpack γ, σ, α, r, ζ, ξ, π_tilde = params
+    @unpack x, g, T = settings 
     # Solver setting 
     basealgorithm = CVODE_BDF()
 

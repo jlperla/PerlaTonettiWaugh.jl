@@ -2,38 +2,41 @@
 # Implementation of the simple model with time-varying objects. 
 function simpleODE(params, settings)
     # Unpack necessary objects. 
-    @unpack γ, σ, ζ, r, α = params
-    @unpack π, x, T, g = settings 
+    @unpack γ, σ, α, r, ζ, ξ, π_tilde = params
+    @unpack x, T, g = settings 
     M = length(x)
 
     # Discretize the operator. 
-    x, L_1, L_1_plus, L_2 = diffusionoperators(x) # L_1_minus ≡ L_1 is the only one we use. 
+    x, L_1_minus, L_1_plus, L_2 = rescaled_diffusionoperators(x, ξ) # L_1_minus ≡ L_1 is the only one we use. 
 
-    #Calculate the stationary solution.
-    (γ - g(T)) < 0 || error("γ - g must be strictly negative at all times") # How we validate the upwind scheme. 
-    L_T = (r(T) - g(T))*I - (γ - g(T)) * L_1 - σ^2/2.0 * L_2
-    v_T = L_T \ π.(T, x)
-    @assert(issorted(v_T)) # Monotonicity check. 
+    # Calculate the stationary solution.
+    r_T = r(T)
+    g_T = g(T)
+    π_tilde_T = x -> π_tilde(T, x)
+
+    # NOTE: the following two lines overlap with stationary solution
+    L_T = (r_T - g_T - ξ*(γ - g_T) - σ^2/2*ξ^2)*I - (γ - g_T + σ^2*ξ)*L_1_minus - σ^2/2 * L_2 # Construct the aggregate operator.
+    v_T = L_T \ π_tilde_T.(x) # Solution to the rescaled differential equation.
 
     # Bundle as before. 
-    p = @NT(L_1 = L_1, L_2 = L_2, x = x, g = g, r = r, σ = σ, π = π, T = T, γ = γ) #Named tuple for parameters.
+    p = @NT(L_1 = L_1_minus, L_2 = L_2, x = x, g = g, r = r, σ = σ, π_tilde = π_tilde, T = T, γ = γ) #Named tuple for parameters.
 
     # Dynamic calculations, defined for each time ∈ t.  
     function f(du,u,p,t)
-        @unpack L_1, L_2, x, r, γ, g, σ, π, T = p 
+        @unpack L_1, L_2, x, r, γ, g, σ, π_tilde, T = p 
         # Validate upwind scheme direction. 
         (γ - g(t)) < 0 || error("μ - g must be strictly negative at all times")
         # Carry out calculations. 
-        L = (r(t) - g(t))*I - (γ - g(t)) * L_1 - σ^2/2.0 * L_2 # Aggregated discrete operator. 
+        L = (r(t) - g(t) - ξ*(γ - g(t)) - σ^2/2*ξ^2)*I - (γ - g(t) + σ^2*ξ)*L_1 - σ^2/2 * L_2
         A_mul_B!(du,L,u)
-        du .-= π.(t, x)
+        du .-= π_tilde.(t, x)
     end
 
     #Checks on the stationary residual
     dv_T = zeros(v_T)
     f(dv_T, v_T, p, T)
-    @show norm(dv_T)
-    @assert norm(dv_T) < 1.0E-10
+    # @show norm(dv_T)
+    # @assert norm(dv_T) < 1.0E-10
 
     return ODEProblem(f, v_T, (T, 0.0), p)
 end
