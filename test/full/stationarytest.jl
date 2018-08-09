@@ -1,26 +1,26 @@
-# Defaults from default_transition_parameters()
-fullparams = @with_kw (ρ = 0.05, σ = 3.0, N = 10.0, θ = 3.22, γ = 0, d = 5.49, κ = 0.06, ζ = 1.9, η = 0, Theta = 1.0, χ = 1/3, υ = 0.01, μ = 0, δ = 0.01)
+# Define common objects. 
+    baselineparams = @with_kw (ρ = 0.02, σ = 4.2508, N = 10, θ = 5.1269, γ = 1.01, d = 2.3701, κ = 0.013, ζ = 1, η = 0, Theta = 1, χ = 1/(2.1868), υ = 0.0593, μ = 0, δ = 0.053) # Baselines per Jesse. 
 
-# Run basic tests. 
-MATLAB_eq = [0.0260, 3.7504, 1.0615] # Equilibrium for default fullparams() from MATLAB.
-init_x = copy(MATLAB_eq)
-@btime result = nlsolve((G, x) -> f!(G, x; params = fullparams()), init_x)
-@btime result = nlsolve((G, x) -> f!(G, x; params = fullparams()), [0.01, 4.3, 2.0])
+# Run for some different starting poitns (arbitrarily chosen).
+    x1 = [0.2, 2.3, 0.4]
+    x2 = [0.25, 3.0, 1.0] # Breaks around 0.3 for g. 
+    x3 = [0.0260, 3.7504, 1.0615] # Old equilibrium value. 
 
-result = nlsolve((G, x) -> f!(G, x; params = fullparams()), init_x)
-@test round.(result.zero, 4) ≈ MATLAB_eq # Test if we're nearby 
-result = nlsolve((G, x) -> f!(G, x; params = fullparams()), [0.01, 4.3, 2.0])
-@test round.(result.zero, 4) ≈ MATLAB_eq # Test success for a different starting point. 
+    # Tests for vanilla parameters. 
+    res1_vanilla = stationary_algebraic_full(x1, baselineparams())
+    res2_vanilla = stationary_algebraic_full(x2, baselineparams())
+    res3_vanilla = stationary_algebraic_full(x3, baselineparams())
+    @test res1_vanilla.g ≈ res2_vanilla.g atol = 1e-5
+    @test res2_vanilla.g ≈ res3_vanilla.g atol = atol = 1e-5 
 
-@test_throws AssertionError nlsolve((G, x) -> f!(G, x; params = fullparams()), [0.01, 2.2, 2.0]) # Test for <0 value failure (low z_hat guess.)
-@test_throws AssertionError nlsolve((G, x) -> f!(G, x; params = fullparams()), [0.01, 2.2, 1.0]) # Another broken test.  
-@test_throws AssertionError nlsolve((G, x) -> f!(G, x; params = fullparams()), [0.01, 2.2, 2.0]; method = :anderson) # Test failure for Anderson.
+    # Tests for new d. 
+    res1_new = stationary_algebraic_full(x1, baselineparams(d = 5))
+    @test_throws AssertionError stationary_algebraic_full(x2, baselineparams(d = 5)) # Solver goes into the invalid param region. 
+    res3_new = stationary_algebraic_full(x3, baselineparams(d = 5))
+    @test res1_new.g ≈ res3_new.g atol = 1e-5
 
-# Different case (custom params test)
-params2 = @with_kw (ρ = 0.5, σ = 3.0, N = 10.0, θ = 3.22, γ = 0, d = 5.49, κ = 0.06, ζ = 1.9, η = 0, Theta = 1.0, χ = 1/3, υ = 0.01, μ = 0, δ = 0.01)
-result = nlsolve((G, x) -> f!(G, x; params=params2()), [0.12, 1.2, 0.04])
-@test round.(result.zero, 5) ≈ [0.24444, 1.33895, 0.12194]
 
-# Benchmarking
-init_x = [0.01, 6.0, 0.1]
-@btime nlsolve((G, x) -> f!(G, x; params = fullparams()), init_x)
+# Benchmarks.
+    # @btime result = stationary_algebraic_full(x1, baselineparams())
+    # @btime result = stationary_algebraic_full([0.15, 4.0, 2.6], baselineparams()) # Try different params. 
+    # Anderson acceleration? Need to find a paramset that works. 
