@@ -7,20 +7,24 @@
     x3 = [0.0260, 3.7504, 1.0615] # Old equilibrium value. 
 
     # Tests for vanilla parameters. 
-    res1_vanilla = stationary_algebraic_full(x1, baselineparams())
-    res2_vanilla = stationary_algebraic_full(x2, baselineparams())
-    res3_vanilla = stationary_algebraic_full(x3, baselineparams())
+    res1_vanilla = stationary_algebraic(baselineparams(), x1)
+    res2_vanilla = stationary_algebraic(baselineparams(), x2)
+    res3_vanilla = stationary_algebraic(baselineparams(), x3)
     @test res1_vanilla.g ≈ res2_vanilla.g atol = 1e-5
     @test res2_vanilla.g ≈ res3_vanilla.g atol = atol = 1e-5 
 
     # Tests for new d. 
-    res1_new = stationary_algebraic_full(x1, baselineparams(d = 5))
-    @test_throws AssertionError stationary_algebraic_full(x2, baselineparams(d = 5)) # Solver goes into the invalid param region. 
-    res3_new = stationary_algebraic_full(x3, baselineparams(d = 5))
+    res1_new = stationary_algebraic(baselineparams(d = 5), x1)
+    res2_new = stationary_algebraic(baselineparams(d = 5), x2) 
+    res3_new = stationary_algebraic(baselineparams(d = 5), x3)
     @test res1_new.g ≈ res3_new.g atol = 1e-5
+    @test res1_new.g ≈ res2_new.g atol = 1e-5
+
+    # Test for error handling. 
+    @test_throws ErrorException stationary_algebraic(baselineparams(ζ = 0.0001, γ = 0.4))
 
 
 # Benchmarks.
-    # @btime result = stationary_algebraic_full(x1, baselineparams())
-    # @btime result = stationary_algebraic_full([0.15, 4.0, 2.6], baselineparams()) # Try different params. 
+    # @btime result = stationary_algebraic(x1, baselineparams())
+    # @btime result = stationary_algebraic([0.15, 4.0, 2.6], baselineparams()) # Try different params. 
     # Anderson acceleration? Need to find a paramset that works. 
