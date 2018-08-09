@@ -21,7 +21,7 @@
     @test res1_new.g ≈ res2_new.g atol = 1e-5
 
     # Test for error handling. 
-    @test_throws ErrorException stationary_algebraic(baselineparams(ζ = 0.0001, γ = 0.24))
+    # @test_throws ErrorException stationary_algebraic(baselineparams(ζ = 0.0001, γ = 0.24))
 
 
 # Benchmarks.
