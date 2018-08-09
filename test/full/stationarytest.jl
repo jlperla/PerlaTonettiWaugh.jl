@@ -1,6 +1,10 @@
 # Define common objects. 
     baselineparams = @with_kw (ρ = 0.02, σ = 4.2508, N = 10, θ = 5.1269, γ = 1.01, d = 2.3701, κ = 0.013, ζ = 1, η = 0, Theta = 1, χ = 1/(2.1868), υ = 0.0593, μ = 0, δ = 0.053) # Baselines per Jesse. 
 
+#=
+    Algebraic tests. 
+=#
+
 # Run for some different starting poitns (arbitrarily chosen).
     x1 = [0.2, 2.3, 0.4]
     x2 = [0.25, 3.0, 1.0] # Breaks around 0.3 for g. 
@@ -23,8 +27,11 @@
     # Test for error handling. 
     # @test_throws ErrorException stationary_algebraic(baselineparams(ζ = 0.0001, γ = 0.24))
 
-
 # Benchmarks.
     # @btime result = stationary_algebraic(x1, baselineparams())
     # @btime result = stationary_algebraic([0.15, 4.0, 2.6], baselineparams()) # Try different params. 
     # Anderson acceleration? Need to find a paramset that works. 
+
+#= 
+    Numerical tests. 
+=#

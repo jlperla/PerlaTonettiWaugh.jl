@@ -48,5 +48,24 @@ function staticvals(x, params)
     return @NT(g = g, z_hat = z_hat, Ω = Ω, F = F, r = r, ν = ν, a = a, b = b, S = S, L_tilde = L_tilde, z_bar = z_bar, w = w, x = x, π = π)
 end 
 
-# Default parameter values 
+# Default initial values 
 defaultiv(params) = [0.01, 2.0, 1.0]
+
+# Numerical method.
+function stationary_numerical(params, z, settings; kwargs...)
+    # Unpack params and settings. 
+    @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params
+    @unpack ξ = settings
+
+    # Discretization objects. 
+    z, L_1_minus, L_1_plus, L_2 = rescaled_diffusionoperators(z, ξ)
+    
+    # Define the function to solve. 
+    function stationary_numerical_given_vals(vals)
+        g, z_hat, Ω = vals 
+
+    end 
+    # Find the root. 
+    # Check that the solution makes sense. 
+    # Return the results. 
+end 

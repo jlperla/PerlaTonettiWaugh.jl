@@ -31,6 +31,7 @@ function stationary_numerical_simple(params, z)
         return diff
     end
 
+    # Find the root. 
     g_T = find_zero(stationary_numerical_given_g, (1e-10, 0.75*r), atol = 1e-10, rtol = 1e-10, xatol = 1e-10, xrtol = 1e-10)
 
     # Check that the solution makes sense.
