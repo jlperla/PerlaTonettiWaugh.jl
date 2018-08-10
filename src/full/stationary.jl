@@ -70,6 +70,14 @@ function stationary_numerical(params, z, settings; kwargs...)
         f = z_tilde -> θ * exp(-θ * z_tilde) # exponential dist on z_tilde, (14)
         ρ_tilde = r - (σ - 1)*(μ - g + (σ-1)*(υ^2/2)) # (29)
         L_T = (ρ_tilde * I - (μ-g + (σ-1)*υ^2)*L_1_minus - υ^2/2) # Operator for the ξ-rescaled v function, (28)
-        
+        π_min = (d/z_hat)^(σ-1) * κ # (H.9)
+        π_bar = 2 # PUT EXPRESSION HERE. 
+        v_tilde = L_T \ π_bar     
+
+        #=
+            System of equations to be solved. 
+        =#
+        # Value-matching. 
+
     end 
 end 
