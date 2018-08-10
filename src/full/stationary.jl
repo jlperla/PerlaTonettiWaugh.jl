@@ -57,15 +57,19 @@ function stationary_numerical(params, z, settings; kwargs...)
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params
     @unpack ξ = settings
 
-    # Discretization objects. 
-    z, L_1_minus, L_1_plus, L_2 = rescaled_diffusionoperators(z, ξ)
+    # Discretization objects and quadrature weights. 
+    z, L_1_minus, L_1_plus, L_2 = rescaled_diffusionoperators(z, ξ) # Operators. 
+    z_tilde = log.(z) # Rescaling of the state space. 
+    ω = ω_weights(z_tilde, θ, ξ) # Get quadrature weights for the distribution on the rescaled grid. 
     
-    # Define the function to solve. 
+    # Define the system of equations we're solving.
     function stationary_numerical_given_vals(vals)
-        g, z_hat, Ω = vals 
-
+        g, z_hat, Ω = vals # Grab passed objects. 
+        @unpack g, z_hat, Ω, F, r, ν, a, b, S, L_tilde, z_bar, w, x, π = staticvals(z, params) # Grab static values. 
+        r_tilde = r - g - 0 # g_w = 0 in the limit, equation (13)
+        f = z_tilde -> θ * exp(-θ * z_tilde) # exponential dist on z_tilde, (14)
+        ρ_tilde = r - (σ - 1)*(μ - g + (σ-1)*(υ^2/2)) # (29)
+        L_T = (ρ_tilde * I - (μ-g + (σ-1)*υ^2)*L_1_minus - υ^2/2) # Operator for the ξ-rescaled v function, (28)
+        
     end 
-    # Find the root. 
-    # Check that the solution makes sense. 
-    # Return the results. 
 end 

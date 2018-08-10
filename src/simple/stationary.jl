@@ -24,6 +24,7 @@ function stationary_numerical_simple(params, z)
     # Define the pdf of the truncated exponential distribution
     ω = ω_weights(z, α, ξ)
 
+    # Function we're solving. 
     function stationary_numerical_given_g(g)
         L_T = (r - g - ξ*(γ - g) - σ^2/2*ξ^2)*I - (γ - g + σ^2*ξ)*L_1_minus - σ^2/2 * L_2 # Construct the aggregate operator.
         v_T = L_T \ π_tilde.(z) # Solution to the rescaled differential equation.

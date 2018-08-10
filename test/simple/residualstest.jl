@@ -60,7 +60,7 @@
 
     # Test the stationary residual is close to zero.
     resid = calculate_residuals(params_func_const, settings(g = t -> g_stationary))
-    @test norm(resid) ≈ 0 atol = 1e-10
+    @test norm(resid) ≈ 0 atol = 1e-5
 
     # Solve with time-varying r and π_tilde (since g is not in equilibrium, we expect broken at this moment)
     resid = calculate_residuals(params_func_varying_1, settings(g = t -> g_stationary))
