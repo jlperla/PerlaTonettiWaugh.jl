@@ -19,7 +19,7 @@ function simpleODE(params, settings)
     v_T = L_T \ π_tilde_T.(z) # Solution to the rescaled differential equation.
 
     # Bundle as before. 
-    p = @NT(L_1 = L_1_minus, L_2 = L_2, z = z, g = g, r = r, σ = σ, π_tilde = π_tilde, T = T, γ = γ) #Named tuple for parameters.
+    p = @NT(L_1 = L_1_minus, L_2 = L_2, z = z, g = g, r = r, σ = σ, π_tilde = π_tilde, T = T, γ = γ, g_T = g_T) #Named tuple for parameters.
 
     # Dynamic calculations, defined for each time ∈ t.  
     function f(du,u,p,t)
