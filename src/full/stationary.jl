@@ -65,19 +65,33 @@ function stationary_numerical(params, z, settings; kwargs...)
     # Define the system of equations we're solving.
     function stationary_numerical_given_vals(vals)
         g, z_hat, Ω = vals # Grab passed objects. 
-        @unpack g, z_hat, Ω, F, r, ν, a, b, S, L_tilde, z_bar, w, x, π = staticvals(z, params) # Grab static values. 
-        r_tilde = r - g - 0 # g_w = 0 in the limit, equation (13)
-        f = z_tilde -> θ * exp(-θ * z_tilde) # exponential dist on z_tilde, (14)
-        ρ_tilde = r - (σ - 1)*(μ - g + (σ-1)*(υ^2/2)) # (29)
-        L_T = (ρ_tilde * I - (μ-g + (σ-1)*υ^2)*L_1_minus - υ^2/2) # Operator for the ξ-rescaled v function, (28)
+        @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x = staticvals(z, params) # Grab static values. 
+        r_tilde = r - g - 0 # g_w = 0 at steady state, equation (13)
+        f = z_tilde -> θ * exp(-θ * z_tilde) # exponential dist on z_tilde (14)
+        ρ_tilde = r_tilde - (σ - 1)*(μ - g + (σ-1)*(υ^2/2)) # (29)
+        L_T = (ρ_tilde * I - (μ-g + (σ-1)*υ^2)*L_1_minus + υ^2/2 * L_2) # Operator for the ξ-rescaled v function (28)
         π_min = (d/z_hat)^(σ-1) * κ # (H.9)
-        π_bar = 2 # PUT EXPRESSION HERE. 
-        v_tilde = L_T \ π_bar     
+        i = z -> z >= log(z_hat) ? 1 : 0 # Indicator function for next equation. 
+        π_tilde = z -> π_min * (1 + (N-1)*d^(1-σ)*i(z)) - (N-1)*κ*exp(-ξ*z)*i(z) # Rescaled RHS (18), using ξ
+        v_tilde = L_T \ π_tilde.(z)
 
         #=
             System of equations to be solved. 
         =#
-        # Value-matching. 
 
+        # Value-matching condition. 
+        value_matching = v_tilde[0] - θ*dot(v_tilde, ω) + x # (26), ω contains ξ rescaling factor
+       
+        # Free-entry condition. 
+        free_entry = v_tilde[0] - x*(1-χ)/χ # (D.19)
+
+        # Adoption threshold.
+        adoption_threshold = π_min - (1 - L_tilde)/((σ-1)*z_bar^(σ-1)) # (H.17) Gives us dependence on Ω, through L_tilde and z_bar. 
+        
+        return [value_matching, free_entry, adoption_threshold]
     end 
+
+    # Solve the equation for the steady state. 
+
+    # Recreate the steady-state objects using the solution in g, z_hat, Ω. 
 end 
