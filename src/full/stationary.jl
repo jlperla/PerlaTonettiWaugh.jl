@@ -52,38 +52,39 @@ end
 defaultiv(params) = [0.01, 2.0, 1.0]
 
 # Numerical method.
-function stationary_numerical(params, z, settings; kwargs...)
+function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
     # Unpack params and settings. 
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params
-    @unpack ξ = settings
+    @assert params.υ > 0 && params.κ > 0 # Parameter validation
 
     # Discretization objects and quadrature weights. 
-    z, L_1_minus, L_1_plus, L_2 = rescaled_diffusionoperators(z, ξ) # Operators. 
+    z, L_1_minus, L_1_plus, L_2 = rescaled_diffusionoperators(z, σ-1) # Operators. 
     z_tilde = log.(z) # Rescaling of the state space. 
-    ω = ω_weights(z_tilde, θ, ξ) # Get quadrature weights for the distribution on the rescaled grid. 
-    
+    ω = ω_weights(z_tilde, θ, σ-1) # Get quadrature weights for the distribution on the rescaled grid. 
+    f = z_tilde -> θ * exp(-θ * z_tilde) # exponential dist on z_tilde (14)
+
+
     # Define the system of equations we're solving.
     function stationary_numerical_given_vals(vals)
-        g, z_hat, Ω = vals # Grab passed objects. 
-        @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x = staticvals(z, params) # Grab static values. 
+        @show g, z_hat, Ω = vals # Grab passed objects. 
+        @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x = staticvals(vals, params) # Grab static values. 
         r_tilde = r - g - 0 # g_w = 0 at steady state, equation (13)
-        f = z_tilde -> θ * exp(-θ * z_tilde) # exponential dist on z_tilde (14)
         ρ_tilde = r_tilde - (σ - 1)*(μ - g + (σ-1)*(υ^2/2)) # (29)
         L_T = (ρ_tilde * I - (μ-g + (σ-1)*υ^2)*L_1_minus + υ^2/2 * L_2) # Operator for the ξ-rescaled v function (28)
         π_min = (d/z_hat)^(σ-1) * κ # (H.9)
         i = z -> z >= log(z_hat) ? 1 : 0 # Indicator function for next equation. 
-        π_tilde = z -> π_min * (1 + (N-1)*d^(1-σ)*i(z)) - (N-1)*κ*exp(-ξ*z)*i(z) # Rescaled RHS (18), using ξ
-        v_tilde = L_T \ π_tilde.(z)
+        π_tilde = z -> π_min * (1 + (N-1)*d^(1-σ)*i(z)) - (N-1)*κ*exp(-(σ-1)*z)*i(z) # (21)
+        v_tilde = L_T \ π_tilde.(z_tilde)
 
         #=
             System of equations to be solved. 
         =#
 
         # Value-matching condition. 
-        value_matching = v_tilde[0] - θ*dot(v_tilde, ω) + x # (26), ω contains ξ rescaling factor
+        value_matching = v_tilde[1] - θ*dot(v_tilde, ω) + x # (26), ω contains rescaling factor
        
         # Free-entry condition. 
-        free_entry = v_tilde[0] - x*(1-χ)/χ # (D.19)
+        free_entry = v_tilde[1] - x*(1-χ)/χ # (D.19)
 
         # Adoption threshold.
         adoption_threshold = π_min - (1 - L_tilde)/((σ-1)*z_bar^(σ-1)) # (H.17) Gives us dependence on Ω, through L_tilde and z_bar. 
@@ -91,7 +92,24 @@ function stationary_numerical(params, z, settings; kwargs...)
         return [value_matching, free_entry, adoption_threshold]
     end 
 
-    # Solve the equation for the steady state. 
+    # Solve the equation for the steady state.
+    sol = nlsolve(stationary_numerical_given_vals, init_x; inplace = false, xtol = 1e-5)
 
+    # Error if not converged
+    if ~converged(sol)
+        throw(sol) # If it fails, throw the results as an exception. 
+    end
+
+    g_T, z_hat_T, Ω_t = sol.zero
+    @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x = staticvals([g_T, z_hat_T, Ω_T], params) # Grab static values. 
     # Recreate the steady-state objects using the solution in g, z_hat, Ω. 
+    r_tilde = r - g_T - 0 # g_w = 0 at steady state, equation (13)
+    ρ_tilde = r_tilde - (σ - 1)*(μ - g_T + (σ-1)*(υ^2/2)) # (29)
+    L_T = (ρ_tilde * I - (μ- g_T + (σ-1)*υ^2)*L_1_minus + υ^2/2 * L_2) # Operator for the ξ-rescaled v function (28)
+    π_min = (d/z_hat_T)^(σ-1) * κ # (H.9)
+    i = z -> z >= log(z_hat_T) ? 1 : 0 # Indicator function for next equation. 
+    π_tilde = z -> π_min * (1 + (N-1)*d^(1-σ)*i(z)) - (N-1)*κ*exp(-(σ-1)*z)*i(z) # Rescaled RHS (18), using 
+    v_tilde = L_T \ π_tilde.(z_tilde)
+
+    return merge(staticvalues, @NT(g = g_T, z_hat = z_hat_T, Ω = Ω_T, v_tilde = v_tilde))
 end 

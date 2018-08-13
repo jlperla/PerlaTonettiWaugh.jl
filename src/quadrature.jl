@@ -9,7 +9,7 @@ function ω_weights(z, α, ξ)
     Δ = diff(z)
     M = length(z)
     prepend!(Δ, NaN) # To keep the indexing straight. Now, Δ[2] = Δ_2 = z_2 - z_1. And NaN will throw an error if we try to use it.
-    @assert z[1] == 0.0 # Check that our minimum is 0.0 
+    # @assert z[1] == 0.0 # Check that our minimum is 0.0 
     z_bar = z[end]
     f_vec = (α * exp.(z * (ξ - α)))/(1 - exp(-α*z_bar)) # Get the vector of probability masses. 
     interiorWeights = [f_vec[i]/2 * (Δ[i] + Δ[i+1]) for i = 2:M-1] # Turn these into interior trapezoidal weights.
