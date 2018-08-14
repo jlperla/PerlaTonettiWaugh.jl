@@ -4,7 +4,7 @@
 # Gives us the (full algebraic) stationary solution for a set of params and an initial x. 
 function stationary_algebraic(params, init_x = defaultiv(params); kwargs...)
     @assert params.υ > 0 && params.κ > 0 # Parameter validation
-    sol = nlsolve(x -> stationary_algebraic_aux(x, params), init_x; inplace = false, kwargs...)
+    sol = nlsolve(vals -> stationary_algebraic_aux(vals, params), init_x; inplace = false, kwargs...)
     if ~converged(sol)
         throw(sol) # If it fails, throw the results as an exception. 
     end
@@ -15,10 +15,10 @@ function stationary_algebraic(params, init_x = defaultiv(params); kwargs...)
 end 
 
 # Gives us the residuals for a point x in state-space and a set of params. 
-function stationary_algebraic_aux(x, params)    
+function stationary_algebraic_aux(vals, params)    
     # Grab values and intermediate quantities. 
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params
-    @unpack g, z_hat, Ω, F, r, ν, a, b, S, L_tilde, z_bar, w, x, π = staticvals(x, params)
+    @unpack g, z_hat, Ω, F, r, ν, a, b, S, L_tilde, z_bar, w, x, π = staticvals(vals, params)
     # Validate parameters. 
     # Calculate and assign residuals. 
         big_denom = ν*(θ + ν)*(θ - σ + 1) # Part of H.16
@@ -28,9 +28,9 @@ function stationary_algebraic_aux(x, params)
     return [x/π - a*(χ/(1-χ))*(σ + ν - 1)/ν, 1 + (σ-1)/ν - (num_1/denom_1 + num_2)/big_denom + (χ/(1-χ))*(σ + ν - 1)/(ν), π - (1- L_tilde)/((σ -1)*z_bar^(σ-1))]
 end
 
-function staticvals(x, params)
+function staticvals(vals, params)
     # Unpack x. 
-    g, z_hat, Ω = x
+    g, z_hat, Ω = vals
     # Unpack params. 
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params
     # Compute interim quantities.
@@ -62,7 +62,6 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
     z_tilde = log.(z) # Rescaling of the state space. 
     ω = ω_weights(z_tilde, θ, σ-1) # Get quadrature weights for the distribution on the rescaled grid. 
     f = z_tilde -> θ * exp(-θ * z_tilde) # exponential dist on z_tilde (14)
-
 
     # Define the system of equations we're solving.
     function stationary_numerical_given_vals(vals)
