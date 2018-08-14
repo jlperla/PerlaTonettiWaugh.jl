@@ -1,3 +1,6 @@
+using PerlaTonettiWaugh, Base.Test
+using Distributions, Sundials, BenchmarkTools, QuantEcon, Interpolations, Parameters, NamedTuples, NLsolve, ContinuousTransformations
+
 # Global constants. 
     # State grid. 
     z_min = 0.0 
@@ -52,20 +55,26 @@
     g_func = t -> g_int(t) # Not idiosyncratic. 
 
     # Create settings object.
-    settings = @with_kw (z = z_grid, T = T_val, g = g_func, ode_solve_algorithm = CVODE_BDF())
-
+    settings = @with_kw (z = z_grid, T = T_val, g = t -> g_stationary, ode_solve_algorithm = CVODE_BDF())
     # Solve for v with time-varying g
     resid = calculate_residuals(params_func_const, settings())
     @test_broken norm(resid) ≈ 0 atol = 1e-10 # since time-varying g is not in equilibrium, we expect broken at this moment
 
     # Test the stationary residual is close to zero.
-    resid = calculate_residuals(params_func_const, settings(g = t -> g_stationary))
-    @test norm(resid) ≈ 0 atol = 1e-10
+    resid = calculate_residuals(params_func_const, settings())
+    @test norm(resid) ≈ 0 atol = 1e-5
+
+    # Test the stationary residual is close to zero when using solve_dynamic
+    solved = solve_dynamic(params_func_const, settings())
+    @test norm(solved.residuals) ≈ 0 atol = 1e-5
+
+    solved = solve_dynamic(params_func_varying_1, settings())
+    @test norm(solved.residuals) ≈ 0 atol = 1e-2
 
     # Solve with time-varying r and π_tilde (since g is not in equilibrium, we expect broken at this moment)
-    resid = calculate_residuals(params_func_varying_1, settings(g = t -> g_stationary))
-    @test_broken norm(resid) ≈ 0 atol = 1e-10
-    resid = calculate_residuals(params_func_varying_2, settings(g = t -> g_stationary))
-    @test_broken norm(resid) ≈ 0 atol = 1e-10
-    resid = calculate_residuals(params_func_varying_3, settings(g = t -> g_stationary))
-    @test_broken norm(resid) ≈ 0 atol = 1e-10
+    solved = solve_dynamic(params_func_varying_1, settings())
+    @test norm(solved.residuals) ≈ 0 atol = 1e-1
+    solved = solve_dynamic(params_func_varying_2, settings())
+    @test norm(solved.residuals) ≈ 0 atol = 1e-1
+    solved = solve_dynamic(params_func_varying_3, settings())
+    @test norm(solved.residuals) ≈ 0 atol = 1e-1

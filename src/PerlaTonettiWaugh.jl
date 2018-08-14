@@ -11,9 +11,10 @@ include("quadrature.jl")
 include("simple/dynamic.jl")
 include("simple/stationary.jl")
 include("simple/calculate_residuals.jl")
+include("simple/solve_dynamic.jl")
 # Full model.
 include("full/stationary.jl") # Includes params.
 
-export stationary_algebraic, simpleODE, @with_kw, @unpack, stationary_algebraic_simple, stationary_numerical_simple, ω_weights, calculate_residuals, rescaled_diffusionoperators, diffusionoperators
+export stationary_algebraic, simpleODE, @with_kw, @unpack, stationary_algebraic_simple, stationary_numerical_simple, ω_weights, calculate_residuals, rescaled_diffusionoperators, diffusionoperators, solve_dynamic
 
 end # module
