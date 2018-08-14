@@ -7,20 +7,22 @@ function calculate_residuals(params, settings) # To keep the params consistent w
     # Quadrature weighting
     ω = ω_weights(z, α, ξ)
 
+    # Grid for t (default to have the same length as the one for z)
+    ts = linspace(0.0, T, length(z))
+
     # Define and solve dynamic ODE. 
     ode_prob = simpleODE(params, settings)
     
-    return calculate_residuals(ode_prob, x, ω, ode_solve_algorithm)
+    return calculate_residuals(ode_prob, x, ω, ode_solve_algorithm, ts)
 end
 
-function calculate_residuals(ode_prob, x, ω, ode_solve_algorithm) # To keep the params consistent with other tuples. 
+function calculate_residuals(ode_prob, x, ω, ode_solve_algorithm, ts) # To keep the params consistent with other tuples. 
     # Solve ode
     sol = Sundials.solve(ode_prob, ode_solve_algorithm)
-    t_vals = sol.t
 
     # Calculate the residual at each time point
-    residuals = zeros(length(t_vals))
-    for (i, t) in enumerate(t_vals)
+    residuals = zeros(length(ts))
+    for (i, t) in enumerate(ts)
         v_t = sol(t) # i.e., the value function at the point.
         residuals[i] = v_t[1] + x(t) - dot(ω, v_t)
     end
