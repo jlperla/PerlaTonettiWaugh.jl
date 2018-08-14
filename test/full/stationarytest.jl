@@ -8,7 +8,7 @@
 # Run for some different starting poitns (arbitrarily chosen).
     init_x1 = [0.2, 2.3, 0.4]
     init_x2 = [0.25, 3.0, 1.0] # Breaks around 0.3 for g. 
-    init_x3 = [0.0260, 3.7504, 1.0615] # Old equilibrium value. 
+    init_x3 = [0.0190, 1.434969, 1.06517] # ~ equilibrium value. 
 
     # Tests for vanilla parameters. 
     res1_vanilla = stationary_algebraic(baselineparams(), init_x1)
@@ -35,3 +35,5 @@
 #= 
     Numerical tests. 
 =#
+    z = 0.0:0.01:5.0
+    res1_numeric = stationary_numerical(baselineparams(), z, init_x3)

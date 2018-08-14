@@ -21,7 +21,7 @@ function stationary_numerical_simple(params, z)
     M = length(z)
     # Unpack parameters.
     @unpack μ, υ, θ, r, ζ, ξ, π_tilde = params
-    x, L_1_minus, L_1_plus, L_2 = rescaled_diffusionoperators(z, ξ) #Discretize the operator
+    z, L_1_minus, L_1_plus, L_2  = rescaled_diffusionoperators(z, ξ) #Discretize the operator
 
     # Define the pdf of the truncated exponential distribution
     ω = ω_weights(z, θ, ξ)
@@ -41,7 +41,6 @@ function stationary_numerical_simple(params, z)
     @assert((μ + υ^2/2) - g_T < 0)  # Error if γ - g ≡ (μ + υ^2/2) - g_T is positive
 
     # Recreate what the ODE returned for the value function.
-    z, L_1_minus, L_1_plus, L_2  = rescaled_diffusionoperators(z, ξ) #Discretize the operator
     L_T = (r - g_T - ξ*((μ + υ^2/2) - g_T) - υ^2/2*ξ^2)*I - ((μ + υ^2/2) - g_T + υ^2*ξ)*L_1_minus - υ^2/2 * L_2 # Construct the aggregate operator.
     v_T = L_T \ π_tilde.(z) # Solution to the rescaled differential equation.
     return @NT(g = g_T, v = v_T)
