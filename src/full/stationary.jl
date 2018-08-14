@@ -63,9 +63,9 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
     ω = ω_weights(z, θ, σ-1) # Get quadrature weights for the distribution on the rescaled grid. 
 
     # Set up the transformations. 
-    map_g = x -> (ContinuousTransformations.Logistic()(x) + 1e-10)*(0.75 * ρ) # Take real values into g values in [1e-10, 3ρ/4]
-    map_z_hat = x -> (ContinuousTransformations.Logistic()(x) + 1e-5)*(5) # Fix upper bound at 5 arbitrarily. Since z_bar = f(z_hat), which we're solving for. 
-    map_Ω = x -> Exp()(x) # Takes real values into Ω values in [0, Inf)
+    map_g = x -> 0.5*(RealCircle()(x) + 1 + 1e-10)*(0.99 * ρ) # Take real values into g values in [1e-10, 0.99ρ]
+    map_z_hat = x -> 0.5*(RealCircle()(x) + 1 + 1e-5)*(10) # Fix upper bound at 10 arbitrarily. Since z_bar = f(z_hat), which we're solving for. 
+    map_Ω = x -> (RealCircle()(x) + 1)*10 # Takes real values into Ω values in [0, 10]
 
     # Define the system of equations we're solving.
     function stationary_numerical_given_vals(vals)
@@ -73,7 +73,7 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
         g = map_g(g_raw)
         z_hat = map_z_hat(z_hat_raw)
         Ω = map_Ω(Ω_raw) 
-        @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x, π = staticvals(vals, params) # Grab static values. 
+        @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x, π = staticvals([g, z_hat, Ω], params) # Grab static values. 
         r_tilde = r - g - 0 # g_w = 0 at steady state, equation (13)
         ρ_tilde = r_tilde - (σ - 1)*(μ - g + (σ-1)*(υ^2/2)) # (29)
         L_T = (ρ_tilde * I - (μ-g + (σ-1)*υ^2)*L_1_minus + υ^2/2 * L_2) # Operator for the ξ-rescaled v function (28)
@@ -98,23 +98,27 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
     end 
 
     # Solve the equation for the steady state.
-    sol = nlsolve(stationary_numerical_given_vals, init_x; inplace = false, xtol = 1e-5)
+    sol = nlsolve(stationary_numerical_given_vals, init_x; inplace = false, xtol = -Inf, kwargs..., iterations = 10^5)
 
     # Error if not converged
     if ~converged(sol)
         throw(sol) # If it fails, throw the results as an exception. 
     end
 
-    g_T, z_hat_T, Ω_T = sol.zero
+    g_T_raw, z_hat_T_raw, Ω_T_raw = sol.zero
+    
+    g_T = map_g(g_T_raw)
+    z_hat_T = map_z_hat(z_hat_T_raw)
+    Ω_T = map_Ω(Ω_T_raw)
+
     staticvalues = staticvals([g_T, z_hat_T, Ω_T], params) # Grab static values.
     @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x = staticvalues
     # Recreate the steady-state objects using the solution in g, z_hat, Ω. 
     r_tilde = r - g_T - 0 # g_w = 0 at steady state, equation (13)
     ρ_tilde = r_tilde - (σ - 1)*(μ - g_T + (σ-1)*(υ^2/2)) # (29)
-    L_T = (ρ_tilde * I - (μ- g_T + (σ-1)*υ^2)*L_1_minus + υ^2/2 * L_2) # Operator for the ξ-rescaled v function (28)
-    π_min = (d/z_hat_T)^(σ-1) * κ # (H.9)
+    L_T = (ρ_tilde * I - (μ-g_T + (σ-1)*υ^2)*L_1_minus - υ^2/2 * L_2) # Operator for the ξ-rescaled v function (28)
     i = z -> z >= log(z_hat_T) ? 1 : 0 # Indicator function for next equation. 
-    π_tilde = z -> π_min * (1 + (N-1)*d^(1-σ)*i(z)) - (N-1)*κ*exp(-(σ-1)*z)*i(z) # Rescaled RHS (18), using 
+    π_tilde = z -> π * (1 + (N-1)*d^(1-σ)*i(z)) - (N-1)*κ*exp(-(σ-1)*z)*i(z) # (21)
     v_tilde = L_T \ π_tilde.(z)
 
     return merge(staticvalues, @NT(g = g_T, z_hat = z_hat_T, Ω = Ω_T, v_tilde = v_tilde))
