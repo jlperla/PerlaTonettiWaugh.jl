@@ -1,11 +1,11 @@
 # This function calculatesthe residual at all points given on g.
 function calculate_residuals(params, settings) # To keep the params consistent with other tuples. 
     # Setup
-    @unpack γ, σ, α, r, x, ξ, π_tilde = params
+    @unpack μ, υ, θ, r, x, ξ, π_tilde = params
     @unpack z, g, T, ode_solve_algorithm = settings 
 
     # Quadrature weighting
-    ω = ω_weights(z, α, ξ)
+    ω = ω_weights(z, θ, ξ)
 
     # Define and solve dynamic ODE. 
     prob = simpleODE(params, settings)

@@ -1,28 +1,49 @@
-# Defaults from default_transition_parameters()
-fullparams = @with_kw (ρ = 0.05, σ = 3.0, N = 10.0, θ = 3.22, γ = 0, d = 5.49, κ = 0.06, ζ = 1.9, η = 0, Theta = 1.0, χ = 1/3, υ = 0.01, μ = 0, δ = 0.01)
+# Define common objects. 
+    baselineparams = @with_kw (ρ = 0.02, σ = 4.2508, N = 10, θ = 5.1269, γ = 1.01, d = 2.3701, κ = 0.013, ζ = 1, η = 0, Theta = 1, χ = 1/(2.1868), υ = 0.0593, μ = 0, δ = 0.053) # Baselines per Jesse. 
 
-# Run basic tests. 
-MATLAB_eq = [0.0260, 3.7504, 1.0615] # Equilibrium for default fullparams() from MATLAB.
-init_x = copy(MATLAB_eq)
-@btime result = nlsolve((G, x) -> f!(G, x; params = fullparams()), init_x)
-@btime result = nlsolve((G, x) -> f!(G, x; params = fullparams()), [0.01, 4.3, 2.0])
+#=
+    Algebraic tests. 
+=#
 
-result = nlsolve((G, x) -> f!(G, x; params = fullparams()), init_x)
-@test round.(result.zero, 4) ≈ MATLAB_eq # Test if we're nearby 
-result = nlsolve((G, x) -> f!(G, x; params = fullparams()), [0.01, 4.3, 2.0])
-@test round.(result.zero, 4) ≈ MATLAB_eq # Test success for a different starting point. 
+# Run for some different starting poitns (arbitrarily chosen).
+    init_x1 = [3.0, -1, -2] # For numerical
+    init_x2 = [0.25, 3.0, 1.0] # Breaks around 0.3 for g. 
+    init_x3 = [0.0190, 1.434969, 1.06517] # ~ equilibrium value. 
 
-@test_throws AssertionError nlsolve((G, x) -> f!(G, x; params = fullparams()), [0.01, 2.2, 2.0]) # Test for <0 value failure (low z_hat guess.)
-@test_throws AssertionError nlsolve((G, x) -> f!(G, x; params = fullparams()), [0.01, 2.2, 1.0]) # Another broken test.  
-@test_throws AssertionError nlsolve((G, x) -> f!(G, x; params = fullparams()), [0.01, 2.2, 2.0]; method = :anderson) # Test failure for Anderson.
+    # Tests for vanilla parameters. 
+    # Broken res1_alg = stationary_algebraic(baselineparams(), init_x1)
+    res2_alg = stationary_algebraic(baselineparams(), init_x2)
+    res3_alg = stationary_algebraic(baselineparams(), init_x3)
+    @test res2_alg.g ≈ res3_alg.g atol = atol = 1e-5 
 
-# Different case (custom params test)
-params2 = @with_kw (ρ = 0.5, σ = 3.0, N = 10.0, θ = 3.22, γ = 0, d = 5.49, κ = 0.06, ζ = 1.9, η = 0, Theta = 1.0, χ = 1/3, υ = 0.01, μ = 0, δ = 0.01)
-result = nlsolve((G, x) -> f!(G, x; params=params2()), [0.12, 1.2, 0.04])
-@test round.(result.zero, 5) ≈ [0.24444, 1.33895, 0.12194]
+    # Tests for new d. BROKEN FOR NOW. 
+    # res1_new = stationary_algebraic(baselineparams(d = 5), init_x1)
+    # res2_new = stationary_algebraic(baselineparams(d = 5), init_x2) 
+    # # BROKEN res3_new = stationary_algebraic(baselineparams(d = 5), init_x3)
+    # @test res1_new.g ≈ res3_new.g atol = 1e-5
+    # @test res1_new.g ≈ res2_new.g atol = 1e-5
 
-# Benchmarking
-init_x = [0.01, 6.0, 0.1]
-@btime nlsolve((G, x) -> f!(G, x; params = fullparams()), init_x)
+    # Test for error handling. 
+    # @test_throws ErrorException stationary_algebraic(baselineparams(ζ = 0.0001, γ = 0.24))
 
-baselineparams = @with_kw (ρ = 0.02, σ = 4.2508, N = 10, θ = 5.1269, γ = 1.01, d = 2.3701, κ = 0.013, ζ = 1.0, η = 0, Theta = 1, χ = 1/(2.1868), υ = 0.0593, μ = 0, δ = 0.053)
+# Benchmarks.
+    # @btime result = stationary_algebraic(x1, baselineparams())
+    # @btime result = stationary_algebraic([0.15, 4.0, 2.6], baselineparams()) # Try different params. 
+    # Anderson acceleration? Need to find a paramset that works. 
+
+#= 
+    Numerical tests. 
+=#
+    z = unique([linspace(0.0, 1.0, 300)' linspace(1.0, 2.0, 50)' linspace(2.0, 7.0, 50)'])
+    res1_num = stationary_numerical(baselineparams(), z, init_x1) 
+    res2_num = stationary_numerical(baselineparams(), z, init_x2)
+    res3_num = stationary_numerical(baselineparams(), z, init_x3)
+    res_def_num = stationary_numerical(baselineparams(), z)
+
+    # Similar to each other. 
+    @test res1_num.g ≈ res2_num.g 
+    @test res2_num.g ≈ res3_num.g 
+    @test res3_num.g ≈ res_def_num.g 
+
+    # Similar-ish to algebraic. 
+    @test res1_num.g ≈ res2_alg.g atol = 1e-1
