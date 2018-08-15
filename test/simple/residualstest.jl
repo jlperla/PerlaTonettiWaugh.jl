@@ -63,6 +63,11 @@ using Distributions, Sundials, BenchmarkTools, QuantEcon, Interpolations, Parame
     # Test the stationary residual is close to zero.
     resid = calculate_residuals(params_func_const, settings())
     @test norm(resid) ≈ 0 atol = 1e-5
+    # even by solving with DAE
+    ω = ω_weights(z_grid, α_val, ξ_val)
+    daeprob = simpleDAE(params_func_const, settings())
+    resid = calculate_residuals(daeprob, x_func, ω, IDA(), t)
+    @test norm(resid) ≈ 0 atol = 1e-5
 
     # Test the stationary residual is close to zero when using solve_dynamic
     solved = solve_dynamic(params_func_const, settings())
