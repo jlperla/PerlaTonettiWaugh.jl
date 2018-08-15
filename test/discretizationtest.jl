@@ -160,8 +160,7 @@ end
 
     # Test for error handling on ξ (i.e., if ξ can't be negative or is bounded or something like that) for each method. 
     # Test for proper dispatch (i.e., type of the first return from uniform is a Range).
-
-
+    
 # Unscaled. 
     ## REGULAR DISCRETIZATION
     σ = 1; μ = -1;
