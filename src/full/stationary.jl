@@ -125,13 +125,14 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
 end 
 
 function diffsols(sol1, sol2)
-    @show sol1.a - sol2.a
-    @show sol1.b - sol2.b 
-    @show sol1.S - sol2.S
-    @show sol1.L_tilde - sol2.L_tilde 
-    @show sol1.w - sol2.w 
-    @show sol1.x - sol2.x 
-    @show sol1.π - sol2.π
-    @show sol1.r - sol2.r 
-    @show sol1.ν - sol2.ν
+    if :g ∈ fieldnames(sol1) @show sol1.g - sol2.g end 
+    if :a ∈ fieldnames(sol1) @show sol1.a - sol2.a end 
+    if :b ∈ fieldnames(sol1) @show sol1.b - sol2.b end 
+    if :S ∈ fieldnames(sol1) @show sol1.S - sol2.S end 
+    if :L_tilde ∈ fieldnames(sol1) @show sol1.L_tilde - sol2.L_tilde end 
+    if :w ∈ fieldnames(sol1) @show sol1.w - sol2.w end 
+    if :x ∈ fieldnames(sol1) @show sol1.x - sol2.x end 
+    if :π ∈ fieldnames(sol1) @show sol1.π - sol2.π end 
+    if :r ∈ fieldnames(sol1) @show sol1.r - sol2.r end 
+    if :ν ∈ fieldnames(sol1) @show sol1.ν - sol2.ν end 
 end 

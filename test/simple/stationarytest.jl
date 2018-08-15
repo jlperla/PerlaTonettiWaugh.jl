@@ -37,3 +37,13 @@ results = stationary_numerical_simple(simple_params(), z)
 z = unique([linspace(0.0, 1.0, 300)' linspace(1.0, 2.0, 50)' linspace(2.0, 7.0, 50)'])
 results = stationary_numerical_simple(simple_params(), z)
 @test results.g ≈ 0.0211710310711 # Growth rate
+
+
+#= 
+baselineparams = @with_kw (ρ = 0.02, σ = 4.2508, N = 10, θ = 5.1269, γ = 1.01, d = 2.3701, κ = 0.013, ζ = 1, η = 0, Theta = 1, χ = 1/(2.1868), υ = 0.0593, μ = 0, δ = 0.053) # Baselines per Jesse. 
+=#
+
+baselineparams = simple_params(θ = 5.1269, υ = 0.0593, μ = 0.0, ζ = 1) # μ should probably be 0.0
+results_baseline_algebraic = stationary_algebraic_simple(baselineparams)
+results_baseline_numerical = stationary_numerical_simple(baselineparams, z)
+@show diffsols(results_baseline_numerical, results_baseline_algebraic)
