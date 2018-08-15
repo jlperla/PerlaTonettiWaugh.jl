@@ -45,5 +45,4 @@ baselineparams = @with_kw (ρ = 0.02, σ = 4.2508, N = 10, θ = 5.1269, γ = 1.0
 
 baselineparams = simple_params(θ = 5.1269, υ = 0.0593, μ = 0.0, ζ = 1) # μ should probably be 0.0
 results_baseline_algebraic = stationary_algebraic_simple(baselineparams)
-results_baseline_numerical = stationary_numerical_simple(baselineparams, z)
-@show diffsols(results_baseline_numerical, results_baseline_algebraic)
+# Numerical needs compression to work.
