@@ -68,9 +68,6 @@ using Distributions, Sundials, BenchmarkTools, QuantEcon, Interpolations, Parame
     solved = solve_dynamic(params_func_const, settings())
     @test norm(solved.residuals) ≈ 0 atol = 1e-5
 
-    solved = solve_dynamic(params_func_varying_1, settings())
-    @test norm(solved.residuals) ≈ 0 atol = 1e-2
-
     # Solve with time-varying r and π_tilde (since g is not in equilibrium, we expect broken at this moment)
     solved = solve_dynamic(params_func_varying_1, settings())
     @test norm(solved.residuals) ≈ 0 atol = 1e-1
