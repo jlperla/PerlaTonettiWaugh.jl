@@ -67,8 +67,7 @@ function simpleDAE(params, settings)
         L = (r(t) - g(t) - ξ*(γ - g(t)) - σ^2/2*ξ^2)*I - (γ - g(t) + σ^2*ξ)*L_1 - σ^2/2 * L_2        
         v_interior = v[1:p.M]
         resid[1:M] = L * v_interior - π_tilde.(t, z) 
-        resid[M+1] = v[M+1] - 1.0 
-        # resid[M+1] = v_interior + x.(t) - dot(ω, v_interior)
+        resid[M+1] = v_interior[1] + x.(t) - dot(ω, v_interior)
         resid .-= dv
     end
 
