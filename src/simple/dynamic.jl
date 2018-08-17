@@ -61,20 +61,21 @@ function simpleDAE(params, settings)
     p = @NT(L_1 = L_1_minus, L_2 = L_2, z = z, g = g, r = r, σ = σ, π_tilde = π_tilde, T = T, γ = γ, g_T = g_T, M = M) #Named tuple for parameters.
 
     # Dynamic calculations, defined for each time ∈ t.  
-    function f!(resid,dv,v,p,t)
+    function f!(resid,du,u,p,t)
         @unpack L_1, L_2, z, r, γ, g, σ, π_tilde, T, M = p 
         # Carry out calculations. 
-        L = (r(t) - g(t) - ξ*(γ - g(t)) - σ^2/2*ξ^2)*I - (γ - g(t) + σ^2*ξ)*L_1 - σ^2/2 * L_2        
-        v_interior = v[1:p.M]
-        resid[1:M] = L * v_interior - π_tilde.(t, z) 
-        resid[M+1] = v_interior[1] + x.(t) - dot(ω, v_interior)
-        resid .-= dv
+        v_t = u[1:M]
+        g_t = u[M+1]
+        L = (r(t) - g_t - ξ*(γ - g_t) - σ^2/2*ξ^2)*I - (γ - g_t + σ^2*ξ)*L_1 - σ^2/2 * L_2        
+        resid[1:M] = L * v_t - π_tilde.(t, z) 
+        resid[M+1] = v_t[1] + x.(t) - dot(ω, v_t)
+        resid[1:M] .-= du[1:M]
     end
 
-    v_M1 = [v_T; 1.0]
-    dv_M1 = zeros(M+1)
+    u = [v_T; 1.0]
+    du = zeros(M+1)
     resid_M1 = zeros(M+1)
     
 
-    return DAEProblem(f!, resid_M1, v_M1, (T, 0.0), differential_vars = [trues(v_T); false], p)
+    return DAEProblem(f!, resid_M1, u, (T, 0.0), differential_vars = [trues(v_T); false], p)
 end
