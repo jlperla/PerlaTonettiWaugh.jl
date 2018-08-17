@@ -16,11 +16,13 @@ function solve_dynamic(params, settings)
     ode_prob = simpleODE(params, settings)
 
     # perform transformation to enforce upwind conditions
-    # NOTE: the ub is set to be 3*ode_prob.p.g_T, but this might not be a good bound 
-    transformer = ArrayTransformation(bridge(ℝ, Segment(γ, (3*ode_prob.p.g_T))), g_grid_length)
+    g_lb = γ + 1e-5
+    g_ub = 5 * γ
+    transformer = ArrayTransformation(bridge(ℝ, Segment(g_lb, g_ub)), g_grid_length)
 
     # initial guess for the solution
-    g_candidate_initial = inverse(transformer, fill(ode_prob.p.g_T, g_grid_length)) 
+    g_mid = (g_lb + g_ub) / 2
+    g_candidate_initial = inverse(transformer, fill(g_mid, g_grid_length)) 
     
     function dynamic_g_problem_vec!(residuals, g_candidate_vec)
         g_candidate_vec = transformer(g_candidate_vec)
