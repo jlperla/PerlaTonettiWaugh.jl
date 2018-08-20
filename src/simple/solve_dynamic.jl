@@ -1,6 +1,6 @@
 function solve_dynamic(params, settings)
     # Setup
-    @unpack γ, σ, α, r, x, ξ, π_tilde = params
+    @unpack μ, υ, θ, r, x, ξ, π_tilde = params
     @unpack z, T, ode_solve_algorithm = settings
 
     g_grid_length = length(z)
@@ -8,7 +8,7 @@ function solve_dynamic(params, settings)
     
 
     # Quadrature weighting
-    ω = ω_weights(z, α, ξ)
+    ω = ω_weights(z, θ, ξ)
     # Time grids
     ts = linspace(0.0, T, g_grid_length)
 
@@ -16,8 +16,8 @@ function solve_dynamic(params, settings)
     ode_prob = simpleODE(params, settings)
 
     # perform transformation to enforce upwind conditions
-    g_lb = γ + 1e-5
-    g_ub = 5 * γ
+    g_lb = (μ + υ^2/2) * (1 + 1e-5)
+    g_ub = 5 * g_lb
     transformer = ArrayTransformation(bridge(ℝ, Segment(g_lb, g_ub)), g_grid_length)
 
     # initial guess for the solution
@@ -32,8 +32,8 @@ function solve_dynamic(params, settings)
         
         # TODO: there should be a way to do this without unpacking/packing repeatedly like ode_prob.p.g = g_candidate_func
         # at this moment this seems to be the best way to do so as type ODEProblem and one for ode_prob.p are immutable
-        @unpack L_1, L_2, z, r, σ, π_tilde, T, γ, g_T = ode_prob.p
-        p_updated = @NT(L_1 = L_1, L_2 = L_2, z = z, g = g_candidate_func, r = r, σ = σ, π_tilde = π_tilde, T = T, γ = γ, g_T = g_T)
+        @unpack L_1, L_2, z, r, υ, π_tilde, T, μ = ode_prob.p
+        p_updated = @NT(L_1 = L_1, L_2 = L_2, z = z, g = g_candidate_func, r = r, υ = υ, π_tilde = π_tilde, T = T, μ = μ)
         ode_prob_updated = ODEProblem(ode_prob.f, ode_prob.u0, (T, 0.0), p_updated)
         
         # compute residuals and update
