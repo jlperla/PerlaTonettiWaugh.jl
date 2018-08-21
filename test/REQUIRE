@@ -8,3 +8,5 @@ Interpolations
 QuantEcon
 NamedTuples
 Distributions
+Optim
+ContinuousTransformations
