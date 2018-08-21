@@ -4,7 +4,7 @@
 # Gives us the (full algebraic) stationary solution for a set of params and an initial x. 
 function stationary_algebraic(params, init_x = defaultiv(params); kwargs...)
     @assert params.υ > 0 && params.κ > 0 # Parameter validation
-    sol = nlsolve(x -> stationary_algebraic_aux(x, params), init_x; inplace = false, kwargs...)
+    sol = nlsolve(vals -> stationary_algebraic_aux(vals, params), init_x; inplace = false, kwargs...)
     if ~converged(sol)
         throw(sol) # If it fails, throw the results as an exception. 
     end
@@ -15,10 +15,11 @@ function stationary_algebraic(params, init_x = defaultiv(params); kwargs...)
 end 
 
 # Gives us the residuals for a point x in state-space and a set of params. 
-function stationary_algebraic_aux(x, params)    
+function stationary_algebraic_aux(vals, params)    
     # Grab values and intermediate quantities. 
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params
-    @unpack g, z_hat, Ω, F, r, ν, a, b, S, L_tilde, z_bar, w, x, π = staticvals(x, params)
+    @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x, π = staticvals(vals, params)
+    g, z_hat, Ω = vals
     # Validate parameters. 
     # Calculate and assign residuals. 
         big_denom = ν*(θ + ν)*(θ - σ + 1) # Part of H.16
@@ -28,9 +29,9 @@ function stationary_algebraic_aux(x, params)
     return [x/π - a*(χ/(1-χ))*(σ + ν - 1)/ν, 1 + (σ-1)/ν - (num_1/denom_1 + num_2)/big_denom + (χ/(1-χ))*(σ + ν - 1)/(ν), π - (1- L_tilde)/((σ -1)*z_bar^(σ-1))]
 end
 
-function staticvals(x, params)
+function staticvals(vals, params)
     # Unpack x. 
-    g, z_hat, Ω = x
+    g, z_hat, Ω = vals
     # Unpack params. 
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params
     # Compute interim quantities.
@@ -45,8 +46,93 @@ function staticvals(x, params)
     w = σ^(-1)*z_bar # H.10
     x = ζ * (1- η + η * Theta / w) # H.11
     π = (d^(σ-1) * κ)/(z_hat^(σ-1)) # Inversion of H.9    
-    return @NT(g = g, z_hat = z_hat, Ω = Ω, F = F, r = r, ν = ν, a = a, b = b, S = S, L_tilde = L_tilde, z_bar = z_bar, w = w, x = x, π = π)
+    return @NT(F = F, r = r, ν = ν, a = a, b = b, S = S, L_tilde = L_tilde, z_bar = z_bar, w = w, x = x, π = π)
 end 
 
-# Default parameter values 
+# Default initial values 
 defaultiv(params) = [0.01, 2.0, 1.0]
+
+# Numerical method.
+function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
+    # Unpack params and settings. 
+    @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params
+    @assert params.υ > 0 && params.κ > 0 # Parameter validation
+
+    # Discretization objects and quadrature weights. 
+    z, L_1_minus, L_1_plus, L_2 = rescaled_diffusionoperators(z, σ-1) # Operators. 
+    ω = ω_weights(z, θ, σ-1) # Get quadrature weights for the distribution on the rescaled grid. 
+
+    # Set up the transformations. 
+    map_g = x -> (RealCircle()(x) + 1 + 1e-10)*(ρ) # Take real values into g values in [1e-10, 0.99ρ]
+    map_z_hat = x -> (RealCircle()(x) + 1 + 1e-5)*(10) # Fix upper bound at 10 arbitrarily. Since z_bar = f(z_hat), which we're solving for. 
+    map_Ω = x -> (RealCircle()(x) + 1)*10 # Takes real values into Ω values in [0, 10]
+
+    # Define the system of equations we're solving.
+    function stationary_numerical_given_vals(vals)
+        g_raw, z_hat_raw, Ω_raw = vals 
+        g = map_g(g_raw)
+        z_hat = map_z_hat(z_hat_raw)
+        Ω = map_Ω(Ω_raw) 
+        @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x, π = staticvals([g, z_hat, Ω], params) # Grab static values. 
+        r_tilde = r - g - 0 # g_w = 0 at steady state, equation (13)
+        ρ_tilde = r_tilde - (σ - 1)*(μ - g + (σ-1)*(υ^2/2)) # (29)
+        L_T = (ρ_tilde * I - (μ - g + (σ-1)*υ^2)*L_1_minus - υ^2/2 * L_2) # Operator for the ξ-rescaled v function (28)
+        i = z -> z >= log(z_hat) ? 1 : 0 # Indicator function for next equation. 
+        π_tilde = z -> π * (1 + (N-1)*d^(1-σ)*i(z)) - (N-1)*κ*exp(-(σ-1)*z)*i(z) # (21)
+        v_tilde = L_T \ π_tilde.(z)
+
+        #=
+            System of equations to be solved. 
+        =#
+
+        # Value-matching condition. 
+        value_matching = v_tilde[1] - dot(v_tilde, ω) + x # (26), ω contains rescaling factor
+       
+        # Free-entry condition. 
+        free_entry = v_tilde[1] - x*(1-χ)/χ # (D.19) z[1] ≡ 0, so rescaling is moot. 
+
+        # Adoption threshold.
+        adoption_threshold = π - (1 - L_tilde)/((σ-1)*z_bar^(σ-1)) # (H.17) Gives us dependence on Ω, through L_tilde and z_bar. 
+        
+        return [value_matching, free_entry, adoption_threshold]
+    end 
+
+    # Solve the equation for the steady state.
+    sol = nlsolve(stationary_numerical_given_vals, init_x; inplace = false, xtol = -Inf, kwargs...)
+
+    # Error if not converged
+    if ~converged(sol)
+        throw(sol) # If it fails, throw the results as an exception. 
+    end
+
+    g_T_raw, z_hat_T_raw, Ω_T_raw = sol.zero
+    
+    g_T = map_g(g_T_raw)
+    z_hat_T = map_z_hat(z_hat_T_raw)
+    Ω_T = map_Ω(Ω_T_raw)
+
+    staticvalues = staticvals([g_T, z_hat_T, Ω_T], params) # Grab static values.
+    @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x = staticvalues
+    # Recreate the steady-state objects using the solution in g, z_hat, Ω. 
+    r_tilde = r - g_T - 0 # g_w = 0 at steady state, equation (13)
+    ρ_tilde = r_tilde - (σ - 1)*(μ - g_T + (σ-1)*(υ^2/2)) # (29)
+    L_T = (ρ_tilde * I - (μ-g_T + (σ-1)*υ^2)*L_1_minus - υ^2/2 * L_2) # Operator for the ξ-rescaled v function (28)
+    i = z -> z >= log(z_hat_T) ? 1 : 0 # Indicator function for next equation. 
+    π_tilde = z -> π * (1 + (N-1)*d^(1-σ)*i(z)) - (N-1)*κ*exp(-(σ-1)*z)*i(z) # (21)
+    v_tilde = L_T \ π_tilde.(z)
+
+    return merge(staticvalues, @NT(g = g_T, z_hat = z_hat_T, Ω = Ω_T, v_tilde = v_tilde))
+end 
+
+function diffsols(sol1, sol2)
+    if :g ∈ fieldnames(sol1) @show sol1.g - sol2.g end 
+    if :a ∈ fieldnames(sol1) @show sol1.a - sol2.a end 
+    if :b ∈ fieldnames(sol1) @show sol1.b - sol2.b end 
+    if :S ∈ fieldnames(sol1) @show sol1.S - sol2.S end 
+    if :L_tilde ∈ fieldnames(sol1) @show sol1.L_tilde - sol2.L_tilde end 
+    if :w ∈ fieldnames(sol1) @show sol1.w - sol2.w end 
+    if :x ∈ fieldnames(sol1) @show sol1.x - sol2.x end 
+    if :π ∈ fieldnames(sol1) @show sol1.π - sol2.π end 
+    if :r ∈ fieldnames(sol1) @show sol1.r - sol2.r end 
+    if :ν ∈ fieldnames(sol1) @show sol1.ν - sol2.ν end 
+end 
