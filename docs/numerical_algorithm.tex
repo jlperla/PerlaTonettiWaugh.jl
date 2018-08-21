@@ -87,7 +87,7 @@ Define a  grid $\set{z_i}_{i=1}^I$ with $z_1 = 0$ and $z_I = \bar{z}$ is a ``lar
 
 Take \cref{eq:bellman-GBM-dynamic-normalized} and rearrange to find,
 \begin{align}
-	\D[t]\tilde{v}(z,t) &= \underbrace{\left(\left(r - g(t)- \xi(\gamma-g(t)) - \frac{\sigma^2}{2}\xi^2\right) - (\gamma + \sigma^2\xi - g(t)) \D[z] + \tfrac{\sigma^2}{2} \D[zz]\right)}_{\equiv \tilde{L}(t)} - \tilde{\pi}(z,t) \label{eq:bellman-GBM-dynamic-normalized-rearranged}\\
+	\D[t]\tilde{v}(z,t) &= \underbrace{\left(\left(r - g(t)- \xi(\gamma-g(t)) - \frac{\sigma^2}{2}\xi^2\right) - (\gamma + \sigma^2\xi - g(t)) \D[z] - \tfrac{\sigma^2}{2} \D[zz]\right)}_{\equiv \tilde{L}(t)} - \tilde{\pi}(z,t) \label{eq:bellman-GBM-dynamic-normalized-rearranged}\\
 	\intertext{Then with this linear differential operator,}
 	\D[t]\tilde{v}(z,t) &= \tilde{L}(t) \tilde{v}(z,t) - \tilde{\pi}(z,t)
 \end{align}
@@ -96,7 +96,7 @@ Assume upwind finite difference discretization of the differential operators sub
 
 The discretization of $\tilde{L}(t)$ subject to the boundary conditions is then
 \begin{align}
-L(t) &\equiv \left(r - g(t)- \xi(\gamma-g(t)) - \frac{\sigma^2}{2}\xi^2\right) I - (\gamma + \sigma^2\xi - g(t)) L^{-}_1 + \tfrac{\sigma^2}{2} L_2
+L(t) &\equiv \left(r - g(t)- \xi(\gamma-g(t)) - \frac{\sigma^2}{2}\xi^2\right) I - (\gamma + \sigma^2\xi - g(t)) L^{-}_1 - \tfrac{\sigma^2}{2} L_2
 \end{align}
 and the PDE in \cref{eq:bellman-GBM-dynamic-normalized-rearranged} becomes the system of ODEs
 \begin{align}
