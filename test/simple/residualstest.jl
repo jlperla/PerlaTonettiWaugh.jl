@@ -14,7 +14,7 @@ using Distributions, Sundials, BenchmarkTools, QuantEcon, Interpolations, Parame
     t = linspace(0.0, T_val, N) # For interpolation purposes only. 
 
     # Constant parameters. 
-    υ_val = 0.02
+    υ_val = 0.1
     θ_val = 2.1
     ζ_val = 14.5
     r_val = 0.05
