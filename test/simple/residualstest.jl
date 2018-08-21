@@ -63,6 +63,11 @@ using Distributions, Sundials, BenchmarkTools, QuantEcon, Interpolations, Parame
     # Test the stationary residual is close to zero.
     resid = calculate_residuals(params_func_const, settings())
     @test norm(resid) ≈ 0 atol = 1e-5
+    # even by solving with DAE
+    ω = ω_weights(z_grid, θ_val, ξ_val)
+    daeprob = simpleDAE(params_func_const, settings())
+    resid = calculate_residuals(daeprob, x_func, ω, IDA(), t)
+    @test norm(resid) ≈ 0 atol = 1e-5
 
     # Test the stationary residual is reasonable when using solve_dynamic
     solved = solve_dynamic(params_func_const, settings(iterations = 10))
@@ -75,3 +80,14 @@ using Distributions, Sundials, BenchmarkTools, QuantEcon, Interpolations, Parame
     @test norm(solved.residuals) ≈ 0 atol = 1e+2
     solved = solve_dynamic(params_func_varying_3, settings(iterations = 10))
     @test norm(solved.residuals) ≈ 0 atol = 1e+2
+
+    # Solve with time-varying r and π_tilde, now with DAE
+    daeprob = simpleDAE(params_func_varying_1, settings())
+    resid = calculate_residuals(daeprob, x_func, ω, IDA(), t)
+    @test norm(resid) ≈ 0 atol = 1e-5
+    daeprob = simpleDAE(params_func_varying_2, settings())
+    resid = calculate_residuals(daeprob, x_func, ω, IDA(), t)
+    @test norm(resid) ≈ 0 atol = 1e-5
+    daeprob = simpleDAE(params_func_varying_3, settings())
+    resid = calculate_residuals(daeprob, x_func, ω, IDA(), t)
+    @test norm(resid) ≈ 0 atol = 1e-5
