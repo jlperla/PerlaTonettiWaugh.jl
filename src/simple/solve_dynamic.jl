@@ -16,8 +16,8 @@ function solve_dynamic(params, settings)
     ode_prob = simpleODE(params, settings)
 
     # perform transformation to enforce upwind conditions
-    g_lb = (μ + υ^2/2) * (1 + 1e-5)
-    g_ub = 5 * g_lb
+    g_lb = μ + υ^2/2 + 1e-5
+    g_ub = 5 * (μ + υ^2/2)
     transformer = ArrayTransformation(bridge(ℝ, Segment(g_lb, g_ub)), g_grid_length)
 
     # initial guess for the solution
