@@ -1,7 +1,7 @@
 function solve_dynamic(params, settings)
     # Setup
     @unpack μ, υ, θ, r, x, ξ, π_tilde = params
-    @unpack z, T, ode_solve_algorithm = settings
+    @unpack z, T, ode_solve_algorithm, iterations = settings
 
     g_grid_length = length(z)
     INTERPOLATION_SCHEME_g = LinInterp
@@ -42,7 +42,7 @@ function solve_dynamic(params, settings)
     end
     
     # use nlsolver
-    solved = nlsolve(dynamic_g_problem_vec!, g_candidate_initial)
+    solved = nlsolve(dynamic_g_problem_vec!, g_candidate_initial, iterations = iterations)
     
     residuals = zeros(g_grid_length)
     dynamic_g_problem_vec!(residuals, solved.zero) # compute the resulting ssr
