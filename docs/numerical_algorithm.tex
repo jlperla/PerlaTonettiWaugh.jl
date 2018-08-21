@@ -1,7 +1,7 @@
 % !TEX program = pdflatex
 
 \documentclass[11pt]{article}
-\usepackage{amsmath,amsfonts,amsthm,amssymb,geometry}
+\usepackage{amsmath,amsfonts,amsthm,amssymb,geometry,dsfont}
 \usepackage[capitalise,noabbrev]{cleveref} %
 \crefname{equation}{}{} %
 \crefname{assumption}{Assumption}{Assumptions}	
@@ -12,7 +12,7 @@
 \newcommand{\R}{\ensuremath{\mathbb{R}}}
 \newcommand{\diff}{\ensuremath{\mathrm{d}}}
 \newcommand{\set}[1]{\ensuremath{\left\{{#1}\right\}}}
-
+\newcommand{\indicator}[1]{\ensuremath{\mathds{1}\left\{{#1}\right\}}}
 
 \begin{document}
 \title{Notes for Dynamics Proof of Concept}
@@ -123,6 +123,30 @@ and the PDE in \cref{eq:bellman-GBM-dynamic-normalized-rearranged} becomes the s
 % \end{align}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Full Model}
+The dynamic set of equations is derived in \cref{sec:full-model-derivations}. \textbf{TODO: Truncation and rearrange for the d/dt}
+\begin{align}
+	\tilde{\rho}(t) \tilde{v}(z,t) &= \tilde{\pi}(z,t) + (\mu - g(t) + (\sigma - 1)\upsilon^2)\D[z]\tilde{v}(z,t) + \frac{\upsilon^2}{2}\D[zz]\tilde{v}(z,t) + \D[t]\tilde{v}(z,t)\\
+	\tilde{v}(0,t) &= \theta \int_{0}^{\infty}\tilde{v}(z,t) e^{(-\theta + \sigma - 1)z} \diff z - x(t)\label{eq:normalized-vm-summary-rescaled}\\
+	0 &= (\sigma - 1)\tilde{v}(0,t) + \D[z] \tilde{v}(0,t)\label{eq:normalized-sp-summary-rescaled}\\
+	0 &= (\sigma - 1)\tilde{v}(\bar{z},t) + \D[z] \tilde{v}(\bar{z},t)\label{eq:normalized-rhs-summary-rescaled}	
+\end{align}
+and the following algebraic equations
+\begin{align}
+	ZHAT\\
+	ENTRY
+\end{align}
+With this, the following definitions calculated at every time period,
+\begin{align}
+	\tilde{\rho}(t) &\equiv \tilde{r}(t) - (\sigma - 1)\left(\mu - g(t) + (\sigma - 1)\frac{\upsilon^2}{2} \right)\label{eq:rhot}\\
+	g_w(t) &\equiv ???\\
+	\tilde{\pi} &= ???\\
+	\tilde{r} &= ???\\\
+\end{align}
+
+\subsection{Stationary Equations}
+
+
 \appendix
 \makeatletter
 \def\@seccntformat#1{Appendix\ \csname the#1\endcsname\quad}
@@ -278,6 +302,45 @@ With the discretized grid, the integral in \cref{eq:vm-GBM-dynamic} will be calc
 \intertext{If we set $\Delta_{1,-} = 0$ and $\Delta_{I,+} = 0$ then, (Note different than other use of ghost nodes in derivatives, though not sure they enter equations in those other cases)}
 &= \underbrace{\frac1{2}(\Delta_{-} + \Delta_{+})}_{\equiv \omega}\cdot f
 \end{align}
+
+\section{Derivations of Full Model}\label{sec:full-model-derivations}
+\subsection{Summarizing Normalized Equations}\label{sec:normalized-equations}
+Take as given $g(t),\pi_{\min}(t),\hat{z}(t), x(t)$, and $\tilde{r}(t)$(alternatively $g_w(t)$ and $r(t)$).  Then, the following equations must be fulfilled for all $t$ and  $z$
+\begin{align}
+\tilde{r}(t) \equiv & r(t) - g(t) - g_w(t)\label{eq:r-tilde-summary}\\
+f(z) &= \theta e^{-\theta z}\label{eq:f-stationary-summary}\\
+\tilde{r}(t) v(z,t) &= \pi(z,t) + (\mu - g(t))\D[z]v(z,t) + \frac{\upsilon^2}{2}\D[zz]v(z,t) + \D[t]v(z,t)\label{eq:normalized-bellman-summary}\\
+\D[z]v(0,t) &= 0\label{eq:normalized-sp-summary}\\
+v(0,t) &= \int_{0}^{\infty}v(z,t) f(z) \diff z - x(t)\label{eq:normalized-vm-summary}\\
+	\pi(z,t) &= \pi_{\min}(t) e^{(\sigma - 1)z}\left(1 + (N-1)d^{1-\sigma}\indicator{z \geq \log(\hat{z}(t))}\right) - (N-1)\kappa\indicator{z \geq \log(\hat{z}(t))}\label{eq:pi-z-t-summary}
+\end{align}
+
+\subsection{More Rescaling}
+Note: while this transformation could be done all at once, we will base it off of the previous section for easier comparison.  Define the following
+\begin{align}
+	\tilde{v}(z,t) &\equiv e^{-(\sigma - 1)z}v(z,t)\label{eq:v-tilde}\\
+	\tilde{\pi}(z,t) &\equiv e^{-(\sigma - 1)z}\pi(z,t)\\
+	\intertext{Use \cref{eq:pi-z-t-summary}}
+	\tilde{\pi}(z,t) &= \pi_{\min}(t)\left(1 + (N-1)d^{1-\sigma}\indicator{z \geq \log(\hat{z}(t))}\right) - (N-1)\kappa e^{-(\sigma - 1)z}\indicator{z \geq \log(\hat{z}(t))}	
+\end{align}
+Rearrange and differentiate \cref{eq:v-tilde},
+\begin{align}
+	\D[t]v(z,t) &= e^{(\sigma - 1)z} \D[t]\tilde{v}(z,t)\label{eq:v-tilde-dt}\\
+	\D[z]v(z,t) &= e^{(\sigma - 1)z}\left((\sigma - 1)\tilde{v}(z,t) + \D[z] \tilde{v}(z,t) \right)\label{eq:v-tilde-dz}\\
+	\D[zz]v(z,t) &= e^{(\sigma - 1)z}\left((\sigma - 1)^2\tilde{v}(z,t) + 2(\sigma - 1)\D[z] \tilde{v}(z,t) + \D[zz] \tilde{v}(z,t)\right)\label{eq:v-tilde-dzz}\\
+	\intertext{And at the adoption threshold, from \cref{eq:v-tilde-dz}}
+	\D[z]v(0,t) &= (\sigma - 1)\tilde{v}(0,t) + \D[z] \tilde{v}(0,t)\label{eq:vt-0-dz}
+\end{align}	
+To use these substitutions, start with \cref{eq:normalized-vm-summary} and use the definition of $f(z)$,
+\begin{align}
+	\tilde{v}(0,t) &= \theta \int_{0}^{\infty}\tilde{v}(z,t) e^{(-\theta + \sigma - 1)z} \diff z - x(t)\label{eq:normalized-vm-summary-rescaled}\\
+	\intertext{Combine \cref{eq:normalized-sp-summary,eq:vt-0-dz} to get}
+	0 &= (\sigma - 1)\tilde{v}(0,t) + \D[z] \tilde{v}(0,t)\label{eq:normalized-sp-summary-rescaled}
+	\intertext{Finally, substitute all of the derivatives into \cref{eq:normalized-bellman-summary} and divide by $e^{(\sigma - 1)z}$}	
+	\tilde{\rho}(t) \tilde{v}(z,t) &= \tilde{\pi}(z,t) + (\mu - g(t) + (\sigma - 1)\upsilon^2)\D[z]\tilde{v}(z,t) + \frac{\upsilon^2}{2}\D[zz]\tilde{v}(z,t) + \D[t]\tilde{v}(z,t)
+	\intertext{where,}
+	\tilde{\rho}(t) &\equiv \tilde{r}(t) - (\sigma - 1)\left(\mu - g(t) + (\sigma - 1)\frac{\upsilon^2}{2} \right)\label{eq:rhot}	
+\end{align}	
 
 % \subsection{Discretized System of Equations}\label{eq:discretized-system}
 % Take the exogenously given profits and costs at the time periods discretized as $\pi^n_i$ and $x^n$.  Apply the discretization in \cref{eq:integral-approximation,eq:D-v-t,eq:D-v-z,eq:D-v-zz} to \cref{eq:bellman-GBM-dynamic,eq:vm-GBM-dynamic,eq:sp-GBM-dynamic,eq:reflecting-GBM-dynamic}.\footnote{\textbf{TODO:} I am not entirely sure about the $n$ vs. $n+1$ index in the $(r-g^n)$ term.  We need to verify that this is the correct form for finite-differences with an explicit euler scheme in time.}
