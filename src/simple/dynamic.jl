@@ -68,7 +68,7 @@ function simpleDAE(params, settings)
         g_t = u[M+1]
         L = (r(t) - g_t - ξ*(γ - g_t) - σ^2/2*ξ^2)*I - (γ - g_t + σ^2*ξ)*L_1 - σ^2/2 * L_2        
         resid[1:M] = L * v_t - π_tilde.(t, z) 
-        resid[M+1] = v_t[1] + x.(t) - dot(ω, v_t)
+        resid[M+1] = v_t[1] + x(t) - dot(ω, v_t)
         resid[1:M] .-= du[1:M]
     end
 
