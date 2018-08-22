@@ -128,8 +128,8 @@
         odeprob = ODEProblem((u, p, t) -> begin
             vals = p.saved_values.saveval
                 if t < 0.0
-                i = findlast(x -> x[1] > t, vals);
-                d = -1 * (u - vals[i][2])/(t - vals[i][1]);
+                i = findlast(x -> x[1] > t, vals); # Sign is becuase of backwards time. 
+                d = (u - vals[i][2])/(vals[i][1] - t);
                 @show d
             end 
             return 1.01*u 
