@@ -4,7 +4,7 @@ function solve_dynamic_full(params, settings)
     M = length(z)
 
     dae_prob = fullDAE(params, settings)
-    callback = SavingCallback((u,p,t,integrator)->(t, get_L_tilde_t(p, t, u[M+1], u[M+2])), 
+    callback = SavingCallback((u,p,t,integrator)->(t, get_L_tilde_t(p, t, u[M+1], p.map_z_hat_t(u[M+2]))), 
                                 SavedValues(Float64, Tuple{Float64,Float64}), 
                                 tdir = -1) # need to compute D_t L(t)
 
@@ -33,16 +33,20 @@ function fullDAE(params, settings)
 
     # Bundle as before. 
     Ω = get_Ω(Ω_T, δ, T)
-    p = @NT(L_1 = L_1_minus, L_2 = L_2, z = z, N = N, M = M, T = T, θ = θ, σ = σ, κ = κ, ζ = ζ, d = d, ρ = ρ, δ = δ, μ = μ, υ = υ, χ = χ, Ω = Ω, saved_values = SavedValues(Float64, Tuple{Float64,Float64})) #Named tuple for parameters.
+    map_z_hat_t = bridge(ℝ, PositiveRay(1))
+    map_z_hat_t_inverse = val -> inverse(map_z_hat_t, val) 
+    p = @NT(L_1 = L_1_minus, L_2 = L_2, z = z, N = N, M = M, T = T, θ = θ, σ = σ, κ = κ, 
+        ζ = ζ, d = d, ρ = ρ, δ = δ, μ = μ, υ = υ, χ = χ, Ω = Ω, 
+        map_z_hat_t = map_z_hat_t, saved_values = SavedValues(Float64, Tuple{Float64,Float64})) #Named tuple for parameters.
 
     # Dynamic calculations, defined for each time ∈ t.  
     function f!(resid,du,u,p,t)
-        @unpack L_1, L_2, z, M, T, μ, υ, Ω = p 
+        @unpack L_1, L_2, z, M, T, μ, υ, Ω, map_z_hat_t = p 
 
         # Carry out calculations. 
         v_t = u[1:M]
         g_t = u[M+1]
-        z_hat_t = u[M+2]
+        z_hat_t = map_z_hat_t(u[M+2])
 
         @unpack x_t, π_min_t, π_tilde_t_by_z, ρ_tilde_t = get_static_vals(p, t, v_t, g_t, z_hat_t)
 
@@ -53,7 +57,7 @@ function fullDAE(params, settings)
         resid[1:M] .-= du[1:M]
     end
 
-    u = [v_T; g_T; z_hat_T]
+    u = [v_T; g_T; map_z_hat_t_inverse(z_hat_T)]
     du = zeros(M+2)
     resid_M2 = zeros(M+2)
 
