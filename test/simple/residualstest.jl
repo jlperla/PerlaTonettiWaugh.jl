@@ -126,10 +126,10 @@
         tstops = [-0.1, -0.2, -0.3, -1.0]
         p = @NT(saved_values = SavedValues(Float64, Tuple{Float64,Float64}))
         odeprob = ODEProblem((u, p, t) -> begin 
-            @show p.saved_values.t
+            println((p.saved_values.t, u))
             return 1.01*u 
         end, u0, tspan, p) # To confirm that we have access to saved_values during the runs. 
-        cb = SavingCallback((u,t,integrator)->(-u, exp(u)), p.saved_values, tdir = -1)
+        cb = SavingCallback((u,t,integrator)->(t, exp(u)), p.saved_values, tdir = -1)
         sol_callback = DifferentialEquations.solve(odeprob, callback=cb, tstops = tstops)
         print(p.saved_values.saveval)
         print(p.saved_values.t)
