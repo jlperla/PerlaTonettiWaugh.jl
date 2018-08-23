@@ -79,9 +79,6 @@ end
 function get_L_tilde_t(p, t, g_t, z_hat_t)
     @unpack N, T, θ, κ, ζ, δ, χ, Ω = p
     is_t_over_T = ifelse(t >= T, 1, 0)
-    if (t < T)
-    print(string(z_hat_t, ", θ*κ: ", θ*κ, ", t: ", t, "\n")) # TODO: remove this
-    end
     return Ω(t) * ((N-1) * z_hat_t^(-θ * κ) + ζ*θ*g_t + is_t_over_T * ζ * δ / χ)
 end
 
