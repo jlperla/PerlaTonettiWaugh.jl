@@ -33,7 +33,7 @@ function fullDAE(params, settings)
 
     # Bundle as before. 
     Ω = get_Ω(Ω_T, δ, T)
-    map_z_hat_t = bridge(ℝ, PositiveRay(1))
+    map_z_hat_t = bridge(ℝ, Segment(1, 100))
     map_z_hat_t_inverse = val -> inverse(map_z_hat_t, val) 
     p = @NT(L_1 = L_1_minus, L_2 = L_2, z = z, N = N, M = M, T = T, θ = θ, σ = σ, κ = κ, 
         ζ = ζ, d = d, ρ = ρ, δ = δ, μ = μ, υ = υ, χ = χ, Ω = Ω, 
