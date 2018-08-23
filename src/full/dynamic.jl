@@ -1,14 +1,14 @@
 
 function solve_dynamic_full(params, settings)
-    @unpack z = settings 
+    @unpack z, T = settings 
     M = length(z)
-
+    tstops = 0:1e-03:T # TODO: might need finer grids
     dae_prob = fullDAE(params, settings)
     callback = SavingCallback((u,p,t,integrator)->(t, get_L_tilde_t(p, t, u[M+1], p.map_z_hat_t(u[M+2]))), 
                                 SavedValues(Float64, Tuple{Float64,Float64}), 
                                 tdir = -1) # need to compute D_t L(t)
 
-    DifferentialEquations.solve(dae_prob, IDA(), callback=callback)
+    DifferentialEquations.solve(dae_prob, callback=callback, tstops=tstops)
 end
 
 # Implementation of the full model with time-varying objects, represented by DAE
