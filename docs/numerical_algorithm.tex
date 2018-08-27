@@ -52,7 +52,7 @@ While not listed above, in practice another boundary condition (e.g. transversal
 \begin{align}
 	\D[z]v(\bar{z},t) &= 0\label{eq:reflecting-GBM-dynamic}
 \end{align}
-Keep in mind that this is just a step in the numerical solution, rather than introducing a true reflecting barrier.  We will need to verify that it does not introduce issues by verifying the numeric solution matches the closed form solution for large $\bar{z}$.  Also note that if $\sigma = 0$, due to the upwind procedure this boundary value would be unnecessary and/or drop out of the solution.
+Keep in mind that this is just a step in the numerical solution, rather than introducing a true reflecting barrier.  We will need to verify that it does not introduce issues by verifying the numeric solution matches the closed form solution for large $\bar{z}$.  Also note that if $\upsilon = 0$, due to the upwind procedure this boundary value would be unnecessary and/or drop out of the solution.
 
 \subsection{Change of Variables to Normalize and Rescale}
 Solving the above equation for $v(z,t)$ is problematic since the scale goes form approximatively $1$ to $e^{\bar{z}}$, which is very large for a high $\bar{z}$.  To make the solution more stable, we rescale the equation.
@@ -74,7 +74,7 @@ Now, substitute into the boundary condition $\D[z]v(0,t) = 0$ and the artificial
 	\xi\tilde{v}(0,t) + \D[z]\tilde{v}(0,t ) &= 0\label{eq:new-BC1}\\
 	\xi\tilde{v}(\bar{z},t) + \D[z]\tilde{v}(\bar{z},t) &= 0\label{eq:new-BC2}
 \end{align}	
-Finally, in the value matching condition, $v(0,t) = e^{0}\tilde{v}(0,t)$ where if the $F'(z) = \alpha e^{-\alpha z}$ then,
+Finally, in the value matching condition, $v(0,t) = e^{0}\tilde{v}(0,t)$ where if the $F'(z) = \theta e^{-\theta z}$ then,
 \begin{align}
 	\tilde{v}(0,t) &= \int_{0}^{\infty} \tilde{v}(z,t) \left(e^{\xi z} F'(z)\right) \diff z - x(t)\label{eq:vm-GBM-dynamic-normalized}
 \end{align}	
