@@ -24,7 +24,7 @@ We start with an artificially simple version of the model with transition dynami
 A key simplification maintained in the full PTW transition dynamics: in the transition dynamics experiment we are planning for the paper, the distribution $F(z)$ will remain constant over all time.  Hence, we do not need to jointly solve the KFE as we will be at the stationary level (post-normalization).  This is a major simplification for the transition dynamics case compared to many heterogeneous agent models.
 
 \subsection{PDE and Boundary Values}
-For $z\in[0,\infty)$.  Assume an exogenously given $\pi(z,t)$ and $x(t)$ function.  We will only look at examples where $F(z) = 1 - e^{-\alpha z}$ for all $t$.
+For $z\in[0,\infty)$.  Assume an exogenously given $\pi(z,t)$ and $x(t)$ function.  We will only look at examples where $F(z) = 1 - e^{-\theta z}$ for all $t$.
 \begin{align}
 	(r - g(t)) v(z,t) &= \pi(z,t) + ((\mu + \upsilon^2/2) - g(t)) \D[z] v(z,t) + \tfrac{\upsilon^2}{2} \D[zz] v(z,t) + \D[t]v(z,t)\label{eq:bellman-GBM-dynamic}	\\
 v(0,t) &= \int_{0}^{\infty} v(z,t) F'(z)\diff z - x(t)\label{eq:vm-GBM-dynamic}\\
@@ -57,7 +57,7 @@ Keep in mind that this is just a step in the numerical solution, rather than int
 \subsection{Change of Variables to Normalize and Rescale}
 Solving the above equation for $v(z,t)$ is problematic since the scale goes form approximatively $1$ to $e^{\bar{z}}$, which is very large for a high $\bar{z}$.  To make the solution more stable, we rescale the equation.
 
-Take \cref{eq:sp-GBM-dynamic} and let $\tilde{v}(z,t) \equiv e^{-\xi z}v(z,t)$.  Then,
+Take \cref{eq:sp-GBM-dynamic} pand let $\tilde{v}(z,t) \equiv e^{-\xi z}v(z,t)$.  Then,
 \begin{align}
 	\D[z]v(z,t) &= e^{\xi z}\left(\xi\tilde{v}(z,t) + \D[z]\tilde{v}(z,t) \right)\\
 	\D[zz]v(z,t) &= e^{\xi z}\left(\xi^{2}\tilde{v}(z,t) + 2 \xi\D[z]\tilde{v}(z,t) + \D[zz]\tilde{v}(z,t)  \right)\\	
