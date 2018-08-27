@@ -88,7 +88,7 @@ Define a  grid $\set{z_i}_{i=1}^I$ with $z_1 = 0$ and $z_I = \bar{z}$ is a ``lar
 
 Take \cref{eq:bellman-GBM-dynamic-normalized} and rearrange to find,
 \begin{align}
-	\D[t]\tilde{v}(z,t) &= \underbrace{\left(\left(r - g(t)- \xi((\mu + \upsilon^2/2)-g(t)) - \frac{\upsilon^2}{2}\xi^2\right) - ((\mu + \upsilon^2/2) + \sigma^2\xi - g(t)) \D[z] - \tfrac{\upsilon^2}{2} \D[zz]\right)}_{\equiv \tilde{A}(t)} - \tilde{\pi}(z,t) \label{eq:bellman-GBM-dynamic-normalized-rearranged}\\
+	\D[t]\tilde{v}(z,t) &= \underbrace{\left(\left(r - g(t)- \xi((\mu + \upsilon^2/2)-g(t)) - \frac{\upsilon^2}{2}\xi^2\right) - ((\mu + \upsilon^2/2) + \upsilon^2\xi - g(t)) \D[z] - \tfrac{\upsilon^2}{2} \D[zz]\right)}_{\equiv \tilde{A}(t)} - \tilde{\pi}(z,t) \label{eq:bellman-GBM-dynamic-normalized-rearranged}\\
 	\intertext{Then with this linear differential operator,}
 	\D[t]\tilde{v}(z,t) &= \tilde{A}(t) \tilde{v}(z,t) - \tilde{\pi}(z,t)
 \end{align}
