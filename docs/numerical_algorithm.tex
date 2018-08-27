@@ -26,7 +26,7 @@ A key simplification maintained in the full PTW transition dynamics: in the tran
 \subsection{PDE and Boundary Values}
 For $z\in[0,\infty)$.  Assume an exogenously given $\pi(z,t)$ and $x(t)$ function.  We will only look at examples where $F(z) = 1 - e^{-\alpha z}$ for all $t$.
 \begin{align}
-	(r - g(t)) v(z,t) &= \pi(z,t) + (\gamma - g(t)) \D[z] v(z,t) + \tfrac{\sigma^2}{2} \D[zz] v(z,t) + \D[t]v(z,t)\label{eq:bellman-GBM-dynamic}	\\
+	(r - g(t)) v(z,t) &= \pi(z,t) + ((\mu + \upsilon^2/2) - g(t)) \D[z] v(z,t) + \tfrac{\upsilon^2}{2} \D[zz] v(z,t) + \D[t]v(z,t)\label{eq:bellman-GBM-dynamic}	\\
 v(0,t) &= \int_{0}^{\infty} v(z,t) F'(z)\diff z - x(t)\label{eq:vm-GBM-dynamic}\\
 \D[z]v(0,t) &= 0\label{eq:sp-GBM-dynamic}
 \end{align}
@@ -39,10 +39,10 @@ x(t) &= \zeta,\quad \text{ for all }t \geq T\label{eq:terminal-x}\\
 
 From this, we know that at the terminal state, a large $T$,
 \begin{align}
-g \equiv g(T) &= 	\gamma + \frac{1-(\alpha -1) \zeta  \left(r-\gamma\right)}{(\alpha -1)^2 \zeta }+ \frac{\sigma^2}{2}\frac{\alpha  \left(\alpha(\alpha -1)    \left(r-\gamma-\frac{\sigma ^2}{2}\right) \zeta-2\right)+1}{(\alpha -1) \left((\alpha -1)   \left(r-\gamma-\frac{\sigma ^2}{2}\right)\zeta-1\right)}. \label{eq:g-gbm}\\
-v(z,T) &= \frac1{r-\gamma - \sigma^2/2}\left(e^{z} + \frac1{\nu} e^{-\nu z}\right)\label{eq:v-gbm-sol},
+g \equiv g(T) &= 	(\mu + \upsilon^2/2) + \frac{1-(\theta -1) \zeta  \left(r-(\mu + \upsilon^2/2)\right)}{(\theta -1)^2 \zeta }+ \frac{\upsilon^2}{2}\frac{\theta  \left(\theta(\theta -1)    \left(r-(\mu + \upsilon^2/2)-\frac{\upsilon ^2}{2}\right) \zeta-2\right)+1}{(\theta -1) \left((\theta -1)   \left(r-(\mu + \upsilon^2/2)-\frac{\upsilon ^2}{2}\right)\zeta-1\right)}. \label{eq:g-gbm}\\
+v(z,T) &= \frac1{r-(\mu + \upsilon^2/2) - \upsilon^2/2}\left(e^{z} + \frac1{\nu} e^{-\nu z}\right)\label{eq:v-gbm-sol},
 \intertext{where,}
-\nu &=  \frac{\gamma - g}{\sigma^2} + \sqrt{\left(\frac{g-\gamma}{\sigma^2} \right)^{2} + \frac{r-g}{\sigma^2/2}}. \label{eq:nu-gbm}
+\nu &=  \frac{(\mu + \upsilon^2/2) - g}{\upsilon^2} + \sqrt{\left(\frac{g-(\mu + \upsilon^2/2)}{\upsilon^2} \right)^{2} + \frac{r-g}{\upsilon^2/2}}. \label{eq:nu-gbm}
 \end{align}
 
 A solution to this problem is a $g(t)$ and $v(z,t)$ that fulfills the above equations for all $t\in[0,T]$ and $z\in[0,\infty)$
@@ -66,8 +66,9 @@ Take \cref{eq:sp-GBM-dynamic} and let $\tilde{v}(z,t) \equiv e^{-\xi z}v(z,t)$. 
 Define $\tilde{\pi}(z,t) = e^{-\xi z}\pi(z,t)$ so that if $\pi(z,t) = e^{\xi z}$ then $\tilde{\pi}(z,t) = 1$.  Substitute into \cref{eq:sp-GBM-dynamic}, divide by $e^{\xi z}$ and simplify,
 
 \begin{align}
-	\left(r - g(t)- \xi(\gamma-g(t)) - \frac{\sigma^2}{2}\xi^2\right) \tilde{v}(z,t) &= \tilde{\pi}(z,t) + (\gamma + \sigma^2\xi - g(t)) \D[z] \tilde{v}(z,t) + \tfrac{\sigma^2}{2} \D[zz] \tilde{v}(z,t) + \D[t]\tilde{v}(z,t)\label{eq:bellman-GBM-dynamic-normalized}
+	\left(r - g(t)- \xi((\mu + \upsilon^2/2)-g(t)) - \frac{\upsilon^2}{2}\xi^2\right) \tilde{v}(z,t) &= \tilde{\pi}(z,t) + ((\mu + \upsilon^2/2) + \upsilon^2\xi - g(t)) \D[z] \tilde{v}(z,t) \nonumber \\ &+ \tfrac{\upsilon^2}{2} \D[zz] \tilde{v}(z,t) + \D[t]\tilde{v}(z,t)  \label{eq:bellman-GBM-dynamic-normalized}
 \end{align}
+
 Now, substitute into the boundary condition $\D[z]v(0,t) = 0$ and the artificial reflecting barrier at the top, $\D[z]v(\bar{z},t) = 0$ to find,
 \begin{align}
 	\xi\tilde{v}(0,t) + \D[z]\tilde{v}(0,t ) &= 0\label{eq:new-BC1}\\
@@ -87,16 +88,16 @@ Define a  grid $\set{z_i}_{i=1}^I$ with $z_1 = 0$ and $z_I = \bar{z}$ is a ``lar
 
 Take \cref{eq:bellman-GBM-dynamic-normalized} and rearrange to find,
 \begin{align}
-	\D[t]\tilde{v}(z,t) &= \underbrace{\left(\left(r - g(t)- \xi(\gamma-g(t)) - \frac{\sigma^2}{2}\xi^2\right) - (\gamma + \sigma^2\xi - g(t)) \D[z] - \tfrac{\sigma^2}{2} \D[zz]\right)}_{\equiv \tilde{A}(t)} - \tilde{\pi}(z,t) \label{eq:bellman-GBM-dynamic-normalized-rearranged}\\
+	\D[t]\tilde{v}(z,t) &= \underbrace{\left(\left(r - g(t)- \xi((\mu + \upsilon^2/2)-g(t)) - \frac{\upsilon^2}{2}\xi^2\right) - ((\mu + \upsilon^2/2) + \sigma^2\xi - g(t)) \D[z] - \tfrac{\upsilon^2}{2} \D[zz]\right)}_{\equiv \tilde{A}(t)} - \tilde{\pi}(z,t) \label{eq:bellman-GBM-dynamic-normalized-rearranged}\\
 	\intertext{Then with this linear differential operator,}
 	\D[t]\tilde{v}(z,t) &= \tilde{A}(t) \tilde{v}(z,t) - \tilde{\pi}(z,t)
 \end{align}
 
-Assume upwind finite difference discretization of the differential operators subject to the homogenous boundary values, such that \cref{eq:new-BC1,eq:new-BC2} hold, which creates $L^{-}_1$ and $L_2$ from \cref{sec:discretization-operators}.\footnote{Here, we will assert that $(\gamma + \sigma^2\xi - g(t)) < 0$ so that $L^{-}_1$ is backwards differences, and consequently the correct upwind direction.}
+Assume upwind finite difference discretization of the differential operators subject to the homogenous boundary values, such that \cref{eq:new-BC1,eq:new-BC2} hold, which creates $L^{-}_1$ and $L_2$ from \cref{sec:discretization-operators}.\footnote{Here, we will assert that $((\mu + \upsilon^2/2) + \sigma^2\xi - g(t)) < 0$ so that $L^{-}_1$ is backwards differences, and consequently the correct upwind direction.}
 
 The discretization of $\tilde{A}(t)$ subject to the boundary conditions is then
 \begin{align}
-A(t) &\equiv \left(r - g(t)- \xi(\gamma-g(t)) - \frac{\sigma^2}{2}\xi^2\right) I - (\gamma + \sigma^2\xi - g(t)) L^{-}_1 - \tfrac{\sigma^2}{2} L_2\label{eq:A-def-simple}
+A(t) &\equiv \left(r - g(t)- \xi((\mu + \upsilon^2/2)-g(t)) - \frac{\upsilon^2}{2}\xi^2\right) I - (\gamma + \upsilon^2\xi - g(t)) L^{-}_1 - \tfrac{\upsilon^2}{2} L_2\label{eq:A-def-simple}
 \end{align}
 and the PDE in \cref{eq:bellman-GBM-dynamic-normalized-rearranged} becomes the system of ODEs
 \begin{align}
