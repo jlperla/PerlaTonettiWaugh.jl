@@ -57,7 +57,7 @@ Keep in mind that this is just a step in the numerical solution, rather than int
 \subsection{Change of Variables to Normalize and Rescale}
 Solving the above equation for $v(z,t)$ is problematic since the scale goes form approximatively $1$ to $e^{\bar{z}}$, which is very large for a high $\bar{z}$.  To make the solution more stable, we rescale the equation.
 
-Take \cref{eq:sp-GBM-dynamic} pand let $\tilde{v}(z,t) \equiv e^{-\xi z}v(z,t)$.  Then,
+Take \cref{eq:sp-GBM-dynamic} and let $\tilde{v}(z,t) \equiv e^{-\xi z}v(z,t)$.  Then,
 \begin{align}
 	\D[z]v(z,t) &= e^{\xi z}\left(\xi\tilde{v}(z,t) + \D[z]\tilde{v}(z,t) \right)\\
 	\D[zz]v(z,t) &= e^{\xi z}\left(\xi^{2}\tilde{v}(z,t) + 2 \xi\D[z]\tilde{v}(z,t) + \D[zz]\tilde{v}(z,t)  \right)\\	
