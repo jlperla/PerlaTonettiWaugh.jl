@@ -112,7 +112,7 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
     Ω_T = map_Ω(Ω_T_raw)
 
     staticvalues = staticvals([g_T, z_hat_T, Ω_T], params) # Grab static values.
-    @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x = staticvalues
+    @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x, π = staticvalues
     # Recreate the steady-state objects using the solution in g, z_hat, Ω. 
     r_tilde = r - g_T - 0 # g_w = 0 at steady state, equation (13)
     ρ_tilde = r_tilde - (σ - 1)*(μ - g_T + (σ-1)*(υ^2/2)) # (29)

@@ -40,6 +40,14 @@
     res3_num = stationary_numerical(baselineparams(), z, init_x3)
     res_def_num = stationary_numerical(baselineparams(), z)
 
+    # Residuals
+    x = res1_num.x 
+    ω = ω_weights(z, baselineparams().θ, baselineparams().σ-1)
+    value_matching = v_tilde -> v_tilde[1] - dot(v_tilde, ω) + x
+    free_entry = v_tilde -> v_tilde[1] - x*(1-baselineparams().χ)/baselineparams().χ
+    @test value_matching(res1_num.v_tilde) ≈ 0 atol = 1e-9
+    @test free_entry(res1_num.v_tilde) ≈ 0 atol = 1e-9
+
     # Similar to each other. 
     @test res1_num.g ≈ res2_num.g 
     @test res2_num.g ≈ res3_num.g 
