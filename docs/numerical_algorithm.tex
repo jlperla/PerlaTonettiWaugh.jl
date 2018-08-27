@@ -48,7 +48,7 @@ v(z,T) &= \frac1{r-(\mu + \upsilon^2/2) - \upsilon^2/2}\left(e^{z} + \frac1{\nu}
 A solution to this problem is a $g(t)$ and $v(z,t)$ that fulfills the above equations for all $t\in[0,T]$ and $z\in[0,\infty)$
 
 \paragraph{Boundary Value for Discretization}
-While not listed above, in practice another boundary condition (e.g. transversality) is used to ensure that \cref{eq:bellman-GBM-dynamic} can be solved.  In order to use finite differences to solve the problem with $\sigma > 0$, we will need to use some variation on this, or an appeal to viscosity solutions.  For us, a reflecting barrier at a ``large'' $z$ may converge to the correct solution.  For example, at the normalized $\bar{z}$, the boundary value is
+While not listed above, in practice another boundary condition (e.g. transversality) is used to ensure that \cref{eq:bellman-GBM-dynamic} can be solved.  In order to use finite differences to solve the problem with $\upsilon > 0$, we will need to use some variation on this, or an appeal to viscosity solutions.  For us, a reflecting barrier at a ``large'' $z$ may converge to the correct solution.  For example, at the normalized $\bar{z}$, the boundary value is
 \begin{align}
 	\D[z]v(\bar{z},t) &= 0\label{eq:reflecting-GBM-dynamic}
 \end{align}
