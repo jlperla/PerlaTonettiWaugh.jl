@@ -77,9 +77,9 @@ function get_Ω(Ω_T, δ, T)
 end
 
 function get_L_tilde_t(p, t, g_t, z_hat_t)
-    @unpack N, T, θ, κ, ζ, δ, χ, Ω = p
+    @unpack N, T, θ, κ, ζ, δ, χ, Ω, μ, υ = p
     is_t_over_T = ifelse(t >= T, 1, 0)
-    return Ω(t) * ((N-1) * z_hat_t^(-θ)*κ + ζ*θ*g_t + is_t_over_T * ζ * δ / χ)
+    return Ω(t) * ((N-1) * z_hat_t^(-θ)*κ + ζ*θ*(g_t - μ - θ * υ^2/2) + is_t_over_T * ζ * δ / χ)
 end
 
 function get_static_vals(p, t, v_t, g_t, z_hat_t)
