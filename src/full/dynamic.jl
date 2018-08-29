@@ -55,9 +55,6 @@ function fullDAE(params, settings)
         resid[M+1] = v_t[1] + x_t - dot(ω, v_t) # residual (eq:25)
         resid[M+2] = z_hat_t^(σ-1) - κ * d^(σ-1) / π_min_t # export threshold (eq:31) 
         resid[1:M] .-= du[1:M]
-        if (t == T)
-            println(string("first:", norm(resid[1:M]), ", second:", resid[M+1], ", third:", resid[M+2]))
-        end
     end
 
     u = [v_T; g_T; map_z_hat_t_inverse(z_hat_T)]
@@ -94,12 +91,13 @@ function get_static_vals(p, t, v_t, g_t, z_hat_t)
     L_tilde_t = get_L_tilde_t(p, t, g_t, z_hat_t)
     values_future = saved_values.saveval
     L_tilde_t_derivative = (γ-1)*g_t # default when t = T
-    if (t < T)
-        forward_index = findlast(x -> x[1] > t, values_future)
-        t_forward = values_future[forward_index][1]
-        L_tilde_t_forward = values_future[forward_index][2]
-        L_tilde_t_derivative = (L_tilde_t_forward - L_tilde_t) / (t_forward - t)
-    end
+    # if (t < T)
+    #     throw("L_tilde_t_derivative not defined for t < T") # TODO: remove this and implement derivative fully
+    #     forward_index = findlast(x -> x[1] > t, values_future)
+    #     t_forward = values_future[forward_index][1]
+    #     L_tilde_t_forward = values_future[forward_index][2]
+    #     L_tilde_t_derivative = (L_tilde_t_forward - L_tilde_t) / (t_forward - t)
+    # end
 
     # compute other variables evaluated at t (see subsection 2.5 in the note)
     x_t = ζ
