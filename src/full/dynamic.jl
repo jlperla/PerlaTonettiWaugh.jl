@@ -55,6 +55,9 @@ function fullDAE(params, settings)
         resid[M+1] = v_t[1] + x_t - dot(ω, v_t) # residual (eq:25)
         resid[M+2] = z_hat_t^(σ-1) - κ * d^(σ-1) / π_min_t # export threshold (eq:31) 
         resid[1:M] .-= du[1:M]
+        if (t == T)
+            println(string("first:", norm(resid[1:M]), ", second:", resid[M+1], ", third:", resid[M+2]))
+        end
     end
 
     u = [v_T; g_T; map_z_hat_t_inverse(z_hat_T)]
@@ -102,7 +105,7 @@ function get_static_vals(p, t, v_t, g_t, z_hat_t)
     x_t = ζ
     z_bar_t_term = Ω(t) * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat_t^(σ-1-θ))
     π_min_t = (1 - L_tilde_t) / ((σ-1)*z_bar_t_term)
-    π_tilde_t_map = z_val -> (π_min_t * (1+(N-1)*d^(1-σ)*is_z_over_log_z_hat_t(z_val)) - (N-1)*κ*e^(-(σ-1)*z_val)*is_z_over_log_z_hat_t(z_val))
+    π_tilde_t_map = z_val -> (π_min_t * (1+(N-1)*d^(1-σ)*is_z_over_log_z_hat_t(z_val)) - (N-1)*κ*exp(-(σ-1)*z_val)*is_z_over_log_z_hat_t(z_val))
 
     π_tilde_t_by_z = map(π_tilde_t_map, z)
     r_tilde_t = ρ + δ + L_tilde_t_derivative
