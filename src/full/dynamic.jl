@@ -79,6 +79,7 @@ end
 function get_L_tilde_t(p, t, g_t, z_hat_t)
     @unpack N, T, θ, κ, ζ, δ, χ, Ω, μ, υ = p
     is_t_over_T = ifelse(t >= T, 1, 0)
+    is_t_over_T = 1 # FIXIT: later see if removing this line still makes no discontinuity
     return Ω(t) * ((N-1) * z_hat_t^(-θ)*κ + ζ*θ*(g_t - μ - θ * υ^2/2) + is_t_over_T * ζ * δ / χ)
 end
 
