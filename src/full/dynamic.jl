@@ -90,7 +90,7 @@ function get_static_vals(p, t, v_t, g_t, z_hat_t)
     # compute L_tilde_t and its derivative
     L_tilde_t = get_L_tilde_t(p, t, g_t, z_hat_t)
     values_future = saved_values.saveval
-    L_tilde_t_derivative = 0 # TODO: Check if this is a valid default value
+    L_tilde_t_derivative = (γ-1)*g_t # default when t = T
     if (t < T)
         forward_index = findlast(x -> x[1] > t, values_future)
         t_forward = values_future[forward_index][1]
