@@ -56,25 +56,12 @@ function fullDAE(params_T, stationary_sol_T, settings, Ω, T)
     map_z_hat_t = bridge(ℝ, Segment(1, 100))
     map_z_hat_t_inverse = val -> inverse(map_z_hat_t, val) 
     p = @NT(L_1 = L_1_minus, L_2 = L_2, z = z, N = N, M = M, T = T, θ = θ, σ = σ, κ = κ, 
-        ζ = ζ, d = d, ρ = ρ, δ = δ, μ = μ, υ = υ, χ = χ, Ω = Ω, 
+        ζ = ζ, d = d, ρ = ρ, δ = δ, μ = μ, υ = υ, χ = χ, ω = ω, Ω = Ω, 
         map_z_hat_t = map_z_hat_t, saved_values = SavedValues(Float64, Tuple{Float64,Float64})) #Named tuple for parameters.
 
     # Dynamic calculations, defined for each time ∈ t.  
     function f!(resid,du,u,p,t)
-        @unpack L_1, L_2, z, M, T, μ, υ, Ω, map_z_hat_t = p 
-
-        # Carry out calculations. 
-        v_t = u[1:M]
-        g_t = u[M+1]
-        z_hat_t = map_z_hat_t(u[M+2])
-
-        @unpack x_t, π_min_t, π_tilde_t_by_z, ρ_tilde_t = get_static_vals(p, t, v_t, g_t, z_hat_t)
-
-        A_t = ρ_tilde_t*I - (μ - g_t + (σ-1)*υ^2)*L_1 - υ^2/2 * L_2        
-        resid[1:M] = A_t * v_t - π_tilde_t_by_z # system of ODEs (eq:28)
-        resid[M+1] = v_t[1] + x_t - dot(ω, v_t) # residual (eq:25)
-        resid[M+2] = z_hat_t^(σ-1) - κ * d^(σ-1) / π_min_t # export threshold (eq:31) 
-        resid[1:M] .-= du[1:M]
+        resid[:] = calculate_residual_t(M, du, u, p, t)
     end
 
     u = [v_T; g_T; map_z_hat_t_inverse(z_hat_T)]
@@ -82,6 +69,26 @@ function fullDAE(params_T, stationary_sol_T, settings, Ω, T)
     resid_M2 = zeros(M+2)
 
     return DAEProblem(f!, resid_M2, u, (T, 0.0), differential_vars = [trues(v_T); false; false], p)
+end
+
+function calculate_residual_t(M, du, u, p, t)
+    @unpack L_1, L_2, z, M, T, μ, υ, σ, d, κ, ω, Ω, map_z_hat_t = p 
+    resid = zeros(u)
+    
+    # Carry out calculations. 
+    v_t = u[1:M]
+    g_t = u[M+1]
+    z_hat_t = map_z_hat_t(u[M+2])
+
+    @unpack x_t, π_min_t, π_tilde_t_by_z, ρ_tilde_t = get_static_vals(p, t, v_t, g_t, z_hat_t)
+
+    A_t = ρ_tilde_t*I - (μ - g_t + (σ-1)*υ^2)*L_1 - υ^2/2 * L_2        
+    resid[1:M] = A_t * v_t - π_tilde_t_by_z # system of ODEs (eq:28)
+    resid[M+1] = v_t[1] + x_t - dot(ω, v_t) # residual (eq:25)
+    resid[M+2] = z_hat_t^(σ-1) - κ * d^(σ-1) / π_min_t # export threshold (eq:31) 
+    resid[1:M] .-= du[1:M]
+
+    return resid
 end
 
 function get_Ω(Ω_T, δ, T)
