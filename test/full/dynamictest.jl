@@ -11,7 +11,9 @@ z_grid = linspace(z_min,z_max,M) # Since we only care about the grid.
 T_val = 100.0
 
 # Define common objects. 
-baselineparams = @with_kw (ρ = 0.02, σ = 4.2508, N = 10, θ = 5.1269, γ = 1.01, d = 2.3701, κ = 0.013, ζ = 1, η = 0, Theta = 1, χ = 1/(2.1868), υ = 0.0593, μ = 0, δ = 0.053) # Baselines per Jesse. 
+d_0 = 4.5
+d_T = 2.3701
+baselineparams = @with_kw (ρ = 0.02, σ = 4.2508, N = 10, θ = 5.1269, γ = 1.01, κ = 0.013, ζ = 1, η = 0, Theta = 1, χ = 1/(2.1868), υ = 0.0593, μ = 0, δ = 0.053) # Baselines per Jesse. 
 settings = @with_kw (z = z_grid, T = T_val)
 
-solved = solve_dynamic_full(baselineparams(), settings())
+solved = solve_dynamic_full(baselineparams(), settings(), d_0, d_T)

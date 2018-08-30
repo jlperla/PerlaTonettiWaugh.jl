@@ -1,22 +1,50 @@
 
-function solve_dynamic_full(params, settings)
-    @unpack z, T = settings 
+function solve_dynamic_full(params, settings, d_0, d_T)
+    @unpack δ = params
+    @unpack z = settings 
     M = length(z)
-    tstops = 0:1e-03:T # TODO: might need finer grids
-    dae_prob = fullDAE(params, settings)
+
+    # Compute the stationary solution at t = 0 and t = T
+    params_0 = merge(params, @NT(d = d_0)) # parameters to be used at t = 0
+    params_T = merge(params, @NT(d = d_T)) # parameters to be used at t = T
+
+    stationary_sol_0 = stationary_numerical(params_0, z) # solution at t = 0
+    Ω_0 = stationary_sol_0.Ω
+
+    stationary_sol_T = stationary_numerical(params_T, z) # solution at t = T
+    v_T = stationary_sol_T.v_tilde
+    g_T = stationary_sol_T.g
+    z_hat_T = stationary_sol_T.z_hat
+    Ω_T = stationary_sol_T.Ω
+
+    # compute the resulting end time and function of Ω
+    T = (log(Ω_0) - log(Ω_T)) / δ
+    Ω = get_Ω(Ω_T, δ, T)
+
+    # define the corresponding DAE problem
+    dae_prob = fullDAE(params_T, stationary_sol_T, settings, Ω, T)
+
+    # solve solutions
+    tstops = 0:1e-03:T # ensure that time grids are fine enough
     callback = SavingCallback((u,t,integrator)->(t, get_L_tilde_t(p, t, u[M+1], u[M+2])), 
                 SavedValues(Float64, Tuple{Float64,Float64}), 
                 tdir = -1) # need to compute D_t L(t)
 
-    DifferentialEquations.solve(dae_prob, tstops=tstops)
+    DifferentialEquations.solve(dae_prob, tstops=tstops) # solve!
 end
 
 # Implementation of the full model with time-varying objects, represented by DAE
-function fullDAE(params, settings)
+function fullDAE(params_T, stationary_sol_T, settings, Ω, T)
     # Unpack params and settings. 
-    @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params
-    @unpack z, T = settings 
+    @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params_T
+    @unpack z = settings 
     M = length(z)
+
+    # Unpack the stationary solution.
+    v_T = stationary_sol_T.v_tilde
+    g_T = stationary_sol_T.g
+    z_hat_T = stationary_sol_T.z_hat
+    Ω_T = stationary_sol_T.Ω
 
     # Quadrature weighting
     ω = ω_weights(z, θ, σ-1)  # TODO: compute integral for eq 30
@@ -24,15 +52,7 @@ function fullDAE(params, settings)
     # Discretize the operator. 
     z, L_1_minus, L_1_plus, L_2 = rescaled_diffusionoperators(z, σ-1) # L_1_minus ≡ L_1 is the only one we use. 
 
-    # Compute the stationary solution.
-    stationary_sol = stationary_numerical(params, z) # solve a stationary problem, using numerical solutions
-    v_T = stationary_sol.v_tilde
-    g_T = stationary_sol.g
-    z_hat_T = stationary_sol.z_hat
-    Ω_T = stationary_sol.Ω
-
     # Bundle as before. 
-    Ω = get_Ω(Ω_T, δ, T)
     map_z_hat_t = bridge(ℝ, Segment(1, 100))
     map_z_hat_t_inverse = val -> inverse(map_z_hat_t, val) 
     p = @NT(L_1 = L_1_minus, L_2 = L_2, z = z, N = N, M = M, T = T, θ = θ, σ = σ, κ = κ, 
