@@ -82,20 +82,16 @@ function get_p(params_T, stationary_sol_T, settings, Ω, T)
     # Discretize the operator. 
     z, L_1_minus, L_1_plus, L_2 = rescaled_diffusionoperators(z, σ-1) # L_1_minus ≡ L_1 is the only one we use. 
 
-    # Bundle as before. 
-    map_z_hat_t = bridge(ℝ, Segment(1, 100))
-    map_z_hat_t_inverse = val -> inverse(map_z_hat_t, val) 
+    # Bundle as before.
     p = @NT(L_1 = L_1_minus, L_2 = L_2, z = z, N = N, M = M, T = T, θ = θ, σ = σ, κ = κ, 
         ζ = ζ, d = d, ρ = ρ, δ = δ, μ = μ, υ = υ, χ = χ, ω = ω, Ω = Ω,
         v_T = v_T, g_T = g_T, z_hat_T = z_hat_T, Ω_T = Ω_T,
-        map_z_hat_t = map_z_hat_t, 
-        map_z_hat_t_inverse= map_z_hat_t_inverse,
         saved_values = SavedValues(Float64, Tuple{Float64,Float64})) #Named tuple for parameters.
     return p
 end
 
 function calculate_residual_t(du, u, p, t)
-    @unpack L_1, L_2, z, M, T, μ, υ, σ, d, κ, ω, Ω, map_z_hat_t = p 
+    @unpack L_1, L_2, z, M, T, μ, υ, σ, d, κ, ω, Ω = p 
     resid = zeros(u)
     
     # Carry out calculations. 
