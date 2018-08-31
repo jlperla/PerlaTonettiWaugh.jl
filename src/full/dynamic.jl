@@ -1,5 +1,3 @@
-T_Δ_MIN = 1e-03
-
 function solve_dynamic_full(params, settings, d_0, d_T)
     @unpack δ = params
     @unpack z = settings 
@@ -27,13 +25,11 @@ function solve_dynamic_full(params, settings, d_0, d_T)
     dae_prob = fullDAE(params_T, stationary_sol_T, settings, Ω, T, p)
 
     # solve solutions
-    tstops = 0:T_Δ_MIN:T # ensure that time grids are fine enough
-
     callback = SavingCallback((u,t,integrator)->(t, get_L_tilde_t(p, t, u[M+1], u[M+2])), 
                 p.saved_values, 
                 tdir = -1) # need to compute D_t L(t)
-    sol = DifferentialEquations.solve(dae_prob, callback = callback, tstops = tstops) # solve!
-    residuals = calculate_residuals(sol.du, sol.u, p, sol.t)
+    @time sol = DifferentialEquations.solve(dae_prob, callback = callback) # solve!
+    @time residuals = calculate_residuals(sol.du, sol.u, p, sol.t)
 
     return @NT(sol = sol, p = p, residuals = residuals)
 end
@@ -146,8 +142,7 @@ function get_static_vals(p, t, v_t, g_t, z_hat_t)
     values_future = saved_values.saveval
     L_tilde_t_derivative = 0 # default value
     forward_index = findlast(x -> x[1] > t, values_future)
-    # if (forward_index > 0)
-    if (T - t > T_Δ_MIN)
+    if (forward_index > 0)
         t_forward = values_future[forward_index][1]
         L_tilde_t_forward = values_future[forward_index][2]
         L_tilde_t_derivative = (L_tilde_t_forward - L_tilde_t) / (t_forward - t)
