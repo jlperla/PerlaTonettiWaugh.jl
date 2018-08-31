@@ -66,18 +66,6 @@
     resid = calculate_residuals(daeprob, x_func, ω, IDA(), t)
     @test norm(resid) ≈ 0 atol = 1e-5
 
-    # Test the stationary residual is reasonable when using solve_dynamic
-    solved = solve_dynamic(params_func_const, settings(iterations = 10))
-    @test norm(solved.residuals) ≈ 0 atol = 1e+2
-
-    # Solve with time-varying r and π_tilde
-    solved = solve_dynamic(params_func_varying_1, settings(iterations = 10))
-    @test norm(solved.residuals) ≈ 0 atol = 1e+2
-    solved = solve_dynamic(params_func_varying_2, settings(iterations = 10))
-    @test norm(solved.residuals) ≈ 0 atol = 1e+2
-    solved = solve_dynamic(params_func_varying_3, settings(iterations = 10))
-    @test norm(solved.residuals) ≈ 0 atol = 1e+2
-
     # Solve with time-varying r and π_tilde, now with DAE
     daeprob = simpleDAE(params_func_varying_1, settings())
     resid = calculate_residuals(daeprob, x_func, ω, IDA(), t)
@@ -130,7 +118,6 @@
                 if t < 0.0
                 i = findlast(x -> x[1] > t, vals); # Sign is becuase of backwards time. 
                 d = (u - vals[i][2])/(vals[i][1] - t); # Differences for backwards time, per notes. 
-                @show d
             end 
             return 1.01*u 
         end, u0, tspan, p) # To confirm that we have access to saved_values during the runs. 

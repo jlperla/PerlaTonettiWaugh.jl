@@ -9,6 +9,5 @@ QuantEcon
 NamedTuples
 Distributions
 Optim
-ContinuousTransformations
 DifferentialEquations
 DiffEqCallbacks
