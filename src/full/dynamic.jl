@@ -33,9 +33,22 @@ function solve_dynamic_full(params, settings, d_0, d_T)
                 p.saved_values, 
                 tdir = -1) # need to compute D_t L(t)
     sol = DifferentialEquations.solve(dae_prob, callback = callback, tstops = tstops) # solve!
+    residuals = calculate_residuals(sol.du, sol.u, p, sol.t)
 
-    return @NT(sol = sol, p = p)
+    return @NT(sol = sol, p = p, residuals = residuals)
 end
+
+function calculate_residuals(du, u, p, ts)
+    # Calculate the residual at each time point
+    residuals = zeros(length(ts), length(u[1]))
+    
+    for (i, t) in enumerate(ts)
+        residuals[i,:] = calculate_residual_t(du[i], u[i], p, t)
+    end
+
+    return residuals
+end
+
 
 # Implementation of the full model with time-varying objects, represented by DAE
 function fullDAE(params_T, stationary_sol_T, settings, Ω, T, p)
