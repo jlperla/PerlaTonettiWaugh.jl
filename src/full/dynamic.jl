@@ -29,7 +29,7 @@ function solve_dynamic_full(params, settings, d_0, d_T)
     # solve solutions
     tstops = 0:T_Δ_MIN:T # ensure that time grids are fine enough
 
-    callback = SavingCallback((u,t,integrator)->(t, get_L_tilde_t(p, t, u[M+1], p.map_z_hat_t(u[M+2]))), 
+    callback = SavingCallback((u,t,integrator)->(t, get_L_tilde_t(p, t, u[M+1], u[M+2])), 
                 p.saved_values, 
                 tdir = -1) # need to compute D_t L(t)
     sol = DifferentialEquations.solve(dae_prob, callback = callback, tstops = tstops) # solve!
@@ -61,7 +61,7 @@ function fullDAE(params_T, stationary_sol_T, settings, Ω, T, p)
         resid[:] = calculate_residual_t(du, u, p, t)
     end
 
-    u = [p.v_T; p.g_T; p.map_z_hat_t_inverse(p.z_hat_T)]
+    u = [p.v_T; p.g_T; p.z_hat_T]
     du = zeros(M+2)
     resid_M2 = zeros(M+2)
 
@@ -105,7 +105,7 @@ function calculate_residual_t(du, u, p, t)
     # Carry out calculations. 
     v_t = u[1:M]
     g_t = u[M+1]
-    z_hat_t = map_z_hat_t(u[M+2])
+    z_hat_t = u[M+2]
 
     @unpack x_t, π_min_t, π_tilde_t_by_z, ρ_tilde_t = get_static_vals(p, t, v_t, g_t, z_hat_t)
 
