@@ -22,20 +22,40 @@ function solve_dynamic_full(params, settings, d_0, d_T)
     Ω = get_Ω(Ω_T, δ, T)
 
     # define the corresponding DAE problem
-    dae_prob = fullDAE(params_T, stationary_sol_T, settings, Ω, T)
+    p = get_p(params_T, stationary_sol_T, settings, Ω, T)
+    dae_prob = fullDAE(params_T, stationary_sol_T, settings, Ω, T, p)
 
     # solve solutions
-    tstops = 0:1e-03:T # ensure that time grids are fine enough
-    callback = SavingCallback((u,t,integrator)->(t, get_L_tilde_t(p, t, u[M+1], u[M+2])), 
-                SavedValues(Float64, Tuple{Float64,Float64}), 
-                tdir = -1) # need to compute D_t L(t)
+    tstops = 0:1e-02:T # ensure that time grids are fine enough
 
-    DifferentialEquations.solve(dae_prob, tstops=tstops) # solve!
+    callback = SavingCallback((u,t,integrator)->(t, get_L_tilde_t(p, t, u[M+1], p.map_z_hat_t(u[M+2]))), 
+                p.saved_values, 
+                tdir = -1) # need to compute D_t L(t)
+    sol = DifferentialEquations.solve(dae_prob, callback = callback, tstops = tstops) # solve!
+
+    return @NT(sol = sol, p = p)
 end
 
 # Implementation of the full model with time-varying objects, represented by DAE
-function fullDAE(params_T, stationary_sol_T, settings, Ω, T)
+function fullDAE(params_T, stationary_sol_T, settings, Ω, T, p)
     # Unpack params and settings. 
+    @unpack z = settings 
+    M = length(z)
+    
+    # Dynamic calculations, defined for each time ∈ t.  
+    function f!(resid,du,u,p,t)
+        resid[:] = calculate_residual_t(du, u, p, t)
+    end
+
+    u = [p.v_T; p.g_T; p.map_z_hat_t_inverse(p.z_hat_T)]
+    du = zeros(M+2)
+    resid_M2 = zeros(M+2)
+
+    return DAEProblem(f!, resid_M2, u, (T, 0.0), differential_vars = [trues(M); false; false], p)
+end
+
+# return the parameters and functions needed to define dynamics
+function get_p(params_T, stationary_sol_T, settings, Ω, T)
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params_T
     @unpack z = settings 
     M = length(z)
@@ -56,22 +76,15 @@ function fullDAE(params_T, stationary_sol_T, settings, Ω, T)
     map_z_hat_t = bridge(ℝ, Segment(1, 100))
     map_z_hat_t_inverse = val -> inverse(map_z_hat_t, val) 
     p = @NT(L_1 = L_1_minus, L_2 = L_2, z = z, N = N, M = M, T = T, θ = θ, σ = σ, κ = κ, 
-        ζ = ζ, d = d, ρ = ρ, δ = δ, μ = μ, υ = υ, χ = χ, ω = ω, Ω = Ω, 
-        map_z_hat_t = map_z_hat_t, saved_values = SavedValues(Float64, Tuple{Float64,Float64})) #Named tuple for parameters.
-
-    # Dynamic calculations, defined for each time ∈ t.  
-    function f!(resid,du,u,p,t)
-        resid[:] = calculate_residual_t(M, du, u, p, t)
-    end
-
-    u = [v_T; g_T; map_z_hat_t_inverse(z_hat_T)]
-    du = zeros(M+2)
-    resid_M2 = zeros(M+2)
-
-    return DAEProblem(f!, resid_M2, u, (T, 0.0), differential_vars = [trues(v_T); false; false], p)
+        ζ = ζ, d = d, ρ = ρ, δ = δ, μ = μ, υ = υ, χ = χ, ω = ω, Ω = Ω,
+        v_T = v_T, g_T = g_T, z_hat_T = z_hat_T, Ω_T = Ω_T,
+        map_z_hat_t = map_z_hat_t, 
+        map_z_hat_t_inverse= map_z_hat_t_inverse,
+        saved_values = SavedValues(Float64, Tuple{Float64,Float64})) #Named tuple for parameters.
+    return p
 end
 
-function calculate_residual_t(M, du, u, p, t)
+function calculate_residual_t(du, u, p, t)
     @unpack L_1, L_2, z, M, T, μ, υ, σ, d, κ, ω, Ω, map_z_hat_t = p 
     resid = zeros(u)
     
@@ -118,8 +131,9 @@ function get_static_vals(p, t, v_t, g_t, z_hat_t)
     L_tilde_t = get_L_tilde_t(p, t, g_t, z_hat_t)
     values_future = saved_values.saveval
     L_tilde_t_derivative = 0 # default value
-    if (t < 0.0)
-        forward_index = findlast(x -> x[1] > t, values_future)
+    forward_index = findlast(x -> x[1] > t, values_future)
+    if (forward_index > 0)
+
         t_forward = values_future[forward_index][1]
         L_tilde_t_forward = values_future[forward_index][2]
         L_tilde_t_derivative = (L_tilde_t_forward - L_tilde_t) / (t_forward - t)
