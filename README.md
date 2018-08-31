@@ -1,5 +1,4 @@
 [![Build Status](https://travis-ci.com/jlperla/PerlaTonettiWaugh.jl.svg?token=G6ge79qYLosYiRGJBp1G&branch=master)](https://travis-ci.com/jlperla/PerlaTonettiWaugh.jl)
-[![CircleCI](https://circleci.com/gh/jlperla/PerlaTonettiWaugh.jl.svg?style=svg)](https://circleci.com/gh/jlperla/PerlaTonettiWaugh.jl)
 
 # To Install
 - On v0.6, this will require your github ID to install.
