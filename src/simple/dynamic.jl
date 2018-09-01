@@ -19,7 +19,7 @@ function simpleODE(params, settings)
     v_T = L_T \ π_tilde_T.(z) # Solution to the rescaled differential equation.
 
     # Bundle as before. 
-    p = @NT(L_1 = L_1_minus, L_2 = L_2, z = z, g = g, r = r, υ = υ, π_tilde = π_tilde, T = T, μ = μ) #Named tuple for parameters.
+    p = (L_1 = L_1_minus, L_2 = L_2, z = z, g = g, r = r, υ = υ, π_tilde = π_tilde, T = T, μ = μ) #Named tuple for parameters.
 
     # Dynamic calculations, defined for each time ∈ t.  
     function f(du,u,p,t)
@@ -58,7 +58,7 @@ function simpleDAE(params, settings)
     v_T = L_T \ π_tilde_T.(z) # Solution to the rescaled differential equation.
 
     # Bundle as before. 
-    p = @NT(L_1 = L_1_minus, L_2 = L_2, z = z, g = g, r = r, υ = υ, π_tilde = π_tilde, T = T, μ = μ, g_T = g_T, M = M) #Named tuple for parameters.
+    p = (L_1 = L_1_minus, L_2 = L_2, z = z, g = g, r = r, υ = υ, π_tilde = π_tilde, T = T, μ = μ, g_T = g_T, M = M) #Named tuple for parameters.
 
     # Dynamic calculations, defined for each time ∈ t.  
     function f!(resid,du,u,p,t)

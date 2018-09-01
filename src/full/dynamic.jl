@@ -4,8 +4,8 @@ function solve_dynamic_full(params, settings, d_0, d_T)
     M = length(z)
 
     # Compute the stationary solution at t = 0 and t = T
-    params_0 = merge(params, @NT(d = d_0)) # parameters to be used at t = 0
-    params_T = merge(params, @NT(d = d_T)) # parameters to be used at t = T
+    params_0 = merge(params, (d = d_0)) # parameters to be used at t = 0
+    params_T = merge(params, (d = d_T)) # parameters to be used at t = T
 
     stationary_sol_0 = stationary_numerical(params_0, z) # solution at t = 0
     Ω_0 = stationary_sol_0.Ω
@@ -31,7 +31,7 @@ function solve_dynamic_full(params, settings, d_0, d_T)
     @time sol = DifferentialEquations.solve(dae_prob, callback = callback) # solve!
     @time residuals = calculate_residuals(sol.du, sol.u, p, sol.t)
 
-    return @NT(sol = sol, p = p, residuals = residuals)
+    return (sol = sol, p = p, residuals = residuals)
 end
 
 function calculate_residuals(du, u, p, ts)
@@ -83,7 +83,7 @@ function get_p(params_T, stationary_sol_T, settings, Ω, T)
     z, L_1_minus, L_1_plus, L_2 = rescaled_diffusionoperators(z, σ-1) # L_1_minus ≡ L_1 is the only one we use. 
 
     # Bundle as before.
-    p = @NT(L_1 = L_1_minus, L_2 = L_2, z = z, N = N, M = M, T = T, θ = θ, σ = σ, κ = κ, 
+    p = (L_1 = L_1_minus, L_2 = L_2, z = z, N = N, M = M, T = T, θ = θ, σ = σ, κ = κ, 
         ζ = ζ, d = d, ρ = ρ, δ = δ, μ = μ, υ = υ, χ = χ, ω = ω, Ω = Ω,
         v_T = v_T, g_T = g_T, z_hat_T = z_hat_T, Ω_T = Ω_T,
         saved_values = SavedValues(Float64, Tuple{Float64,Float64})) #Named tuple for parameters.
@@ -154,5 +154,5 @@ function get_static_vals(p, t, v_t, g_t, z_hat_t)
     r_tilde_t = ρ + δ + L_tilde_t_derivative
     ρ_tilde_t = r_tilde_t - (σ-1) * (μ - g_t + (σ-1)*υ^2 / 2)
 
-    return @NT(x_t = x_t, π_min_t = π_min_t, π_tilde_t_by_z = π_tilde_t_by_z, ρ_tilde_t = ρ_tilde_t)
+    return (x_t = x_t, π_min_t = π_min_t, π_tilde_t_by_z = π_tilde_t_by_z, ρ_tilde_t = ρ_tilde_t)
 end
