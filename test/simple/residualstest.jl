@@ -3,12 +3,12 @@
     z_min = 0.0 
     z_max = 5.0
     M = 100
-    z_grid = linspace(z_min,z_max,M) # Since we only care about the grid. 
+    z_grid = range(z_min, stop = z_max, length = M) # Since we only care about the grid. 
 
     # Time grid. 
     T_val = 100.0
     N = 10
-    t = linspace(0.0, T_val, N) # For interpolation purposes only. 
+    t = range(0.0, stop = T_val, length = N) # For interpolation purposes only. 
 
     # Constant parameters. 
     υ_val = 0.1

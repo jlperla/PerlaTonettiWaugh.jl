@@ -2,7 +2,7 @@
 z_min = 0.0 
 z_max = 5.0
 M = 1000
-z_grid = linspace(z_min,z_max,M) # Since we only care about the grid. 
+z_grid = range(z_min, stop = z_max, length = M) # Since we only care about the grid. 
 
 # Time
 T_val = 100.0

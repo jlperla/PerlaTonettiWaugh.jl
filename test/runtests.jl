@@ -1,4 +1,4 @@
-using PerlaTonettiWaugh, Base.Test
+using PerlaTonettiWaugh, Test
 using Distributions, Sundials, BenchmarkTools, QuantEcon, Interpolations, Parameters, NamedTuples, NLsolve, Optim, DifferentialEquations, DiffEqCallbacks
 
 tic()
