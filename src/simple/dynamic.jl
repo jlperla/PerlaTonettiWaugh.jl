@@ -77,5 +77,5 @@ function simpleDAE(params, settings)
     resid_M1 = zeros(M+1)
     
 
-    return DAEProblem(f!, resid_M1, u, (T, 0.0), differential_vars = [trues(v_T); false], p)
+    return DAEProblem(f!, resid_M1, u, (T, 0.0), differential_vars = [fill(true, M); false], p)
 end
