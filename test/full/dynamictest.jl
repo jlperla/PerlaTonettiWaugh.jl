@@ -16,6 +16,6 @@ settings = @with_kw (z = z_grid, T = T_val)
 # Solve and compute residuals
 @time solved = solve_dynamic_full(baselineparams(), settings(), d_0, d_T)
 
-# @test mean(mean(solved.residuals[:,1:M], 1)) ≈ 0 atol = 1e-03 # mean residuals for system of ODEs
-# @test mean(mean(solved.residuals[:,(M+1)])) ≈ 0 atol = 1e-03 # mean residuals for value matching condition
-# @test mean(mean(solved.residuals[:,(M+2)])) ≈ 0 atol = 1e-03 # mean residuals for export threshold condition
+@test mean(mean(solved.residuals[:,1:M], dims = 1)) ≈ 0 atol = 1e-03 # mean residuals for system of ODEs
+@test mean(mean(solved.residuals[:,(M+1)])) ≈ 0 atol = 1e-03 # mean residuals for value matching condition
+@test mean(mean(solved.residuals[:,(M+2)])) ≈ 0 atol = 1e-03 # mean residuals for export threshold condition
