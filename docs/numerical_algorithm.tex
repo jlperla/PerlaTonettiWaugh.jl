@@ -21,7 +21,7 @@
 \section{Simplified System of Normalized Equations}
 We start with an artificially simple version of the model with transition dynamics.  In the PTW case, the $\pi(z,t), r(t), x(t)$ will come from  calculations (and the terminal value function is more complicated if required).  But because the calculations of the $\pi(z,t), r(t), x(t)$ can be calculated using a set of painful, but otherwise straightforward, equations, the solution to this simplified setup should be the crux of the problem.
 
-A key simplification maintained in the full PTW transition dynamics: in the transition dynamics experiment we are planning for the paper, the distribution $F(z)$ will remain ant over all time.  Hence, we do not need to jointly solve the KFE as we will be at the stationary level (post-normalization).  This is a major simplification for the transition dynamics case compared to many heterogeneous agent models.
+A key simplification maintained in the full PTW transition dynamics: in the transition dynamics experiment we are planning for the paper, the distribution $F(z)$ will remain constant over all time.  Hence, we do not need to jointly solve the KFE as we will be at the stationary level (post-normalization).  This is a major simplification for the transition dynamics case compared to many heterogeneous agent models.
 
 \subsection{PDE and Boundary Values}
 For $z\in[0,\infty)$.  Assume an exogenously given $\pi(z,t)$ and $x(t)$ function.  We will only look at examples where $F(z) = 1 - e^{-\theta z}$ for all $t$.
@@ -276,7 +276,7 @@ L_1^{-} &\equiv \begin{bmatrix} TODO \end{bmatrix}\\
 \textbf{TODO:} This section should be replaced with the operator composition approach.  Note that the boundary conditions are homogenous, which is why the composition works wit.
 
 \paragraph{Interior of $L$:}
-To better understand the ruction of $A$ and $b$, look at individual rows of $A$ with the ODE.\footnote{Note that the first derivative is not using central differences.  This is to ensure it is upwind, and hence that this is a monotone sequence, even for vanishing $\sigma$.
+To better understand the construction of $A$ and $b$, look at individual rows of $A$ with the ODE.\footnote{Note that the first derivative is not using central differences.  This is to ensure it is upwind, and hence that this is a monotone sequence, even for vanishing $\sigma$.
 
 \begin{align}
 \D[z]v(z_i, t_n) &\approx \frac{v_i^n - v_{i-1}^n}{\Delta_{i,-}}\label{eq:D-v-z}\\
@@ -797,7 +797,7 @@ g_c(t) - g_w(t) &= \D[t]\log\left(1 - \tilde{L}(t)\right)\label{eq:g-c-w-diff}
 % \subsection{Iteratively Solving the LCP}
 % Keep in mind that the $B$ and $q$ in \cref{eq:LCP-two} are functions of the $g$ guess vector.  The iterative solution is to solve this system, calculate the implied threshold from the solution (mapping from $y$ back to $z$ space). then change the $g$ guess until they are all at $0$.
 % \subsection{Solving a MCP}
-% Alternatively, the $g_i$ could be kept as variables in the solution, and the system could be written as a nonlinear system with complementarity raints.  Something like knitro or PATH should be able to handle this sort of setup.
+% Alternatively, the $g_i$ could be kept as variables in the solution, and the system could be written as a nonlinear system with complementarity constraints.  Something like knitro or PATH should be able to handle this sort of setup.
 
 % \subsection{Stationary Version}
 % In the discretization, let $i_0$ be such that $z_{i_0} = 0$.  This is using a uniform grid, rather than the nonuniform setup.  Discretize the stochastic process reflected at a $\underline{z}$ and $\bar{z}$ as,
@@ -848,7 +848,7 @@ g_c(t) - g_w(t) &= \D[t]\log\left(1 - \tilde{L}(t)\right)\label{eq:g-c-w-diff}
 % y^T(B y + q) &= 0 \\
 % y &\geq 0\\
 % B y + q &\geq 0	\\
-% \intertext{Which can be written succinctly with complementarity raints as,}
+% \intertext{Which can be written succinctly with complementarity constraints as,}
 % 0 &\leq (B y + q) \perp y \geq 0
 % \end{align}
 % Note that unlike some LCP problems, $B$ will not be sparse.  The stopping rule here will be when the index for the maximum $y=0$ is exactly at the $i_0$ such that $z_{i_0} = 0$.
@@ -861,7 +861,7 @@ g_c(t) - g_w(t) &= \D[t]\log\left(1 - \tilde{L}(t)\right)\label{eq:g-c-w-diff}
 % \end{itemize}
 % \subsection{Alternative Boundary Value}
 
-% 	Another option is to create a boundary value based on the asymptotic behavior of the value function.  For example, we know for large $z$ and $\pi(z,t) = e^z$ that \cref{eq:v-gbm-sol}  implies $v(z,T) \propto e^z$ for large $z$.  Hence, $\D[z]v(z,T)/v(z,t)$ is ant.  To create a boundary value, add something like the following for a small $\epsilon$, a large $\bar{z}$, and all $t$,
+% 	Another option is to create a boundary value based on the asymptotic behavior of the value function.  For example, we know for large $z$ and $\pi(z,t) = e^z$ that \cref{eq:v-gbm-sol}  implies $v(z,T) \propto e^z$ for large $z$.  Hence, $\D[z]v(z,T)/v(z,t)$ is constant.  To create a boundary value, add something like the following for a small $\epsilon$, a large $\bar{z}$, and all $t$,
 % 	\begin{align}
 % 		\frac{\D[z]v(\bar{z},t)}{v(\bar{z},t)} &= \frac{\D[z]v(\bar{z}- \epsilon,t)}{v(\bar{z}- \epsilon ,t)}\label{eq:rhs-GBM-dynamic-alt}\\
 % 		\intertext{For the alternative discretization of the rhs boundary value in \cref{eq:rhs-GBM-dynamic-alt}}
