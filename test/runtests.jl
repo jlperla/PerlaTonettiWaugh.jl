@@ -1,4 +1,4 @@
-using PerlaTonettiWaugh, Test
+using PerlaTonettiWaugh, Test, LinearAlgebra
 using Distributions, Sundials, BenchmarkTools, QuantEcon, Interpolations, Parameters, NLsolve, Optim, DifferentialEquations, DiffEqCallbacks
 
 @elapsed begin 

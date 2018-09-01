@@ -34,7 +34,7 @@ results = stationary_numerical_simple(simple_params(), z)
 @test results.g ≈ 0.02123967993879092 # Growth rate
 
 # a baseline grid z
-z = unique([range(0.0, stop = 1.0, 300)' range(1.0, stop = 2.0, length = 50)' range(2.0, stop = 7.0, length = 50)'])
+z = unique([range(0.0, stop = 1.0, length = 300)' range(1.0, stop = 2.0, length = 50)' range(2.0, stop = 7.0, length = 50)'])
 results = stationary_numerical_simple(simple_params(), z)
 @test results.g ≈ 0.0211710310711 # Growth rate
 
