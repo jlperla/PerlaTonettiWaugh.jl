@@ -92,7 +92,7 @@ end
 
 function calculate_residual_t(du, u, p, t)
     @unpack L_1, L_2, z, M, T, μ, υ, σ, d, κ, ω, Ω = p 
-    resid = zeros(u)
+    resid = zero(u)
     
     # Carry out calculations. 
     v_t = u[1:M]
