@@ -11,7 +11,7 @@ function stationary_algebraic(params, init_x = defaultiv(params); kwargs...)
     g, z_hat, Ω  = sol.zero
     @assert z_hat > 1 && Ω > 0 && g > 0 # Validate parameters. 
     staticvalues = staticvals(sol.zero, params)
-    return merge(staticvalues, @NT(g = g, z_hat = z_hat, Ω = Ω))
+    return merge(staticvalues, (g = g, z_hat = z_hat, Ω = Ω))
 end 
 
 # Gives us the residuals for a point x in state-space and a set of params. 

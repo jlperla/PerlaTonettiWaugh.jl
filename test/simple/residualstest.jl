@@ -112,7 +112,7 @@
         u0=1/2
         tspan = (0.0,-1.0)
         tstops = [-0.1, -0.2, -0.3, -1.0]
-        p = @NT(saved_values = SavedValues(Float64, Tuple{Float64,Float64}))
+        p = (saved_values = SavedValues(Float64, Tuple{Float64,Float64}))
         odeprob = ODEProblem((u, p, t) -> begin
             vals = p.saved_values.saveval
                 if t < 0.0

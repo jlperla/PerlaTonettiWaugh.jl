@@ -6,7 +6,6 @@ BandedMatrices
 Distributions
 Interpolations
 QuantEcon
-NamedTuples
 Distributions
 Optim
 DifferentialEquations
