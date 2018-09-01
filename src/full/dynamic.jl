@@ -61,7 +61,7 @@ function fullDAE(params_T, stationary_sol_T, settings, Ω, T, p)
     du = zeros(M+2)
     resid_M2 = zeros(M+2)
 
-    return DAEProblem(f!, resid_M2, u, (T, 0.0), differential_vars = [trues(M); false; false], p)
+    return DAEProblem(f!, resid_M2, u, (T, 0.0), differential_vars = [fill(true, M); false; false], p)
 end
 
 # return the parameters and functions needed to define dynamics
