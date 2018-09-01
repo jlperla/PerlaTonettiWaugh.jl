@@ -108,7 +108,7 @@ Test on reascaling method and make comparison
     @test norm(v_rescale_irr-v_rescale_irr_add1,Inf)≈ 0.0 atol = 1e-2
 
     # For the 3rd case
-    indx=maximum(find(z_irregular.<=4))
+    indx=maximum(findall(z_irregular.<=4))
     @test norm(v_int2.(z_irregular[1:indx])-v_tilde_irregular[1:indx],Inf)≈ 0.0 atol = 1e-2
     @test norm(v_int3.(z_irregular[1:indx])-v_tilde_irregular[1:indx],Inf)≈ 0.0 atol = 1e-2
 end 
