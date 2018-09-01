@@ -1,4 +1,4 @@
-# Global constants. 
+# Global ants. 
     # State grid. 
     z_min = 0.0 
     z_max = 5.0
@@ -24,18 +24,18 @@
     r_vector = r_val + 1e-04 * (1 - t / T_val)
     r_int = LinInterp(t, r_vector)
     r_func_varying = t -> r_int(t) # Not idiosyncratic, per intro to doc.    
-    r_func_const = t -> r_val
+    r_func_ = t -> r_val
 
     π_tilde_vector = 1 + 1e-04 * (1 - t / T_val)
     π_tilde_int = LinInterp(t, π_tilde_vector)
     π_tilde_func_varying = (t, z) -> π_tilde_int(t) # Not idiosyncratic, per intro to doc.    
-    π_tilde_func_const = (t, z) -> 1 # Potentially idiosyncratic. 
+    π_tilde_func_ = (t, z) -> 1 # Potentially idiosyncratic. 
     
     # Param generators and param NTs. 
-    params_const = @with_kw (μ = 0.0, υ = υ_val, θ = θ_val, r = r_val, ζ = ζ_val, ξ = ξ_val, π_tilde = z -> 1) 
-    params_func = @with_kw (μ = 0.0, υ = υ_val, θ = θ_val, r = r_func_const, x = x_func, ξ = ξ_val, π_tilde = π_tilde_func_const)
-    params_const = params_const()
-    params_func_const = params_func()
+    params_ = @with_kw (μ = 0.0, υ = υ_val, θ = θ_val, r = r_val, ζ = ζ_val, ξ = ξ_val, π_tilde = z -> 1) 
+    params_func = @with_kw (μ = 0.0, υ = υ_val, θ = θ_val, r = r_func_, x = x_func, ξ = ξ_val, π_tilde = π_tilde_func_)
+    params_ = params_()
+    params_func_ = params_func()
     params_func_varying_1 = params_func(π_tilde = π_tilde_func_varying)
     params_func_varying_2 = params_func(r = r_func_varying)
     params_func_varying_3 = params_func(r = r_func_varying, π_tilde = π_tilde_func_varying)
@@ -43,7 +43,7 @@
     
     # Solutions.
     # Solve for the numerical stationary g_T. 
-    result_ns = stationary_numerical_simple(params_const, z_grid)
+    result_ns = stationary_numerical_simple(params_, z_grid)
     g_stationary = result_ns.g # This is the level. 
 
     # Create the interpolation object of g
@@ -54,15 +54,15 @@
     # Create settings object.
     settings = @with_kw (z = z_grid, T = T_val, g = t -> g_stationary, ode_solve_algorithm = CVODE_BDF(), iterations = 1000)
     # Solve for v with time-varying g
-    resid = calculate_residuals(params_func_const, settings(g = g_func))
+    resid = calculate_residuals(params_func_, settings(g = g_func))
     @test_broken norm(resid) ≈ 0 atol = 1e-10 # since time-varying g is not in equilibrium, we expect broken at this moment
 
     # Test the stationary residual is close to zero.
-    resid = calculate_residuals(params_func_const, settings())
+    resid = calculate_residuals(params_func_, settings())
     @test norm(resid) ≈ 0 atol = 1e-5
     # even by solving with DAE
     ω = ω_weights(z_grid, θ_val, ξ_val)
-    daeprob = simpleDAE(params_func_const, settings())
+    daeprob = simpleDAE(params_func_, settings())
     resid = calculate_residuals(daeprob, x_func, ω, IDA(), t)
     @test norm(resid) ≈ 0 atol = 1e-5
 
@@ -82,7 +82,7 @@
 =#
 
     # tstops. 
-    daeprob = simpleDAE(params_func_const, settings()) # Use the vanilla example.
+    daeprob = simpleDAE(params_func_, settings()) # Use the vanilla example.
     sol_vanilla = DifferentialEquations.solve(daeprob)
     tstops = [1.0, 11.3, 27.4, 30.0] # Arbitrary tstops. 
     sol_tstops = DifferentialEquations.solve(daeprob, tstops = tstops)

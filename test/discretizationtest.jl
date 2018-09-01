@@ -3,11 +3,11 @@
 Test on reascaling method and make comparison
 =#
     # Parameters
-    const ξ = 1.0 # Constant rescaling value. 
-    const r = 0.05 - 0.021 # Constant state multiplier, this is picked close to r-g(t) in the growth model(residualtest.jl)
-    const μ_val2 = 0.005 - 0.021 # Constant drift < 0. This is picked close to γ-g(t) in the growth model
-    const σ_val2 = 0.02 # Constant shock, same, picked close to growth model
-    const π(ξ) = z -> exp(ξ * z) # Rescaled π function. This defines a family of π functions, parametrized by ξ. 
+     ξ = 1.0 # Constant rescaling value. 
+     r = 0.05 - 0.021 # Constant state multiplier, this is picked close to r-g(t) in the growth model(residualtest.jl)
+     μ_val2 = 0.005 - 0.021 # Constant drift < 0. This is picked close to γ-g(t) in the growth model
+     σ_val2 = 0.02 # Constant shock, same, picked close to growth model
+     π(ξ) = z -> exp(ξ * z) # Rescaled π function. This defines a family of π functions, parametrized by ξ. 
 
 # Grid 
     z_min = 0.0
