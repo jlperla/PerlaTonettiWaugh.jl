@@ -4,8 +4,8 @@ function solve_dynamic_full(params, settings, d_0, d_T)
     M = length(z)
 
     # Compute the stationary solution at t = 0 and t = T
-    params_0 = merge(params, (d = d_0)) # parameters to be used at t = 0
-    params_T = merge(params, (d = d_T)) # parameters to be used at t = T
+    params_0 = merge(params, (d = d_0,)) # parameters to be used at t = 0
+    params_T = merge(params, (d = d_T,)) # parameters to be used at t = T
 
     stationary_sol_0 = stationary_numerical(params_0, z) # solution at t = 0
     Ω_0 = stationary_sol_0.Ω
