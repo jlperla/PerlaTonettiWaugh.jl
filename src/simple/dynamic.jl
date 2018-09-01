@@ -28,7 +28,7 @@ function simpleODE(params, settings)
         ((μ+υ^2/2) - g(t)) < 0 || error("μ - g must be strictly negative at all times")
         # Carry out calculations. 
         L = (r(t) - g(t) - ξ*((μ+υ^2/2) - g(t)) - υ^2/2*ξ^2)*I - ((μ+υ^2/2) - g(t) + υ^2*ξ)*L_1 - υ^2/2 * L_2
-        A_mul_B!(du,L,u)
+        du .= L * u
         du .-= π_tilde.(t, z)
     end
 
