@@ -6,4 +6,4 @@ Distributions
 Roots
 Parameters 
 Optim
-QuantEcon >= 0.15.0
+QuantEcon 0.15.0+
