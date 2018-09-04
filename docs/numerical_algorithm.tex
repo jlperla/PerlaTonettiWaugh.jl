@@ -31,13 +31,18 @@ v(0,t) &= \int_{0}^{\infty} v(z,t) F'(z)\diff z - x(t)\label{eq:vm-GBM-dynamic}\
 \D[z]v(0,t) &= 0\label{eq:sp-GBM-dynamic}
 \end{align}
 
-For the exogenous $\pi(z,t)$ and $x(t)$ we require that
+For the exogenous $\pi(z,t)$ and $x(t)$ we require that at some $T$ it becomes stationary and
 \begin{align}
 x(t) &= \zeta,\quad \text{ for all }t \geq T\label{eq:terminal-x}\\
 \pi(z,t) &= e^z,\quad \text{ for all }t \geq T\label{eq:terminal-pi}
 \end{align}
 
-From this, we know that at the terminal state, a large $T$,
+A solution to this problem is a $g(t)$ and $v(z,t)$ that fulfills the above equations for all $t\in[0,T]$ and $z\in[0,\infty)$
+\footnote{While not listed above, in practice another boundary condition (e.g. transversality) is used to ensure that \cref{eq:bellman-GBM-dynamic} can be solved.  In order to use finite differences to solve the problem with $\upsilon > 0$, we will need to use some variation on this, or an appeal to viscosity solutions.  For us, a reflecting barrier at a ``large'' $z$ may converge to the correct solution.  For example, at the normalized $\bar{z}$, the boundary value is
+\begin{align}
+	\D[z]v(\bar{z},t) &= 0\label{eq:reflecting-GBM-dynamic}
+\end{align}
+Keep in mind that this is just a step in the numerical solution, rather than introducing a true reflecting barrier.  We will need to verify that it does not introduce issues by verifying the numeric solution matches the closed form solution for large $\bar{z}$ and compare to the analytic equation for external validity.  Also note that if $\upsilon = 0$, due to the upwind procedure this boundary value would be unnecessary and/or drop out of the solution.}
 \begin{align}
 g \equiv g(T) &= 	(\mu + \upsilon^2/2) + \frac{1-(\theta -1) \zeta  \left(r-(\mu + \upsilon^2/2)\right)}{(\theta -1)^2 \zeta }+ \frac{\upsilon^2}{2}\frac{\theta  \left(\theta(\theta -1)    \left(r-(\mu + \upsilon^2/2)-\frac{\upsilon ^2}{2}\right) \zeta-2\right)+1}{(\theta -1) \left((\theta -1)   \left(r-(\mu + \upsilon^2/2)-\frac{\upsilon ^2}{2}\right)\zeta-1\right)}. \label{eq:g-gbm}\\
 v(z,T) &= \frac1{r-(\mu + \upsilon^2/2) - \upsilon^2/2}\left(e^{z} + \frac1{\nu} e^{-\nu z}\right)\label{eq:v-gbm-sol},
@@ -45,39 +50,7 @@ v(z,T) &= \frac1{r-(\mu + \upsilon^2/2) - \upsilon^2/2}\left(e^{z} + \frac1{\nu}
 \nu &=  \frac{(\mu + \upsilon^2/2) - g}{\upsilon^2} + \sqrt{\left(\frac{g-(\mu + \upsilon^2/2)}{\upsilon^2} \right)^{2} + \frac{r-g}{\upsilon^2/2}}. \label{eq:nu-gbm}
 \end{align}
 
-A solution to this problem is a $g(t)$ and $v(z,t)$ that fulfills the above equations for all $t\in[0,T]$ and $z\in[0,\infty)$
 
-\paragraph{Boundary Value for Discretization}
-While not listed above, in practice another boundary condition (e.g. transversality) is used to ensure that \cref{eq:bellman-GBM-dynamic} can be solved.  In order to use finite differences to solve the problem with $\upsilon > 0$, we will need to use some variation on this, or an appeal to viscosity solutions.  For us, a reflecting barrier at a ``large'' $z$ may converge to the correct solution.  For example, at the normalized $\bar{z}$, the boundary value is
-\begin{align}
-	\D[z]v(\bar{z},t) &= 0\label{eq:reflecting-GBM-dynamic}
-\end{align}
-Keep in mind that this is just a step in the numerical solution, rather than introducing a true reflecting barrier.  We will need to verify that it does not introduce issues by verifying the numeric solution matches the closed form solution for large $\bar{z}$.  Also note that if $\upsilon = 0$, due to the upwind procedure this boundary value would be unnecessary and/or drop out of the solution.
-
-\subsection{Change of Variables to Normalize and Rescale}
-Solving the above equation for $v(z,t)$ is problematic since the scale goes form approximatively $1$ to $e^{\bar{z}}$, which is very large for a high $\bar{z}$.  To make the solution more stable, we rescale the equation.
-
-Take \cref{eq:sp-GBM-dynamic} and let $\tilde{v}(z,t) \equiv e^{-\xi z}v(z,t)$.  Then,
-\begin{align}
-	\D[z]v(z,t) &= e^{\xi z}\left(\xi\tilde{v}(z,t) + \D[z]\tilde{v}(z,t) \right)\\
-	\D[zz]v(z,t) &= e^{\xi z}\left(\xi^{2}\tilde{v}(z,t) + 2 \xi\D[z]\tilde{v}(z,t) + \D[zz]\tilde{v}(z,t)  \right)\\	
-	\D[t]v(z,t) &= e^{\xi z} \D[t] \tilde{v}(z,t)
-\end{align}
-Define $\tilde{\pi}(z,t) = e^{-\xi z}\pi(z,t)$ so that if $\pi(z,t) = e^{\xi z}$ then $\tilde{\pi}(z,t) = 1$.  Substitute into \cref{eq:sp-GBM-dynamic}, divide by $e^{\xi z}$ and simplify,
-
-\begin{align}
-	\left(r - g(t)- \xi((\mu + \upsilon^2/2)-g(t)) - \frac{\upsilon^2}{2}\xi^2\right) \tilde{v}(z,t) &= \tilde{\pi}(z,t) + ((\mu + \upsilon^2/2) + \upsilon^2\xi - g(t)) \D[z] \tilde{v}(z,t) \nonumber \\ &+ \tfrac{\upsilon^2}{2} \D[zz] \tilde{v}(z,t) + \D[t]\tilde{v}(z,t)  \label{eq:bellman-GBM-dynamic-normalized}
-\end{align}
-
-Now, substitute into the boundary condition $\D[z]v(0,t) = 0$ and the artificial reflecting barrier at the top, $\D[z]v(\bar{z},t) = 0$ to find,
-\begin{align}
-	\xi\tilde{v}(0,t) + \D[z]\tilde{v}(0,t ) &= 0\label{eq:new-BC1}\\
-	\xi\tilde{v}(\bar{z},t) + \D[z]\tilde{v}(\bar{z},t) &= 0\label{eq:new-BC2}
-\end{align}	
-Finally, in the value matching condition, $v(0,t) = e^{0}\tilde{v}(0,t)$ where if the $F'(z) = \theta e^{-\theta z}$ then,
-\begin{align}
-	\tilde{v}(0,t) &= \int_{0}^{\infty} \tilde{v}(z,t) \left(e^{\xi z} F'(z)\right) \diff z - x(t)\label{eq:vm-GBM-dynamic-normalized}
-\end{align}	
 
 \subsection{Discretization}
 
@@ -88,12 +61,12 @@ Define a  grid $\set{z_i}_{i=1}^I$ with $z_1 = 0$ and $z_I = \bar{z}$ is a ``lar
 
 Take \cref{eq:bellman-GBM-dynamic-normalized} and rearrange to find,
 \begin{align}
-	\D[t]\tilde{v}(z,t) &= \underbrace{\left(\left(r - g(t)- \xi((\mu + \upsilon^2/2)-g(t)) - \frac{\upsilon^2}{2}\xi^2\right) - ((\mu + \upsilon^2/2) + \upsilon^2\xi - g(t)) \D[z] - \tfrac{\upsilon^2}{2} \D[zz]\right)}_{\equiv \tilde{A}(t)} - \tilde{\pi}(z,t) \label{eq:bellman-GBM-dynamic-normalized-rearranged}\\
+	\D[t]\tilde{v}(z,t) &= \underbrace{\left(\left(r - g(t)- \xi((\mu + \upsilon^2/2)-g(t)) - \frac{\upsilon^2}{2}\xi^2\right) - ((\mu + \upsilon^2/2) + \upsilon^2\xi - g(t)) \D[z] - \tfrac{\upsilon^2}{2} \D[zz]\right)}_{\equiv \tilde{A}(t)}\tilde{v}(z,t)  - \tilde{\pi}(z,t) \label{eq:bellman-GBM-dynamic-normalized-rearranged}\\
 	\intertext{Then with this linear differential operator,}
 	\D[t]\tilde{v}(z,t) &= \tilde{A}(t) \tilde{v}(z,t) - \tilde{\pi}(z,t)
 \end{align}
 
-Assume upwind finite difference discretization of the differential operators subject to the homogenous boundary values, such that \cref{eq:new-BC1,eq:new-BC2} hold, which creates $L^{-}_1$ and $L_2$ from \cref{sec:discretization-operators}.\footnote{Here, we will assert that $((\mu + \upsilon^2/2) + \sigma^2\xi - g(t)) < 0$ so that $L^{-}_1$ is backwards differences, and consequently the correct upwind direction.}
+Assume upwind finite difference discretization of the differential operators subject to the homogenous boundary values, such that \cref{eq:new-BC1,eq:new-BC2} hold, which creates $L^{-}_1$ and $L_2$ from \cref{sec:discretization-operators}.\footnote{Here, we will check that $((\mu + \upsilon^2/2) + \sigma^2\xi - g(t)) < 0$ so that $L^{-}_1$ is backwards differences, and consequently the correct upwind direction.}
 
 The discretization of $\tilde{A}(t)$ subject to the boundary conditions is then
 \begin{align}
@@ -140,7 +113,7 @@ E(t) &\equiv \delta + \D[t]\log \Omega(t)
 Therefore, in the steady-state we must have $E(t) = \delta$.
 
 \subsection{Differential Equations}\label{sec:full-ODE}
-The dynamic set of differential equations is derived in \cref{sec:full-model-derivations}.
+The dynamic set of differential equations (rescaled) is derived in \cref{sec:full-model-derivations}.
 \begin{align}
 %	\tilde{\rho}(t) \tilde{v}(z,t) &= \tilde{\pi}(z,t) + (\mu - g(t) + (\sigma - 1)\upsilon^2)\D[z]\tilde{v}(z,t) + \frac{\upsilon^2}{2}\D[zz]\tilde{v}(z,t) + \D[t]\tilde{v}(z,t)\\
 %	\D[t]\tilde{v}(z,t) &= \left(\tilde{\rho}(t)  - (\mu - g(t) + (\sigma - 1)\upsilon^2)\D[z] - \frac{\upsilon^2}{2}\D[zz]\right)\tilde{v}(z,t) - \tilde{\pi}(z,t) \\	
@@ -368,6 +341,28 @@ With the discretized grid, the integral in \cref{eq:vm-GBM-dynamic} will be calc
 \intertext{If we set $\Delta_{1,-} = 0$ and $\Delta_{I,+} = 0$ then, (Note different than other use of ghost nodes in derivatives, though not sure they enter equations in those other cases)}
 &= \underbrace{\frac1{2}(\Delta_{-} + \Delta_{+})}_{\equiv \omega}\cdot f
 \end{align}
+\subsection{Change of Variables to Normalize and Rescale}\label{eq:simple-rescale}
+Solving \cref{eq:bellman-GBM-dynamic} for $v(z,t)$ is problematic since the scale goes from approximatively $1$ to $e^{\bar{z}}$, which is very large for a high $\bar{z}$.  To make the solution more stable, we rescale the equation.  Take \cref{eq:sp-GBM-dynamic} and let $\tilde{v}(z,t) \equiv e^{-\xi z}v(z,t)$ for some $\xi \geq 0$ chosen for convenience and stability.  Then,
+\begin{align}
+	\D[z]v(z,t) &= e^{\xi z}\left(\xi\tilde{v}(z,t) + \D[z]\tilde{v}(z,t) \right)\\
+	\D[zz]v(z,t) &= e^{\xi z}\left(\xi^{2}\tilde{v}(z,t) + 2 \xi\D[z]\tilde{v}(z,t) + \D[zz]\tilde{v}(z,t)  \right)\\	
+	\D[t]v(z,t) &= e^{\xi z} \D[t] \tilde{v}(z,t)
+\end{align}
+Define $\tilde{\pi}(z,t) = e^{-\xi z}\pi(z,t)$ so that if $\pi(z,t) = e^{\xi z}$ then $\tilde{\pi}(z,t) = 1$.  Substitute into \cref{eq:sp-GBM-dynamic}, divide by $e^{\xi z}$ and simplify,
+
+\begin{align}
+	\left(r - g(t)- \xi((\mu + \upsilon^2/2)-g(t)) - \frac{\upsilon^2}{2}\xi^2\right) \tilde{v}(z,t) &= \tilde{\pi}(z,t) + ((\mu + \upsilon^2/2) + \upsilon^2\xi - g(t)) \D[z] \tilde{v}(z,t) \nonumber \\ &+ \tfrac{\upsilon^2}{2} \D[zz] \tilde{v}(z,t) + \D[t]\tilde{v}(z,t)  \label{eq:bellman-GBM-dynamic-normalized}
+\end{align}
+
+Now, substitute into the boundary condition $\D[z]v(0,t) = 0$ and the artificial reflecting barrier at the top, $\D[z]v(\bar{z},t) = 0$ to find,
+\begin{align}
+	\xi\tilde{v}(0,t) + \D[z]\tilde{v}(0,t ) &= 0\label{eq:new-BC1}\\
+	\xi\tilde{v}(\bar{z},t) + \D[z]\tilde{v}(\bar{z},t) &= 0\label{eq:new-BC2}
+\end{align}	
+Finally, in the value matching condition, $v(0,t) = e^{0}\tilde{v}(0,t)$ where if the $F'(z) = \theta e^{-\theta z}$ then,
+\begin{align}
+	\tilde{v}(0,t) &= \int_{0}^{\infty} \tilde{v}(z,t) \left(e^{\xi z} F'(z)\right) \diff z - x(t)\label{eq:vm-GBM-dynamic-normalized}
+\end{align}	
 
 \section{Derivations of Full Model}\label{sec:full-model-derivations}
 \subsection{Summarizing Normalized Equations}\label{sec:normalized-equations}
@@ -407,6 +402,7 @@ To use these substitutions, start with \cref{eq:normalized-vm-summary} and use t
 	\intertext{where,}
 	\tilde{\rho}(t) &\equiv \tilde{r}(t) - (\sigma - 1)\left(\mu - g(t) + (\sigma - 1)\frac{\upsilon^2}{2} \right)\label{eq:rhot}	
 \end{align}	
+
 
 \subsection{Derivation of Rates of Change and Interest Rates}\label{sec:derive-interest-rates}
 Since consumption is $C(t) := c(t) M(t)$, take logs and differentiate to get,
