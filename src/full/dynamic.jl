@@ -18,7 +18,7 @@ function solve_dynamic_full(params, settings, d_0, d_T)
 
     # compute the resulting end time and function of Ω
     T = (log(Ω_0) - log(Ω_T)) / δ
-    Ω = get_Ω(Ω_T, δ, T)
+    Ω = Ω(t) = t < T ? Ω_0 * exp(-δ*t) : Ω_T
 
     # define the corresponding DAE problem
     p = get_p(params_T, stationary_sol_T, settings, Ω, T)
@@ -108,17 +108,6 @@ function calculate_residual_t(du, u, p, t)
     resid[1:M] .-= du[1:M]
 
     return resid
-end
-
-function get_Ω(Ω_T, δ, T)
-    Ω_0 = Ω_T * exp(δ*T)
-    function Ω(t)
-        if (t < T)
-            return Ω_0 * exp(-δ*t)
-        end
-        return Ω_T
-    end
-    return Ω
 end
 
 function get_L_tilde_t(p, t, g_t, z_hat_t)
