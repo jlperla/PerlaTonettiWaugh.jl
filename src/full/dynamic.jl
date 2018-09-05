@@ -22,13 +22,10 @@ function solve_dynamic_full(params, settings, d_0, d_T)
 
     # define the corresponding DAE problem
     p = get_p(params_T, stationary_sol_T, settings, Ω, T)
-    dae_prob = fullDAE(params_T, stationary_sol_T, settings, Ω, T, p)
+    dae = fullDAE(params_T, stationary_sol_T, settings, Ω, T, p)
 
     # solve solutions
-    callback = SavingCallback((u,t,integrator)->(t, get_L_tilde_t(p, t, u[M+1], u[M+2])), 
-                p.saved_values, 
-                tdir = -1) # need to compute D_t L(t)
-    @time sol = DifferentialEquations.solve(dae_prob, callback = callback) # solve!
+    @time sol = DifferentialEquations.solve(dae.dae_prob, callback = dae.callback) # solve!
     @time residuals = calculate_residuals(sol.du, sol.u, p, sol.t)
 
     return @NT(sol = sol, p = p, residuals = residuals)
@@ -51,17 +48,49 @@ function fullDAE(params_T, stationary_sol_T, settings, Ω, T, p)
     # Unpack params and settings. 
     @unpack z = settings 
     M = length(z)
+    @unpack L_1, L_2, z, M, T, μ, υ, σ, d, κ, ω, θ, δ, χ, N, ζ = p 
+
+    function stationary_equilibrium(g, z_hat, Ω, t)
+        S = (g - μ - θ * υ^2/2)
+        E = t >= T ? δ : 0
+        E = 1 # TODO: remove this later to see if discontinuity is resolved
+        L_tilde = Ω * ((N-1) * z_hat^(-θ)*κ + ζ*θ*S + ζ*E*δ / χ)
+        z_bar = Ω * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ))
+        π_min = (1 - L_tilde) / ((σ-1)*z_bar)
+        return @NT(S = S, E = E, L_tilde = L_tilde, z_bar = z_bar, π_min = π_min)
+    end
+
+    callback = SavingCallback((u,t,integrator)->(t, stationary_equilibrium(u[M+1], u[M+2], Ω(t), t).L_tilde), 
+                                p.saved_values, 
+                                tdir = -1) # need to compute D_t L(t)
     
     # Dynamic calculations, defined for each time ∈ t.  
-    function f!(resid,du,u,p,t)
+    function f!(resid,du,u,p,t) 
         resid[:] = calculate_residual_t(du, u, p, t)
+        resid = zeros(u)
+        
+        # Carry out calculations. 
+        v_t = u[1:M]
+        g_t = u[M+1]
+        z_hat_t = u[M+2]
+        @unpack x_t, π_min_t, π_tilde_t_by_z, ρ_tilde_t = get_static_vals(p, t, v_t, g_t, z_hat_t)
+        A_t = ρ_tilde_t*I - (μ - g_t + (σ-1)*υ^2)*L_1 - υ^2/2 * L_2        
+        resid[1:M] = A_t * v_t - π_tilde_t_by_z # system of ODEs (eq:28)
+        resid[M+1] = v_t[1] + x_t - dot(ω, v_t) # residual (eq:25)
+        resid[M+2] = z_hat_t^(σ-1) - κ * d^(σ-1) / π_min_t # export threshold (eq:31) 
+        resid[1:M] .-= du[1:M]    
     end
 
     u = [p.v_T; p.g_T; p.z_hat_T]
     du = zeros(M+2)
     resid_M2 = zeros(M+2)
 
-    return DAEProblem(f!, resid_M2, u, (T, 0.0), differential_vars = [trues(M); false; false], p)
+    return @NT(dae_prob = DAEProblem(f!, resid_M2, u, (T, 0.0), differential_vars = [trues(M); false; false], p),
+    callback = callback)
+end
+
+function stationary_equilibrium(g, z_hat, Ω_static, t)
+
 end
 
 # return the parameters and functions needed to define dynamics
