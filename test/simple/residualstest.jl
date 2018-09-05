@@ -21,12 +21,12 @@
     # Functional parameters. 
     x_func = t -> ζ_val # Not idiosyncratic, per equation (4)
 
-    r_vector = r_val + 1e-04 * (1 - t / T_val)
+    r_vector = r_val + 1e-02 * (1 - t / T_val)
     r_int = LinInterp(t, r_vector)
     r_func_varying = t -> r_int(t) # Not idiosyncratic, per intro to doc.    
     r_func_const = t -> r_val
 
-    π_tilde_vector = 1 + 1e-04 * (1 - t / T_val)
+    π_tilde_vector = 1 + 1e-02 * (1 - t / T_val)
     π_tilde_int = LinInterp(t, π_tilde_vector)
     π_tilde_func_varying = (t, z) -> π_tilde_int(t) # Not idiosyncratic, per intro to doc.    
     π_tilde_func_const = (t, z) -> 1 # Potentially idiosyncratic. 
@@ -59,22 +59,32 @@
 
     # Test the stationary residual is close to zero.
     resid = calculate_residuals(params_func_const, settings())
+    @test norm(resid[1]) ≈ 0 atol = 1e-5
+    @test norm(resid[end]) ≈ 0 atol = 1e-5
     @test norm(resid) ≈ 0 atol = 1e-5
     # even by solving with DAE
     ω = ω_weights(z_grid, θ_val, ξ_val)
     daeprob = simpleDAE(params_func_const, settings())
     resid = calculate_residuals(daeprob, x_func, ω, IDA(), t)
+    @test norm(resid[1]) ≈ 0 atol = 1e-5
+    @test norm(resid[end]) ≈ 0 atol = 1e-5
     @test norm(resid) ≈ 0 atol = 1e-5
 
     # Solve with time-varying r and π_tilde, now with DAE
     daeprob = simpleDAE(params_func_varying_1, settings())
     resid = calculate_residuals(daeprob, x_func, ω, IDA(), t)
+    @test norm(resid[1]) ≈ 0 atol = 1e-5
+    @test norm(resid[end]) ≈ 0 atol = 1e-5
     @test norm(resid) ≈ 0 atol = 1e-5
     daeprob = simpleDAE(params_func_varying_2, settings())
     resid = calculate_residuals(daeprob, x_func, ω, IDA(), t)
+    @test norm(resid[1]) ≈ 0 atol = 1e-5
+    @test norm(resid[end]) ≈ 0 atol = 1e-5
     @test norm(resid) ≈ 0 atol = 1e-5
     daeprob = simpleDAE(params_func_varying_3, settings())
     resid = calculate_residuals(daeprob, x_func, ω, IDA(), t)
+    @test norm(resid[1]) ≈ 0 atol = 1e-5
+    @test norm(resid[end]) ≈ 0 atol = 1e-5
     @test norm(resid) ≈ 0 atol = 1e-5
 
 #=
