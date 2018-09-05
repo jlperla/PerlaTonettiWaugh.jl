@@ -72,7 +72,7 @@ function simpleDAE(params, settings)
         resid[1:M] .-= du[1:M]
     end
 
-    u = [v_T; 1.0]
+    u = [v_T; g_T]
     du = zeros(M+1)
     resid_M1 = zeros(M+1)
     

@@ -66,7 +66,7 @@
     resid = calculate_residuals(daeprob, x_func, ω, IDA(), t)
     @test norm(resid) ≈ 0 atol = 1e-5
 
-    #= # Solve with time-varying r and π_tilde, now with DAE
+    # Solve with time-varying r and π_tilde, now with DAE
     daeprob = simpleDAE(params_func_varying_1, settings())
     resid = calculate_residuals(daeprob, x_func, ω, IDA(), t)
     @test norm(resid) ≈ 0 atol = 1e-5
@@ -75,7 +75,7 @@
     @test norm(resid) ≈ 0 atol = 1e-5
     daeprob = simpleDAE(params_func_varying_3, settings())
     resid = calculate_residuals(daeprob, x_func, ω, IDA(), t)
-    @test norm(resid) ≈ 0 atol = 1e-5 =#
+    @test norm(resid) ≈ 0 atol = 1e-5
 
 #=
     Test advanced options.

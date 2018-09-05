@@ -1,7 +1,6 @@
-authors = ["arnavs <soodarnav01@gmail.com>",
-            "jlperla <jesseperla@gmail.com>"] # Primary author. 
 name = "PerlaTonettiWaugh"
 uuid = "d2cacc76-b06b-11e8-362b-f18d03a16405"
+authors = ["arnavs <soodarnav01@gmail.com>", "jlperla <jesseperla@gmail.com>"]
 version = "0.1.0"
 
 [deps]
