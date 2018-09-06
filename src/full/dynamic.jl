@@ -1,4 +1,4 @@
-function solve_dynamic_full(params, settings, d_0, d_T)
+function solve_dynamics(params, settings, d_0, d_T)
     @unpack δ = params
     @unpack z = settings 
     M = length(z)
