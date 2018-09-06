@@ -66,8 +66,7 @@ function fullDAE(params_T, stationary_sol_T, settings, Ω, T, p)
     
     # Dynamic calculations, defined for each time ∈ t.  
     function f!(resid,du,u,p,t) 
-        resid[:] = calculate_residual_t(du, u, p, t)
-        resid = zeros(u)
+        resid[:] = zeros(u)
         
         # Carry out calculations. 
         v = u[1:M]
