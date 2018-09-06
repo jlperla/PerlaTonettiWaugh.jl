@@ -18,11 +18,13 @@ function solve_dynamic_full(params, settings, d_0, d_T)
 
     # compute the resulting end time and function of Ω
     T = (log(Ω_0) - log(Ω_T)) / δ
-    Ω = Ω(t) = t < T ? Ω_0 * exp(-δ*t) : Ω_T
+    Ω(t) = t < T ? Ω_0 * exp(-δ*t) : Ω_T
+    E(t) = t >= T ? δ : 0
+    E(t) = 1 # TODO: remove this later to see if discontinuity is resolved
 
     # define the corresponding DAE problem
     p = get_p(params_T, stationary_sol_T, settings, Ω, T)
-    dae = fullDAE(params_T, stationary_sol_T, settings, Ω, T, p)
+    dae = fullDAE(params_T, stationary_sol_T, settings, E, Ω, T, p)
 
     # solve solutions
     @time sol = DifferentialEquations.solve(dae.dae_prob, callback = dae.callback) # solve!
@@ -44,23 +46,21 @@ end
 
 
 # Implementation of the full model with time-varying objects, represented by DAE
-function fullDAE(params_T, stationary_sol_T, settings, Ω, T, p)
+function fullDAE(params_T, stationary_sol_T, settings, E, Ω, T, p)
     # Unpack params and settings. 
     @unpack z = settings 
     M = length(z)
     @unpack L_1, L_2, z, M, T, μ, υ, σ, d, κ, ω, θ, δ, χ, N, ζ, ρ = p 
 
-    function stationary_equilibrium(g, z_hat, Ω, t)
+    function stationary_equilibrium(g, z_hat, E, Ω, t)
         S = (g - μ - θ * υ^2/2)
-        E = t >= T ? δ : 0
-        E = 1 # TODO: remove this later to see if discontinuity is resolved
         L_tilde = Ω * ((N-1) * z_hat^(-θ)*κ + ζ*θ*S + ζ*E*δ / χ)
         z_bar = Ω * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ))
         π_min = (1 - L_tilde) / ((σ-1)*z_bar)
-        return @NT(S = S, E = E, L_tilde = L_tilde, z_bar = z_bar, π_min = π_min)
+        return @NT(S = S, L_tilde = L_tilde, z_bar = z_bar, π_min = π_min)
     end
 
-    callback = SavingCallback((u,t,integrator)->(t, stationary_equilibrium(u[M+1], u[M+2], Ω(t), t).L_tilde), 
+    callback = SavingCallback((u,t,integrator)->(t, stationary_equilibrium(u[M+1], u[M+2], E(t), Ω(t), t).L_tilde), 
                                 p.saved_values, 
                                 tdir = -1) # need to compute D_t L(t)
     
@@ -72,7 +72,7 @@ function fullDAE(params_T, stationary_sol_T, settings, Ω, T, p)
         v = u[1:M]
         g = u[M+1]
         z_hat = u[M+2]
-        @unpack S, E, L_tilde, z_bar, π_min = stationary_equilibrium(g, z_hat, Ω(t), t)
+        @unpack S, L_tilde, z_bar, π_min = stationary_equilibrium(g, z_hat, E(t), Ω(t), t)
         π_tilde(z) = π_min * (1+(N-1)*d^(1-σ)*(z >= log(z_hat))) - (N-1)*κ*exp(-(σ-1)*z)*(z >= log(z_hat))
         # π_tilde(z) = π_min * (1+(N-1)*d^(1-σ)*(z >= z_hat)) - (N-1)*κ*exp(-(σ-1)*z)*(z >= z_hat)
         x = ζ
