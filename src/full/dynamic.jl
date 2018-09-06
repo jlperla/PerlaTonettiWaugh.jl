@@ -95,11 +95,10 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
         resid[1:M] .-= du[1:M]    
     end
 
-    u = [p.v_T; p.g_T; p.z_hat_T]
-    du = zeros(M+2)
-    resid_M2 = zeros(M+2)
+    u0 = [p.v_T; p.g_T; p.z_hat_T]
+    du0 = zeros(M+2)
 
-    return @NT(dae_prob = DAEProblem(f!, resid_M2, u, (T, 0.0), differential_vars = [trues(M); false; false], p),
+    return @NT(dae_prob = DAEProblem(f!, du0, u0, (T, 0.0), differential_vars = [trues(M); false; false], p),
     callback = callback)
 end
 
