@@ -77,7 +77,7 @@ Assume $\delta > 0$.  This trade liberalization experiment will involve a decrea
 
 In order to solve the dynamic problem in \cref{sec:normalized-equations}, we need to calculate $\tilde{r}(t), \pi_{\min}(t),\hat{z}(t),$ etc  as a function of $g(t), \Omega(t),$ and parameters.  As a simplification, we will assume that the cost of adoption is in labor, i.e. $\eta = 0$, so that $x(t) = \zeta$ for all $t$ from (H.11)\footnote{Otherwise, there is an addition system of implicit equations to solve.}  We also assume $\log$ utility, so that $\gamma = 1$.
 
-\subsection{Number of Varieties and Normalized CDF}
+\subsection{Number of Varieties and Entry in Transition}
 
 Define $E(t)$ such that the \textbf{gross} entry flow is $E(t)\Omega(t)$.  Since the \textbf{gross} exit flow is $\delta \Omega(t)$, then the differential equation for $\Omega(t)$ comes from the net flows,
 \begin{align}
@@ -100,22 +100,6 @@ The dynamic set of differential equations (rescaled) is derived in \cref{sec:ful
 \end{align}
 
 
-\subsection{Free-entry Condition}\label{sec:free-entry}
-To determine the $E(t)$ function, we need the free entry complementarity condition to hold.  Note that (D.19) actually holds for any $t$ as well, and does not require the stationary solution.
-
-From (D.19) and using $v(t,0) = \hat{v}(t,0)$, we see that if $E(t) > 0$ that,
-\begin{align}
-v(t,0) &= \zeta \frac{1-\chi}{\chi}
-\end{align}
-
-In the case that there is no entry, and $E(t) = 0$ for some $t$, from (D.18)
-\begin{align}
-\frac{\zeta}{\chi} &> \int_{0}^{\infty}\hat{v}(z,t) f(z) \diff z\\
-\intertext{Use $v(t,0) = \hat{v}(t,0)$ and the adoption definition in \cref{eq:normalized-vm-summary-rescaled},}
-\frac{\zeta}{\chi}&> v(0,t) + \zeta\\
-\intertext{Reorganizing, this means that $E(t) = 0$ if}
-v(0,t) &< \zeta \frac{1-\chi}{\chi}
-\end{align}
 
 
 \subsection{Dynamic Equations and Discretization}
@@ -128,9 +112,7 @@ Discretize this and implement the boundary conditions in the discretized operato
 	v'(t) &= A(t) v(t) - \pi(t)
 \end{align}	
 
-The three variables required in the DAE are $g(t), \hat{z}(t),$ and $\Omega(t)$.\footnote{Note: the $\hat{z}(t)$ \textbf{has no log} taken of it, unlike the $z$.  Hence, to see if a firm exports, we need to check if $z \geq \log(\hat{z}(t))$.  Furthermore, it means that the $\hat{z}$ has a minimum value of $1$.}
-
-The \cref{eq:normalized-vm-summary-rescaled} value matching equation uses the same discretization approach as in the simple example (combining everything into the weights $\omega$, with the truncated exponential distribution, etc.) to discretize as
+The three variables required in the DAE are $g(t), \hat{z}(t),$ and $\Omega(t)$.\footnote{Note: the $\hat{z}(t)$ \textbf{has no log} taken of it, unlike the $z$.  Hence, to see if a firm exports, we need to check if $z \geq \log(\hat{z}(t))$.  Furthermore, it means that the $\hat{z}$ has a minimum value of $1$.}  The \cref{eq:normalized-vm-summary-rescaled} value matching equation uses the same discretization approach as in the simple example (combining everything into the weights $\omega$, with the truncated exponential distribution, etc.) to discretize as
 \begin{align}
 	0 &= v_1(t) - \omega \cdot v(t) + \zeta
 \end{align}
@@ -145,9 +127,11 @@ From \cref{sec:free-entry}, we see that
 	v_1(t) &\leq \zeta \frac{1-\chi}{\chi},\, = \text{ if } E(t) > 0
 \end{align}
 
-See \cref{sec:derive-interest-rates} for a derivation of the interest rates.
 
 \subsection{Static Calculations and Definitions}
+See \cref{sec:derive-interest-rates} for a derivation of the interest rates.
+
+
 Given the current $g$ and $\hat{z}$, the following definitions calculated at every time period, in the following rough order within the function.
 \begin{align}
 	S(t) &\equiv \theta \left( g(t) - \mu - \frac{\upsilon^2}{2}\right)\\
@@ -211,6 +195,63 @@ Finally, in the value matching condition, $\hat{v}(0,t) = e^{0} v(0,t)$ where if
 \end{align}	
 
 \section{Derivations of Full Model}\label{sec:full-model-derivations}
+Note that unlike the PTW paper (for now, at least) we have $z \equiv \log(Z/M(t))$ throughout these notes.
+\subsection{Normalization and Rescaling}
+The value is normalized as $\hat{v}(z,t) = \frac{V(Z,t)}{M(t)w(t)}$.  With this,
+\begin{align}
+V(Z,t) &:= w(t) M(t) \hat{v}(t, \log(Z/M(t)))\label{eq:V-norm}\\
+\intertext{Differentiate \cref{eq:V-norm} with respect to $t$, divide by $w(t)M(t)$, and use the definitions $z := \log(Z/M(t)), g(t):= M'(t)/M(t)$ and $g_w(t) := W'(t)/W(t)$}
+\frac{1}{w(t) M(t)}\D[t]V(Z,t) &= \left(g(t) + g_w(t)\right)\hat{v}(z,t) - g(t)\D[z]\hat{v}(z,t) + \D[t]\hat{v}(z,t) \label{eq:dV-dt}\\
+\intertext{Similarly differentiate \cref{eq:V-norm} with respect to $Z$,}
+\frac{1}{w(t) M(t)}\D[Z]V(Z,t) &= \frac{1}{Z}\D[z]\hat{v}(z,t)\label{eq:dV-dZ}\\
+\frac{1}{w(t) M(t)}\D[ZZ]V(Z,t) &= \frac{1}{Z^2}\left(\D[zz]\hat{v}(z,t)-\D[z]\hat{v}(z,t)\right)\label{eq:dV-dZZ}
+\end{align}
+Take the unnormalized Bellman equation from the paper, repeated below,
+\begin{align}
+r(t) V(Z,t) &=  \Pi(Z,t)+ \left(\mu + \frac{\upsilon^2}{2}\right) Z\, \D[Z]V(Z,t)+ \frac{\upsilon^2}{2} Z^2 \D[ZZ]V(Z,t) +  \D[t]V(Z,t), \label{ap-eq:bellman-deterministic-prenorm}
+\intertext{Use $\pi(z,t) \equiv \frac{\Pi(Z,t)}{w(t)M(t)}$ with the new $z$, divide \cref{ap-eq:bellman-deterministic-prenorm} $w(t)M(t)$ and then use \cref{eq:dV-dt,eq:dV-dZ,eq:dV-dZZ} to find,}
+(r(t) - g(t) - g_w(t))\hat{v}(z,t) &= \pi(z,t) + (\mu - g(t))\D[z]\hat{v}(z,t) + \frac{\upsilon^2}{2}\D[zz]\hat{v}(z,t) + \D[t]\hat{v}(z,t)\label{eq:normalized-bellman}
+\intertext{The smooth pasting condition, $\D[Z]V(M(t),t) = 0$ becomes}
+\D[z]\hat{v}(0,t) &= 0\label{eq:normalized-sp}
+\intertext{Take the value matching condition from the paper and divide by $M(t)w(t)$,}
+\frac{{V}(M(t),t)}{M(t)w(t)} &= \int_{M(t)}^{\infty}\frac{{V}(Z,t)}{M(t)w(t)} \phi(Z,t) \diff Z - \frac{X(t)}{M(t)w(t)}
+\intertext{Substitute for $\hat{v}(z,t)$ and $x(t) \equiv \frac{X(t)}{M(t)w(t)}$,}
+\hat{v}(0,t) &= \int_{0}^{\infty}\hat{v}(\log(Z/M(t)),t) \phi(Z,t) \diff Z - x(t)
+\intertext{With a change of variables in the integral to  $z = \log(Z/M(t))$,}
+\hat{v}(0,t) &= \int_{0}^{\infty}\hat{v}(z,t) f(z,t) \diff z - x(t)\label{eq:normalized-vm}
+\intertext{We will only solve versions of the model starting from a stationary Pareto distribution with tail index $\theta$ and minimum $M(t)$, so if $\phi(Z,t) = \theta M(t)^{\theta}Z^{-(1+\theta)}$ then}
+f(z) &= \theta e^{-\theta z}\label{eq:f-stationary}
+\end{align}
+for all $t$.  It can be proven that this will be maintained by the KFE in the setup for any $g(t)$ sequence.
+
+While this transformation could be done all at once, we will base it off of the previous section for easier comparison.  Define the following
+\begin{align}
+v(z,t) &\equiv e^{-(\sigma - 1)z}\hat{v}(z,t)\label{eq:v-tilde}\\
+\pi(z,t) &\equiv e^{-(\sigma - 1)z}\hat{\pi}(z,t)\\
+\intertext{Use \cref{eq:pi-z-t-summary}}
+\pi(z,t) &= \pi_{\min}(t)\left(1 + (N-1)d^{1-\sigma}\indicator{z \geq \log(\hat{z}(t))}\right) - (N-1)\kappa e^{-(\sigma - 1)z}\indicator{z \geq \log(\hat{z}(t))}	
+\end{align}
+Rearrange and differentiate \cref{eq:v-tilde},
+\begin{align}
+\D[t]\hat{v}(z,t) &= e^{(\sigma - 1)z} \D[t]v(z,t)\label{eq:v-tilde-dt}\\
+\D[z]\hat{v}(z,t) &= e^{(\sigma - 1)z}\left((\sigma - 1) v(z,t) + \D[z]v(z,t) \right)\label{eq:v-tilde-dz}\\
+\D[zz]\hat{v}(z,t) &= e^{(\sigma - 1)z}\left((\sigma - 1)^2 v(z,t) + 2(\sigma - 1)\D[z]v(z,t) + \D[zz]v(z,t)\right)\label{eq:v-tilde-dzz}\\
+\intertext{And at the adoption threshold, from \cref{eq:v-tilde-dz}}
+\D[z]\hat{v}(0,t) &= (\sigma - 1) v(0,t) + \D[z]v(0,t)\label{eq:vt-0-dz}
+\end{align}	
+To use these substitutions, start with \cref{eq:normalized-vm-summary} and use the definition of $f(z)$,
+\begin{align}
+v(0,t) &= \theta \int_{0}^{\infty} v(z,t) e^{(-\theta + \sigma - 1)z} \diff z - x(t)\label{eq:normalized-vm-summary-rescaled}\\
+\intertext{Combine \cref{eq:normalized-sp-summary,eq:vt-0-dz} to get}
+0 &= (\sigma - 1) v(0,t) + \D[z]v(0,t)\label{eq:normalized-sp-summary-rescaled}
+\intertext{Finally, substitute all of the derivatives into \cref{eq:normalized-bellman-summary} and divide by $e^{(\sigma - 1)z}$}	
+\tilde{\rho}(t)  v(z,t) &= \pi(z,t) + (\mu - g(t) + (\sigma - 1)\upsilon^2)\D[z]v(z,t) + \frac{\upsilon^2}{2}\D[zz]v(z,t) + \D[t]v(z,t)
+\intertext{where,}
+\tilde{\rho}(t) &\equiv \tilde{r}(t) - (\sigma - 1)\left(\mu - g(t) + (\sigma - 1)\frac{\upsilon^2}{2} \right)\label{eq:rhot}	
+\end{align}	
+
+
+
 \subsection{Summarizing Normalized Equations}\label{sec:normalized-equations}
 Take as given $g(t),\pi_{\min}(t),\hat{z}(t), x(t)$, and $\tilde{r}(t)$(alternatively $g_w(t)$ and $r(t)$).  Then, the following equations must be fulfilled for all $t$ and  $z$
 \begin{align}
@@ -222,33 +263,26 @@ f(z) &= \theta e^{-\theta z}\label{eq:f-stationary-summary}\\
 	\hat{\pi}(z,t) &= \pi_{\min}(t) e^{(\sigma - 1)z}\left(1 + (N-1)d^{1-\sigma}\indicator{z \geq \log(\hat{z}(t))}\right) - (N-1)\kappa\indicator{z \geq \log(\hat{z}(t))}\label{eq:pi-z-t-summary}
 \end{align}
 
-\subsection{More Rescaling}
-Note: while this transformation could be done all at once, we will base it off of the previous section for easier comparison.  Define the following
-\begin{align}
-	 v(z,t) &\equiv e^{-(\sigma - 1)z}\hat{v}(z,t)\label{eq:v-tilde}\\
-	\pi(z,t) &\equiv e^{-(\sigma - 1)z}\hat{\pi}(z,t)\\
-	\intertext{Use \cref{eq:pi-z-t-summary}}
-	\pi(z,t) &= \pi_{\min}(t)\left(1 + (N-1)d^{1-\sigma}\indicator{z \geq \log(\hat{z}(t))}\right) - (N-1)\kappa e^{-(\sigma - 1)z}\indicator{z \geq \log(\hat{z}(t))}	
-\end{align}
-Rearrange and differentiate \cref{eq:v-tilde},
-\begin{align}
-	\D[t]\hat{v}(z,t) &= e^{(\sigma - 1)z} \D[t]v(z,t)\label{eq:v-tilde-dt}\\
-	\D[z]\hat{v}(z,t) &= e^{(\sigma - 1)z}\left((\sigma - 1) v(z,t) + \D[z]v(z,t) \right)\label{eq:v-tilde-dz}\\
-	\D[zz]\hat{v}(z,t) &= e^{(\sigma - 1)z}\left((\sigma - 1)^2 v(z,t) + 2(\sigma - 1)\D[z]v(z,t) + \D[zz]v(z,t)\right)\label{eq:v-tilde-dzz}\\
-	\intertext{And at the adoption threshold, from \cref{eq:v-tilde-dz}}
-	\D[z]\hat{v}(0,t) &= (\sigma - 1) v(0,t) + \D[z]v(0,t)\label{eq:vt-0-dz}
-\end{align}	
-To use these substitutions, start with \cref{eq:normalized-vm-summary} and use the definition of $f(z)$,
-\begin{align}
-	 v(0,t) &= \theta \int_{0}^{\infty} v(z,t) e^{(-\theta + \sigma - 1)z} \diff z - x(t)\label{eq:normalized-vm-summary-rescaled}\\
-	\intertext{Combine \cref{eq:normalized-sp-summary,eq:vt-0-dz} to get}
-	0 &= (\sigma - 1) v(0,t) + \D[z]v(0,t)\label{eq:normalized-sp-summary-rescaled}
-	\intertext{Finally, substitute all of the derivatives into \cref{eq:normalized-bellman-summary} and divide by $e^{(\sigma - 1)z}$}	
-	\tilde{\rho}(t)  v(z,t) &= \pi(z,t) + (\mu - g(t) + (\sigma - 1)\upsilon^2)\D[z]v(z,t) + \frac{\upsilon^2}{2}\D[zz]v(z,t) + \D[t]v(z,t)
-	\intertext{where,}
-	\tilde{\rho}(t) &\equiv \tilde{r}(t) - (\sigma - 1)\left(\mu - g(t) + (\sigma - 1)\frac{\upsilon^2}{2} \right)\label{eq:rhot}	
-\end{align}	
 
+
+\subsection{Free-entry Condition}\label{sec:free-entry}
+To determine the $E(t)$ function, we need the free entry complementarity condition to hold.  Note that (D.19) actually holds for any $t$ as well, and does not require the stationary solution.
+
+From (D.19) and using $v(t,0) = \hat{v}(t,0)$, we see that if $E(t) > 0$ that,
+\begin{align}
+v(t,0) &= \zeta \frac{1-\chi}{\chi}
+\intertext{In the case that there is no entry, and $E(t) = 0$ for some $t$, from (D.18)}
+v(0,t) &< \zeta \frac{1-\chi}{\chi}
+\end{align}
+
+In the case that there is no entry, and $E(t) = 0$ for some $t$, from (D.18)
+\begin{align}
+\frac{\zeta}{\chi} &> \int_{0}^{\infty}\hat{v}(z,t) f(z) \diff z\\
+\intertext{Use $v(t,0) = \hat{v}(t,0)$ and the adoption definition in \cref{eq:normalized-vm-summary-rescaled},}
+\frac{\zeta}{\chi}&> v(0,t) + \zeta\\
+\intertext{Reorganizing, this means that $E(t) = 0$ if}
+v(0,t) &< \zeta \frac{1-\chi}{\chi}
+\end{align}
 
 \subsection{Derivation of Rates of Change and Interest Rates}\label{sec:derive-interest-rates}
 Since consumption is $C(t) := c(t) M(t)$, take logs and differentiate to get,
