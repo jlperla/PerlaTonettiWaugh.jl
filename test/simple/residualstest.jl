@@ -21,7 +21,7 @@
     # Functional parameters. 
     x_func = t -> ζ_val # Not idiosyncratic, per equation (4)
 
-    r_vector = (r_val + 1e-02) * (1 .- t / T_val)
+    r_vector = r_val .+ (1 + 1e-02) * (1 .- t / T_val)
     r_int = LinInterp(t, r_vector)
     r_func_varying = t -> r_int(t) # Not idiosyncratic, per intro to doc.    
     r_func_ = t -> r_val
