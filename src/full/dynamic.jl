@@ -28,7 +28,7 @@ function solve_dynamics(params, settings, d_0, d_T)
 
     # solve solutions
     @time sol = DifferentialEquations.solve(dae.dae_prob, callback = dae.callback) # solve!
-    @time residuals = calculate_residuals(sol.du, sol.u, p, sol.t)
+    @time residuals = calculate_residuals(dae.dae_prob.f, sol.du, sol.u, p, sol.t)
 
     return @NT(sol = sol, p = p, residuals = residuals)
 end
@@ -116,35 +116,15 @@ function get_p(params_T, stationary_sol_T, settings, Ω, T)
     return p
 end
 
-function calculate_residuals(du, u, p, ts)
+function calculate_residuals(f!, du, u, p, ts)
     # Calculate the residual at each time point
     residuals = zeros(length(ts), length(u[1]))
     
     for (i, t) in enumerate(ts)
-        residuals[i,:] = calculate_residual_t(du[i], u[i], p, t)
+        f!(residuals[i,:], du[i], u[i], p, t)
     end
 
     return residuals
-end
-
-function calculate_residual_t(du, u, p, t)
-    @unpack L_1, L_2, z, M, T, μ, υ, σ, d, κ, ω, Ω = p 
-    residual = zeros(u)
-    
-    # Carry out calculations. 
-    v_t = u[1:M]
-    g_t = u[M+1]
-    z_hat_t = u[M+2]
-
-    @unpack x_t, π_min_t, π_tilde_t_by_z, ρ_tilde_t = get_static_vals(p, t, v_t, g_t, z_hat_t)
-
-    A_t = ρ_tilde_t*I - (μ - g_t + (σ-1)*υ^2)*L_1 - υ^2/2 * L_2        
-    residual[1:M] = A_t * v_t - π_tilde_t_by_z # system of ODEs (eq:28)
-    residual[M+1] = v_t[1] + x_t - dot(ω, v_t) # residual (eq:25)
-    residual[M+2] = z_hat_t^(σ-1) - κ * d^(σ-1) / π_min_t # export threshold (eq:31) 
-    residual[1:M] .-= du[1:M]
-
-    return residual
 end
 
 function get_static_vals(p, t, v_t, g_t, z_hat_t)
