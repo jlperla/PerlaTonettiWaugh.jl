@@ -15,67 +15,62 @@
 \newcommand{\indicator}[1]{\ensuremath{\mathds{1}\left\{{#1}\right\}}}
 
 \begin{document}
-\title{Computational Appendix}
+\title{Equilibrium Technology Diffusion, Trade, and Growth\\Online Computational Appendix\thanks{Thanks...}}
+\author{Jesse Perla \and Christopher Tonetti \and Michael E. Waugh}
 \maketitle
 
 \section{Simplified Growth Model with Transition Dynamics}
 We start with an artificially simple version of the model with transition dynamics, which is nested in BPT2.  In the PTW case, $\pi(z,t), r(t), x(t)$ will come from calculations, but the basic structure is otherwise the same.
 
-A key simplification maintained in the both this simple and the full PTW transition dynamics: in the transition dynamics experiments we are looking at, the normalized distribution $F(z)$ will remain constant over all time.  Hence, we do not need to jointly solve the KFE as we will be at the stationary level (post-normalization).  This is a major simplification for the transition dynamics case compared to many heterogeneous agent models.
+A key simplification maintained in the both this simple and the full PTW transition dynamics: in the transition dynamics experiments we are looking at, the normalized distribution $F(z)$ will remain constant over all time.  Hence, we do not need to jointly solve the KFE as we will be at the stationary level (post-normalization).  This is a major simplification for the transition dynamics case compared to many heterogeneous agent models.  In particular, we will only look at examples where $F(z) = 1 - e^{-\theta z}$ for all $t$.
 
 \subsection{Summary of Equations}
-For $z\in[0,\infty)$.  Assume an exogenously given $\hat{\pi}(z,t)$ and $x(t)$ function.  We will only look at examples where $F(z) = 1 - e^{-\theta z}$ for all $t$.
+Let $Z$ be productivity, where $Z(t) \geq M(t)$.  Let $V(Z,t)$ is the value function prior to normalization, $M(t)$ the endogenous threshold, $\Pi(Z,t)$ the profits, and $X(t)$ the adoption cost.  Then define the normalization that $z \equiv \log(Z/M(t))$, $v(z,t) \equiv \frac{e^{-z}}{M(t)}V(M(t)e^z, t))$, $\pi(z,t) \equiv \frac{e^{-z}}{M(t)}\Pi(M(t)e^z, t))$, and $x(t) \equiv X(t)/M(t)$.  See \cref{sec:simple-derivation} to show that the set of equations is
 \begin{align}
-	(r - g(t)) \hat{v}(z,t) &= \hat{\pi}(z,t) + (\mu- g(t)) \D[z] \hat{v}(z,t) + \tfrac{\upsilon^2}{2} \D[zz] \hat{v}(z,t) + \D[t]\hat{v}(z,t)\label{eq:bellman-GBM-dynamic}	\\
-\hat{v}(0,t) &= \int_{0}^{\infty} \hat{v}(z,t) F'(z)\diff z - x(t)\label{eq:vm-GBM-dynamic}\\
-\D[z]\hat{v}(0,t) &= 0\label{eq:sp-GBM-dynamic}
-\end{align}
+\D[t]v(z,t) &= A(t)v(z,t) - \pi(z,t)\label{eq:simple-summary1}\\
+v(0,t) &= \int_{0}^{\infty}  v(z,t) \left(e^{-z} F'(z)\right) \diff z - x(t)\label{eq:simple-summary2}\\
+\D[z]v(0,t) + v(0,t) &= 0\label{eq:simple-summary3}\\
+\intertext{Where,}
+A(t) &\equiv \left(r - \mu - \frac{\upsilon^2}{2}\right) - (\mu+ \upsilon^2 - g(t)) \D[z] - \tfrac{\upsilon^2}{2} \D[zz]\label{eq:simple-summary4}
+\end{align} 
 
-For the exogenous $\hat{\pi}(z,t)$ and $x(t)$ we require that at some $T$ it becomes stationary and
+\subsection{Steady State}
+For the exogenous $\pi(z,t)$ and $x(t)$ we require that at some $T$ it becomes stationary and
 \begin{align}
 x(t) &= \zeta,\quad \text{ for all }t \geq T\label{eq:terminal-x}\\
-\hat{\pi}(z,t) &= e^z,\quad \text{ for all }t \geq T\label{eq:terminal-pi}
+\pi(z,t) &= 1,\quad \text{ for all }t \geq T\label{eq:terminal-pi}
 \end{align}
 
-A solution to this problem is a $g(t)$ and $\hat{v}(z,t)$ that fulfills the above equations for all $t\in[0,T]$ and $z\in[0,\infty)$
-\footnote{While not listed above, in practice another boundary condition (e.g. transversality) is used to ensure that \cref{eq:bellman-GBM-dynamic} can be solved.  In order to use finite differences to solve the problem with $\upsilon > 0$, we will need to use some variation on this, or an appeal to viscosity solutions.  For us, a reflecting barrier at a ``large'' $z$ may converge to the correct solution.  For example, at the normalized $\bar{z}$, the boundary value is
-\begin{align}
-	\D[z]\hat{v}(\bar{z},t) &= 0\label{eq:reflecting-GBM-dynamic}
-\end{align}
-Keep in mind that this is just a step in the numerical solution, rather than introducing a true reflecting barrier.  We will need to verify that it does not introduce issues by verifying the numeric solution matches the closed form solution for large $\bar{z}$ and compare to the analytic equation for external validity.  Also note that if $\upsilon = 0$, due to the upwind procedure this boundary value would be unnecessary and/or drop out of the solution.}
+\noindent With this, BPT2 gives us that,
+
 \begin{align}
 g \equiv g(T) &= 	\mu+ \frac{1-(\theta -1) \zeta  \left(r-\mu\right)}{(\theta -1)^2 \zeta }+ \frac{\upsilon^2}{2}\frac{\theta  \left(\theta(\theta -1)    \left(r-\mu-\frac{\upsilon ^2}{2}\right) \zeta-2\right)+1}{(\theta -1) \left((\theta -1)   \left(r-\mu-\frac{\upsilon ^2}{2}\right)\zeta-1\right)}. \label{eq:g-gbm}\\
-\hat{v}(z,T) &= \frac1{r-\mu- \upsilon^2/2}\left(e^{z} + \frac1{\nu} e^{-\nu z}\right)\label{eq:v-gbm-sol},
+v(z,T) &= \frac1{r-\mu- \upsilon^2/2}\left(1 + \frac1{\nu} e^{-(\nu + 1) z}\right)\label{eq:v-gbm-sol},
 \intertext{where,}
 \nu &=  \frac{\mu- g}{\upsilon^2} + \sqrt{\left(\frac{g-\mu}{\upsilon^2} \right)^{2} + \frac{r-g}{\upsilon^2/2}}. \label{eq:nu-gbm}
 \end{align}
 
-
+Note: since $v(z,T)$ has been rescaled by $e^{-z}$ above, it is now a \textbf{decreasing} function of $z$.
 
 \subsection{Discretization}
 
-In this subsection we apply a discretization operator and ensure the boundary conditions \cref{eq:new-BC1} and \cref{eq:new-BC2} are fulfilled. 
+In this subsection we apply a discretization operator and ensure the boundary conditions are fulfilled.
 
-Define a  grid $\set{z_i}_{i=1}^I$ with $z_1 = 0$ and $z_I = \bar{z}$ is a ``large'' number (keeping in mind that the effective number is $e^{\bar{z}}$).  After discretizing, we will denote the grid with the variable name, i.e. $z \equiv \set{z_i}_{i=1}^I$.  Given the exogenous $\hat{\pi}(z,t)$ functions, the discretized equivalents is $\hat{\pi}(t) \in \R^I$.
+Define a  grid $\set{z_i}_{i=1}^I$ with $z_1 = 0$ and $z_I = \bar{z}$ is a ``large'' number (keeping in mind that the effective number is $e^{\bar{z}}$).  After discretizing, we will denote the grid with the variable name, i.e. $z \equiv \set{z_i}_{i=1}^I$.  Given the exogenous $\pi(z,t)$ functions, the discretized equivalents is $\pi(t) \in \R^I$.
 
-
-Take \cref{eq:bellman-GBM-dynamic-normalized} and rearrange to find,
+Assume upwind finite difference discretization of the differential operators subject to the homogenous boundary values, such that \cref{eq:new-BC1,eq:new-BC2} hold, which creates $L^{-}_1$ and $L_2$ from \cref{sec:discretization-operators}.\footnote{Here, we will check that $(\mu+ \sigma^2 - g(t)) < 0$ so that $L^{-}_1$ is backwards differences, and consequently the correct upwind direction.}  The discretization of $A(t)$ subject to the boundary conditions is then (in the interior)
 \begin{align}
-	\D[t]v(z,t) &= \underbrace{\left(\left(r - g(t)- \xi(\mu-g(t)) - \frac{\upsilon^2}{2}\xi^2\right) - (\mu+ \upsilon^2\xi - g(t)) \D[z] - \tfrac{\upsilon^2}{2} \D[zz]\right)}_{\equiv A(t)}v(z,t)  - \pi(z,t) \label{eq:bellman-GBM-dynamic-normalized-rearranged}\\
-	\intertext{Then with this linear differential operator,}
-	\D[t]v(z,t) &= A(t) v(z,t) - \pi(z,t)
+A(t) &\equiv \left(r - \mu - \frac{\upsilon^2}{2}\right) I - (\mu + \upsilon^2 - g(t)) L^{-}_1 - \tfrac{\upsilon^2}{2} L_2\label{eq:A-def-simple}
 \end{align}
-
-Assume upwind finite difference discretization of the differential operators subject to the homogenous boundary values, such that \cref{eq:new-BC1,eq:new-BC2} hold, which creates $L^{-}_1$ and $L_2$ from \cref{sec:discretization-operators}.\footnote{Here, we will check that $(\mu+ \sigma^2\xi - g(t)) < 0$ so that $L^{-}_1$ is backwards differences, and consequently the correct upwind direction.}
-
-The discretization of $A(t)$ subject to the boundary conditions is then
+and the PDE in \cref{eq:simple-summary1} becomes the system of ODEs
 \begin{align}
-A(t) &\equiv \left(r - g(t)- \xi(\mu-g(t)) - \frac{\upsilon^2}{2}\xi^2\right) I - (\gamma + \upsilon^2\xi - g(t)) L^{-}_1 - \tfrac{\upsilon^2}{2} L_2\label{eq:A-def-simple}
+	v'(t) &= A(t) v(t) - \pi(t)\label{eq:discretized-simple}\\
+	\intertext{Along with the value matching condition}
+	v_1(t) &= \omega \cdot v(t) - x(t)\label{eq:discretized-simple-vm}
 \end{align}
-and the PDE in \cref{eq:bellman-GBM-dynamic-normalized-rearranged} becomes the system of ODEs
-\begin{align}
-	v'(t) &= A(t) v(t) - \pi(t)
-\end{align}	
+Where the $\omega$ come from \cref{sec:quadrature} and combines quadrature nodes with the the $F(z)$.
+
+To find the stationary solution at $T$, solve the system of equations $A(T) v(t) = \pi(T)$ and $v_1(T) = \omega \cdot v(T) - x(T)$ for the $v(T)$ and $g$ with a nonlinear solver.\footnote{Or by fixing a $g$, solving the linear \cref{eq:discretized-simple} and then picking the $g$ to equate \cref{eq:discretized-simple-vm} }  You can also compare to the analytic solution in \cref{eq:simple-summary1}.
 
 \section{Full Growth Model with Transition Dynamics}
 Assume $\delta > 0$.  This trade liberalization experiment will involve a decrease in $d$ as the trade liberalization, with no other changes.  We can calculate the two steady states (using existing code) and examine the transition dynamics.
@@ -176,7 +171,22 @@ To calculate the $\D[t]\log\left(1 - \tilde{L}(t)\right)$ you need to store the 
 \numberwithin{equation}{section}
 \let\normalsize\small
 \small
-\section{Derivations for Simple Model}
+\section{Derivations for Simple Model}\label{sec:simple-derivation}
+\subsection{Equations Prior to Rescaling}
+
+Copying from BPT2 (but renaming the $v$ function to $\hat{v}$ here), assume an exogenously given $\hat{\pi}(z,t)$ and $x(t)$ function.  We will only look at examples where $F(z) = 1 - e^{-\theta z}$ for all $t$.
+\begin{align}
+(r - g(t)) \hat{v}(z,t) &= \hat{\pi}(z,t) + (\mu- g(t)) \D[z] \hat{v}(z,t) + \tfrac{\upsilon^2}{2} \D[zz] \hat{v}(z,t) + \D[t]\hat{v}(z,t)\label{eq:bellman-GBM-dynamic}	\\
+\hat{v}(0,t) &= \int_{0}^{\infty} \hat{v}(z,t) F'(z)\diff z - x(t)\label{eq:vm-GBM-dynamic}\\
+\D[z]\hat{v}(0,t) &= 0\label{eq:sp-GBM-dynamic}
+\end{align}
+
+A solution to this problem is a $g(t)$ and $\hat{v}(z,t)$ that fulfills the above equations for all $t\in[0,T]$ and $z\in[0,\infty)$.  While not listed above, in practice another boundary condition (e.g. transversality) is used to ensure that \cref{eq:bellman-GBM-dynamic} can be solved.  In order to use finite differences to solve the problem with $\upsilon > 0$, we will need to use some variation on this, or an appeal to viscosity solutions.  For us, a reflecting barrier at a ``large'' $z$ may converge to the correct solution.  For example, at the normalized $\bar{z}$, the boundary value is
+	\begin{align}
+	\D[z]\hat{v}(\bar{z},t) &= 0\label{eq:reflecting-GBM-dynamic}
+	\end{align}
+	Keep in mind that this is just a step in the numerical solution, rather than introducing a true reflecting barrier.  We will need to verify that it does not introduce issues by verifying the numeric solution matches the closed form solution for large $\bar{z}$ and compare to the analytic equation for external validity.  Also note that if $\upsilon = 0$, due to the upwind procedure this boundary value would be unnecessary and/or drop out of the solution.
+
 \subsection{Change of Variables to Normalize and Rescale}\label{eq:simple-rescale}
 Solving \cref{eq:bellman-GBM-dynamic} for $\hat{v}(z,t)$ is problematic since the scale goes from approximatively $1$ to $e^{\bar{z}}$, which is very large for a high $\bar{z}$.  To make the solution more stable, we rescale the equation.  Take \cref{eq:sp-GBM-dynamic} and let $ v(z,t) \equiv e^{-\xi z}\hat{v}(z,t)$ for some $\xi \geq 0$ chosen for convenience and stability.  Then,
 \begin{align}
