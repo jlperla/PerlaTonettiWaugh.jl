@@ -126,35 +126,3 @@ function calculate_residuals(f!, du, u, p, ts)
 
     return residuals
 end
-
-function get_static_vals(p, t, v_t, g_t, z_hat_t)
-    @unpack z, N, T, θ, σ, κ, ζ, d, ρ, δ, υ, μ, χ, Ω, saved_values = p
-
-    is_z_over_log_z_hat_t = z_val -> ifelse(z_val >= log(z_hat_t), 1, 0)
-
-    # compute L_tilde_t and its derivative
-    is_t_over_T = ifelse(t >= T, 1, 0)
-    is_t_over_T = 1 # FIXIT: later see if removing this line still makes no discontinuity
-    L_tilde_t = Ω(t) * ((N-1) * z_hat_t^(-θ)*κ + ζ*θ*(g_t - μ - θ * υ^2/2) + is_t_over_T * ζ * δ / χ)
-
-    values_future = saved_values.saveval
-    L_tilde_t_derivative = 0 # default value
-    forward_index = findlast(x -> x[1] > t, values_future)
-    if (forward_index > 0)
-        t_forward = values_future[forward_index][1]
-        L_tilde_t_forward = values_future[forward_index][2]
-        L_tilde_t_derivative = (L_tilde_t_forward - L_tilde_t) / (t_forward - t)
-    end
-
-    # compute other variables evaluated at t (see subsection 2.5 in the note)
-    x_t = ζ
-    z_bar_t_term = Ω(t) * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat_t^(σ-1-θ))
-    π_min_t = (1 - L_tilde_t) / ((σ-1)*z_bar_t_term)
-    π_tilde_t_map = z_val -> (π_min_t * (1+(N-1)*d^(1-σ)*is_z_over_log_z_hat_t(z_val)) - (N-1)*κ*exp(-(σ-1)*z_val)*is_z_over_log_z_hat_t(z_val))
-
-    π_tilde_t_by_z = map(π_tilde_t_map, z)
-    r_tilde_t = ρ + δ + L_tilde_t_derivative
-    ρ_tilde_t = r_tilde_t - (σ-1) * (μ - g_t + (σ-1)*υ^2 / 2)
-
-    return @NT(x_t = x_t, π_min_t = π_min_t, π_tilde_t_by_z = π_tilde_t_by_z, ρ_tilde_t = ρ_tilde_t)
-end
