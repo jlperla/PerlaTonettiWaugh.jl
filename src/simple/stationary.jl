@@ -13,7 +13,7 @@ function stationary_algebraic_simple(params)
     v(z) = (r - γ - υ^2/2)^(-1) * (exp(z) + 1/ν * exp(-ν*z)); # Equation 7
     # Validate parameters.
     # Return.
-    return @NT(g = g, ν = ν, v = v)
+    return (g = g, ν = ν, v = v)
 end
 
 # Numerically solve for the stationary solution as a system of equations.
@@ -43,5 +43,5 @@ function stationary_numerical_simple(params, z)
     # Recreate what the ODE returned for the value function.
     L_T = (r - g_T - ξ*((μ + υ^2/2) - g_T) - υ^2/2*ξ^2)*I - ((μ + υ^2/2) - g_T + υ^2*ξ)*L_1_minus - υ^2/2 * L_2 # Construct the aggregate operator.
     v_T = L_T \ π_tilde.(z) # Solution to the rescaled differential equation.
-    return @NT(g = g_T, v = v_T)
+    return (g = g_T, v = v_T)
 end

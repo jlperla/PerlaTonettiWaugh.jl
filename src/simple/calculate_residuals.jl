@@ -8,7 +8,7 @@ function calculate_residuals(params, settings) # To keep the params consistent w
     ω = ω_weights(z, θ, ξ)
 
     # Grid for t (default to have the same length as the one for z)
-    ts = linspace(0.0, T, length(z))
+    ts = range(0.0, stop = T, length = length(z))
 
     # Define and solve dynamic ODE. 
     ode_prob = simpleODE(params, settings)

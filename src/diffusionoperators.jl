@@ -3,7 +3,7 @@
 =#
 
 # Regular grids. 
-function rescaled_diffusionoperators(x::Range, ξ)
+function rescaled_diffusionoperators(x::AbstractRange, ξ)
     # Insert algebra here. 
     Δ = step(x)
     M = length(x)
@@ -71,7 +71,7 @@ end
 
 
 # Method for regular grids. 
-function diffusionoperators(x::Range)
+function diffusionoperators(x::AbstractRange)
     Δ = step(x)
     M = length(x)
 

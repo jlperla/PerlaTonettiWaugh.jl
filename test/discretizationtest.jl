@@ -3,17 +3,17 @@
 Test on reascaling method and make comparison
 =#
     # Parameters
-    const ξ = 1.0 # Constant rescaling value. 
-    const r = 0.05 - 0.021 # Constant state multiplier, this is picked close to r-g(t) in the growth model(residualtest.jl)
-    const μ_val2 = 0.005 - 0.021 # Constant drift < 0. This is picked close to γ-g(t) in the growth model
-    const σ_val2 = 0.02 # Constant shock, same, picked close to growth model
-    const π(ξ) = z -> exp(ξ * z) # Rescaled π function. This defines a family of π functions, parametrized by ξ. 
+     ξ = 1.0 # Constant rescaling value. 
+     r = 0.05 - 0.021 # Constant state multiplier, this is picked close to r-g(t) in the growth model(residualtest.jl)
+     μ_val2 = 0.005 - 0.021 # Constant drift < 0. This is picked close to γ-g(t) in the growth model
+     σ_val2 = 0.02 # Constant shock, same, picked close to growth model
+     π(ξ) = z -> exp(ξ * z) # Rescaled π function. This defines a family of π functions, parametrized by ξ. 
 
 # Grid 
     z_min = 0.0
     z_max = 5.0
     M = 200
-    z = linspace(z_min,z_max,M)# Some partition of [0, 5].
+    z = range(z_min, stop = z_max, length = M)# Some partition of [0, 5].
 
 # Vanilla (old) solution 
     z,  L_1, L_1_plus, L_2 = diffusionoperators(z) # Regular code. 
@@ -36,7 +36,7 @@ Test on reascaling method and make comparison
     @test_broken norm(v-v_rescale,Inf) ≈ 0.0 atol = 1e-2
 
     # Check for greater stability with the rescaled problem. 
-    z_alt = linspace(z_min,z_max,M+100)
+    z_alt = range(z_min, stop = z_max, length = M+100)
     z_alt, L_1_tilde, L_1_plus_tilde, L_2_tilde = rescaled_diffusionoperators(z_alt, ξ)
     # modify r and μ_val2 ,π to match (13)
     r_tilde = r - ξ*μ_val2 - σ_val2^2/2*ξ^2;
@@ -62,13 +62,13 @@ Test on reascaling method and make comparison
     @test_broken norm(v_alt-v_int_old.(z_alt), Inf) ≈ 0.0 atol = 2e-1
 
 #Tests for stability of irregular grid
-    z_irregular=unique([linspace(z_min, 1.0, 500)' linspace(1.0, z_max, 201)'])
+    z_irregular=unique([range(z_min, stop = 1.0, length = 500)' range(1.0, stop = z_max, length = 201)'])
     # add point in the bottom
-    z_irregular_add1=unique([linspace(z_min, 1.0, 700)' linspace(1.0, z_max, 201)'])
+    z_irregular_add1=unique([range(z_min, stop = 1.0, length = 700)' range(1.0, stop = z_max, length = 201)'])
     # add point in the top
-    z_irregular_add2=unique([linspace(z_min, 1.0, 500)' linspace(1.0, z_max, 301)'])
+    z_irregular_add2=unique([range(z_min, stop = 1.0, length = 500)' range(1.0, stop = z_max, length = 301)'])
     # change z_max
-    z_irregular_add3=unique([linspace(z_min, 1.0, 500)' linspace(1.0, z_max+1.0, 201)'])
+    z_irregular_add3=unique([range(z_min, stop = 1.0, length = 500)' range(1.0, stop = z_max+1.0, length = 201)'])
 
     #Rescaling method
     z_irregular, L_1_tilde, L_1_plus_tilde, L_2_tilde = rescaled_diffusionoperators(z_irregular, ξ)
@@ -108,7 +108,7 @@ Test on reascaling method and make comparison
     @test norm(v_rescale_irr-v_rescale_irr_add1,Inf)≈ 0.0 atol = 1e-2
 
     # For the 3rd case
-    indx=maximum(find(z_irregular.<=4))
+    indx=maximum(findall(z_irregular.<=4))
     @test norm(v_int2.(z_irregular[1:indx])-v_tilde_irregular[1:indx],Inf)≈ 0.0 atol = 1e-2
     @test norm(v_int3.(z_irregular[1:indx])-v_tilde_irregular[1:indx],Inf)≈ 0.0 atol = 1e-2
 end 
@@ -118,7 +118,7 @@ end
     ξ_1 = 1.0 
     ξ_2 = 2.0
     z_uniform = 1:5 
-    z_irregular = [1, 2, 3, 4, 5] # This is an AbstractArray and not a Range, so it calls the right method. 
+    z_irregular = [1, 2, 3, 4, 5] # This is an AbstractArray and not a AbstractRange, so it calls the right method. 
 
     # Test for uniform grid code, ξ_1.
     σ = 1; μ = -1;
@@ -128,7 +128,7 @@ end
     row3 = [0.0, 1.5, -2.0, 0.5, 0.0]'
     row4 = [0.0, 0.0, 1.5, -2.0, 0.5]'
     row5 = [0.0, 0.0, 0.0, 1.5, -1 + (-2 + 1-ξ_1)/2]'
-    @test μ * L_1_minus + σ^2/2 * L_2 == cat(1, row1, row2, row3, row4, row5) # only test for backwards now
+    @test μ * L_1_minus + σ^2/2 * L_2 == cat(row1, row2, row3, row4, row5, dims = 1) # only test for backwards now
     # Test for irregular grid code, ξ_1. 
     # Test irregular grid function produce proper regular grid
     σ = 1; μ = -1;
@@ -138,7 +138,7 @@ end
     row3 = [0.0, 1.5, -2.0, 0.5, 0.0]'
     row4 = [0.0, 0.0, 1.5, -2.0, 0.5]'
     row5 = [0.0, 0.0, 0.0, 1.5, -1 + (-2 + 1-ξ_1)/2]'
-    @test μ * L_1_minus + σ^2/2 * L_2 == cat(1, row1, row2, row3, row4, row5) # only test for backwards now
+    @test μ * L_1_minus + σ^2/2 * L_2 == cat(row1, row2, row3, row4, row5, dims = 1) # only test for backwards now
     # Uniform ... ξ_2. 
     σ = 1; μ = -1;
     z,  L_1_minus, L_1_plus, L_2 = rescaled_diffusionoperators(z_uniform,ξ_2) # Dispatches on the discrete code. 
@@ -147,7 +147,7 @@ end
     row3 = [0.0, 1.5, -2.0, 0.5, 0.0]'
     row4 = [0.0, 0.0, 1.5, -2.0, 0.5]'
     row5 = [0.0, 0.0, 0.0, 1.5, -1 + (-2 + 1-ξ_2)/2]'
-    @test μ * L_1_minus + σ^2/2 * L_2 == cat(1, row1, row2, row3, row4, row5) # only test for backwards now
+    @test μ * L_1_minus + σ^2/2 * L_2 == cat(row1, row2, row3, row4, row5, dims = 1) # only test for backwards now
     # Irregular ... ξ_2.  
     σ = 1; μ = -1;
     z,  L_1_minus, L_1_plus, L_2 = rescaled_diffusionoperators(z_irregular,ξ_2) # Dispatches on the discrete code. 
@@ -156,10 +156,10 @@ end
     row3 = [0.0, 1.5, -2.0, 0.5, 0.0]'
     row4 = [0.0, 0.0, 1.5, -2.0, 0.5]'
     row5 = [0.0, 0.0, 0.0, 1.5, -1 + (-2 + 1-ξ_2)/2]'
-    @test μ * L_1_minus + σ^2/2 * L_2 == cat(1, row1, row2, row3, row4, row5) # only test for backwards now
+    @test μ * L_1_minus + σ^2/2 * L_2 == cat(row1, row2, row3, row4, row5, dims = 1) # only test for backwards now
 
     # Test for error handling on ξ (i.e., if ξ can't be negative or is bounded or something like that) for each method. 
-    # Test for proper dispatch (i.e., type of the first return from uniform is a Range).
+    # Test for proper dispatch (i.e., type of the first return from uniform is a AbstractRange).
     
 # Unscaled. 
     ## REGULAR DISCRETIZATION
@@ -170,19 +170,19 @@ end
     row3 = [0.0, 1.5, -2.0, 0.5, 0.0]'
     row4 = [0.0, 0.0, 1.5, -2.0, 0.5]'
     row5 = [0.0, 0.0, 0.0, 1.5, -1.5]'
-    @test μ * L_1_minus + σ^2/2 * L_2 == cat(1, row1, row2, row3, row4, row5)
+    @test μ * L_1_minus + σ^2/2 * L_2 == cat(row1, row2, row3, row4, row5, dims = 1)
     @test -μ * L_1_plus + σ^2/2 * L_2 == [-1.5 1.5 0.0 0.0 0.0; 0.5 -2.0 1.5 0.0 0.0; 0.0 0.50 -2.0 1.50 0.0; 0.0 0.0 0.50 -2.0 1.50; 0.0 0.0 0.0 0.50 -0.50] # Test for positive drift. 
 
     ## IRREGULAR DISCRETIZATION
     # Test that we properly generalize the regular case 
-    z = [1, 2, 3, 4, 5] # This is an AbstractArray and not a Range, so it calls the right method. 
+    z = [1, 2, 3, 4, 5] # This is an AbstractArray and not a AbstractRange, so it calls the right method. 
     z,  L_1_minus, L_1_plus, L_2 = diffusionoperators(z)
     row1 = [-0.5, 0.5, 0.0, 0.0, 0.0]'
     row2 = [1.5, -2.0, 0.5, 0.0, 0.0]'
     row3 = [0.0, 1.5, -2.0, 0.5, 0.0]'
     row4 = [0.0, 0.0, 1.5, -2.0, 0.5]'
     row5 = [0.0, 0.0, 0.0, 1.5, -1.5]'
-    @test μ * L_1_minus + σ^2/2 * L_2 == cat(1, row1, row2, row3, row4, row5)
+    @test μ * L_1_minus + σ^2/2 * L_2 == cat(row1, row2, row3, row4, row5, dims = 1)
     @test -μ * L_1_plus + σ^2/2 * L_2 == [-1.5 1.5 0.0 0.0 0.0; 0.5 -2.0 1.5 0.0 0.0; 0.0 0.50 -2.0 1.50 0.0; 0.0 0.0 0.50 -2.0 1.50; 0.0 0.0 0.0 0.50 -0.50] # Test for positive drift. 
 
     # Test that we properly mirror the MATLAB on strictly irregular grids 
@@ -193,11 +193,11 @@ end
     row3 = [ 0    1.2821   -4.6154    3.3333         0]
     row4 = [0         0   15.0000  -21.6667    6.6667]
     row5 = [0         0         0    8.8889   -8.8889]
-    @test μ * L_1_minus + σ^2/2 * L_2 ≈ cat(1, row1, row2, row3, row4, row5) atol = 1e-4
+    @test μ * L_1_minus + σ^2/2 * L_2 ≈ cat(row1, row2, row3, row4, row5, dims = 1) atol = 1e-4
     row1 = [-1.3223    1.3223         0         0         0]
     row2 = [0.3788   -1.4685    1.0897         0         0]
     row3 = [0    0.5128   -8.8462    8.3333         0]
     row4 = [0         0   10.0000  -20.0000   10.0000]
     row5 = [ 0         0         0    5.5556   -5.5556]
-    @test -μ * L_1_plus + σ^2/2 * L_2 ≈ cat(1, row1, row2, row3, row4, row5) atol = 1e-3 # Test for positive drift
+    @test -μ * L_1_plus + σ^2/2 * L_2 ≈ cat(row1, row2, row3, row4, row5, dims = 1) atol = 1e-3 # Test for positive drift
 end 

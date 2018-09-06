@@ -11,7 +11,7 @@ function stationary_algebraic(params, init_x = defaultiv(params); kwargs...)
     g, z_hat, Ω  = sol.zero
     @assert z_hat > 1 && Ω > 0 && g > 0 # Validate parameters. 
     staticvalues = staticvals(sol.zero, params)
-    return merge(staticvalues, @NT(g = g, z_hat = z_hat, Ω = Ω))
+    return merge(staticvalues, (g = g, z_hat = z_hat, Ω = Ω))
 end 
 
 # Gives us the residuals for a point x in state-space and a set of params. 
@@ -46,7 +46,7 @@ function staticvals(vals, params)
     w = σ^(-1)*z_bar # H.10
     x = ζ * (1- η + η * Theta / w) # H.11
     π_min = (d^(σ-1) * κ)/(z_hat^(σ-1)) # Inversion of H.9    
-    return @NT(F = F, r = r, ν = ν, a = a, b = b, S = S, L_tilde = L_tilde, z_bar = z_bar, w = w, x = x, π_min = π_min)
+    return (F = F, r = r, ν = ν, a = a, b = b, S = S, L_tilde = L_tilde, z_bar = z_bar, w = w, x = x, π_min = π_min)
 end 
 
 # Default initial values 
@@ -122,7 +122,7 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
     π_tilde = z -> π_min * (1 + (N-1)*d^(1-σ)*i(z)) - (N-1)*κ*exp(-(σ-1)*z)*i(z) # (21)
     v_tilde = L_T \ π_tilde.(z)
 
-    return merge(staticvalues, @NT(g = g_T, z_hat = z_hat_T, Ω = Ω_T, v_tilde = v_tilde))
+    return merge(staticvalues, (g = g_T, z_hat = z_hat_T, Ω = Ω_T, v_tilde = v_tilde))
 end 
 
 function diffsols(sol1, sol2)

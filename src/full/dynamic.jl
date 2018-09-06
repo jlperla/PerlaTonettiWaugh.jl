@@ -4,8 +4,8 @@ function solve_dynamic_full(params, settings, d_0, d_T)
     M = length(z)
 
     # Compute the stationary solution at t = 0 and t = T
-    params_0 = merge(params, @NT(d = d_0)) # parameters to be used at t = 0
-    params_T = merge(params, @NT(d = d_T)) # parameters to be used at t = T
+    params_0 = merge(params, (d = d_0,)) # parameters to be used at t = 0
+    params_T = merge(params, (d = d_T,)) # parameters to be used at t = T
 
     stationary_sol_0 = stationary_numerical(params_0, z) # solution at t = 0
     Ω_0 = stationary_sol_0.Ω
@@ -31,7 +31,7 @@ function solve_dynamic_full(params, settings, d_0, d_T)
     @time sol = DifferentialEquations.solve(dae_prob, callback = callback) # solve!
     @time residuals = calculate_residuals(sol.du, sol.u, p, sol.t)
 
-    return @NT(sol = sol, p = p, residuals = residuals)
+    return (sol = sol, p = p, residuals = residuals)
 end
 
 function calculate_residuals(du, u, p, ts)
@@ -61,7 +61,7 @@ function fullDAE(params_T, stationary_sol_T, settings, Ω, T, p)
     du = zeros(M+2)
     resid_M2 = zeros(M+2)
 
-    return DAEProblem(f!, resid_M2, u, (T, 0.0), differential_vars = [trues(M); false; false], p)
+    return DAEProblem(f!, resid_M2, u, (T, 0.0), differential_vars = [fill(true, M); false; false], p)
 end
 
 # return the parameters and functions needed to define dynamics
@@ -83,7 +83,7 @@ function get_p(params_T, stationary_sol_T, settings, Ω, T)
     z, L_1_minus, L_1_plus, L_2 = rescaled_diffusionoperators(z, σ-1) # L_1_minus ≡ L_1 is the only one we use. 
 
     # Bundle as before.
-    p = @NT(L_1 = L_1_minus, L_2 = L_2, z = z, N = N, M = M, T = T, θ = θ, σ = σ, κ = κ, 
+    p = (L_1 = L_1_minus, L_2 = L_2, z = z, N = N, M = M, T = T, θ = θ, σ = σ, κ = κ, 
         ζ = ζ, d = d, ρ = ρ, δ = δ, μ = μ, υ = υ, χ = χ, ω = ω, Ω = Ω,
         v_T = v_T, g_T = g_T, z_hat_T = z_hat_T, Ω_T = Ω_T,
         saved_values = SavedValues(Float64, Tuple{Float64,Float64})) #Named tuple for parameters.
@@ -92,7 +92,7 @@ end
 
 function calculate_residual_t(du, u, p, t)
     @unpack L_1, L_2, z, M, T, μ, υ, σ, d, κ, ω, Ω = p 
-    resid = zeros(u)
+    resid = zero(u)
     
     # Carry out calculations. 
     v_t = u[1:M]
@@ -137,8 +137,8 @@ function get_static_vals(p, t, v_t, g_t, z_hat_t)
     L_tilde_t = get_L_tilde_t(p, t, g_t, z_hat_t)
     values_future = saved_values.saveval
     L_tilde_t_derivative = 0 # default value
-    forward_index = findlast(x -> x[1] > t, values_future)
-    if (forward_index > 0)
+    forward_index = findlast(x -> x[1] > t, values_future) # disabled for now
+    if (forward_index isa Number)
         t_forward = values_future[forward_index][1]
         L_tilde_t_forward = values_future[forward_index][2]
         L_tilde_t_derivative = (L_tilde_t_forward - L_tilde_t) / (t_forward - t)
@@ -154,5 +154,5 @@ function get_static_vals(p, t, v_t, g_t, z_hat_t)
     r_tilde_t = ρ + δ + L_tilde_t_derivative
     ρ_tilde_t = r_tilde_t - (σ-1) * (μ - g_t + (σ-1)*υ^2 / 2)
 
-    return @NT(x_t = x_t, π_min_t = π_min_t, π_tilde_t_by_z = π_tilde_t_by_z, ρ_tilde_t = ρ_tilde_t)
+    return (x_t = x_t, π_min_t = π_min_t, π_tilde_t_by_z = π_tilde_t_by_z, ρ_tilde_t = ρ_tilde_t)
 end
