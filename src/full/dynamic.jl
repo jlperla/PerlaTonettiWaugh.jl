@@ -53,8 +53,8 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
                                 tdir = -1) # need to compute D_t L(t)
     
     # Dynamic calculations, defined for each time ∈ t.  
-    function f!(resid,du,u,p,t) 
-        resid[:] = zeros(u)
+    function f!(residual,du,u,p,t) 
+        residual[:] = zeros(u)
         
         # Carry out calculations. 
         v = u[1:M]
@@ -77,10 +77,10 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
         # form the DAE at t
         ρ_tilde = ρ + δ + L_tilde_derivative - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2)
         A_t = ρ_tilde*I - (μ - g + (σ-1)*υ^2)*L_1 - υ^2/2 * L_2        
-        resid[1:M] = A_t * v - π_tilde.(z) # system of ODEs (eq:28)
-        resid[M+1] = v[1] + x - dot(ω, v) # residual (eq:25)
-        resid[M+2] = z_hat^(σ-1) - κ * d^(σ-1) / π_min # export threshold (eq:31) 
-        resid[1:M] .-= du[1:M]    
+        residual[1:M] = A_t * v - π_tilde.(z) # system of ODEs (eq:28)
+        residual[M+1] = v[1] + x - dot(ω, v) # residual (eq:25)
+        residual[M+2] = z_hat^(σ-1) - κ * d^(σ-1) / π_min # export threshold (eq:31) 
+        residual[1:M] .-= du[1:M]    
     end
 
     u0 = [p.v_T; p.g_T; p.z_hat_T]
@@ -129,7 +129,7 @@ end
 
 function calculate_residual_t(du, u, p, t)
     @unpack L_1, L_2, z, M, T, μ, υ, σ, d, κ, ω, Ω = p 
-    resid = zeros(u)
+    residual = zeros(u)
     
     # Carry out calculations. 
     v_t = u[1:M]
@@ -139,12 +139,12 @@ function calculate_residual_t(du, u, p, t)
     @unpack x_t, π_min_t, π_tilde_t_by_z, ρ_tilde_t = get_static_vals(p, t, v_t, g_t, z_hat_t)
 
     A_t = ρ_tilde_t*I - (μ - g_t + (σ-1)*υ^2)*L_1 - υ^2/2 * L_2        
-    resid[1:M] = A_t * v_t - π_tilde_t_by_z # system of ODEs (eq:28)
-    resid[M+1] = v_t[1] + x_t - dot(ω, v_t) # residual (eq:25)
-    resid[M+2] = z_hat_t^(σ-1) - κ * d^(σ-1) / π_min_t # export threshold (eq:31) 
-    resid[1:M] .-= du[1:M]
+    residual[1:M] = A_t * v_t - π_tilde_t_by_z # system of ODEs (eq:28)
+    residual[M+1] = v_t[1] + x_t - dot(ω, v_t) # residual (eq:25)
+    residual[M+2] = z_hat_t^(σ-1) - κ * d^(σ-1) / π_min_t # export threshold (eq:31) 
+    residual[1:M] .-= du[1:M]
 
-    return resid
+    return residual
 end
 
 function get_static_vals(p, t, v_t, g_t, z_hat_t)
