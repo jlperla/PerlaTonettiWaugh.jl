@@ -24,7 +24,7 @@ function solve_dynamic_full(params, settings, d_0, d_T)
 
     # define the corresponding DAE problem
     p = get_p(params_T, stationary_sol_T, settings, Ω, T)
-    dae = fullDAE(params_T, stationary_sol_T, settings, E, Ω, T, p)
+    dae = PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
 
     # solve solutions
     @time sol = DifferentialEquations.solve(dae.dae_prob, callback = dae.callback) # solve!
@@ -46,7 +46,7 @@ end
 
 
 # Implementation of the full model with time-varying objects, represented by DAE
-function fullDAE(params_T, stationary_sol_T, settings, E, Ω, T, p)
+function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
     # Unpack params and settings. 
     @unpack z = settings 
     M = length(z)
