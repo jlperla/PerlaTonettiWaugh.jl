@@ -33,18 +33,6 @@ function solve_dynamics(params, settings, d_0, d_T)
     return @NT(sol = sol, p = p, residuals = residuals)
 end
 
-function calculate_residuals(du, u, p, ts)
-    # Calculate the residual at each time point
-    residuals = zeros(length(ts), length(u[1]))
-    
-    for (i, t) in enumerate(ts)
-        residuals[i,:] = calculate_residual_t(du[i], u[i], p, t)
-    end
-
-    return residuals
-end
-
-
 # Implementation of the full model with time-varying objects, represented by DAE
 function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
     # Unpack params and settings. 
@@ -102,10 +90,6 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
     callback = callback)
 end
 
-function stationary_equilibrium(g, z_hat, Ω_static, t)
-
-end
-
 # return the parameters and functions needed to define dynamics
 function get_p(params_T, stationary_sol_T, settings, Ω, T)
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params_T
@@ -132,6 +116,17 @@ function get_p(params_T, stationary_sol_T, settings, Ω, T)
     return p
 end
 
+function calculate_residuals(du, u, p, ts)
+    # Calculate the residual at each time point
+    residuals = zeros(length(ts), length(u[1]))
+    
+    for (i, t) in enumerate(ts)
+        residuals[i,:] = calculate_residual_t(du[i], u[i], p, t)
+    end
+
+    return residuals
+end
+
 function calculate_residual_t(du, u, p, t)
     @unpack L_1, L_2, z, M, T, μ, υ, σ, d, κ, ω, Ω = p 
     resid = zeros(u)
@@ -152,20 +147,16 @@ function calculate_residual_t(du, u, p, t)
     return resid
 end
 
-function get_L_tilde_t(p, t, g_t, z_hat_t)
-    @unpack N, T, θ, κ, ζ, δ, χ, Ω, μ, υ = p
-    is_t_over_T = ifelse(t >= T, 1, 0)
-    is_t_over_T = 1 # FIXIT: later see if removing this line still makes no discontinuity
-    return Ω(t) * ((N-1) * z_hat_t^(-θ)*κ + ζ*θ*(g_t - μ - θ * υ^2/2) + is_t_over_T * ζ * δ / χ)
-end
-
 function get_static_vals(p, t, v_t, g_t, z_hat_t)
     @unpack z, N, T, θ, σ, κ, ζ, d, ρ, δ, υ, μ, χ, Ω, saved_values = p
 
     is_z_over_log_z_hat_t = z_val -> ifelse(z_val >= log(z_hat_t), 1, 0)
 
     # compute L_tilde_t and its derivative
-    L_tilde_t = get_L_tilde_t(p, t, g_t, z_hat_t)
+    is_t_over_T = ifelse(t >= T, 1, 0)
+    is_t_over_T = 1 # FIXIT: later see if removing this line still makes no discontinuity
+    L_tilde_t = Ω(t) * ((N-1) * z_hat_t^(-θ)*κ + ζ*θ*(g_t - μ - θ * υ^2/2) + is_t_over_T * ζ * δ / χ)
+
     values_future = saved_values.saveval
     L_tilde_t_derivative = 0 # default value
     forward_index = findlast(x -> x[1] > t, values_future)
