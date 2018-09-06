@@ -1,4 +1,4 @@
-# Global ants. 
+# Global constants. 
     # State grid. 
     z_min = 0.0 
     z_max = 5.0
@@ -21,12 +21,12 @@
     # Functional parameters. 
     x_func = t -> ζ_val # Not idiosyncratic, per equation (4)
 
-    r_vector = (r_val + 1e-04) * (1 .- t / T_val)
+    r_vector = (r_val + 1e-02) * (1 .- t / T_val)
     r_int = LinInterp(t, r_vector)
     r_func_varying = t -> r_int(t) # Not idiosyncratic, per intro to doc.    
     r_func_ = t -> r_val
 
-    π_tilde_vector = (1 + 1e-04) * (1 .- t / T_val)
+    π_tilde_vector = r_val .+ (1 + 1e-02) * (1 .- t / T_val)
     π_tilde_int = LinInterp(t, π_tilde_vector)
     π_tilde_func_varying = (t, z) -> π_tilde_int(t) # Not idiosyncratic, per intro to doc.    
     π_tilde_func_ = (t, z) -> 1 # Potentially idiosyncratic. 
