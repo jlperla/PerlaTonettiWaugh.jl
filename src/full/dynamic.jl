@@ -116,12 +116,14 @@ function get_p(params_T, stationary_sol_T, settings, Ω, T)
     return p
 end
 
-function calculate_residuals(f!, du, u, p, ts)
-    # Calculate the residual at each time point
+# calculate the residual at each time point; each row represents t in ts
+function calculate_residuals(f!, du, u, p, ts)    
     residuals = zeros(length(ts), length(u[1]))
     
     for (i, t) in enumerate(ts)
-        f!(residuals[i,:], du[i], u[i], p, t)
+        residual = zeros(length(u[1]))
+        f!(residual, du[i], u[i], p, t)
+        residuals[i,:] = residual 
     end
 
     return residuals
