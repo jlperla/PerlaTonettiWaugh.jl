@@ -28,7 +28,7 @@ function solve_dynamics(params, settings, d_0, d_T)
 
     # solve solutions
     @time sol = DifferentialEquations.solve(dae.dae_prob, callback = dae.callback) # solve!
-    @time residuals = calculate_residuals(dae.dae_prob.f, sol.du, sol.u, p, sol.t)
+    @time residuals = calculate_residuals_dae(dae.dae_prob.f, deepcopy(sol.du), deepcopy(sol.u), p, sol.t)
 
     return @NT(sol = sol, p = p, residuals = residuals)
 end
@@ -117,7 +117,7 @@ function get_p(params_T, stationary_sol_T, settings, Ω, T)
 end
 
 # calculate the residual at each time point; each row represents t in ts
-function calculate_residuals(f!, du, u, p, ts)    
+function calculate_residuals_dae(f!, du, u, p, ts)    
     residuals = zeros(length(ts), length(u[1]))
     
     for (i, t) in enumerate(ts)
