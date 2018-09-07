@@ -2,6 +2,22 @@
 
 \documentclass[11pt]{article}
 \usepackage{amsmath,amsfonts,amsthm,amssymb,geometry,dsfont}
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+\usepackage[
+bookmarks=false,
+pdfstartview={FitV},
+pdftitle={Equilibrium Technology Diffusion, Trade, and Growth: Computational Appendix},
+pdfauthor={Jesse Perla, Christopher Tonetti, Michael E. Waugh},
+pdfcreator={Jesse Perla, Christopher Tonetti, Michael E. Waugh},
+pdfkeywords={economics,international,growth,technology diffusion, trade, Perla, Tonetti, Waugh},
+colorlinks=true,
+linkcolor=darkgray,
+citecolor=darkgray,
+urlcolor=darkgray,
+filecolor=darkgray,
+anchorcolor=darkgray, 
+breaklinks]
+{hyperref}
 \usepackage[capitalise,noabbrev]{cleveref} %
 \crefname{equation}{}{} %
 \crefname{assumption}{Assumption}{Assumptions}	
@@ -13,7 +29,8 @@
 \newcommand{\diff}{\ensuremath{\mathrm{d}}}
 \newcommand{\set}[1]{\ensuremath{\left\{{#1}\right\}}}
 \newcommand{\indicator}[1]{\ensuremath{\mathds{1}\left\{{#1}\right\}}}
-
+\newcommand{\condexpec}[3][]{\ensuremath{\mathbb{E}_{#1}\left[{#2} \; \middle| \; {#3} \right]}}
+\newcommand{\expec}[2][]{\ensuremath{\mathbb{E}_{{#1}}\left[ {#2} \right]}}
 \begin{document}
 \title{Equilibrium Technology Diffusion, Trade, and Growth\\Online Computational Appendix\thanks{Thanks...}}
 \author{Jesse Perla \and Christopher Tonetti \and Michael E. Waugh}
@@ -22,7 +39,7 @@
 \section{Simplified Growth Model with Transition Dynamics}
 We start with an artificially simple version of the model with transition dynamics, which is nested in BPT2.  In the PTW case, $\pi(z,t), r(t), x(t)$ will come from calculations, but the basic structure is otherwise the same.
 
-A key simplification maintained in the both this simple and the full PTW transition dynamics: in the transition dynamics experiments we are looking at, the normalized distribution $F(z)$ will remain constant over all time.  Hence, we do not need to jointly solve the KFE as we will be at the stationary level (post-normalization).  This is a major simplification for the transition dynamics case compared to many heterogeneous agent models.  In particular, we will only look at examples where $F(z) = 1 - e^{-\theta z}$ for all $t$.
+A key simplification maintained in the both this simple and the full PTW transition dynamics: in the transition dynamics experiments we are looking at, the normalized distribution $F(z)$ will remain constant over all time.  Hence, we do not need to jointly solve the KFE as we will be at the stationary level (post-normalization).  This is a major simplification for the transition dynamics case compared to many heterogeneous agent models.  %In particular, we will only look at examples where $F(z) = 1 - e^{-\theta z}$ for all $t$.
 
 \subsection{Summary of Equations}
 Let $Z$ be productivity, where $Z(t) \geq M(t)$.  Let $V(Z,t)$ is the value function prior to normalization, $M(t)$ the endogenous threshold, $\Pi(Z,t)$ the profits, and $X(t)$ the adoption cost.  Then define the normalization that $z \equiv \log(Z/M(t))$, $v(z,t) \equiv \frac{e^{-z}}{M(t)}V(M(t)e^z, t))$, $\pi(z,t) \equiv \frac{e^{-z}}{M(t)}\Pi(M(t)e^z, t))$, and $x(t) \equiv X(t)/M(t)$.  \cref{sec:simple-derivation} show the rescaled system of equation is
@@ -38,7 +55,8 @@ A(t) &\equiv \left(r - \mu - \frac{\upsilon^2}{2}\right) - (\mu+ \upsilon^2 - g(
 For the exogenous $\pi(z,t)$ and $x(t)$ we require that at some $T$ it becomes stationary and
 \begin{align}
 x(t) &= \zeta,\quad \text{ for all }t \geq T\label{eq:terminal-x}\\
-\pi(z,t) &= 1,\quad \text{ for all }t \geq T\label{eq:terminal-pi}
+\pi(z,t) &= 1,\quad \text{ for all }t \geq T\label{eq:terminal-pi}\\
+f(z,t) &= \theta e^{-\theta z},\quad \text{ for all }t \label{eq:f-stationary-summary}
 \end{align}
 
 \noindent With this, BPT2 gives us that,
@@ -50,7 +68,7 @@ v(z,T) &= \frac1{r-\mu- \upsilon^2/2}\left(1 + \frac1{\nu} e^{-(\nu + 1) z}\righ
 \nu &\equiv  \frac{\mu- g}{\upsilon^2} + \sqrt{\left(\frac{g-\mu}{\upsilon^2} \right)^{2} + \frac{r-g}{\upsilon^2/2}}. \label{eq:nu-gbm}
 \end{align}
 
-Note: since $v(z,T)$ has been rescaled by $e^{-z}$ above, it is now a \textbf{decreasing} function of $z$.
+Note: since $v(z,T)$ has been rescaled by $e^{-z}$ above, it is now a \textbf{decreasing} function for at least some of $z$.
 
 \subsection{Spatial Discretization}
 
@@ -69,18 +87,18 @@ and the PDE in \cref{eq:simple-summary1} becomes the system of ODEs
 	v_1(t) &= \omega \cdot v(t) - x(t)\label{eq:discretized-simple-vm}\\
 	\intertext{Where,}
 	\omega_i &\equiv \bar{\omega} \frac{\theta e^{(1 - \theta)z_i}}{1 - e^{-\theta \bar{z}}}
-	\intertext{And the weights for the non-uniform trapezoidal rule is calculated with the $\Delta_{-}$ and $\Delta_{+}$ backwards and forward diffs (respectively) for the $z$ grid (with $\Delta_{1,-} = 0$ and $\Delta_{I,+} = 0$ set respectively,}
+	\intertext{And the weights for the non-uniform trapezoidal rule is calculated with the $\Delta_{-}$ and $\Delta_{+}$ backwards and forward diffs (respectively) for the $z$ grid (with $\Delta_{1,-} = 0$ and $\Delta_{I,+} = 0$ set for the ghost nodes),}
 \bar{\omega}&\equiv \frac1{2}(\Delta_{-} + \Delta_{+})
 \end{align}
 
 Where the $\omega$ come from \cref{sec:quadrature} and combines quadrature nodes with $e^z$ and the $F'(z)$, and $\bar{\omega}$ are the irregular Simpson's rule weights.
 
-To find the stationary solution at $T$, solve the system of equations $A(T) v(t) = \pi(T)$ and $v_1(T) = \omega \cdot v(T) - x(T)$ for the $v(T)$ and $g$ with a nonlinear solver.\footnote{Or by fixing a $g$, solving the linear \cref{eq:discretized-simple} and then picking the $g$ to equate \cref{eq:discretized-simple-vm} }  You can also compare to the analytic solution in \cref{eq:simple-summary1}.
+To find the stationary solution at $T$, solve the system of equations $A(T) v(T) = \pi(T)$ and $v_1(T) = \omega \cdot v(T) - x(T)$ for the $v(T)$ and $g$ with a nonlinear solver.\footnote{Or by fixing a $g$, solving the linear \cref{eq:discretized-simple} and then picking the $g$ to equate \cref{eq:discretized-simple-vm} }  You can also compare to the analytic solution in \cref{eq:simple-summary1}.
 
 \section{Full Growth Model with Transition Dynamics}
-Assume $\delta > 0$.  This trade liberalization experiment will involve a decrease in $d$ as the trade liberalization, with no other changes.  We can calculate the two steady states (using existing code) and examine the transition dynamics.
+Assume $\delta > 0$.  This trade liberalization experiment will involve a one-time unanticipated decrease in $d$ as the trade liberalization.  We will calculate the two steady states and examine the transition dynamics.
 
-In order to solve the dynamic problem in \cref{sec:normalized-equations}, we need to calculate $\tilde{r}(t), \pi_{\min}(t),\hat{z}(t),$ etc  as a function of $g(t), \Omega(t),$ and parameters.  As a simplification, we will assume that the cost of adoption is in labor, i.e. $\eta = 0$, so that $x(t) = \zeta$ for all $t$ from (H.11)\footnote{Otherwise, there is an addition system of implicit equations to solve.}  We also assume $\log$ utility, so that $\gamma = 1$.
+In order to solve the dynamic problem in, we need to calculate $\tilde{\rho}(t), \pi_{\min}(t),\hat{z}(t),$ etc  as a function of $g(t), \Omega(t),$ and parameters.  As a simplification, we will assume that the cost of adoption is in labor, i.e. $\eta = 0$, so that $x(t) = \zeta$ for all $t$ from (PTW H.11)\footnote{Otherwise, there is an addition system of implicit equations to solve.}  %We also assume $\log$ utility, so that $\gamma = 1$.
 
 \subsection{Number of Varieties and Entry in Transition}
 
@@ -99,9 +117,9 @@ The dynamic set of differential equations (rescaled) is derived in \cref{sec:ful
 %	\D[t]v(z,t) &= \left(\tilde{\rho}(t)  - (\mu - g(t) + (\sigma - 1)\upsilon^2)\D[z] - \frac{\upsilon^2}{2}\D[zz]\right)v(z,t) - \pi(z,t) \\	
 	\D[t]v(z,t) &= A(t)v(z,t) - \pi(z,t) \\	
 	A(t) &\equiv \tilde{\rho}(t)  - (\mu - g(t) + (\sigma - 1)\upsilon^2)\D[z] - \frac{\upsilon^2}{2}\D[zz]\\
-	v(0,t) &= \theta \int_{0}^{\infty}v(z,t) e^{(-\theta + \sigma - 1)z} \diff z - \zeta\label{eq:normalized-vm-summary-rescaled}\\
-	0 &= (\sigma - 1)v(0,t) + \D[z]v(0,t)\label{eq:normalized-sp-summary-rescaled}\\
-	0 &= (\sigma - 1)v(\bar{z},t) + \D[z]v(\bar{z},t)\label{eq:normalized-rhs-summary-rescaled}
+	v(0,t) &= \int_{0}^{\bar{z}}v(z,t) \frac{e^{\sigma - 1}F'(z)}{F(\bar{z})} \diff z - \zeta\\
+	0 &= (\sigma - 1)v(0,t) + \D[z]v(0,t)\\
+	0 &= (\sigma - 1)v(\bar{z},t) + \D[z]v(\bar{z},t)
 \end{align}
 
 
@@ -124,7 +142,7 @@ The three variables required in the DAE are $g(t), \hat{z}(t),$ and $\Omega(t)$.
 
 The export threshold equation is
 \begin{align}
-	0&=\hat{z}^{\sigma-1}-  \kappa d^{\sigma - 1} \bar{\pi}_{\min}(t)^{-1}\label{eq:z-hat-power}
+	0&=\hat{z}^{\sigma-1}-  \kappa d^{\sigma - 1} \bar{\pi}_{\min}(t)^{-1}
 \end{align}
 
 From \cref{sec:free-entry}, we see that
@@ -134,20 +152,28 @@ From \cref{sec:free-entry}, we see that
 
 
 \subsection{Static Calculations and Definitions}
-See \cref{sec:derive-interest-rates} for a derivation of the interest rates.
-
-
-Given the current $g$ and $\hat{z}$, the following definitions calculated at every time period, in the following rough order within the function.
+Given the current $g$ and $\hat{z}$, the following definitions calculated at every time period, in the following rough order within the function.\footnote{See \cref{sec:derive-interest-rates} for a derivation of the interest rates, \cref{sec:full-rescaling} for a derivation of the normalized profits, and (PTW.H.2, H.7, H.8, )}.
 \begin{align}
 	S(t) &\equiv \theta \left( g(t) - \mu - \frac{\upsilon^2}{2}\right)\\
 	1 - \tilde{L}(t) &\equiv 1 - \Omega(t)\left((N -1)\hat{z}^{-\theta}\kappa + \zeta \left(S(t) + E(t)/\chi \right)\right)\\
 	\bar{z}(t)^{\sigma - 1}&\equiv \Omega(t)
-\frac{\theta}{1+\theta - \sigma}\left(1 + (N-1)d^{1-\sigma}\hat{z}^{\sigma - 1 -\theta} \right)\label{eq:z-bar-sub-power}\\
-	\bar{\pi}_{\min}(t) &\equiv \frac{1-\tilde{L}(t)}{(\sigma-1)\bar{z}(t)^{\sigma-1}}\label{eq:pi-min-def}\\
+\frac{\theta}{1+\theta - \sigma}\left(1 + (N-1)d^{1-\sigma}\hat{z}^{\sigma - 1 -\theta} \right)\\
+	\bar{\pi}_{\min}(t) &\equiv \frac{1-\tilde{L}(t)}{(\sigma-1)\bar{z}(t)^{\sigma-1}}\\
 	\pi(z,t) &\equiv \bar{\pi}_{\min}(t)\left(1 + (N-1)d^{1-\sigma}\indicator{z \geq \log(\hat{z}(t))}\right) - (N-1)\kappa e^{-(\sigma - 1)z}\indicator{z \geq \log(\hat{z}(t))}\\
-	\tilde{\rho}(t) &\equiv \rho+ \delta + \D[t]\log\left(1 - \tilde{L}(t)\right) - (\sigma - 1)\left(\mu - g(t) + (\sigma - 1)\frac{\upsilon^2}{2} \right)\label{eq:rhot}
+	\tilde{\rho}(t) &\equiv \rho+ \delta + \D[t]\log\left(1 - \tilde{L}(t)\right) - (\sigma - 1)\left(\mu - g(t) + (\sigma - 1)\frac{\upsilon^2}{2} \right)
 \end{align}
 To calculate the $\D[t]\log\left(1 - \tilde{L}(t)\right)$ you need to store the ``future'' $\left(1 - \tilde{L}(t)\right)$ and $t$ values in the last adaptive timestep, and then use forward first-differences with it based on the current value
+
+
+\paragraph{Final Calculations}
+Some additional calculations useful for analyzing the model, but not required for the calculation are
+\begin{align}
+	\lambda_{ii}(t) &= \frac{1}{1 + (N-1)\hat{z}(t)^{\sigma-1-\theta}d^{1-\sigma}}\label{eq:lambda-ii-t-summary}\\
+c(t) &= \left(\frac{\theta}{1-\sigma+\theta}\right)^{\frac{1}{\sigma-1}}\left(1 - \tilde{L}(t)\right)\Omega(t)^{\frac{1}{\sigma - 1}} \lambda_{ii}(t)^{\frac{1}{1-\sigma}}\label{eq:c-summary}\\
+\log M(t) &= \int_0^t g(s)\diff s\label{eq:log-M-summary}\\
+U(t) &= \int_0^{T-t}e^{-\rho \tau}\left(\log M(t+\tau)+\log c(t+\tau)\right)\diff \tau + \frac{e^{-\rho( T-t)}}{\rho^2}\left((1+\rho( T-t))g(T) + \rho\left(\log c(T) + \log M(T) \right) \right)\label{eq:U-dynamics-summary}	
+\end{align}
+
 
 \newpage
 \appendix
@@ -171,14 +197,14 @@ Copying from BPT2 (but renaming the $v$ function to $\hat{v}$ here), assume an e
 \D[z]\hat{v}(0,t) &= 0\label{eq:sp-GBM-dynamic}
 \end{align}
 
-A solution to this problem is a $g(t)$ and $\hat{v}(z,t)$ that fulfills the above equations for all $t\in[0,T]$ and $z\in[0,\infty)$.  While not listed above, in practice another boundary condition (e.g. transversality) is used to ensure that \cref{eq:bellman-GBM-dynamic} can be solved. We us, a reflecting barrier at a ``large'' $\bar{z}$ converges to the correct solution.  Use the boundary value is
+A solution to this problem is a $g(t)$ and $\hat{v}(z,t)$ that fulfills the above equations for all $t\in[0,T]$ and $z\in[0,\infty)$.  While not listed above, in practice another boundary condition (e.g. transversality) is used to ensure that \cref{eq:bellman-GBM-dynamic} can be solved. We us, a reflecting barrier at a ``large'' $\bar{z}$ converges to the correct solution.  Use the boundary value\footnote{Keep in mind that this is just a step in the numerical solution, rather than introducing a true reflecting barrier.  We will need to verify that it does not introduce issues by verifying the numeric solution matches the closed form solution for large $\bar{z}$ and compare to the analytic equation for external validity.  Also note that if $\upsilon = 0$, due to the upwind procedure this boundary value would be unnecessary and/or drop out of the solution.}
 	\begin{align}
 	\D[z]\hat{v}(\bar{z},t) &= 0\label{eq:reflecting-GBM-dynamic}
 	\end{align}
-	Keep in mind that this is just a step in the numerical solution, rather than introducing a true reflecting barrier.  We will need to verify that it does not introduce issues by verifying the numeric solution matches the closed form solution for large $\bar{z}$ and compare to the analytic equation for external validity.  Also note that if $\upsilon = 0$, due to the upwind procedure this boundary value would be unnecessary and/or drop out of the solution.
+	
 
 \subsection{Change of Variables to Normalize and Rescale}\label{eq:simple-rescale}
-Solving \cref{eq:bellman-GBM-dynamic} for $\hat{v}(z,t)$ is problematic since the scale goes from approximatively $1$ to $e^{\bar{z}}$, which is very large for a high $\bar{z}$.  To make the solution more stable, we rescale the equation.  Choose some $\xi \geq 0$ chosen for convenience and stability and let
+Solving \cref{eq:bellman-GBM-dynamic} for $\hat{v}(z,t)$ is problematic since the scale goes from approximatively $1$ to $e^{\bar{z}}$, which is very large for a high $\bar{z}$.  To make the solution more stable, we rescale the equation.  Choose some $\xi \geq 0$ for convenience and to ensure stability and let
 \begin{align}
 	v(z,t) &\equiv e^{-\xi z}\hat{v}(z,t) = e^{-\xi z}\frac{V(e^z M(t),t)}{M(t)}\\
 	\intertext{Differentiate and reorganize this expression to yield}
@@ -229,9 +255,8 @@ v_1(t) &= \omega \cdot v(t) - x(t)
 \end{align}
 
 \section{Derivations of Full Model}\label{sec:full-model-derivations}
-Note that unlike the PTW paper (for now, at least) we have $z \equiv \log(Z/M(t))$ throughout these notes.
-\subsection{Normalization and Rescaling}
-The value is normalized as $\hat{v}(z,t) = \frac{V(Z,t)}{M(t)w(t)}$.  With this,
+\subsection{Normalization and Rescaling}\label{sec:full-rescaling}
+Note that unlike the PTW paper we have $z \equiv \log(Z/M(t))$ throughout these notes.  The value is normalized as $\hat{v}(z,t) = \frac{V(e^z M(t),t)}{M(t)w(t)}$.  With this,
 \begin{align}
 V(Z,t) &:= w(t) M(t) \hat{v}(t, \log(Z/M(t)))\label{eq:V-norm}\\
 \intertext{Differentiate \cref{eq:V-norm} with respect to $t$, divide by $w(t)M(t)$, and use the definitions $z := \log(Z/M(t)), g(t):= M'(t)/M(t)$ and $g_w(t) := W'(t)/W(t)$}
@@ -261,9 +286,7 @@ for all $t$.  It can be proven that this will be maintained by the KFE in the se
 While this transformation could be done all at once, we will base it off of the previous section for easier comparison.  Define the following
 \begin{align}
 v(z,t) &\equiv e^{-(\sigma - 1)z}\hat{v}(z,t)\label{eq:v-tilde}\\
-\pi(z,t) &\equiv e^{-(\sigma - 1)z}\hat{\pi}(z,t)\\
-\intertext{Use \cref{eq:pi-z-t-summary}}
-\pi(z,t) &= \pi_{\min}(t)\left(1 + (N-1)d^{1-\sigma}\indicator{z \geq \log(\hat{z}(t))}\right) - (N-1)\kappa e^{-(\sigma - 1)z}\indicator{z \geq \log(\hat{z}(t))}	
+\pi(z,t) &\equiv e^{-(\sigma - 1)z}\hat{\pi}(z,t)
 \end{align}
 Rearrange and differentiate \cref{eq:v-tilde},
 \begin{align}
@@ -272,49 +295,46 @@ Rearrange and differentiate \cref{eq:v-tilde},
 \D[zz]\hat{v}(z,t) &= e^{(\sigma - 1)z}\left((\sigma - 1)^2 v(z,t) + 2(\sigma - 1)\D[z]v(z,t) + \D[zz]v(z,t)\right)\label{eq:v-tilde-dzz}\\
 \intertext{And at the adoption threshold, from \cref{eq:v-tilde-dz}}
 \D[z]\hat{v}(0,t) &= (\sigma - 1) v(0,t) + \D[z]v(0,t)\label{eq:vt-0-dz}
-\end{align}	
-To use these substitutions, start with \cref{eq:normalized-vm-summary} and use the definition of $f(z)$,
+\end{align}
+
+To use these substitutions, start with \cref{eq:normalized-vm} and use the definition of $f(z)$,
 \begin{align}
 v(0,t) &= \theta \int_{0}^{\infty} v(z,t) e^{(-\theta + \sigma - 1)z} \diff z - x(t)\label{eq:normalized-vm-summary-rescaled}\\
-\intertext{Combine \cref{eq:normalized-sp-summary,eq:vt-0-dz} to get}
+\intertext{Combine \cref{eq:normalized-sp,eq:vt-0-dz} to get}
 0 &= (\sigma - 1) v(0,t) + \D[z]v(0,t)\label{eq:normalized-sp-summary-rescaled}
-\intertext{Finally, substitute all of the derivatives into \cref{eq:normalized-bellman-summary} and divide by $e^{(\sigma - 1)z}$}	
+\intertext{Finally, substitute all of the derivatives into \cref{eq:normalized-bellman} and divide by $e^{(\sigma - 1)z}$}	
 \tilde{\rho}(t)  v(z,t) &= \pi(z,t) + (\mu - g(t) + (\sigma - 1)\upsilon^2)\D[z]v(z,t) + \frac{\upsilon^2}{2}\D[zz]v(z,t) + \D[t]v(z,t)
 \intertext{where,}
-\tilde{\rho}(t) &\equiv \tilde{r}(t) - (\sigma - 1)\left(\mu - g(t) + (\sigma - 1)\frac{\upsilon^2}{2} \right)\label{eq:rhot}	
+\tilde{\rho}(t) &\equiv  r(t) - g(t) - g_w(t) - (\sigma - 1)\left(\mu - g(t) + (\sigma - 1)\frac{\upsilon^2}{2} \right)\label{eq:rhot}	
+\end{align}	
+
+\noindent From (PTW.C.26 to C.28) using the $z\equiv\log(Z/M(t))$ definition,
+\begin{align}
+	\hat{\pi}(z,t) &= \pi_{\min}(t) e^{(\sigma - 1)z}\left(1 + (N-1)d^{1-\sigma}\indicator{z \geq \log(\hat{z}(t))}\right) - (N-1)\kappa\indicator{z \geq \log(\hat{z}(t))}\label{eq:pi-z-t-summary}
+\intertext{Multiply by $e^{-(\sigma - 1)z}$ to get,}
+\pi(z,t) &\equiv \bar{\pi}_{\min}(t)\left(1 + (N-1)d^{1-\sigma}\indicator{z \geq \log(\hat{z}(t))}\right) - (N-1)\kappa e^{-(\sigma - 1)z}\indicator{z \geq \log(\hat{z}(t))}
 \end{align}	
 
 
 
-\subsection{Summarizing Normalized Equations}\label{sec:normalized-equations}
-Take as given $g(t),\pi_{\min}(t),\hat{z}(t), x(t)$, and $\tilde{r}(t)$(alternatively $g_w(t)$ and $r(t)$).  Then, the following equations must be fulfilled for all $t$ and  $z$
-\begin{align}
-\tilde{r}(t) \equiv & r(t) - g(t) - g_w(t)\label{eq:r-tilde-summary}\\
-f(z) &= \theta e^{-\theta z}\label{eq:f-stationary-summary}\\
-\tilde{r}(t) \hat{v}(z,t) &= \hat{\pi}(z,t) + (\mu - g(t))\D[z]\hat{v}(z,t) + \frac{\upsilon^2}{2}\D[zz]\hat{v}(z,t) + \D[t]\hat{v}(z,t)\label{eq:normalized-bellman-summary}\\
-\D[z]\hat{v}(0,t) &= 0\label{eq:normalized-sp-summary}\\
-\hat{v}(0,t) &= \int_{0}^{\infty}\hat{v}(z,t) f(z) \diff z - x(t)\label{eq:normalized-vm-summary}\\
-	\hat{\pi}(z,t) &= \pi_{\min}(t) e^{(\sigma - 1)z}\left(1 + (N-1)d^{1-\sigma}\indicator{z \geq \log(\hat{z}(t))}\right) - (N-1)\kappa\indicator{z \geq \log(\hat{z}(t))}\label{eq:pi-z-t-summary}
-\end{align}
+
+%\subsection{Summarizing Normalized Equations}\label{sec:normalized-equations}
+%Take as given $g(t),\pi_{\min}(t),\hat{z}(t), x(t)$, and $\tilde{r}(t)$(alternatively $g_w(t)$ and $r(t)$).  Then, the following equations must be fulfilled for all $t$ and  $z$
+%\begin{align}
+%\tilde{r}(t) \equiv & r(t) - g(t) - g_w(t)\label{eq:r-tilde-summary}\\
+%f(z) &= \theta e^{-\theta z}\label{eq:f-stationary-summary}\\
+%\tilde{r}(t) \hat{v}(z,t) &= \hat{\pi}(z,t) + (\mu - g(t))\D[z]\hat{v}(z,t) + \frac{\upsilon^2}{2}\D[zz]\hat{v}(z,t) + \D[t]\hat{v}(z,t)\label{eq:normalized-bellman-summary}\\
+%\D[z]\hat{v}(0,t) &= 0\label{eq:normalized-sp-summary}\\
+%\hat{v}(0,t) &= \int_{0}^{\infty}\hat{v}(z,t) f(z) \diff z - x(t)\label{eq:normalized-vm-summary}\\
+%\end{align}
 
 
 
 \subsection{Free-entry Condition}\label{sec:free-entry}
-To determine the $E(t)$ function, we need the free entry complementarity condition to hold.  Note that (D.19) actually holds for any $t$ as well, and does not require the stationary solution.
-
-From (D.19) and using $v(t,0) = \hat{v}(t,0)$, we see that if $E(t) > 0$ that,
+To determine the $E(t)$ function, we need the free entry complementarity condition to hold.  Note that (PTW D.19) actually holds for any $t$ as well, and does not require the stationary solution.  From (PTW D.19) and using $v(t,0) = \hat{v}(t,0)$, we see that if $E(t) > 0$ that,
 \begin{align}
 v(t,0) &= \zeta \frac{1-\chi}{\chi}
 \intertext{In the case that there is no entry, and $E(t) = 0$ for some $t$, from (D.18)}
-v(0,t) &< \zeta \frac{1-\chi}{\chi}
-\end{align}
-
-In the case that there is no entry, and $E(t) = 0$ for some $t$, from (D.18)
-\begin{align}
-\frac{\zeta}{\chi} &> \int_{0}^{\infty}\hat{v}(z,t) f(z) \diff z\\
-\intertext{Use $v(t,0) = \hat{v}(t,0)$ and the adoption definition in \cref{eq:normalized-vm-summary-rescaled},}
-\frac{\zeta}{\chi}&> v(0,t) + \zeta\\
-\intertext{Reorganizing, this means that $E(t) = 0$ if}
 v(0,t) &< \zeta \frac{1-\chi}{\chi}
 \end{align}
 
@@ -327,12 +347,12 @@ r(t) &= \rho + \delta + \gamma \D[t]\log C(t)\\
 &= \rho+ \delta + \gamma(g_c(t)+ g(t))\label{eq:r-def}
 \end{align}
 
-\noindent This can be simpified in some cases.  From the PTW (C.34), for $\eta = 0$,
+\noindent This can be simplified in some cases.  From the PTW (C.34), for $\eta = 0$,
  \begin{align}
  \frac{c(t)}{w(t)}&\propto 1 - \tilde{L}(t) 
  \intertext{Taking the log and differentiating,}
 g_c(t) - g_w(t) &= \D[t]\log\left(1 - \tilde{L}(t)\right)\label{eq:g-c-w-diff}
-\intertext{From \cref{eq:r-tilde-summary}}
+\intertext{Define,}
 \tilde{r}(t) &\equiv r(t) - g(t) - g_w(t)\\
 \intertext{From \cref{eq:r-def}}
 &= \rho + \delta + \gamma(g_c(t)+ g(t)) - g(t) - g_w(t)\\
@@ -342,6 +362,64 @@ g_c(t) - g_w(t) &= \D[t]\log\left(1 - \tilde{L}(t)\right)\label{eq:g-c-w-diff}
 \intertext{And in the $\log$ utility case with $\gamma = 1$, the last term drops, so that we have,}
  \tilde{r}(t) &=  \rho+ \delta + \D[t]\log\left(1 - \tilde{L}(t)\right)\label{eq:tilde-r-L}
  \end{align}
+
+ 
+ \subsection{Derivations of Cutoffs and Profits}
+ From (PTW H.11), the adoption cost relative to wages remains constant throughout the transition (i.e. assumed $\eta = 0$):
+ \begin{align}
+ x(t) &= \zeta\label{eq:x-zeta}
+ \intertext{For the components of aggregate profits, we need to find $\pi_{\min}(t)$. In order to solve for the static $\hat{z}(t)$ condition, we will leave it as a variable in the equations.  Start with (PTW C.26)}
+ \pi_{\min}(t) &= \frac{1-\tilde{L}(t)}{(\sigma-1)\bar{z}(t)^{\sigma-1}}\label{eq:pi-min-def}\\
+ \intertext{From (PTW C.19), along the transition dynamics $E(t)$ is left general}
+ \tilde{L}(t) &=\Omega(t)\left[(N-1)(1-F(\hat{z}(t)))\kappa + \zeta \left( S(t) + E(t)/\chi\right)\right]\label{eq:L-tilde-sub}\\
+ &=\Omega(t)\left((N -1)\hat{z}^{-\theta}\kappa + \zeta \left(S(t) + E(t)/\chi \right)\right)\\
+ \intertext{From (PTW C.10)}
+ \bar{z}(t) &= \left[\Omega(t)\left(\expec{z^{\sigma - 1}} + (N-1)(1-F(\hat{z}(t)))d^{1-\sigma}\condexpec{z^{\sigma - 1}}{z > \hat{z}(t)}\right)\right]^{\frac{1}{\sigma - 1}}\\
+ &= \left[\Omega(t)
+ \frac{\theta}{1+\theta - \sigma}\left(1 + (N-1)d^{-\theta}\left(\frac{\hat{z}}{d} \right)^{\sigma - 1 -\theta} \right)\right]^{\frac{1}{\sigma - 1}}\label{eq:z-bar-sub}\\
+ \end{align}	
+ 
+ Hence,
+ \begin{align}
+ \bar{z}(t)^{\sigma - 1}&= \Omega(t)
+ \frac{\theta}{1+\theta - \sigma}\left(1 + (N-1)d^{1-\sigma}\hat{z}^{\sigma - 1 -\theta} \right)\label{eq:z-bar-sub-power}\\
+ \intertext{Use (PTW C.29)}
+ \hat{z}(t)&= d \left(\tfrac{\kappa}{\bar{\pi}_{\min}(t)} \right)^{\frac{1}{\sigma - 1}}\label{eq:z-hat-def}
+\intertext{Reorganize \cref{eq:z-hat-def} to find an implicit equation in $\hat{z}$ at every $t$,}
+ 0&=\hat{z}^{\sigma-1}-  \kappa d^{\sigma - 1} \bar{\pi}_{\min}(t)^{-1}\label{eq:z-hat-power}
+ \end{align}
+ Note that \cref{eq:z-hat-power} provides an implicit equation in $\hat{z}(t)$ given an exogenous $\Omega(t)$ and $g(t)$ and \cref{eq:L-tilde-sub}, and can be solved separately for each $t$.  From the implicit $\hat{z}(t)$, calculate the home trade share through (PTW C.47),
+ \begin{align}
+ \lambda_{ii}(t) &= \frac{1}{1 + (N-1)\hat{z}(t)^{\sigma-1-\theta}d^{1-\sigma}}\label{eq:lambda-ii-t}\\
+\intertext{Use (PTW C.49) to calculate,}
+ \bar{\pi}_{\min}(t) &= \frac{(N-1) \hat z(t) ^{-\theta}\kappa}{1-\lambda_{ii}(t)} \label{eq:pi-bar-t}
+ \end{align}
+
+\subsection{Welfare Calculations}
+Assume that there is a $T > 0$ such that the equilibrium reaches a steady state.   Given that $g(t) \equiv \D[t]\log M(t)$.  With this,
+\begin{align}
+M(t) &=M(0)\times\begin{cases}
+\exp\left(\int_0^t g(s)\diff s \right) & \text{ if } 0 \leq t \leq T\\
+\exp\left(\int_0^{T} g(s)\diff s  + (t - T)\bar{g} \right) & t \geq T
+\end{cases}\label{eq:M-t-sol}
+\intertext{Assume wlog that $M(0) = 1$, then,}
+\log M(t) &= \int_0^t g(s)\diff s\label{eq:log-M}
+\end{align}
+
+At the steady state, define $\bar{g}$ and $\bar{c}$ as the growth rate and consumption relative to real wages for $t \geq T$.  The consumer welfare can be calculated as from (PTW 1),
+\begin{align}
+U(t) &= \int_0^{\infty}e^{-\rho \tau}\log C(t+\tau)\diff \tau\\
+&= \int_0^{\infty}e^{-\rho \tau}\log M(t+\tau) \diff \tau + \int_0^{\infty}e^{-\rho \tau}\log c(t+\tau)\diff \tau\label{eq:U-def}
+\intertext{Given the convergence at time $T$, use \cref{eq:U-def} to split the welfare integral,}
+U(t) &= \int_0^{T-t}e^{-\rho \tau}\left(\log M(t+\tau)+\log c(t+\tau)\right)\diff \tau + \int_{T-t}^{\infty}e^{-\rho \tau}\left(\log M(t+\tau)+\log c(t+\tau)\right)\diff \tau\\
+\intertext{Note that $c(t)= \bar{c}$ for $t \geq T$,}
+&= \int_0^{T-t}e^{-\rho \tau}\left(\log M(t+\tau)+\log c(t+\tau)\right)\diff \tau + \frac{e^{-\rho( T-t)}}{\rho^2}\left((1+\rho( T-t))\bar{g} + \rho\left(\log \bar{c} + \log M(T) \right) \right)\label{eq:U-dynamics}
+%	\intertext{With \cref{eq:M-t-sol}}
+%	&= \int_0^{T}e^{-\rho \tau}\left(\log M(t+\tau)+\log c(t+\tau)\right)\diff \tau + \frac{e^{-\rho( T-t)}}{\rho^2}\left((1+\rho( T-t))g(T) + \rho\left(\log \bar{c} + \log M(T) \right) \right)
+\intertext{With (PTW G.31) and (PTW G.33) and \cref{eq:f-stationary-summary}}
+c(t) &= \left(\frac{\theta}{1-\sigma+\theta}\right)^{\frac{1}{\sigma-1}}\left(1 - \tilde{L}(t)\right)\Omega(t)^{\frac{1}{\sigma - 1}} \lambda_{ii}(t)^{\frac{1}{1-\sigma}}\label{eq:c-def}
+\end{align}
+
 
 
 \section{Discretization}\label{sec:discretization}
@@ -373,7 +451,7 @@ This will discretize space with backward differences in the first derivative, an
 \end{itemize}
 
 \subsection{Discretization Operators}\label{sec:discretization-operators}
-Summarizing the discretized differential operators subject to the boundary conditions.  Let $\L_1^{-}$ be the discretized backwards first differences, subject to \cref{eq:new-BC1,eq:new-BC2} and $L_2$ be the discretized central differences subject to \cref{eq:new-BC1,eq:new-BC2}.
+Summarizing the discretized differential operators subject to the boundary conditions.  Let $L_1^{-}$ be the discretized backwards first differences, subject to \cref{eq:new-BC1,eq:new-BC2} and $L_2$ be the discretized central differences subject to \cref{eq:new-BC1,eq:new-BC2}.
 
 Then you can show that the following  
 
@@ -397,7 +475,7 @@ To better understand the construction of $A$ and $b$, look at individual rows of
 \end{align}
 If the $z$ grid is uniform, the central differences should end up as just
 \begin{align}
-	\D[zz]v(z_i, t_n) &\approx \frac{v_{i+1}^n - 2 v_i^n + v_{i-1}^n}{\Delta^2}\label{eq:D-v-zz}
+	\D[zz]v(z_i, t_n) &\approx \frac{v_{i+1}^n - 2 v_i^n + v_{i-1}^n}{\Delta^2}\label{eq:D-v-zz-uniform}
 \end{align}
 }
 
