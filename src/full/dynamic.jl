@@ -27,14 +27,14 @@ function solve_dynamics(params, settings, d_0, d_T)
     dae = PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
 
     # solve solutions
-    sol = DifferentialEquations.solve(dae.dae_prob, callback = dae.callback) # solve!
     residuals = calculate_residuals_dae(dae.dae_prob.f, deepcopy(sol.du), deepcopy(sol.u), p, sol.t)
+    sol = DifferentialEquations.solve(dae.dae_prob, callback = dae.callback, tstops = 0:1e-3:T) # solve!
 
     v = map(u -> u[1:M], sol.u)
     g = map(u -> u[M+1], sol.u)
     z_hat = map(u -> u[M+2], sol.u)
 
-    return (v = v, g = g, z_hat = z_hat, t = sol.t, 
+    return (v = v, g = g, z_hat = z_hat, t = t, 
             p = p, sol = sol, residuals = residuals)
 end
 
@@ -94,7 +94,7 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
     du0 = zeros(M+2)
 
     return (dae_prob = DAEProblem(f!, du0, u0, (T, 0.0), differential_vars = [trues(M); false; false], p),
-    callback = callback)
+            callback = callback, stationary_equilibrium = stationary_equilibrium)
 end
 
 # return the parameters and functions needed to define dynamics
@@ -121,17 +121,4 @@ function get_p(params_T, stationary_sol_T, settings, Ω, T)
         v_T = v_T, g_T = g_T, z_hat_T = z_hat_T, Ω_T = Ω_T,
         saved_values = SavedValues(Float64, Tuple{Float64,Float64})) #Named tuple for parameters.
     return p
-end
-
-# calculate the residual at each time point; each row represents t in ts
-function calculate_residuals_dae(f!, du, u, p, ts)    
-    residuals = zeros(length(ts), length(u[1]))
-    
-    for (i, t) in enumerate(ts)
-        residual = zeros(length(u[1]))
-        f!(residual, du[i], u[i], p, t)
-        residuals[i,:] = residual 
-    end
-
-    return residuals
 end
