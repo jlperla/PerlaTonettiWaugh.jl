@@ -25,13 +25,13 @@ We start with an artificially simple version of the model with transition dynami
 A key simplification maintained in the both this simple and the full PTW transition dynamics: in the transition dynamics experiments we are looking at, the normalized distribution $F(z)$ will remain constant over all time.  Hence, we do not need to jointly solve the KFE as we will be at the stationary level (post-normalization).  This is a major simplification for the transition dynamics case compared to many heterogeneous agent models.  In particular, we will only look at examples where $F(z) = 1 - e^{-\theta z}$ for all $t$.
 
 \subsection{Summary of Equations}
-Let $Z$ be productivity, where $Z(t) \geq M(t)$.  Let $V(Z,t)$ is the value function prior to normalization, $M(t)$ the endogenous threshold, $\Pi(Z,t)$ the profits, and $X(t)$ the adoption cost.  Then define the normalization that $z \equiv \log(Z/M(t))$, $v(z,t) \equiv \frac{e^{-z}}{M(t)}V(M(t)e^z, t))$, $\pi(z,t) \equiv \frac{e^{-z}}{M(t)}\Pi(M(t)e^z, t))$, and $x(t) \equiv X(t)/M(t)$.  See \cref{sec:simple-derivation} to show that the set of equations is
+Let $Z$ be productivity, where $Z(t) \geq M(t)$.  Let $V(Z,t)$ is the value function prior to normalization, $M(t)$ the endogenous threshold, $\Pi(Z,t)$ the profits, and $X(t)$ the adoption cost.  Then define the normalization that $z \equiv \log(Z/M(t))$, $v(z,t) \equiv \frac{e^{-z}}{M(t)}V(M(t)e^z, t))$, $\pi(z,t) \equiv \frac{e^{-z}}{M(t)}\Pi(M(t)e^z, t))$, and $x(t) \equiv X(t)/M(t)$.  \cref{sec:simple-derivation} show the rescaled system of equation is
 \begin{align}
 \D[t]v(z,t) &= A(t)v(z,t) - \pi(z,t)\label{eq:simple-summary1}\\
-v(0,t) &= \int_{0}^{\infty}  v(z,t) \left(e^{-z} F'(z)\right) \diff z - x(t)\label{eq:simple-summary2}\\
+v(0,t) &= \int_{0}^{\infty}  v(z,t) \left(e^z F'(z)\right) \diff z - x(t)\label{eq:simple-summary2}\\
 \D[z]v(0,t) + v(0,t) &= 0\label{eq:simple-summary3}\\
 \intertext{Where,}
-A(t) &\equiv \left(r - \mu - \frac{\upsilon^2}{2}\right) - (\mu+ \upsilon^2 - g(t)) \D[z] - \tfrac{\upsilon^2}{2} \D[zz]\label{eq:simple-summary4}
+A(t) &\equiv \left(r - \mu - \frac{\upsilon^2}{2}\right) - (\mu+ \upsilon^2 - g(t)) \D[z] - \frac{\upsilon^2}{2} \D[zz]\label{eq:simple-summary4}
 \end{align} 
 
 \subsection{Steady State}
@@ -47,12 +47,12 @@ x(t) &= \zeta,\quad \text{ for all }t \geq T\label{eq:terminal-x}\\
 g \equiv g(T) &= 	\mu+ \frac{1-(\theta -1) \zeta  \left(r-\mu\right)}{(\theta -1)^2 \zeta }+ \frac{\upsilon^2}{2}\frac{\theta  \left(\theta(\theta -1)    \left(r-\mu-\frac{\upsilon ^2}{2}\right) \zeta-2\right)+1}{(\theta -1) \left((\theta -1)   \left(r-\mu-\frac{\upsilon ^2}{2}\right)\zeta-1\right)}. \label{eq:g-gbm}\\
 v(z,T) &= \frac1{r-\mu- \upsilon^2/2}\left(1 + \frac1{\nu} e^{-(\nu + 1) z}\right)\label{eq:v-gbm-sol},
 \intertext{where,}
-\nu &=  \frac{\mu- g}{\upsilon^2} + \sqrt{\left(\frac{g-\mu}{\upsilon^2} \right)^{2} + \frac{r-g}{\upsilon^2/2}}. \label{eq:nu-gbm}
+\nu &\equiv  \frac{\mu- g}{\upsilon^2} + \sqrt{\left(\frac{g-\mu}{\upsilon^2} \right)^{2} + \frac{r-g}{\upsilon^2/2}}. \label{eq:nu-gbm}
 \end{align}
 
 Note: since $v(z,T)$ has been rescaled by $e^{-z}$ above, it is now a \textbf{decreasing} function of $z$.
 
-\subsection{Discretization}
+\subsection{Spatial Discretization}
 
 In this subsection we apply a discretization operator and ensure the boundary conditions are fulfilled.
 
@@ -60,15 +60,20 @@ Define a  grid $\set{z_i}_{i=1}^I$ with $z_1 = 0$ and $z_I = \bar{z}$ is a ``lar
 
 Assume upwind finite difference discretization of the differential operators subject to the homogenous boundary values, such that \cref{eq:new-BC1,eq:new-BC2} hold, which creates $L^{-}_1$ and $L_2$ from \cref{sec:discretization-operators}.\footnote{Here, we will check that $(\mu+ \sigma^2 - g(t)) < 0$ so that $L^{-}_1$ is backwards differences, and consequently the correct upwind direction.}  The discretization of $A(t)$ subject to the boundary conditions is then (in the interior)
 \begin{align}
-A(t) &\equiv \left(r - \mu - \frac{\upsilon^2}{2}\right) I - (\mu + \upsilon^2 - g(t)) L^{-}_1 - \tfrac{\upsilon^2}{2} L_2\label{eq:A-def-simple}
+A(t) &\equiv \left(r - \mu - \frac{\upsilon^2}{2}\right) I - (\mu + \upsilon^2 - g(t)) L^{-}_1 - \frac{\upsilon^2}{2} L_2\label{eq:A-def-simple}
 \end{align}
 and the PDE in \cref{eq:simple-summary1} becomes the system of ODEs
 \begin{align}
 	v'(t) &= A(t) v(t) - \pi(t)\label{eq:discretized-simple}\\
-	\intertext{Along with the value matching condition}
-	v_1(t) &= \omega \cdot v(t) - x(t)\label{eq:discretized-simple-vm}
+	\intertext{Let $v_1(t)$ be the $1$st element in the $v(t)$ vector, corresponding to $v(0,t)$.  Then, the value matching condition is}
+	v_1(t) &= \omega \cdot v(t) - x(t)\label{eq:discretized-simple-vm}\\
+	\intertext{Where,}
+	\omega_i &\equiv \bar{\omega} \frac{\theta e^{(1 - \theta)z_i}}{1 - e^{-\theta \bar{z}}}
+	\intertext{And the weights for the non-uniform trapezoidal rule is calculated with the $\Delta_{-}$ and $\Delta_{+}$ backwards and forward diffs (respectively) for the $z$ grid (with $\Delta_{1,-} = 0$ and $\Delta_{I,+} = 0$ set respectively,}
+\bar{\omega}&\equiv \frac1{2}(\Delta_{-} + \Delta_{+})
 \end{align}
-Where the $\omega$ come from \cref{sec:quadrature} and combines quadrature nodes with the the $F(z)$.
+
+Where the $\omega$ come from \cref{sec:quadrature} and combines quadrature nodes with $e^z$ and the $F'(z)$, and $\bar{\omega}$ are the irregular Simpson's rule weights.
 
 To find the stationary solution at $T$, solve the system of equations $A(T) v(t) = \pi(T)$ and $v_1(T) = \omega \cdot v(T) - x(T)$ for the $v(T)$ and $g$ with a nonlinear solver.\footnote{Or by fixing a $g$, solving the linear \cref{eq:discretized-simple} and then picking the $g$ to equate \cref{eq:discretized-simple-vm} }  You can also compare to the analytic solution in \cref{eq:simple-summary1}.
 
@@ -144,6 +149,7 @@ Given the current $g$ and $\hat{z}$, the following definitions calculated at eve
 \end{align}
 To calculate the $\D[t]\log\left(1 - \tilde{L}(t)\right)$ you need to store the ``future'' $\left(1 - \tilde{L}(t)\right)$ and $t$ values in the last adaptive timestep, and then use forward first-differences with it based on the current value
 
+\newpage
 \appendix
 \makeatletter
 \def\@seccntformat#1{Appendix\ \csname the#1\endcsname\quad}
@@ -153,46 +159,74 @@ To calculate the $\D[t]\log\left(1 - \tilde{L}(t)\right)$ you need to store the 
 \def\Pref@section{Appendix~}
 \makeatother
 \numberwithin{equation}{section}
-\let\normalsize\small
-\small
+%\let\normalsize\small
+%\small
 \section{Derivations for Simple Model}\label{sec:simple-derivation}
 \subsection{Equations Prior to Rescaling}
 
 Copying from BPT2 (but renaming the $v$ function to $\hat{v}$ here), assume an exogenously given $\hat{\pi}(z,t)$ and $x(t)$ function.  We will only look at examples where $F(z) = 1 - e^{-\theta z}$ for all $t$.
 \begin{align}
-(r - g(t)) \hat{v}(z,t) &= \hat{\pi}(z,t) + (\mu- g(t)) \D[z] \hat{v}(z,t) + \tfrac{\upsilon^2}{2} \D[zz] \hat{v}(z,t) + \D[t]\hat{v}(z,t)\label{eq:bellman-GBM-dynamic}	\\
+(r - g(t)) \hat{v}(z,t) &= \hat{\pi}(z,t) + (\mu- g(t)) \D[z] \hat{v}(z,t) + \frac{\upsilon^2}{2} \D[zz] \hat{v}(z,t) + \D[t]\hat{v}(z,t)\label{eq:bellman-GBM-dynamic}	\\
 \hat{v}(0,t) &= \int_{0}^{\infty} \hat{v}(z,t) F'(z)\diff z - x(t)\label{eq:vm-GBM-dynamic}\\
 \D[z]\hat{v}(0,t) &= 0\label{eq:sp-GBM-dynamic}
 \end{align}
 
-A solution to this problem is a $g(t)$ and $\hat{v}(z,t)$ that fulfills the above equations for all $t\in[0,T]$ and $z\in[0,\infty)$.  While not listed above, in practice another boundary condition (e.g. transversality) is used to ensure that \cref{eq:bellman-GBM-dynamic} can be solved.  In order to use finite differences to solve the problem with $\upsilon > 0$, we will need to use some variation on this, or an appeal to viscosity solutions.  For us, a reflecting barrier at a ``large'' $z$ may converge to the correct solution.  For example, at the normalized $\bar{z}$, the boundary value is
+A solution to this problem is a $g(t)$ and $\hat{v}(z,t)$ that fulfills the above equations for all $t\in[0,T]$ and $z\in[0,\infty)$.  While not listed above, in practice another boundary condition (e.g. transversality) is used to ensure that \cref{eq:bellman-GBM-dynamic} can be solved. We us, a reflecting barrier at a ``large'' $\bar{z}$ converges to the correct solution.  Use the boundary value is
 	\begin{align}
 	\D[z]\hat{v}(\bar{z},t) &= 0\label{eq:reflecting-GBM-dynamic}
 	\end{align}
 	Keep in mind that this is just a step in the numerical solution, rather than introducing a true reflecting barrier.  We will need to verify that it does not introduce issues by verifying the numeric solution matches the closed form solution for large $\bar{z}$ and compare to the analytic equation for external validity.  Also note that if $\upsilon = 0$, due to the upwind procedure this boundary value would be unnecessary and/or drop out of the solution.
 
 \subsection{Change of Variables to Normalize and Rescale}\label{eq:simple-rescale}
-Solving \cref{eq:bellman-GBM-dynamic} for $\hat{v}(z,t)$ is problematic since the scale goes from approximatively $1$ to $e^{\bar{z}}$, which is very large for a high $\bar{z}$.  To make the solution more stable, we rescale the equation.  Take \cref{eq:sp-GBM-dynamic} and let $ v(z,t) \equiv e^{-\xi z}\hat{v}(z,t)$ for some $\xi \geq 0$ chosen for convenience and stability.  Then,
+Solving \cref{eq:bellman-GBM-dynamic} for $\hat{v}(z,t)$ is problematic since the scale goes from approximatively $1$ to $e^{\bar{z}}$, which is very large for a high $\bar{z}$.  To make the solution more stable, we rescale the equation.  Choose some $\xi \geq 0$ chosen for convenience and stability and let
 \begin{align}
+	v(z,t) &\equiv e^{-\xi z}\hat{v}(z,t) = e^{-\xi z}\frac{V(e^z M(t),t)}{M(t)}\\
+	\intertext{Differentiate and reorganize this expression to yield}
 	\D[z]\hat{v}(z,t) &= e^{\xi z}\left(\xi v(z,t) + \D[z]v(z,t) \right)\\
 	\D[zz]\hat{v}(z,t) &= e^{\xi z}\left(\xi^{2} v(z,t) + 2 \xi\D[z]v(z,t) + \D[zz]v(z,t)  \right)\\	
 	\D[t]\hat{v}(z,t) &= e^{\xi z} \D[t]v(z,t)
 \end{align}
-Define $\pi(z,t) = e^{-\xi z}\hat{\pi}(z,t)$ so that if $\hat{\pi}(z,t) = e^{\xi z}$ then $\pi(z,t) = 1$.  Substitute into \cref{eq:sp-GBM-dynamic}, divide by $e^{\xi z}$ and simplify,
+Define $\pi(z,t) = e^{-\xi z}\hat{\pi}(z,t)$ so that if $\hat{\pi}(z,t) = e^{\xi z}$ then $\pi(z,t) = 1$.  Substitute into \cref{eq:bellman-GBM-dynamic}, divide by $e^{\xi z}$ and simplify,
 
 \begin{align}
-	\left(r - g(t)- \xi(\mu-g(t)) - \frac{\upsilon^2}{2}\xi^2\right)  v(z,t) &= \pi(z,t) + (\mu+ \upsilon^2\xi - g(t)) \D[z]v(z,t) \nonumber \\ &+ \tfrac{\upsilon^2}{2} \D[zz]v(z,t) + \D[t]v(z,t)  \label{eq:bellman-GBM-dynamic-normalized}
+	\left(r - g(t)- \xi(\mu-g(t)) - \frac{\upsilon^2}{2}\xi^2\right)  v(z,t) &= \pi(z,t) + (\mu+ \upsilon^2\xi - g(t)) \D[z]v(z,t) \nonumber \\ &+ \frac{\upsilon^2}{2} \D[zz]v(z,t) + \D[t]v(z,t)  \label{eq:bellman-GBM-dynamic-normalized}
 \end{align}
 
-Now, substitute into the boundary condition $\D[z]\hat{v}(0,t) = 0$ and the artificial reflecting barrier at the top, $\D[z]\hat{v}(\bar{z},t) = 0$ to find,
+Now, substitute into the boundary conditions \cref{eq:sp-GBM-dynamic,eq:reflecting-GBM-dynamic} to find,
 \begin{align}
 	\xi v(0,t) + \D[z]v(0,t ) &= 0\label{eq:new-BC1}\\
 	\xi v(\bar{z},t) + \D[z]v(\bar{z},t) &= 0\label{eq:new-BC2}
 \end{align}	
 Finally, in the value matching condition, $\hat{v}(0,t) = e^{0} v(0,t)$ where if the $F'(z) = \theta e^{-\theta z}$ then,
 \begin{align}
-	 v(0,t) &= \int_{0}^{\infty}  v(z,t) \left(e^{\xi z} F'(z)\right) \diff z - x(t)\label{eq:vm-GBM-dynamic-normalized}
+	 v(0,t) &= \int_{0}^{\infty}  v(z,t) \left(e^{\xi z} F'(z)\right) \diff z - x(t)\label{eq:vm-GBM-dynamic-normalized-not-truncated}
 \end{align}	
+However, for the numerical approximation with the artificial boundary at $\bar{z}$, we need to use a truncated distribution for $F(z)$.  Since we have take the $F(z)$ with support from $[0,\infty)$, and we truncate at $\bar{z} = \bar{z}$ then the equation in \cref{eq:vm-GBM-dynamic-normalized-not-truncated} to work with is,
+\begin{align}
+	 v(0,t) &= \int_{0}^{\bar{z}}  v(z,t) \left(e^{\xi z} \frac{F'(z)}{F(\bar{z})}\right) \diff z - x(t)\label{eq:vm-GBM-dynamic-normalized}
+\end{align}
+
+
+\subsection{Quadrature}\label{sec:quadrature}
+With the discretized grid, the integral in \cref{eq:vm-GBM-dynamic-normalized} will be calculated with some quadrature rules.\footnote{An issue here is that the support of the integral is infinite, but the finite differences go to $z_I$.  While not ideal, since $F'(z_I)\to 0$ rapidly, the Trapezoidal rule should be a  reasonable approximation.}  Most generally, let the quadrature rule weights be $\bar{\omega} \in \R^I$ where for some $q(z)$ and $q \equiv \set{q(z_i)}_{i=1}^I$,
+\begin{align}
+\int_0^{\bar{z}} q(z) \diff z &\approx \bar{\omega} \cdot q
+\intertext{To derive the non-uniform trapezoidal rules for an arbitrary $q$ function,}
+\int_{z_1}^{z_I} q(z)\diff z &\approx \frac1{2}\sum_{i=1}^{I-1}(z_{i+1}-z_i)(q(z_i) + q(z_{i+1}))\\
+&= \frac1{2}\left(\Delta_{1,+}q(z_1) + (\Delta_{1,+} + \Delta_{2,+})q(z_2) + \ldots (\Delta_{I-2,+} + \Delta_{I-1,+})q(z_{I-1})+\Delta_{I-1,+}q(z_I)\right)
+\intertext{If we set $\Delta_{1,-} = 0$ and $\Delta_{I,+} = 0$ then, (Note different than other use of ghost nodes in derivatives, though not sure they enter equations in those other cases)}
+\int_{z_1}^{z_I} q(z)\diff z &\approx \bar{\omega}\cdot q\\
+\intertext{where,}
+\bar{\omega}&\equiv \frac1{2}(\Delta_{-} + \Delta_{+})
+\end{align}
+
+
+Moving to the specific integral in \cref{eq:vm-GBM-dynamic-normalized}, define the $\omega$ weights to combine the $\bar{\omega}$ and the $\left(e^{\xi z} \frac{F'(z)}{F(\bar{z})}\right)$ term so that
+\begin{align}
+\omega_i &\equiv \bar{\omega}_i e^{\xi z_i}\frac{F'(z_i)}{F(\bar{z})}\\
+\intertext{Then with the discretized vector $v(t) \in \R^I$, the integral in \cref{eq:vm-GBM-dynamic-normalized} becomes,}
+v_1(t) &= \omega \cdot v(t) - x(t)
+\end{align}
 
 \section{Derivations of Full Model}\label{sec:full-model-derivations}
 Note that unlike the PTW paper (for now, at least) we have $z \equiv \log(Z/M(t))$ throughout these notes.
@@ -422,25 +456,6 @@ So from \cref{eq:reflecting-right-nonuniform} the bottom right corner of $A$ mat
 	0 & 0 & 0 & \ldots & X^n_{I-1} & Y^n_{I-1} & Z^n_{I-1}\\
 	0 & \ldots & \ldots & \ldots & 0 & X_I^n & Y_I^n+Z_I^n(1-\xi\Delta_{I,-})
 \end{bmatrix}\in\R^{I\times I}\label{eq:A-n}
-\end{align}
-
-\subsection{Quadrature}\label{sec:quadrature}
-With the discretized grid, the integral in \cref{eq:vm-GBM-dynamic} will be calculated with Simpsons' or other quadrature rules.\footnote{An issue here is that the support of the integral is infinite, but the finite differences go to $z_I$.  While not ideal, since $F'(z_I)\to 0$ rapidly, Simpson's rule should be a  reasonable approximation.  In the case of a non-uniform grid, we will use the trapezoidal rule.  Alternatively, with an non-uniform grid we could ensure that the Laguerre quadrature points are in the grid and Gauss-Laguerre quadrature, which has an infinite support.  This could be done either for the whole domain, or more precise simpsons rule used for part of the integral, and then the Gauss-Laguerre setup used for the right hand side.  In any of the cases, the result is a set of quadrature weights.}  Let the quadrature rule weights be $\bar{\omega} \in \R^I$ where for some $q(z)$ and $q \equiv \set{q(z_i)}_{i=1}^I$,
-\begin{align}
-\int_0^{\infty} q(z) \diff z &\approx \bar{\omega} \cdot q
-\intertext{Then, denoting pointwise multiplication $\odot$, define the adjusted weights as $\omega$ using the time-invariant $F'(z)$ as ,}
-\omega &\equiv \bar{\omega}\odot \set{F'(z_i)}_{i=1}^{I}\label{eq:omega}\\
-\intertext{Then the unconditional expected value at any point in time is approximated by a dot product with time-invariant weights,}
-\int_{0}^{\infty}v(t_n, z)F'(z)\diff z &\approx \omega \cdot v^n\label{eq:integral-approximation}\\
-\intertext{Keep in mind that if we truncate the draws for a particular pdf with infinite support, then we should modify the $F'(\cdot)$ such that it is a truncated draw.  For example, if the support is $[0,\infty)$, and we truncate at $\bar{z} = z_I$ then,}
-	F'_i &\equiv \frac{F'(z_i)}{F(z_I)}
-\end{align}
-	To solve for the non-uniform trapezoidal rules for an arbitrary $f$ function,
-\begin{align}
-\int_{z_1}^{z_I} f(z)\diff z &\approx \frac1{2}\sum_{i=1}^{I-1}(z_{i+1}-z_i)(f(z_i) + f(z_{i+1}))\\
-&= \frac1{2}\left(\Delta_{1,+}f(z_1) + (\Delta_{1,+} + \Delta_{2,+})f(z_2) + \ldots (\Delta_{I-2,+} + \Delta_{I-1,+})f(z_{I-1})+\Delta_{I-1,+}f(z_I)\right)
-\intertext{If we set $\Delta_{1,-} = 0$ and $\Delta_{I,+} = 0$ then, (Note different than other use of ghost nodes in derivatives, though not sure they enter equations in those other cases)}
-&= \underbrace{\frac1{2}(\Delta_{-} + \Delta_{+})}_{\equiv \omega}\cdot f
 \end{align}
 
 
