@@ -2,7 +2,7 @@
 z_min = 0.0 
 z_max = 5.0
 M = 1000
-z_grid = linspace(z_min,z_max,M) # Since we only care about the grid. 
+z_grid = range(z_min, stop = z_max, length = M) # Since we only care about the grid. 
 
 # Time
 T_val = 100.0
@@ -16,6 +16,6 @@ settings = @with_kw (z = z_grid, T = T_val)
 # Solve and compute residuals
 @time solved = solve_dynamics(baselineparams(), settings(), d_0, d_T)
 
-@test mean(mean(solved.residuals[:,1:M], 1)) ≈ 0 atol = 1e-03 # mean residuals for system of ODEs
+@test mean(mean(solved.residuals[:,1:M], dims = 1)) ≈ 0 atol = 1e-03 # mean residuals for system of ODEs
 @test mean(mean(solved.residuals[:,(M+1)])) ≈ 0 atol = 1e-03 # mean residuals for value matching condition
 @test mean(mean(solved.residuals[:,(M+2)])) ≈ 0 atol = 1e-03 # mean residuals for export threshold condition

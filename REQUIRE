@@ -1,9 +1,9 @@
 NLsolve 
 DifferentialEquations
-NamedTuples
 BandedMatrices
 Sundials
 Distributions
 Roots
-Parameters 0.9.1
-Missings
+Parameters 
+Optim
+QuantEcon 0.15.0+

@@ -34,7 +34,7 @@
 #= 
     Numerical tests. 
 =#
-    z = unique([linspace(0.0, 1.0, 300)' linspace(1.0, 2.0, 50)' linspace(2.0, 7.0, 50)'])
+    z = unique([range(0.0, stop = 1.0, length = 300)' range(1.0, stop = 2.0, length = 50)' range(2.0, stop = 7.0, length = 50)'])
     res1_num = stationary_numerical(baselineparams(), z, init_x1) 
     res2_num = stationary_numerical(baselineparams(), z, init_x2)
     res3_num = stationary_numerical(baselineparams(), z, init_x3)

@@ -15,94 +15,69 @@
 \newcommand{\indicator}[1]{\ensuremath{\mathds{1}\left\{{#1}\right\}}}
 
 \begin{document}
-\title{Notes for Dynamics Proof of Concept}
+\title{Equilibrium Technology Diffusion, Trade, and Growth\\Online Computational Appendix\thanks{Thanks...}}
+\author{Jesse Perla \and Christopher Tonetti \and Michael E. Waugh}
 \maketitle
 
-\section{Simplified System of Normalized Equations}
-We start with an artificially simple version of the model with transition dynamics.  In the PTW case, the $\pi(z,t), r(t), x(t)$ will come from  calculations (and the terminal value function is more complicated if required).  But because the calculations of the $\pi(z,t), r(t), x(t)$ can be calculated using a set of painful, but otherwise straightforward, equations, the solution to this simplified setup should be the crux of the problem.
+\section{Simplified Growth Model with Transition Dynamics}
+We start with an artificially simple version of the model with transition dynamics, which is nested in BPT2.  In the PTW case, $\pi(z,t), r(t), x(t)$ will come from calculations, but the basic structure is otherwise the same.
 
-A key simplification maintained in the full PTW transition dynamics: in the transition dynamics experiment we are planning for the paper, the distribution $F(z)$ will remain constant over all time.  Hence, we do not need to jointly solve the KFE as we will be at the stationary level (post-normalization).  This is a major simplification for the transition dynamics case compared to many heterogeneous agent models.
+A key simplification maintained in the both this simple and the full PTW transition dynamics: in the transition dynamics experiments we are looking at, the normalized distribution $F(z)$ will remain constant over all time.  Hence, we do not need to jointly solve the KFE as we will be at the stationary level (post-normalization).  This is a major simplification for the transition dynamics case compared to many heterogeneous agent models.  In particular, we will only look at examples where $F(z) = 1 - e^{-\theta z}$ for all $t$.
 
-\subsection{PDE and Boundary Values}
-For $z\in[0,\infty)$.  Assume an exogenously given $\pi(z,t)$ and $x(t)$ function.  We will only look at examples where $F(z) = 1 - e^{-\theta z}$ for all $t$.
+\subsection{Summary of Equations}
+Let $Z$ be productivity, where $Z(t) \geq M(t)$.  Let $V(Z,t)$ is the value function prior to normalization, $M(t)$ the endogenous threshold, $\Pi(Z,t)$ the profits, and $X(t)$ the adoption cost.  Then define the normalization that $z \equiv \log(Z/M(t))$, $v(z,t) \equiv \frac{e^{-z}}{M(t)}V(M(t)e^z, t))$, $\pi(z,t) \equiv \frac{e^{-z}}{M(t)}\Pi(M(t)e^z, t))$, and $x(t) \equiv X(t)/M(t)$.  See \cref{sec:simple-derivation} to show that the set of equations is
 \begin{align}
-	(r - g(t)) v(z,t) &= \pi(z,t) + ((\mu + \upsilon^2/2) - g(t)) \D[z] v(z,t) + \tfrac{\upsilon^2}{2} \D[zz] v(z,t) + \D[t]v(z,t)\label{eq:bellman-GBM-dynamic}	\\
-v(0,t) &= \int_{0}^{\infty} v(z,t) F'(z)\diff z - x(t)\label{eq:vm-GBM-dynamic}\\
-\D[z]v(0,t) &= 0\label{eq:sp-GBM-dynamic}
-\end{align}
+\D[t]v(z,t) &= A(t)v(z,t) - \pi(z,t)\label{eq:simple-summary1}\\
+v(0,t) &= \int_{0}^{\infty}  v(z,t) \left(e^{-z} F'(z)\right) \diff z - x(t)\label{eq:simple-summary2}\\
+\D[z]v(0,t) + v(0,t) &= 0\label{eq:simple-summary3}\\
+\intertext{Where,}
+A(t) &\equiv \left(r - \mu - \frac{\upsilon^2}{2}\right) - (\mu+ \upsilon^2 - g(t)) \D[z] - \tfrac{\upsilon^2}{2} \D[zz]\label{eq:simple-summary4}
+\end{align} 
 
+\subsection{Steady State}
 For the exogenous $\pi(z,t)$ and $x(t)$ we require that at some $T$ it becomes stationary and
 \begin{align}
 x(t) &= \zeta,\quad \text{ for all }t \geq T\label{eq:terminal-x}\\
-\pi(z,t) &= e^z,\quad \text{ for all }t \geq T\label{eq:terminal-pi}
+\pi(z,t) &= 1,\quad \text{ for all }t \geq T\label{eq:terminal-pi}
 \end{align}
 
-A solution to this problem is a $g(t)$ and $v(z,t)$ that fulfills the above equations for all $t\in[0,T]$ and $z\in[0,\infty)$
-\footnote{While not listed above, in practice another boundary condition (e.g. transversality) is used to ensure that \cref{eq:bellman-GBM-dynamic} can be solved.  In order to use finite differences to solve the problem with $\upsilon > 0$, we will need to use some variation on this, or an appeal to viscosity solutions.  For us, a reflecting barrier at a ``large'' $z$ may converge to the correct solution.  For example, at the normalized $\bar{z}$, the boundary value is
+\noindent With this, BPT2 gives us that,
+
 \begin{align}
-	\D[z]v(\bar{z},t) &= 0\label{eq:reflecting-GBM-dynamic}
-\end{align}
-Keep in mind that this is just a step in the numerical solution, rather than introducing a true reflecting barrier.  We will need to verify that it does not introduce issues by verifying the numeric solution matches the closed form solution for large $\bar{z}$ and compare to the analytic equation for external validity.  Also note that if $\upsilon = 0$, due to the upwind procedure this boundary value would be unnecessary and/or drop out of the solution.}
-\begin{align}
-g \equiv g(T) &= 	(\mu + \upsilon^2/2) + \frac{1-(\theta -1) \zeta  \left(r-(\mu + \upsilon^2/2)\right)}{(\theta -1)^2 \zeta }+ \frac{\upsilon^2}{2}\frac{\theta  \left(\theta(\theta -1)    \left(r-(\mu + \upsilon^2/2)-\frac{\upsilon ^2}{2}\right) \zeta-2\right)+1}{(\theta -1) \left((\theta -1)   \left(r-(\mu + \upsilon^2/2)-\frac{\upsilon ^2}{2}\right)\zeta-1\right)}. \label{eq:g-gbm}\\
-v(z,T) &= \frac1{r-(\mu + \upsilon^2/2) - \upsilon^2/2}\left(e^{z} + \frac1{\nu} e^{-\nu z}\right)\label{eq:v-gbm-sol},
+g \equiv g(T) &= 	\mu+ \frac{1-(\theta -1) \zeta  \left(r-\mu\right)}{(\theta -1)^2 \zeta }+ \frac{\upsilon^2}{2}\frac{\theta  \left(\theta(\theta -1)    \left(r-\mu-\frac{\upsilon ^2}{2}\right) \zeta-2\right)+1}{(\theta -1) \left((\theta -1)   \left(r-\mu-\frac{\upsilon ^2}{2}\right)\zeta-1\right)}. \label{eq:g-gbm}\\
+v(z,T) &= \frac1{r-\mu- \upsilon^2/2}\left(1 + \frac1{\nu} e^{-(\nu + 1) z}\right)\label{eq:v-gbm-sol},
 \intertext{where,}
-\nu &=  \frac{(\mu + \upsilon^2/2) - g}{\upsilon^2} + \sqrt{\left(\frac{g-(\mu + \upsilon^2/2)}{\upsilon^2} \right)^{2} + \frac{r-g}{\upsilon^2/2}}. \label{eq:nu-gbm}
+\nu &=  \frac{\mu- g}{\upsilon^2} + \sqrt{\left(\frac{g-\mu}{\upsilon^2} \right)^{2} + \frac{r-g}{\upsilon^2/2}}. \label{eq:nu-gbm}
 \end{align}
 
-
+Note: since $v(z,T)$ has been rescaled by $e^{-z}$ above, it is now a \textbf{decreasing} function of $z$.
 
 \subsection{Discretization}
 
-In this subsection we apply a discretization operator and ensure the boundary conditions \cref{eq:new-BC1} and \cref{eq:new-BC2} are fulfilled. 
+In this subsection we apply a discretization operator and ensure the boundary conditions are fulfilled.
 
 Define a  grid $\set{z_i}_{i=1}^I$ with $z_1 = 0$ and $z_I = \bar{z}$ is a ``large'' number (keeping in mind that the effective number is $e^{\bar{z}}$).  After discretizing, we will denote the grid with the variable name, i.e. $z \equiv \set{z_i}_{i=1}^I$.  Given the exogenous $\pi(z,t)$ functions, the discretized equivalents is $\pi(t) \in \R^I$.
 
-
-Take \cref{eq:bellman-GBM-dynamic-normalized} and rearrange to find,
+Assume upwind finite difference discretization of the differential operators subject to the homogenous boundary values, such that \cref{eq:new-BC1,eq:new-BC2} hold, which creates $L^{-}_1$ and $L_2$ from \cref{sec:discretization-operators}.\footnote{Here, we will check that $(\mu+ \sigma^2 - g(t)) < 0$ so that $L^{-}_1$ is backwards differences, and consequently the correct upwind direction.}  The discretization of $A(t)$ subject to the boundary conditions is then (in the interior)
 \begin{align}
-	\D[t]\tilde{v}(z,t) &= \underbrace{\left(\left(r - g(t)- \xi((\mu + \upsilon^2/2)-g(t)) - \frac{\upsilon^2}{2}\xi^2\right) - ((\mu + \upsilon^2/2) + \upsilon^2\xi - g(t)) \D[z] - \tfrac{\upsilon^2}{2} \D[zz]\right)}_{\equiv \tilde{A}(t)}\tilde{v}(z,t)  - \tilde{\pi}(z,t) \label{eq:bellman-GBM-dynamic-normalized-rearranged}\\
-	\intertext{Then with this linear differential operator,}
-	\D[t]\tilde{v}(z,t) &= \tilde{A}(t) \tilde{v}(z,t) - \tilde{\pi}(z,t)
+A(t) &\equiv \left(r - \mu - \frac{\upsilon^2}{2}\right) I - (\mu + \upsilon^2 - g(t)) L^{-}_1 - \tfrac{\upsilon^2}{2} L_2\label{eq:A-def-simple}
 \end{align}
-
-Assume upwind finite difference discretization of the differential operators subject to the homogenous boundary values, such that \cref{eq:new-BC1,eq:new-BC2} hold, which creates $L^{-}_1$ and $L_2$ from \cref{sec:discretization-operators}.\footnote{Here, we will check that $((\mu + \upsilon^2/2) + \sigma^2\xi - g(t)) < 0$ so that $L^{-}_1$ is backwards differences, and consequently the correct upwind direction.}
-
-The discretization of $\tilde{A}(t)$ subject to the boundary conditions is then
+and the PDE in \cref{eq:simple-summary1} becomes the system of ODEs
 \begin{align}
-A(t) &\equiv \left(r - g(t)- \xi((\mu + \upsilon^2/2)-g(t)) - \frac{\upsilon^2}{2}\xi^2\right) I - (\gamma + \upsilon^2\xi - g(t)) L^{-}_1 - \tfrac{\upsilon^2}{2} L_2\label{eq:A-def-simple}
+	v'(t) &= A(t) v(t) - \pi(t)\label{eq:discretized-simple}\\
+	\intertext{Along with the value matching condition}
+	v_1(t) &= \omega \cdot v(t) - x(t)\label{eq:discretized-simple-vm}
 \end{align}
-and the PDE in \cref{eq:bellman-GBM-dynamic-normalized-rearranged} becomes the system of ODEs
-\begin{align}
-	\tilde{v}'(t) &= A(t) \tilde{v}(t) - \tilde{\pi}(t)
-\end{align}	
+Where the $\omega$ come from \cref{sec:quadrature} and combines quadrature nodes with the the $F(z)$.
 
+To find the stationary solution at $T$, solve the system of equations $A(T) v(t) = \pi(T)$ and $v_1(T) = \omega \cdot v(T) - x(T)$ for the $v(T)$ and $g$ with a nonlinear solver.\footnote{Or by fixing a $g$, solving the linear \cref{eq:discretized-simple} and then picking the $g$ to equate \cref{eq:discretized-simple-vm} }  You can also compare to the analytic solution in \cref{eq:simple-summary1}.
 
-% See \cref{sec:discretization} for details on the discretization.  The end result is that we can compose the following operator,
-% \begin{align}
-% 	A(t) &\equiv \begin{bmatrix}
-% X_1(t)(1+\xi\Delta_{1,+})+Y_1(t) & Z_1(t) & 0 & \ldots & \ldots & \ldots & 0\\
-% X_2(t) & Y_2(t) & Z_2(t) & 0 & 0 & \ldots & 0\\
-% \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots\\		
-% 0 & 0 & 0 & \ldots & X_{I-1}(t) & Y_{I-1}(t) & Z_{I-1}(t)\\
-% 0 & \ldots & \ldots & \ldots & 0 & X_I(t) & Y_I(t)+Z_I(t)(1-\xi\Delta_{I,-})
-% \end{bmatrix}\in\R^{I\times I}\label{eq:A-t}
-% \end{align}
-
-% where we note that the drift must be negative, and hence we should use backwards differences:
-% \begin{align}
-% 	X(t) &\equiv -\frac{\mu_i^{-}}{\Delta_{i,-}} +\frac{\sigma^2}{\Delta_{i,-}(\Delta_{i,+}+\Delta_{i,-})}\\
-% 	Y(t) &\equiv  \frac{\mu_i^{-}}{\Delta_{i,-}} - \frac{\mu_i^{+}}{\Delta_{i,+}}-\frac{\sigma_i^2}{\Delta_{i,-}\Delta_{i,+}}\\
-% 	Z(t) &\equiv \frac{\mu_i^{+}}{\Delta_{i,+}} + \frac{\sigma_i^2}{\Delta_{i,+}(\Delta_{i,+}+\Delta_{i,-})}
-% \end{align}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Full Model Example Dynamics}
+\section{Full Growth Model with Transition Dynamics}
 Assume $\delta > 0$.  This trade liberalization experiment will involve a decrease in $d$ as the trade liberalization, with no other changes.  We can calculate the two steady states (using existing code) and examine the transition dynamics.
 
 In order to solve the dynamic problem in \cref{sec:normalized-equations}, we need to calculate $\tilde{r}(t), \pi_{\min}(t),\hat{z}(t),$ etc  as a function of $g(t), \Omega(t),$ and parameters.  As a simplification, we will assume that the cost of adoption is in labor, i.e. $\eta = 0$, so that $x(t) = \zeta$ for all $t$ from (H.11)\footnote{Otherwise, there is an addition system of implicit equations to solve.}  We also assume $\log$ utility, so that $\gamma = 1$.
 
-\subsection{Number of Varieties and Normalized CDF}
+\subsection{Number of Varieties and Entry in Transition}
 
 Define $E(t)$ such that the \textbf{gross} entry flow is $E(t)\Omega(t)$.  Since the \textbf{gross} exit flow is $\delta \Omega(t)$, then the differential equation for $\Omega(t)$ comes from the net flows,
 \begin{align}
@@ -115,32 +90,16 @@ Therefore, in the steady-state we must have $E(t) = \delta$.
 \subsection{Differential Equations}\label{sec:full-ODE}
 The dynamic set of differential equations (rescaled) is derived in \cref{sec:full-model-derivations}.
 \begin{align}
-%	\tilde{\rho}(t) \tilde{v}(z,t) &= \tilde{\pi}(z,t) + (\mu - g(t) + (\sigma - 1)\upsilon^2)\D[z]\tilde{v}(z,t) + \frac{\upsilon^2}{2}\D[zz]\tilde{v}(z,t) + \D[t]\tilde{v}(z,t)\\
-%	\D[t]\tilde{v}(z,t) &= \left(\tilde{\rho}(t)  - (\mu - g(t) + (\sigma - 1)\upsilon^2)\D[z] - \frac{\upsilon^2}{2}\D[zz]\right)\tilde{v}(z,t) - \tilde{\pi}(z,t) \\	
-	\D[t]\tilde{v}(z,t) &= \tilde{A}(t)\tilde{v}(z,t) - \tilde{\pi}(z,t) \\	
-	\tilde{A}(t) &\equiv \tilde{\rho}(t)  - (\mu - g(t) + (\sigma - 1)\upsilon^2)\D[z] - \frac{\upsilon^2}{2}\D[zz]\\
-	\tilde{v}(0,t) &= \theta \int_{0}^{\infty}\tilde{v}(z,t) e^{(-\theta + \sigma - 1)z} \diff z - \zeta\label{eq:normalized-vm-summary-rescaled}\\
-	0 &= (\sigma - 1)\tilde{v}(0,t) + \D[z] \tilde{v}(0,t)\label{eq:normalized-sp-summary-rescaled}\\
-	0 &= (\sigma - 1)\tilde{v}(\bar{z},t) + \D[z] \tilde{v}(\bar{z},t)\label{eq:normalized-rhs-summary-rescaled}
+%	\tilde{\rho}(t) v(z,t) &= \pi(z,t) + (\mu - g(t) + (\sigma - 1)\upsilon^2)\D[z]v(z,t) + \frac{\upsilon^2}{2}\D[zz]v(z,t) + \D[t]v(z,t)\\
+%	\D[t]v(z,t) &= \left(\tilde{\rho}(t)  - (\mu - g(t) + (\sigma - 1)\upsilon^2)\D[z] - \frac{\upsilon^2}{2}\D[zz]\right)v(z,t) - \pi(z,t) \\	
+	\D[t]v(z,t) &= A(t)v(z,t) - \pi(z,t) \\	
+	A(t) &\equiv \tilde{\rho}(t)  - (\mu - g(t) + (\sigma - 1)\upsilon^2)\D[z] - \frac{\upsilon^2}{2}\D[zz]\\
+	v(0,t) &= \theta \int_{0}^{\infty}v(z,t) e^{(-\theta + \sigma - 1)z} \diff z - \zeta\label{eq:normalized-vm-summary-rescaled}\\
+	0 &= (\sigma - 1)v(0,t) + \D[z]v(0,t)\label{eq:normalized-sp-summary-rescaled}\\
+	0 &= (\sigma - 1)v(\bar{z},t) + \D[z]v(\bar{z},t)\label{eq:normalized-rhs-summary-rescaled}
 \end{align}
 
 
-\subsection{Free-entry Condition}\label{sec:free-entry}
-To determine the $E(t)$ function, we need the free entry complementarity condition to hold.  Note that (D.19) actually holds for any $t$ as well, and does not require the stationary solution.
-
-From (D.19) and using $\tilde{v}(t,0) = v(t,0)$, we see that if $E(t) > 0$ that,
-\begin{align}
-\tilde{v}(t,0) &= \zeta \frac{1-\chi}{\chi}
-\end{align}
-
-In the case that there is no entry, and $E(t) = 0$ for some $t$, from (D.18)
-\begin{align}
-\frac{\zeta}{\chi} &> \int_{0}^{\infty}v(z,t) f(z) \diff z\\
-\intertext{Use $\tilde{v}(t,0) = v(t,0)$ and the adoption definition in \cref{eq:normalized-vm-summary-rescaled},}
-\frac{\zeta}{\chi}&> \tilde{v}(0,t) + \zeta\\
-\intertext{Reorganizing, this means that $E(t) = 0$ if}
-\tilde{v}(0,t) &< \zeta \frac{1-\chi}{\chi}
-\end{align}
 
 
 \subsection{Dynamic Equations and Discretization}
@@ -150,14 +109,12 @@ To discretize \cref{sec:full-ODE}, define the interior operator, in a way simila
 	\end{align}
 Discretize this and implement the boundary conditions in the discretized operator, as before, to get the system of ODEs,
 \begin{align}
-	\tilde{v}'(t) &= A(t) \tilde{v}(t) - \tilde{\pi}(t)
+	v'(t) &= A(t) v(t) - \pi(t)
 \end{align}	
 
-The three variables required in the DAE are $g(t), \hat{z}(t),$ and $\Omega(t)$.\footnote{Note: the $\hat{z}(t)$ \textbf{has no log} taken of it, unlike the $z$.  Hence, to see if a firm exports, we need to check if $z \geq \log(\hat{z}(t))$.  Furthermore, it means that the $\hat{z}$ has a minimum value of $1$.}
-
-The \cref{eq:normalized-vm-summary-rescaled} value matching equation uses the same discretization approach as in the simple example (combining everything into the weights $\omega$, with the truncated exponential distribution, etc.) to discretize as
+The three variables required in the DAE are $g(t), \hat{z}(t),$ and $\Omega(t)$.\footnote{Note: the $\hat{z}(t)$ \textbf{has no log} taken of it, unlike the $z$.  Hence, to see if a firm exports, we need to check if $z \geq \log(\hat{z}(t))$.  Furthermore, it means that the $\hat{z}$ has a minimum value of $1$.}  The \cref{eq:normalized-vm-summary-rescaled} value matching equation uses the same discretization approach as in the simple example (combining everything into the weights $\omega$, with the truncated exponential distribution, etc.) to discretize as
 \begin{align}
-	0 &= \tilde{v}_1(t) - \omega \cdot \tilde{v}(t) + \zeta
+	0 &= v_1(t) - \omega \cdot v(t) + \zeta
 \end{align}
 
 The export threshold equation is
@@ -167,12 +124,14 @@ The export threshold equation is
 
 From \cref{sec:free-entry}, we see that
 \begin{align}
-	\tilde{v}_1(t) &\leq \zeta \frac{1-\chi}{\chi},\, = \text{ if } E(t) > 0
+	v_1(t) &\leq \zeta \frac{1-\chi}{\chi},\, = \text{ if } E(t) > 0
 \end{align}
 
-See \cref{sec:derive-interest-rates} for a derivation of the interest rates.
 
 \subsection{Static Calculations and Definitions}
+See \cref{sec:derive-interest-rates} for a derivation of the interest rates.
+
+
 Given the current $g$ and $\hat{z}$, the following definitions calculated at every time period, in the following rough order within the function.
 \begin{align}
 	S(t) &\equiv \theta \left( g(t) - \mu - \frac{\upsilon^2}{2}\right)\\
@@ -180,8 +139,7 @@ Given the current $g$ and $\hat{z}$, the following definitions calculated at eve
 	\bar{z}(t)^{\sigma - 1}&\equiv \Omega(t)
 \frac{\theta}{1+\theta - \sigma}\left(1 + (N-1)d^{1-\sigma}\hat{z}^{\sigma - 1 -\theta} \right)\label{eq:z-bar-sub-power}\\
 	\bar{\pi}_{\min}(t) &\equiv \frac{1-\tilde{L}(t)}{(\sigma-1)\bar{z}(t)^{\sigma-1}}\label{eq:pi-min-def}\\
-	\tilde{\pi}(z,t) &\equiv \bar{\pi}_{\min}(t)\left(1 + (N-1)d^{1-\sigma}\indicator{z \geq \log(\hat{z}(t))}\right) - (N-1)\kappa e^{-(\sigma - 1)z}\indicator{z \geq \log(\hat{z}(t))}\\
-%	\tilde{r}(t) &=  \rho+ \delta + \D[t]\log\left(1 - \tilde{L}(t)\right)\\	
+	\pi(z,t) &\equiv \bar{\pi}_{\min}(t)\left(1 + (N-1)d^{1-\sigma}\indicator{z \geq \log(\hat{z}(t))}\right) - (N-1)\kappa e^{-(\sigma - 1)z}\indicator{z \geq \log(\hat{z}(t))}\\
 	\tilde{\rho}(t) &\equiv \rho+ \delta + \D[t]\log\left(1 - \tilde{L}(t)\right) - (\sigma - 1)\left(\mu - g(t) + (\sigma - 1)\frac{\upsilon^2}{2} \right)\label{eq:rhot}
 \end{align}
 To calculate the $\D[t]\log\left(1 - \tilde{L}(t)\right)$ you need to store the ``future'' $\left(1 - \tilde{L}(t)\right)$ and $t$ values in the last adaptive timestep, and then use forward first-differences with it based on the current value
@@ -197,6 +155,161 @@ To calculate the $\D[t]\log\left(1 - \tilde{L}(t)\right)$ you need to store the 
 \numberwithin{equation}{section}
 \let\normalsize\small
 \small
+\section{Derivations for Simple Model}\label{sec:simple-derivation}
+\subsection{Equations Prior to Rescaling}
+
+Copying from BPT2 (but renaming the $v$ function to $\hat{v}$ here), assume an exogenously given $\hat{\pi}(z,t)$ and $x(t)$ function.  We will only look at examples where $F(z) = 1 - e^{-\theta z}$ for all $t$.
+\begin{align}
+(r - g(t)) \hat{v}(z,t) &= \hat{\pi}(z,t) + (\mu- g(t)) \D[z] \hat{v}(z,t) + \tfrac{\upsilon^2}{2} \D[zz] \hat{v}(z,t) + \D[t]\hat{v}(z,t)\label{eq:bellman-GBM-dynamic}	\\
+\hat{v}(0,t) &= \int_{0}^{\infty} \hat{v}(z,t) F'(z)\diff z - x(t)\label{eq:vm-GBM-dynamic}\\
+\D[z]\hat{v}(0,t) &= 0\label{eq:sp-GBM-dynamic}
+\end{align}
+
+A solution to this problem is a $g(t)$ and $\hat{v}(z,t)$ that fulfills the above equations for all $t\in[0,T]$ and $z\in[0,\infty)$.  While not listed above, in practice another boundary condition (e.g. transversality) is used to ensure that \cref{eq:bellman-GBM-dynamic} can be solved.  In order to use finite differences to solve the problem with $\upsilon > 0$, we will need to use some variation on this, or an appeal to viscosity solutions.  For us, a reflecting barrier at a ``large'' $z$ may converge to the correct solution.  For example, at the normalized $\bar{z}$, the boundary value is
+	\begin{align}
+	\D[z]\hat{v}(\bar{z},t) &= 0\label{eq:reflecting-GBM-dynamic}
+	\end{align}
+	Keep in mind that this is just a step in the numerical solution, rather than introducing a true reflecting barrier.  We will need to verify that it does not introduce issues by verifying the numeric solution matches the closed form solution for large $\bar{z}$ and compare to the analytic equation for external validity.  Also note that if $\upsilon = 0$, due to the upwind procedure this boundary value would be unnecessary and/or drop out of the solution.
+
+\subsection{Change of Variables to Normalize and Rescale}\label{eq:simple-rescale}
+Solving \cref{eq:bellman-GBM-dynamic} for $\hat{v}(z,t)$ is problematic since the scale goes from approximatively $1$ to $e^{\bar{z}}$, which is very large for a high $\bar{z}$.  To make the solution more stable, we rescale the equation.  Take \cref{eq:sp-GBM-dynamic} and let $ v(z,t) \equiv e^{-\xi z}\hat{v}(z,t)$ for some $\xi \geq 0$ chosen for convenience and stability.  Then,
+\begin{align}
+	\D[z]\hat{v}(z,t) &= e^{\xi z}\left(\xi v(z,t) + \D[z]v(z,t) \right)\\
+	\D[zz]\hat{v}(z,t) &= e^{\xi z}\left(\xi^{2} v(z,t) + 2 \xi\D[z]v(z,t) + \D[zz]v(z,t)  \right)\\	
+	\D[t]\hat{v}(z,t) &= e^{\xi z} \D[t]v(z,t)
+\end{align}
+Define $\pi(z,t) = e^{-\xi z}\hat{\pi}(z,t)$ so that if $\hat{\pi}(z,t) = e^{\xi z}$ then $\pi(z,t) = 1$.  Substitute into \cref{eq:sp-GBM-dynamic}, divide by $e^{\xi z}$ and simplify,
+
+\begin{align}
+	\left(r - g(t)- \xi(\mu-g(t)) - \frac{\upsilon^2}{2}\xi^2\right)  v(z,t) &= \pi(z,t) + (\mu+ \upsilon^2\xi - g(t)) \D[z]v(z,t) \nonumber \\ &+ \tfrac{\upsilon^2}{2} \D[zz]v(z,t) + \D[t]v(z,t)  \label{eq:bellman-GBM-dynamic-normalized}
+\end{align}
+
+Now, substitute into the boundary condition $\D[z]\hat{v}(0,t) = 0$ and the artificial reflecting barrier at the top, $\D[z]\hat{v}(\bar{z},t) = 0$ to find,
+\begin{align}
+	\xi v(0,t) + \D[z]v(0,t ) &= 0\label{eq:new-BC1}\\
+	\xi v(\bar{z},t) + \D[z]v(\bar{z},t) &= 0\label{eq:new-BC2}
+\end{align}	
+Finally, in the value matching condition, $\hat{v}(0,t) = e^{0} v(0,t)$ where if the $F'(z) = \theta e^{-\theta z}$ then,
+\begin{align}
+	 v(0,t) &= \int_{0}^{\infty}  v(z,t) \left(e^{\xi z} F'(z)\right) \diff z - x(t)\label{eq:vm-GBM-dynamic-normalized}
+\end{align}	
+
+\section{Derivations of Full Model}\label{sec:full-model-derivations}
+Note that unlike the PTW paper (for now, at least) we have $z \equiv \log(Z/M(t))$ throughout these notes.
+\subsection{Normalization and Rescaling}
+The value is normalized as $\hat{v}(z,t) = \frac{V(Z,t)}{M(t)w(t)}$.  With this,
+\begin{align}
+V(Z,t) &:= w(t) M(t) \hat{v}(t, \log(Z/M(t)))\label{eq:V-norm}\\
+\intertext{Differentiate \cref{eq:V-norm} with respect to $t$, divide by $w(t)M(t)$, and use the definitions $z := \log(Z/M(t)), g(t):= M'(t)/M(t)$ and $g_w(t) := W'(t)/W(t)$}
+\frac{1}{w(t) M(t)}\D[t]V(Z,t) &= \left(g(t) + g_w(t)\right)\hat{v}(z,t) - g(t)\D[z]\hat{v}(z,t) + \D[t]\hat{v}(z,t) \label{eq:dV-dt}\\
+\intertext{Similarly differentiate \cref{eq:V-norm} with respect to $Z$,}
+\frac{1}{w(t) M(t)}\D[Z]V(Z,t) &= \frac{1}{Z}\D[z]\hat{v}(z,t)\label{eq:dV-dZ}\\
+\frac{1}{w(t) M(t)}\D[ZZ]V(Z,t) &= \frac{1}{Z^2}\left(\D[zz]\hat{v}(z,t)-\D[z]\hat{v}(z,t)\right)\label{eq:dV-dZZ}
+\end{align}
+Take the unnormalized Bellman equation from the paper, repeated below,
+\begin{align}
+r(t) V(Z,t) &=  \Pi(Z,t)+ \left(\mu + \frac{\upsilon^2}{2}\right) Z\, \D[Z]V(Z,t)+ \frac{\upsilon^2}{2} Z^2 \D[ZZ]V(Z,t) +  \D[t]V(Z,t), \label{ap-eq:bellman-deterministic-prenorm}
+\intertext{Use $\pi(z,t) \equiv \frac{\Pi(Z,t)}{w(t)M(t)}$ with the new $z$, divide \cref{ap-eq:bellman-deterministic-prenorm} $w(t)M(t)$ and then use \cref{eq:dV-dt,eq:dV-dZ,eq:dV-dZZ} to find,}
+(r(t) - g(t) - g_w(t))\hat{v}(z,t) &= \pi(z,t) + (\mu - g(t))\D[z]\hat{v}(z,t) + \frac{\upsilon^2}{2}\D[zz]\hat{v}(z,t) + \D[t]\hat{v}(z,t)\label{eq:normalized-bellman}
+\intertext{The smooth pasting condition, $\D[Z]V(M(t),t) = 0$ becomes}
+\D[z]\hat{v}(0,t) &= 0\label{eq:normalized-sp}
+\intertext{Take the value matching condition from the paper and divide by $M(t)w(t)$,}
+\frac{{V}(M(t),t)}{M(t)w(t)} &= \int_{M(t)}^{\infty}\frac{{V}(Z,t)}{M(t)w(t)} \phi(Z,t) \diff Z - \frac{X(t)}{M(t)w(t)}
+\intertext{Substitute for $\hat{v}(z,t)$ and $x(t) \equiv \frac{X(t)}{M(t)w(t)}$,}
+\hat{v}(0,t) &= \int_{0}^{\infty}\hat{v}(\log(Z/M(t)),t) \phi(Z,t) \diff Z - x(t)
+\intertext{With a change of variables in the integral to  $z = \log(Z/M(t))$,}
+\hat{v}(0,t) &= \int_{0}^{\infty}\hat{v}(z,t) f(z,t) \diff z - x(t)\label{eq:normalized-vm}
+\intertext{We will only solve versions of the model starting from a stationary Pareto distribution with tail index $\theta$ and minimum $M(t)$, so if $\phi(Z,t) = \theta M(t)^{\theta}Z^{-(1+\theta)}$ then}
+f(z) &= \theta e^{-\theta z}\label{eq:f-stationary}
+\end{align}
+for all $t$.  It can be proven that this will be maintained by the KFE in the setup for any $g(t)$ sequence.
+
+While this transformation could be done all at once, we will base it off of the previous section for easier comparison.  Define the following
+\begin{align}
+v(z,t) &\equiv e^{-(\sigma - 1)z}\hat{v}(z,t)\label{eq:v-tilde}\\
+\pi(z,t) &\equiv e^{-(\sigma - 1)z}\hat{\pi}(z,t)\\
+\intertext{Use \cref{eq:pi-z-t-summary}}
+\pi(z,t) &= \pi_{\min}(t)\left(1 + (N-1)d^{1-\sigma}\indicator{z \geq \log(\hat{z}(t))}\right) - (N-1)\kappa e^{-(\sigma - 1)z}\indicator{z \geq \log(\hat{z}(t))}	
+\end{align}
+Rearrange and differentiate \cref{eq:v-tilde},
+\begin{align}
+\D[t]\hat{v}(z,t) &= e^{(\sigma - 1)z} \D[t]v(z,t)\label{eq:v-tilde-dt}\\
+\D[z]\hat{v}(z,t) &= e^{(\sigma - 1)z}\left((\sigma - 1) v(z,t) + \D[z]v(z,t) \right)\label{eq:v-tilde-dz}\\
+\D[zz]\hat{v}(z,t) &= e^{(\sigma - 1)z}\left((\sigma - 1)^2 v(z,t) + 2(\sigma - 1)\D[z]v(z,t) + \D[zz]v(z,t)\right)\label{eq:v-tilde-dzz}\\
+\intertext{And at the adoption threshold, from \cref{eq:v-tilde-dz}}
+\D[z]\hat{v}(0,t) &= (\sigma - 1) v(0,t) + \D[z]v(0,t)\label{eq:vt-0-dz}
+\end{align}	
+To use these substitutions, start with \cref{eq:normalized-vm-summary} and use the definition of $f(z)$,
+\begin{align}
+v(0,t) &= \theta \int_{0}^{\infty} v(z,t) e^{(-\theta + \sigma - 1)z} \diff z - x(t)\label{eq:normalized-vm-summary-rescaled}\\
+\intertext{Combine \cref{eq:normalized-sp-summary,eq:vt-0-dz} to get}
+0 &= (\sigma - 1) v(0,t) + \D[z]v(0,t)\label{eq:normalized-sp-summary-rescaled}
+\intertext{Finally, substitute all of the derivatives into \cref{eq:normalized-bellman-summary} and divide by $e^{(\sigma - 1)z}$}	
+\tilde{\rho}(t)  v(z,t) &= \pi(z,t) + (\mu - g(t) + (\sigma - 1)\upsilon^2)\D[z]v(z,t) + \frac{\upsilon^2}{2}\D[zz]v(z,t) + \D[t]v(z,t)
+\intertext{where,}
+\tilde{\rho}(t) &\equiv \tilde{r}(t) - (\sigma - 1)\left(\mu - g(t) + (\sigma - 1)\frac{\upsilon^2}{2} \right)\label{eq:rhot}	
+\end{align}	
+
+
+
+\subsection{Summarizing Normalized Equations}\label{sec:normalized-equations}
+Take as given $g(t),\pi_{\min}(t),\hat{z}(t), x(t)$, and $\tilde{r}(t)$(alternatively $g_w(t)$ and $r(t)$).  Then, the following equations must be fulfilled for all $t$ and  $z$
+\begin{align}
+\tilde{r}(t) \equiv & r(t) - g(t) - g_w(t)\label{eq:r-tilde-summary}\\
+f(z) &= \theta e^{-\theta z}\label{eq:f-stationary-summary}\\
+\tilde{r}(t) \hat{v}(z,t) &= \hat{\pi}(z,t) + (\mu - g(t))\D[z]\hat{v}(z,t) + \frac{\upsilon^2}{2}\D[zz]\hat{v}(z,t) + \D[t]\hat{v}(z,t)\label{eq:normalized-bellman-summary}\\
+\D[z]\hat{v}(0,t) &= 0\label{eq:normalized-sp-summary}\\
+\hat{v}(0,t) &= \int_{0}^{\infty}\hat{v}(z,t) f(z) \diff z - x(t)\label{eq:normalized-vm-summary}\\
+	\hat{\pi}(z,t) &= \pi_{\min}(t) e^{(\sigma - 1)z}\left(1 + (N-1)d^{1-\sigma}\indicator{z \geq \log(\hat{z}(t))}\right) - (N-1)\kappa\indicator{z \geq \log(\hat{z}(t))}\label{eq:pi-z-t-summary}
+\end{align}
+
+
+
+\subsection{Free-entry Condition}\label{sec:free-entry}
+To determine the $E(t)$ function, we need the free entry complementarity condition to hold.  Note that (D.19) actually holds for any $t$ as well, and does not require the stationary solution.
+
+From (D.19) and using $v(t,0) = \hat{v}(t,0)$, we see that if $E(t) > 0$ that,
+\begin{align}
+v(t,0) &= \zeta \frac{1-\chi}{\chi}
+\intertext{In the case that there is no entry, and $E(t) = 0$ for some $t$, from (D.18)}
+v(0,t) &< \zeta \frac{1-\chi}{\chi}
+\end{align}
+
+In the case that there is no entry, and $E(t) = 0$ for some $t$, from (D.18)
+\begin{align}
+\frac{\zeta}{\chi} &> \int_{0}^{\infty}\hat{v}(z,t) f(z) \diff z\\
+\intertext{Use $v(t,0) = \hat{v}(t,0)$ and the adoption definition in \cref{eq:normalized-vm-summary-rescaled},}
+\frac{\zeta}{\chi}&> v(0,t) + \zeta\\
+\intertext{Reorganizing, this means that $E(t) = 0$ if}
+v(0,t) &< \zeta \frac{1-\chi}{\chi}
+\end{align}
+
+\subsection{Derivation of Rates of Change and Interest Rates}\label{sec:derive-interest-rates}
+Since consumption is $C(t) := c(t) M(t)$, take logs and differentiate to get,
+\begin{align}
+\D[t]\log C(t) &= g(t) + g_c(t)
+\intertext{With a CRRA parameter of $\gamma \geq 0$, the interest rate rate faced by a firm is,}
+r(t) &= \rho + \delta + \gamma \D[t]\log C(t)\\
+&= \rho+ \delta + \gamma(g_c(t)+ g(t))\label{eq:r-def}
+\end{align}
+
+\noindent This can be simpified in some cases.  From the PTW (C.34), for $\eta = 0$,
+ \begin{align}
+ \frac{c(t)}{w(t)}&\propto 1 - \tilde{L}(t) 
+ \intertext{Taking the log and differentiating,}
+g_c(t) - g_w(t) &= \D[t]\log\left(1 - \tilde{L}(t)\right)\label{eq:g-c-w-diff}
+\intertext{From \cref{eq:r-tilde-summary}}
+\tilde{r}(t) &\equiv r(t) - g(t) - g_w(t)\\
+\intertext{From \cref{eq:r-def}}
+&= \rho + \delta + \gamma(g_c(t)+ g(t)) - g(t) - g_w(t)\\
+&= \rho + \delta + (g_c(t) - g_w(t)) + (\gamma - 1)(g_c(t) + g(t))\\
+\intertext{From \cref{eq:g-c-w-diff}}
+&= \rho + \delta + \D[t]\log\left(1 - \tilde{L}(t)\right) + (\gamma - 1)(g_c(t) + g(t))\\
+\intertext{And in the $\log$ utility case with $\gamma = 1$, the last term drops, so that we have,}
+ \tilde{r}(t) &=  \rho+ \delta + \D[t]\log\left(1 - \tilde{L}(t)\right)\label{eq:tilde-r-L}
+ \end{align}
+
+
 \section{Discretization}\label{sec:discretization}
 \subsection{Discretizing the State Space}\label{eq:discretization}
 This will discretize space with backward differences in the first derivative, and central in space for the 2nd derivative.\footnote{Under a $g(t) > \gamma$ assumption (which may be a general requirement on parameter restrictions), the drift is negative, and the correct ``upwind'' finite difference scheme is always backwards.}  After discretizing the spatial dimension, we have a system of ODEs in time - which are solved using various time-stepping algorithms.
@@ -220,17 +333,9 @@ This will discretize space with backward differences in the first derivative, an
 	\item The grid on time $t \in [0,T]$ may be adaptive, and we will let the ODE solver handle the grid.	
 	\item Assume a grid of $I$ discrete points in $z$ and $N$ discrete points in time, then denote the value as
 	\begin{align}
-		\tilde{v}(t) &\equiv \set{\tilde{v}(z_i, t)}_{i=1}^I\in\R^I
+		v(t) &\equiv \set{v(z_i, t)}_{i=1}^I\in\R^I
 	\end{align}
-%	\item With the discretized grid, the integral in \cref{eq:vm-GBM-dynamic} can be calculated with Simpson's rule.  Let the quadrature rule weights be $\bar{\omega} \in \R^I$ where for some $q(z)$ and $q \equiv \set{q(z_i)}_{i=1}^I$,
-%	\begin{align}
-%		\int_0^{\infty} q(z) \diff z &\approx \bar{\omega} \cdot q
-%		\intertext{Then given the pointwise multiplication $\odot$ define the adjusted weights as $\omega$ using the time-invariant $F'(z)$ as ,}
-%		\omega &\equiv \bar{\omega}\odot \set{F'(z_i)}_{i=1}^{I}\\
-%		\intertext{Then the integral is approximated by a dot product,}
-%		\int_{0}^{\infty}v(t_n, z)F'(z)\diff z &\approx \omega \cdot v^n\label{eq:integral-approximation}
-%	\end{align}
-\item Given the exogenous $\pi(z,t)$ functions, the discretized equivalents is $\pi(t) \in \R^I$.
+\item Given the exogenous $\hat{\pi}(z,t)$ functions, the discretized equivalents is $\hat{\pi}(t) \in \R^I$.
 \end{itemize}
 
 \subsection{Discretization Operators}\label{sec:discretization-operators}
@@ -264,40 +369,36 @@ If the $z$ grid is uniform, the central differences should end up as just
 
 In the interior ($1 < i < I$), the discretization of finite difference operator is with drift $\mu_i$ split into upwind components is:
 \begin{align}
-\mathcal{A} \tilde{v}(z_i) 
-&= \underbrace{\left(-\frac{\mu_i^{-}}{\Delta_{i,-}} +\frac{\sigma_i^2}{\Delta_{i,-}(\Delta_{i,+}+\Delta_{i,-})}\right)}_{\equiv X_i}\tilde{v}_{i-1} + \underbrace{\left(\frac{\mu_i^{-}}{\Delta_{i,-}} - \frac{\mu_i^{+}}{\Delta_{i,+}}-\frac{\sigma_i^2}{\Delta_{i,-}\Delta_{i,+}}\right)}_{\equiv Y_i}\tilde{v}_i +\nonumber\\ &\underbrace{\left(\frac{\mu_i^{+}}{\Delta_{i,+}} + \frac{\sigma_i^2}{\Delta_{i,+}(\Delta_{i,+}+\Delta_{i,-})}\right)}_{\equiv Z_i}\tilde{v}_{i+1}\label{eq:A-collected-interior-with-nonuniform-grid}
+\mathcal{A} v(z_i) 
+&= \underbrace{\left(-\frac{\mu_i^{-}}{\Delta_{i,-}} +\frac{\sigma_i^2}{\Delta_{i,-}(\Delta_{i,+}+\Delta_{i,-})}\right)}_{\equiv X_i}v_{i-1} + \underbrace{\left(\frac{\mu_i^{-}}{\Delta_{i,-}} - \frac{\mu_i^{+}}{\Delta_{i,+}}-\frac{\sigma_i^2}{\Delta_{i,-}\Delta_{i,+}}\right)}_{\equiv Y_i}v_i +\nonumber\\ &\underbrace{\left(\frac{\mu_i^{+}}{\Delta_{i,+}} + \frac{\sigma_i^2}{\Delta_{i,+}(\Delta_{i,+}+\Delta_{i,-})}\right)}_{\equiv Z_i}v_{i+1}\label{eq:A-collected-interior-with-nonuniform-grid}
 \end{align}
 
 \paragraph{Boundary Value at $x=0$:}
-%As $i =1$, given the ``ghost node'' $x_0$, we recall the assumption that $\Delta_{1,-} = \Delta_{1,+}$.  Hence, the discretized operator from \cref{eq:A-collected-interior-with-nonuniform-grid} is
-%\begin{align}
-%\mathcal{A} \tilde{v}(z_1) &\approx \left(-\frac{\mu_1^{-}}{\Delta_{1,+}} +\frac{\sigma_1^2}{2 \Delta_{1,+}^2}\right)\tilde{v}_0 + \left(\frac{\mu_1^{-} - \mu_1^{+}}{\Delta_{1,+}}-\frac{\sigma_1^2}{\Delta_{1,+}^2}\right) \tilde{v}_1 + \left(\frac{\mu_1^{+}}{\Delta_{1,+}} + \frac{\sigma_1^2}{2 \Delta_{1,+}^2}\right)\tilde{v}_2\label{eq:A-collected-with-nonuniform-grid-left}\\
-%\end{align}
-If the boundary value is $\xi\tilde{v}(0,t) + \D[z]\tilde{v}(0,t )= 0$, use the backward difference approximation $\tilde{v}'(z_i) \approx \frac{\tilde{v}_i-\tilde{v}_{i-1}}{\Delta_{i,-}}$.  Then substituting into the boundary condition we get
+If the boundary value is $\xi v(0,t) + \D[z]v(0,t )= 0$, use the backward difference approximation $v'(z_i) \approx \frac{v_i-v_{i-1}}{\Delta_{i,-}}$.  Then substituting into the boundary condition we get
 \begin{align}
-0 = \xi\tilde{v}(0,t) + \D[z]\tilde{v}(0,t ) &\approx \xi \tilde{v}_1 + \frac{\tilde{v}_1-\tilde{v}_0}{\Delta_{1,-}}\\
-\intertext{Rearrange, use $\Delta_{1,-} = \Delta_{1,+}$, and solve for $\tilde{v}_0$,}
-\tilde{v}_0 &= (1 + \xi \Delta_{1,+})\tilde{v}_1\label{eq:rescaled-bc-sub}\\
-\intertext{Now, take \cref{eq:A-collected-interior-with-nonuniform-grid}, and remember that given a $\tilde{v}_0$ the function is well defined under the assumption that $\Delta_{1,-} = \Delta_{1,+}$}
-\mathcal{A} \tilde{v}(z_1) &\approx X_1 \tilde{v}_0 + Y_1 \tilde{v}_1 + Z_1 \tilde{v}_2
+0 = \xi v(0,t) + \D[z]v(0,t ) &\approx \xi v_1 + \frac{v_1-v_0}{\Delta_{1,-}}\\
+\intertext{Rearrange, use $\Delta_{1,-} = \Delta_{1,+}$, and solve for $v_0$,}
+v_0 &= (1 + \xi \Delta_{1,+})v_1\label{eq:rescaled-bc-sub}\\
+\intertext{Now, take \cref{eq:A-collected-interior-with-nonuniform-grid}, and remember that given a $v_0$ the function is well defined under the assumption that $\Delta_{1,-} = \Delta_{1,+}$}
+\mathcal{A} v(z_1) &\approx X_1 v_0 + Y_1 v_1 + Z_1 v_2
 \intertext{Substitute in \cref{eq:rescaled-bc-sub} to get}
-\mathcal{A} \tilde{v}(z_1) &\approx \left((1 + \xi \Delta_{1,+})X_1 + Y_1\right) \tilde{v}_1 + Z_1 \tilde{v}_2\label{eq:reflecting-left-nonuniform}
+\mathcal{A} v(z_1) &\approx \left((1 + \xi \Delta_{1,+})X_1 + Y_1\right) v_1 + Z_1 v_2\label{eq:reflecting-left-nonuniform}
 %\intertext{Substitute this into \cref{eq:A-collected-with-nonuniform-grid-left}}
-% &\approx \left(\underbrace{\left(\frac{-\mu_1^{-}}{\Delta_{1,-}} +\frac{\sigma_1^2}{\Delta_{1,-}(\Delta_{1,+}+\Delta_{1,-})}\right)}_{\equiv X_1}(1+\Delta_{1,-}) + \underbrace{\left(\mu_1^{-} - \frac{\mu_1^{+}}{\Delta_{1,+}}-\frac{\sigma_1^2}{\Delta_{1,+}\Delta_{1,-}}\right)}_{\equiv Y_1}\right)\tilde{v}_1 + \nonumber\\
-% & \underbrace{\left(\frac{\mu_1^{+}}{\Delta_{1,+}} + \frac{\sigma_1^2}{2 \Delta_{1,+}\Delta_{1,-}}\right)}_{\equiv Z_1}\tilde{v}_2\label{eq:reflecting-left-nonuniform}
+% &\approx \left(\underbrace{\left(\frac{-\mu_1^{-}}{\Delta_{1,-}} +\frac{\sigma_1^2}{\Delta_{1,-}(\Delta_{1,+}+\Delta_{1,-})}\right)}_{\equiv X_1}(1+\Delta_{1,-}) + \underbrace{\left(\mu_1^{-} - \frac{\mu_1^{+}}{\Delta_{1,+}}-\frac{\sigma_1^2}{\Delta_{1,+}\Delta_{1,-}}\right)}_{\equiv Y_1}\right)v_1 + \nonumber\\
+% & \underbrace{\left(\frac{\mu_1^{+}}{\Delta_{1,+}} + \frac{\sigma_1^2}{2 \Delta_{1,+}\Delta_{1,-}}\right)}_{\equiv Z_1}v_2\label{eq:reflecting-left-nonuniform}
 \end{align}
 So from \cref{eq:reflecting-left-nonuniform} the top left corner of $A$ matrix is now $\left((1 + \xi \Delta_{1,+})X_1 + Y_1\right)$.  Note that this nests the typical reflecting barrier since if the scaling is $e^{0} = 1$, then the corner, is $X_1 + Y_1$, matches the standard reflecting barrier without rescaling.
 
 \paragraph{Boundary Value at $\bar{z}$}
-If the boundary value is $\xi\tilde{v}(\bar{z},t) + \D[z]\tilde{\bar{z}}(0,t )= 0$, use the forward difference approximation $\tilde{v}'(z_i) \approx \frac{\tilde{v}_{i+1}-\tilde{v}_{i}}{\Delta_{i,+}}$.  Then substituting into the boundary condition we get
+If the boundary value is $\xi v(\bar{z},t) + \D[z]\tilde{\bar{z}}(0,t )= 0$, use the forward difference approximation $v'(z_i) \approx \frac{v_{i+1}-v_{i}}{\Delta_{i,+}}$.  Then substituting into the boundary condition we get
 \begin{align}
-0 = \xi\tilde{v}(\bar{z},t) + \D[z]\tilde{v}(\bar{z},t ) &\approx \xi \tilde{v}_I + \frac{\tilde{v}_{I+1}-\tilde{v}_I}{\Delta_{I,+}}\\
-\intertext{Rearrange and solve for $\tilde{v}_0$ and use $\Delta_{I,+} = \Delta_{I,-}$,}
-\tilde{v}_{I+1} &= (1 - \xi \Delta_{I,-})\tilde{v}_I\label{eq:rescaled-bc-sub-right}\\
-\intertext{Now, take \cref{eq:A-collected-interior-with-nonuniform-grid}, and remember that given a $\tilde{v}_{I+1}$ the function is well defined under the assumption that $\Delta_{I,-} = \Delta_{I,+}$}
-\mathcal{A} \tilde{v}(z_I) &\approx X_1 \tilde{v}_{I-1} + Y_1 \tilde{v}_I + Z_1 \tilde{v}_{I+1}
+0 = \xi v(\bar{z},t) + \D[z]v(\bar{z},t ) &\approx \xi v_I + \frac{v_{I+1}-v_I}{\Delta_{I,+}}\\
+\intertext{Rearrange and solve for $v_0$ and use $\Delta_{I,+} = \Delta_{I,-}$,}
+ v_{I+1} &= (1 - \xi \Delta_{I,-}) v_I\label{eq:rescaled-bc-sub-right}\\
+\intertext{Now, take \cref{eq:A-collected-interior-with-nonuniform-grid}, and remember that given a $ v_{I+1}$ the function is well defined under the assumption that $\Delta_{I,-} = \Delta_{I,+}$}
+\mathcal{A}  v(z_I) &\approx X_1  v_{I-1} + Y_1  v_I + Z_1  v_{I+1}
 \intertext{Substitute in \cref{eq:rescaled-bc-sub-right} to get}
-\mathcal{A} \tilde{v}(z_I) &\approx X_I \tilde{v}_{I-1} + \left(Y_I + (1 - \xi \Delta_{I,-})Z_I\right) \tilde{v}_I\label{eq:reflecting-right-nonuniform}
+\mathcal{A}  v(z_I) &\approx X_I  v_{I-1} + \left(Y_I + (1 - \xi \Delta_{I,-})Z_I\right)  v_I\label{eq:reflecting-right-nonuniform}
 \end{align}
 So from \cref{eq:reflecting-right-nonuniform} the bottom right corner of $A$ matrix is now $\left(Y_I + (1 - \xi \Delta_{I,-})Z_I\right)$.  Note that this nests the typical reflecting barrier since if the scaling is $e^{0} = 1$, then the corner, is $X_1 + Y_1$, matches the standard reflecting barrier without rescaling.
 
@@ -305,10 +406,10 @@ So from \cref{eq:reflecting-right-nonuniform} the bottom right corner of $A$ mat
 % \paragraph{Boundary Value at $\bar{z}$:}
 % As $i=I$, given the ``ghost node'' $z_{I+1}$, and the assumption  $\Delta_{I,+} = \Delta_{I,-}$, from \cref{eq:A-collected-interior-with-nonuniform-grid}:
 % \begin{align}
-% \mathcal{A}  \tilde{v}(x_I)&\approx \left(-\frac{\mu_I^{-}}{\Delta_{I,-}} +\frac{\sigma_I^2}{2 \Delta_{I,-}^2}\right)\tilde{v}_{I-1} + \left(\frac{\mu_I^{-} - \mu_I^{+}}{\Delta_{I,-}}-\frac{\sigma_I^2}{\Delta_{I,-}^2}\right)\tilde{v}_I + \left(\frac{\mu_I^{+}}{\Delta_{I,-}} + \frac{\sigma_I^2}{2 \Delta_{I,-}^2}\right)\tilde{v}_{I+1}\\
-% \intertext{For a reflecting barrier, the boundary value $v'(\bar{z}) \approx \frac{\tilde{v}_{I+1}-\tilde{v}_I}{\Delta_{I,+}}+\tilde{v}_{I} = 0, \implies \tilde{v}_{I+1} = (1-\Delta_{I,+})\tilde{v}_I$,}
-% &\approx \underbrace{\left(-\frac{\mu_I^{-}}{\Delta_{I,-}} +\frac{\sigma_I^2}{\Delta_{I,-}(\Delta_{I,+}+\Delta_{I,-})}\right)}_{\equiv X_I} \tilde{v}_{I-1}\nonumber\\
-% &+ \left(\underbrace{\left(\frac{\mu_I^{-}}{\Delta_{I,-}} - \frac{\mu_I^{+}}{\Delta_{I,+}}-\frac{\sigma_I^2}{\Delta_{I,-}\Delta_{I,+}}\right)}_{\equiv Y_I} + \underbrace{\left(\frac{\mu_I^{+}}{\Delta_{I,+}} + \frac{\sigma_I^2}{\Delta_{I,+}(\Delta_{I,+}+\Delta_{I,-})}\right)}_{\equiv Z_I}(1-\Delta_{I,+}) \right) \tilde{v}_I \label{eq:reflecting-right-nonuniform}
+% \mathcal{A}   v(x_I)&\approx \left(-\frac{\mu_I^{-}}{\Delta_{I,-}} +\frac{\sigma_I^2}{2 \Delta_{I,-}^2}\right) v_{I-1} + \left(\frac{\mu_I^{-} - \mu_I^{+}}{\Delta_{I,-}}-\frac{\sigma_I^2}{\Delta_{I,-}^2}\right) v_I + \left(\frac{\mu_I^{+}}{\Delta_{I,-}} + \frac{\sigma_I^2}{2 \Delta_{I,-}^2}\right) v_{I+1}\\
+% \intertext{For a reflecting barrier, the boundary value $v'(\bar{z}) \approx \frac{ v_{I+1}- v_I}{\Delta_{I,+}}+ v_{I} = 0, \implies  v_{I+1} = (1-\Delta_{I,+}) v_I$,}
+% &\approx \underbrace{\left(-\frac{\mu_I^{-}}{\Delta_{I,-}} +\frac{\sigma_I^2}{\Delta_{I,-}(\Delta_{I,+}+\Delta_{I,-})}\right)}_{\equiv X_I}  v_{I-1}\nonumber\\
+% &+ \left(\underbrace{\left(\frac{\mu_I^{-}}{\Delta_{I,-}} - \frac{\mu_I^{+}}{\Delta_{I,+}}-\frac{\sigma_I^2}{\Delta_{I,-}\Delta_{I,+}}\right)}_{\equiv Y_I} + \underbrace{\left(\frac{\mu_I^{+}}{\Delta_{I,+}} + \frac{\sigma_I^2}{\Delta_{I,+}(\Delta_{I,+}+\Delta_{I,-})}\right)}_{\equiv Z_I}(1-\Delta_{I,+}) \right)  v_I \label{eq:reflecting-right-nonuniform}
 % \end{align}
 
 \paragraph{Discretization Operator:} Apply the boundary conditions at the corner of discretization matrix:
@@ -341,531 +442,6 @@ With the discretized grid, the integral in \cref{eq:vm-GBM-dynamic} will be calc
 \intertext{If we set $\Delta_{1,-} = 0$ and $\Delta_{I,+} = 0$ then, (Note different than other use of ghost nodes in derivatives, though not sure they enter equations in those other cases)}
 &= \underbrace{\frac1{2}(\Delta_{-} + \Delta_{+})}_{\equiv \omega}\cdot f
 \end{align}
-\subsection{Change of Variables to Normalize and Rescale}\label{eq:simple-rescale}
-Solving \cref{eq:bellman-GBM-dynamic} for $v(z,t)$ is problematic since the scale goes from approximatively $1$ to $e^{\bar{z}}$, which is very large for a high $\bar{z}$.  To make the solution more stable, we rescale the equation.  Take \cref{eq:sp-GBM-dynamic} and let $\tilde{v}(z,t) \equiv e^{-\xi z}v(z,t)$ for some $\xi \geq 0$ chosen for convenience and stability.  Then,
-\begin{align}
-	\D[z]v(z,t) &= e^{\xi z}\left(\xi\tilde{v}(z,t) + \D[z]\tilde{v}(z,t) \right)\\
-	\D[zz]v(z,t) &= e^{\xi z}\left(\xi^{2}\tilde{v}(z,t) + 2 \xi\D[z]\tilde{v}(z,t) + \D[zz]\tilde{v}(z,t)  \right)\\	
-	\D[t]v(z,t) &= e^{\xi z} \D[t] \tilde{v}(z,t)
-\end{align}
-Define $\tilde{\pi}(z,t) = e^{-\xi z}\pi(z,t)$ so that if $\pi(z,t) = e^{\xi z}$ then $\tilde{\pi}(z,t) = 1$.  Substitute into \cref{eq:sp-GBM-dynamic}, divide by $e^{\xi z}$ and simplify,
-
-\begin{align}
-	\left(r - g(t)- \xi((\mu + \upsilon^2/2)-g(t)) - \frac{\upsilon^2}{2}\xi^2\right) \tilde{v}(z,t) &= \tilde{\pi}(z,t) + ((\mu + \upsilon^2/2) + \upsilon^2\xi - g(t)) \D[z] \tilde{v}(z,t) \nonumber \\ &+ \tfrac{\upsilon^2}{2} \D[zz] \tilde{v}(z,t) + \D[t]\tilde{v}(z,t)  \label{eq:bellman-GBM-dynamic-normalized}
-\end{align}
-
-Now, substitute into the boundary condition $\D[z]v(0,t) = 0$ and the artificial reflecting barrier at the top, $\D[z]v(\bar{z},t) = 0$ to find,
-\begin{align}
-	\xi\tilde{v}(0,t) + \D[z]\tilde{v}(0,t ) &= 0\label{eq:new-BC1}\\
-	\xi\tilde{v}(\bar{z},t) + \D[z]\tilde{v}(\bar{z},t) &= 0\label{eq:new-BC2}
-\end{align}	
-Finally, in the value matching condition, $v(0,t) = e^{0}\tilde{v}(0,t)$ where if the $F'(z) = \theta e^{-\theta z}$ then,
-\begin{align}
-	\tilde{v}(0,t) &= \int_{0}^{\infty} \tilde{v}(z,t) \left(e^{\xi z} F'(z)\right) \diff z - x(t)\label{eq:vm-GBM-dynamic-normalized}
-\end{align}	
-
-\section{Derivations of Full Model}\label{sec:full-model-derivations}
-\subsection{Summarizing Normalized Equations}\label{sec:normalized-equations}
-Take as given $g(t),\pi_{\min}(t),\hat{z}(t), x(t)$, and $\tilde{r}(t)$(alternatively $g_w(t)$ and $r(t)$).  Then, the following equations must be fulfilled for all $t$ and  $z$
-\begin{align}
-\tilde{r}(t) \equiv & r(t) - g(t) - g_w(t)\label{eq:r-tilde-summary}\\
-f(z) &= \theta e^{-\theta z}\label{eq:f-stationary-summary}\\
-\tilde{r}(t) v(z,t) &= \pi(z,t) + (\mu - g(t))\D[z]v(z,t) + \frac{\upsilon^2}{2}\D[zz]v(z,t) + \D[t]v(z,t)\label{eq:normalized-bellman-summary}\\
-\D[z]v(0,t) &= 0\label{eq:normalized-sp-summary}\\
-v(0,t) &= \int_{0}^{\infty}v(z,t) f(z) \diff z - x(t)\label{eq:normalized-vm-summary}\\
-	\pi(z,t) &= \pi_{\min}(t) e^{(\sigma - 1)z}\left(1 + (N-1)d^{1-\sigma}\indicator{z \geq \log(\hat{z}(t))}\right) - (N-1)\kappa\indicator{z \geq \log(\hat{z}(t))}\label{eq:pi-z-t-summary}
-\end{align}
-
-\subsection{More Rescaling}
-Note: while this transformation could be done all at once, we will base it off of the previous section for easier comparison.  Define the following
-\begin{align}
-	\tilde{v}(z,t) &\equiv e^{-(\sigma - 1)z}v(z,t)\label{eq:v-tilde}\\
-	\tilde{\pi}(z,t) &\equiv e^{-(\sigma - 1)z}\pi(z,t)\\
-	\intertext{Use \cref{eq:pi-z-t-summary}}
-	\tilde{\pi}(z,t) &= \pi_{\min}(t)\left(1 + (N-1)d^{1-\sigma}\indicator{z \geq \log(\hat{z}(t))}\right) - (N-1)\kappa e^{-(\sigma - 1)z}\indicator{z \geq \log(\hat{z}(t))}	
-\end{align}
-Rearrange and differentiate \cref{eq:v-tilde},
-\begin{align}
-	\D[t]v(z,t) &= e^{(\sigma - 1)z} \D[t]\tilde{v}(z,t)\label{eq:v-tilde-dt}\\
-	\D[z]v(z,t) &= e^{(\sigma - 1)z}\left((\sigma - 1)\tilde{v}(z,t) + \D[z] \tilde{v}(z,t) \right)\label{eq:v-tilde-dz}\\
-	\D[zz]v(z,t) &= e^{(\sigma - 1)z}\left((\sigma - 1)^2\tilde{v}(z,t) + 2(\sigma - 1)\D[z] \tilde{v}(z,t) + \D[zz] \tilde{v}(z,t)\right)\label{eq:v-tilde-dzz}\\
-	\intertext{And at the adoption threshold, from \cref{eq:v-tilde-dz}}
-	\D[z]v(0,t) &= (\sigma - 1)\tilde{v}(0,t) + \D[z] \tilde{v}(0,t)\label{eq:vt-0-dz}
-\end{align}	
-To use these substitutions, start with \cref{eq:normalized-vm-summary} and use the definition of $f(z)$,
-\begin{align}
-	\tilde{v}(0,t) &= \theta \int_{0}^{\infty}\tilde{v}(z,t) e^{(-\theta + \sigma - 1)z} \diff z - x(t)\label{eq:normalized-vm-summary-rescaled}\\
-	\intertext{Combine \cref{eq:normalized-sp-summary,eq:vt-0-dz} to get}
-	0 &= (\sigma - 1)\tilde{v}(0,t) + \D[z] \tilde{v}(0,t)\label{eq:normalized-sp-summary-rescaled}
-	\intertext{Finally, substitute all of the derivatives into \cref{eq:normalized-bellman-summary} and divide by $e^{(\sigma - 1)z}$}	
-	\tilde{\rho}(t) \tilde{v}(z,t) &= \tilde{\pi}(z,t) + (\mu - g(t) + (\sigma - 1)\upsilon^2)\D[z]\tilde{v}(z,t) + \frac{\upsilon^2}{2}\D[zz]\tilde{v}(z,t) + \D[t]\tilde{v}(z,t)
-	\intertext{where,}
-	\tilde{\rho}(t) &\equiv \tilde{r}(t) - (\sigma - 1)\left(\mu - g(t) + (\sigma - 1)\frac{\upsilon^2}{2} \right)\label{eq:rhot}	
-\end{align}	
 
 
-\subsection{Derivation of Rates of Change and Interest Rates}\label{sec:derive-interest-rates}
-Since consumption is $C(t) := c(t) M(t)$, take logs and differentiate to get,
-\begin{align}
-\D[t]\log C(t) &= g(t) + g_c(t)
-\intertext{With a CRRA parameter of $\gamma \geq 0$, the interest rate rate faced by a firm is,}
-r(t) &= \rho + \delta + \gamma \D[t]\log C(t)\\
-&= \rho+ \delta + \gamma(g_c(t)+ g(t))\label{eq:r-def}
-\end{align}
-
-\noindent This can be simpified in some cases.  From the PTW (C.34), for $\eta = 0$,
- \begin{align}
- \frac{c(t)}{w(t)}&\propto 1 - \tilde{L}(t) 
- \intertext{Taking the log and differentiating,}
-g_c(t) - g_w(t) &= \D[t]\log\left(1 - \tilde{L}(t)\right)\label{eq:g-c-w-diff}
-\intertext{From \cref{eq:r-tilde-summary}}
-\tilde{r}(t) &\equiv r(t) - g(t) - g_w(t)\\
-\intertext{From \cref{eq:r-def}}
-&= \rho + \delta + \gamma(g_c(t)+ g(t)) - g(t) - g_w(t)\\
-&= \rho + \delta + (g_c(t) - g_w(t)) + (\gamma - 1)(g_c(t) + g(t))\\
-\intertext{From \cref{eq:g-c-w-diff}}
-&= \rho + \delta + \D[t]\log\left(1 - \tilde{L}(t)\right) + (\gamma - 1)(g_c(t) + g(t))\\
-\intertext{And in the $\log$ utility case with $\gamma = 1$, the last term drops, so that we have,}
- \tilde{r}(t) &=  \rho+ \delta + \D[t]\log\left(1 - \tilde{L}(t)\right)\label{eq:tilde-r-L}
-% \intertext{There does not seem to be an obvious clean expression for $1-\tilde{L}$ in terms of the home share, but expression would be cleaner with it.  Note that (G.32) is not allowed since it is only at the stationary level. Using \cref{eq:L-tilde-sub} directly,}
-% 1 - \tilde{L}(t) &= 1 - \Omega(t)\left((N -1)\hat{z}(t)^{-\theta}\kappa + \zeta \theta g(t) + \zeta \indicator{t \geq \bar{T}}\delta/\chi\right)\label{eq:minus-tilde-L}
-% %\D[t]\log\left(1 - \tilde{L}(t)\right) &= \D[t]\log\left(1 - \Omega(t)\left((N -1)\hat{z}(t)^{-\theta}\kappa + \zeta \theta g(t)\right)\right)\\
-% %&= \frac{\zeta  \theta  \left(g'(t)+g(t) g_{\Omega}(t)\right)+\kappa  (N-1) \hat{z}(t)^{-\theta } \left(g_{\Omega}(t)-\frac{\theta  \hat{z}'(t)}{\hat{z}(t)}\right)}{\zeta  \theta  g(t)+\kappa  (N-1) \hat{z}(t)^{-\theta }-\frac{1}{\Omega (t)}}\label{eq:D-t-tilde-L}
-% %\intertext{Another formula is,}
-% %&=\frac{\tilde{L}(t)\left(\theta g_{\hat{z}}(t)-g_{\Omega}(t)\right) - \zeta\theta\Omega(t)\left(\theta g(t) g_{\hat{z}}(t) + g'(t)\right)}{1-\tilde{L}(t)}\label{eq:D-t-tilde-L-alt}
- \end{align}
-
-
- 
-
-% \subsection{Discretized System of Equations}\label{eq:discretized-system}
-% Take the exogenously given profits and costs at the time periods discretized as $\pi^n_i$ and $x^n$.  Apply the discretization in \cref{eq:integral-approximation,eq:D-v-t,eq:D-v-z,eq:D-v-zz} to \cref{eq:bellman-GBM-dynamic,eq:vm-GBM-dynamic,eq:sp-GBM-dynamic,eq:reflecting-GBM-dynamic}.\footnote{\textbf{TODO:} I am not entirely sure about the $n$ vs. $n+1$ index in the $(r-g^n)$ term.  We need to verify that this is the correct form for finite-differences with an explicit euler scheme in time.}
-
-% \begin{align}
-% 	(r - g^n) v_i^n &= \pi^n_i + (\gamma - g^n)\frac{v_i^n - v_{i-1}^n}{\Delta_{i,-}} + \frac{\sigma^2}{2}\frac{\Delta_{i,-}v^n_{i+1} - (\Delta_{i,-}+\Delta_{i,+})v^n_i+\Delta_{i,+}v^n_{i-1}}{\frac1{2}(\Delta_{i,+}+\Delta_{i,-})\Delta_{i,-}\Delta_{i,+}}\nonumber\\
-% 	&+ \frac{v_i^{n+1} - v_i^n}{h_{n,+}},\quad \text{for all }n=1,\ldots N,i=2,\ldots I-1\label{eq:bellman-GBM-dynamic-discretized-sub}	\\
-% %	(r - g^n) v_i^n &= \pi^n_i + (\gamma - g^n)\frac{v_i^{n+1} - v_{i-1}^{n+1}}{\Delta_{i,-}} + \frac{\sigma^2}{2}\frac{v_{i+1}^{n+1} - 2 v_i^{n+1} + v_{i-1}^{n+1}}{\Delta^2}\nonumber\\
-% %&+ \frac{v_i^{n+1} - v_i^n}{h_{n,+}},\quad \text{for all }n=1,\ldots N,i=2,\ldots I-1\label{eq:bellman-GBM-dynamic-discretized-sub}	\\
-% 	v_1^n &= \omega \cdot v^n - x^n,\quad \text{for all }n = 1,\ldots N\label{eq:vm-GBM-dynamic-discretized-sub}\\
-% 	\frac{v_{2}^n - v_1^n}{\Delta_{1,-}} &= 0,\quad \text{for all }n = 1,\ldots N\label{eq:sp-GBM-dynamic-discretized-sub}\\
-% 	\frac{v_{I}^n - v_{I-1}^n}{\Delta_{I,-}} &= 0,\quad \text{for all }n = 1,\ldots N\label{eq:reflecting-GBM-dynamic-discretized-sub}\\	
-% \intertext{Rearrange \cref{eq:sp-GBM-dynamic-discretized-sub,eq:reflecting-GBM-dynamic-discretized-sub}}
-% 0 &= v_1^n - v_{0}^n\label{eq:sp-GBM-dynamic-discretized}\\
-% 0 &= v_{I+1}^n - v_{I}^n\label{eq:reflecting-GBM-dynamic-discretized}
-% \intertext{Rearrange \cref{eq:vm-GBM-dynamic-discretized-sub}}
-% 0 &= v_1^n + x^n - \omega \cdot v^n \label{eq:vm-GBM-dynamic-discretized}\\
-% \intertext{Rearrange \cref{eq:bellman-GBM-dynamic-discretized-sub} in the simple case of a uniform $z$ grid $\Delta =  \Delta_{i,-} = \Delta_{i,+}$,}
-% 0 &= -(r - g^n) v_i^n + \pi^n_i + (\gamma - g^n)\frac{v_i^n - v_{i-1}^n}{\Delta} \nonumber\\
-% &+ \frac{\sigma^2}{2}\frac{v_{i+1}^n - 2 v_i^n + v_{i-1}^n}{\Delta^2} + \frac{v_i^{n+1} - v_i^n}{h_{n,+}} \label{eq:bellman-GBM-dynamic-discretized-uniform}\\
-% \intertext{Or in the more complicated case of a non-uniform grid}
-% 0 &= -(r - g^n) v_i^n + \pi^n_i + (\gamma - g^n)\frac{v_i^n - v_{i-1}^n}{\Delta_{i,-}} \nonumber\\
-% &+ \frac{\sigma^2}{2}\frac{\Delta_{i,-}v^n_{i+1} - (\Delta_{i,-}+\Delta_{i,+})v^n_i+\Delta_{i,+}v^n_{i-1}}{\frac1{2}(\Delta_{i,+}+\Delta_{i,-})\Delta_{i,+}\Delta_{i,-}}+ \frac{v_i^{n+1} - v_i^n}{h_{n,+}} \label{eq:bellman-GBM-dynamic-discretized}\\
-% \intertext{For the terminal boundary value, directly discretize \cref{eq:v-gbm-sol} to form the terminal value (used for ghost nodes)}
-% 	v^{N+1}_i &= \frac1{r-\gamma - \sigma^2/2}\left(e^{z_i} + \frac1{\nu} e^{-\nu z_i}\right), \text{ for all }i = 1,\ldots I\label{eq:v-gbm-sol-discretized}
-% \end{align}	
-
-% As will be tested in \cref{eq:solving-stationary-setup}, the hope is that we do not need to impose the terminal boundary value from \cref{eq:v-gbm-sol-discretized}, but rather that it will correctly come out of the solution to the system with stationarity.  If that is the case, I think the final conditions is a stationary one to replace \cref{eq:v-gbm-sol-discretized}, in particular $\D[t]v(z,t) = 0$ or the discretized:
-% \begin{align}
-% 	0 &= v^{N+1}_i - v^N_i,\text{ for all }i = 1,\ldots I
-% \end{align}
-
-
-% \paragraph{Summarize of System} This is a system of equations in $v\in\R^{N I}$ and $g\in \R^N$ given exogenous $\pi\in\R^{N I}$ and $x \in \R^N$.  The $N I + N$ variables match the $N I + N$ equations from:
-% \begin{itemize}
-% 	\item The HJBE in  \cref{eq:bellman-GBM-dynamic-discretized} for $n=1,\ldots N$ and $i = 2,\ldots I-1$ for a total of $N(I-2)$ equations.  Keep in mind that for the $N+1$ term in \cref{eq:bellman-GBM-dynamic-discretized}, it uses the ``ghost nodes'' of \cref{eq:v-gbm-sol-discretized}.\footnote{As an alternative, we should try to solve this \textbf{without} imposing the terminal value function, but rather $\D[t]v(z,T) = 0$.  It should pick up the viscosity solution and solve the stationary model for us.}  This is a \textit{quadratic} equation of the system, but \textit{linear} given $g$.
-% 	\item The smooth pasting \cref{eq:sp-GBM-dynamic-discretized} for $n=1,\ldots N$.  This is a \textit{linear} equation.
-% 	\item The value matching condition \cref{eq:vm-GBM-dynamic-discretized} for $n=1,\ldots N$.  This is a \textit{linear} equation.
-% 	\item Either the reflecting barrier in \cref{eq:reflecting-GBM-dynamic-discretized} for $n=1,\ldots N$ (which is a \textit{linear} equation) or the alternative  \cref{eq:alt-rhs-GBM-dynamic-discretized} for $n=1\ldots N$ (which is a \textit{quadratic} equation in $v$).
-% \end{itemize}
-
-% \subsection{Discretization as a Matrix}
-% For a given time step $n$, define
-% \begin{align}
-% X^n &\equiv -\frac{\gamma - g^n}{\Delta_{-}} +\frac{\sigma^2}{\Delta_{-}(\Delta_{+}+\Delta_{-})} \label{eq:X-non-uniform}\\
-% Y^n &\equiv \frac{\gamma - g^n}{\Delta_{-}} -\frac{\sigma^2}{\Delta_{-}\Delta_{+}}  \label{eq:Y-non-uniform}\\
-% Z^n &\equiv\frac{\sigma^2}{\Delta_{+}(\Delta_{+}+\Delta_{-})} \label{eq:Z-non-uniform}
-% %	\intertext{And turning $\Delta_{i,-}$ into a diagonal matrix for the interior nodes}
-% %	\mathbf{\Delta}_{-} &\equiv \mathbf{I} \set{\Delta_{i,-}}_{i=2}^{I-1} = \text{diag}(\Delta_{-}(2:I-1))\in\R^{I-2}
-% \end{align}
-
-% From these, define,
-% \begin{align}
-% 		A^n &\equiv \begin{bmatrix}
-% 	X_1^n+Y_1^n & Z_1^n & 0 & \ldots & \ldots & \ldots & 0\\
-% 	X^n_2 & Y^n_2 & Z^n_2 & 0 & 0 & \ldots & 0\\
-% 	\vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots\\		
-% 	0 & 0 & 0 & \ldots & X^n_{I-1} & Y^n_{I-1} & Z^n_{I-1}\\
-% 	0 & \ldots & \ldots & \ldots & 0 & X_I^n & Y_I^n+Z_I^n
-% \end{bmatrix}\in\R^{I\times I}\label{eq:A-n}\\
-% \intertext{And,}
-% b^n &= \begin{bmatrix} \pi^n_1 \\
-% \pi^n_{2}\\
-% \vdots\\
-% \pi^n_{I-1}\\
-% \pi^n_{I}\end{bmatrix}\in\R^{I}\label{eq:b-n}\\
-% \end{align}
-
-% Define the following diagonal matrices from the time-stepping differences, leaving the corners as $0$,
-% \begin{align}
-% %D_{+}^n &\equiv \mathrm{diag}\left(\begin{bmatrix}0 & h^n_{+} & \ldots & h^n_{+} & 0 \end{bmatrix}\right) \in \R^{I\times I}\label{eq:D-n}\\
-% D_{+}^n &\equiv h_{+}^n\mathbf{I}_{I\times I} \in \R^{I\times I}\label{eq:D-n}\\
-% \intertext{and the diagonal discounting matrix in a similar same way}
-% %R^n&\equiv \mathrm{diag}\left(\begin{bmatrix}0 & (r-g^n) & \ldots &(r-g^n) & 0 \end{bmatrix}\right) \in \R^{I\times I}\label{eq:R-n}\\
-% R^n&\equiv (r-g^{n}) \mathbf{I}_{I\times I} \in \R^{I\times I}\label{eq:R-n}\\
-% \end{align}
-
-% Finally, to aid in the calculation of the value matching condition, stack \cref{eq:omega,eq:vm-GBM-dynamic-discretized} such that
-% \begin{align}
-% \mathbf{0} &= \Omega v + x	\label{eq:vm-stacked}
-% \intertext{Where,}
-% \Omega &\equiv
-% \begin{bmatrix}
-% 	\tilde{\omega} & \mathbf{0}_I & \ldots & \ldots & \mathbf{0}_I\\
-% \mathbf{0}_I & \tilde{\omega} & \mathbf{0}_I & \ldots & \mathbf{0}_I\\
-% \vdots & \vdots & \vdots & \vdots & \vdots\\
-% \mathbf{0}_I & & & \mathbf{0}_I & \tilde{\omega}
-% \end{bmatrix}\in \R^{N \times (N I)}\label{eq:vm-stacked-Omega}\\
-% \tilde{\omega} &\equiv \begin{bmatrix}1 & 0 & \ldots & 0\end{bmatrix} - \omega' \in \R^I\label{eq:tilde-omega}
-% \end{align}
-
-
-% \subsection{Alternative: Transition Dynamics and Value-Matching}
-% In discrete-time, the value matching condition would be looking at the draw of a value in the next period.  It is possible that we need to approximate that with the current setup.  To generalize, let $\eta \in [0,1]$ be the weight on the value in the future vs. current period for the draws.  This is intended to nest the above \cref{eq:vm-stacked} for $\eta=0$.  With this, \cref{eq:vm-GBM-dynamic-discretized} becomes,
-
-% \begin{align}
-% 0 &= v_1^n + x^n - \left((1-\eta)\omega \cdot v^n + \eta \omega \cdot v^{n+1}\right) \label{eq:vm-GBM-dynamic-discretized-alt}
-% \end{align}
-
-% As in the case of \cref{eq:vm-stacked-Omega}, we can define an $\Omega$ to implement the value-matching conditions so that  \cref{eq:vm-stacked} holds,
-
-% \begin{align}
-% \Omega &\equiv
-% \begin{bmatrix}
-% \tilde{\omega} & -\eta\omega' & \mathbf{0}_I & \ldots & \ldots & \mathbf{0}_I\\
-% \mathbf{0}_I & \tilde{\omega} & -\eta\omega'& \mathbf{0}_I & \ldots & \mathbf{0}_I\\
-% \vdots & \vdots & \vdots & \vdots & \vdots & \vdots\\
-%  & & &  & \tilde{\omega} & -\eta\omega'\\
-% \mathbf{0}_I & \ldots & & \mathbf{0}_I & \mathbf{0}_I & \tilde{\omega}-\eta\omega'
-% \end{bmatrix}\in \R^{N \times (N I)}\label{eq:vm-stacked-Omega-alt}\\
-% \tilde{\omega} &\equiv \begin{bmatrix}1 & 0 & \ldots & 0\end{bmatrix} - (1-\eta)\omega' \in \R^I\label{eq:tilde-omega-alt}
-% \end{align}
-% Note that in the bottom right hand corner, it is using the stationarity to ensure that the $\eta$ is irrelevant.
-
-% \section{Solving the System of Equations}\label{sec:solving-the-system}
-% %There are 2 basic approaches to solving these sorts of systems(for either the stationary or the dynamic setup):
-% %\begin{enumerate}
-% %	\item Take a $g$ as given, solve a linear system for $v$, and change the $g$ choices until some equilibrium property holds.
-% %	\item Solve the whole system as a nonlinear system of equation in $g,v$	
-% %\end{enumerate}
-% %
-% %\subsection{Solving the Stationary Setup}\label{eq:solving-stationary-setup}
-% %To give details on these approaches,
-% %\paragraph{Linear System and Uniform Grid}
-% %Take the the terminal \cref{eq:terminal-pi,eq:terminal-x} to give to a $\pi(z_i) = \pi_i = e^{z_i}$ and $x = \zeta$.  Take the time invariant versions of \cref{eq:bellman-GBM-dynamic-discretized,eq:v-gbm-sol-discretized,eq:bellman-GBM-dynamic-discretized-sub,eq:vm-GBM-dynamic-discretized-sub} to get a system of $N+1$ equations in $g\in \R$ and $v\in\R^I$
-% %\begin{align}
-% %	0 &= - \Delta (r - g) v_i + \Delta \pi_i + (\gamma - g)\left(v_i - v_{i-1}\right)+ \frac{\sigma^2}{2}\frac{v_{i+1} - 2 v_i + v_{i-1}}{\Delta},\text{ for }i = 2,\ldots I-1\label{eq:bellman-GBM-dynamic-discretized-stationary}\\
-% %	0 &= v_1 + x - \omega \cdot v\label{eq:vm-GBM-dynamic-discretized-stationary}\\
-% %	0 &= v_{2} - v_1\label{eq:sp-GBM-dynamic-discretized-stationary}\\
-% %	0 &= v_{I} - v_{I-1}\label{eq:reflecting-rhs-GBM-dynamic-discretized-stationary}
-% %\end{align}
-% %
-% %Rearranging,
-% %\begin{align}
-% %	-\Delta \pi_i &= \left(\gamma - g-\Delta (r - g)-\frac{\sigma^2}{\Delta}\right)v_i		
-% %	+ \left(\frac{\sigma^2}{2\Delta}- (\gamma - g)\right)v_{i-1}+ \frac{\sigma^2}{2\Delta}v_{i+1},\text{ for }i = 2,\ldots I-1
-% %\end{align}
-% %
-% %First, take a $g$ as given and solve the linear system of $I$ equations in \cref{eq:bellman-GBM-dynamic-discretized-stationary,eq:sp-GBM-dynamic-discretized-stationary,eq:reflecting-rhs-GBM-dynamic-discretized-stationary}.\footnote{Note that here we need to use the reflecting boundary since otherwise the system of equations would be nonlinear!  This may be a problem since we know the value function clearly does not have $v'(\bar{z}) = 0$, though it is unclear if this would creep back through the rest of the solution.}  Stacking these equations and rewriting this as a linear system,
-% %\begin{align}
-% %	\begin{bmatrix}
-% %		X & Y & Z & 0 & 0 & \ldots & 0\\
-% %		0 & X & Y & Z & 0 & \ldots & 0\\		
-% %		0 & 0 & \ddots & \ddots & \ddots & \ldots & 0\\
-% %		0 & 0 & 0 & 0 & X & Y & Z\\
-% %		-1 & 1 & 0 & \ldots & \ldots & \ldots & 0\\
-% %		0 & \ldots & \ldots & \ldots & 0 & -1 & 1
-% %		\end{bmatrix} \cdot v &=
-% %	\begin{bmatrix}		 
-% %			-\Delta \pi_2\\
-% %			-\Delta \pi_3\\
-% %			\ldots\\
-% %			-\Delta \pi_{I-1}\\
-% %			0\\
-% %			0
-% %	\end{bmatrix}
-% %\end{align}
-% %Where,
-% %\begin{align}
-% %X &\equiv \left(\frac{\sigma^2}{2\Delta}- (\gamma - g)\right)\\
-% %Y &\equiv \left(\gamma - g-\Delta (r - g)-\frac{\sigma^2}{\Delta}\right)\\
-% %Z &\equiv \left(\frac{\sigma^2}{2\Delta}\right)
-% %\end{align}	
-
-% \subsection{Stationary Solution}
-% First, take a $g^N$ as given and solve the linear system of $I$ equations in \cref{eq:bellman-GBM-dynamic-discretized,eq:vm-GBM-dynamic-discretized,eq:sp-GBM-dynamic-discretized,eq:reflecting-GBM-dynamic-discretized} after setting $n = n+1$.\footnote{Note that here we need to use the reflecting boundary since otherwise the system of equations would be nonlinear!  This may be a problem since we know the value function clearly does not have $v'(\bar{z}) = 0$, though it is unclear if this would creep back through the rest of the solution.}
-
-% Using definitions in \cref{eq:R-n,eq:A-n,eq:b-n} note that as it is in a steady state $v_i^{N+1} - v_i^N = 0$ for all $i$, which leads to the following system of equations,
-% \begin{align}
-% (R^N - A^N) v^N = b^N \label{eq:linear-system-N}
-% \end{align}
-
-
-% For the convergence criteria for the $g^N$ vector, from \cref{eq:vm-GBM-dynamic-discretized}, the value matching must hold.  Solve this as a sparse linear system, then update the $g^N$ value until $0 = v^N_1 + x^N - \omega \cdot v^N$ holds.
-
-% Assuming that the $\bar{z}$ is sufficiently large, we should be able to verify that the solution converges to the known $g$ and $v$ from \cref{eq:g-gbm,eq:v-gbm-sol}.
-% %
-% %Stacking these equations and rewriting this as a linear system, define the following vectors
-% %\begin{align}
-% %	X &\equiv -\frac{\gamma - g}{\Delta_{-}} +\frac{\sigma^2}{\Delta_{-}(\Delta_{+}+\Delta_{-})} \label{eq:X-non-uniform}\\
-% %	Y &\equiv \frac{\gamma - g}{\Delta_{-}} -(r-g) -\frac{\sigma^2}{\Delta_{-}\Delta_{+}}  \label{eq:Y-non-uniform}\\
-% %	Z &\equiv\frac{\sigma^2}{\Delta_{+}(\Delta_{+}+\Delta_{-})} \label{eq:Z-non-uniform}
-% %%	\intertext{And turning $\Delta_{i,-}$ into a diagonal matrix for the interior nodes}
-% %%	\mathbf{\Delta}_{-} &\equiv \mathbf{I} \set{\Delta_{i,-}}_{i=2}^{I-1} = \text{diag}(\Delta_{-}(2:I-1))\in\R^{I-2}
-% %\end{align}
-% %Then,
-% %	\begin{align}
-% %		\begin{bmatrix}
-% %			-1 & 1 & 0 & \ldots & \ldots & \ldots & 0\\
-% %			X_2 & Y_2 & Z_2 & 0 & 0 & \ldots & 0\\
-% %			\vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots\\		
-% %			0 & 0 & 0 & \ldots & X_{I-1} & Y_{I-1} & Z_{I-1}\\
-% %			0 & \ldots & \ldots & \ldots & 0 & -1 & 1
-% %		\end{bmatrix} \cdot v &= - \begin{bmatrix} 0 \\
-% %		\pi_{2}\\
-% %		\vdots\\
-% %		\pi_{I-1}\\
-% %		0\end{bmatrix}\\
-% %%		\begin{bmatrix}		 
-% %%			-\Delta_{2,-} \pi_2\\
-% %%			-\Delta_{3,-} \pi_3\\
-% %%			\ldots\\
-% %%			-\Delta_{I-1,-} \pi_{I-1}\\
-% %%			0\\
-% %%			0
-% %%		\end{bmatrix}
-% %\intertext{In matrix form,}
-% %		A\cdot v &= \mathbf{b}
-% %	\end{align}
-% %	
-
-% \subsection{Solving the Transition Dynamics}\label{eq:solving-transition-dynamics}
-% As before, there are two basic approaches
-% \paragraph{Linear System}
-% Without writing out the full system of equations, given a $g\in\R^N$ guess, we can solve the sparse linear system of size $I N$ defined in
-% \begin{itemize}
-% \item \cref{eq:bellman-GBM-dynamic-discretized} provides $N(I-2)$ equations.
-% \item \cref{eq:sp-GBM-dynamic-discretized} provides $N$ equations
-% \item \cref{eq:reflecting-GBM-dynamic-discretized} provides $N$ equations.  As before, we are forced to use the linear reflecting barrier rather than the alternative RHS boundary condition.
-% \end{itemize}
-% After solving this sparse linear system of $N I$ equations, we can verify the $g\in\R^N$ choice with \cref{eq:vm-GBM-dynamic-discretized}.  Perhaps a global derivative-free solver would help find the optimal $g$ sequence faster, but it is a large dimensional object without any derivatives.
-
-% Define the matrix of zeros as $\mathbf{0} \equiv 0_{I\times I}$.  Define a stacked up set of the matrices, along with the time-stepping using \cref{eq:A-n,eq:D-n} \begin{align}
-% A &\equiv \begin{bmatrix}
-% A^1 - D_{+}^1	& D_{+}^1		& \mathbf{0}			 & \ldots 			& \mathbf{0}\\
-% \mathbf{0} 		&A^1 - D_{+}^2 & D_{+}^2 				 & \ldots			 & \mathbf{0}\\	
-% \vdots 			& \vdots 		& \vdots				& \vdots			&\vdots\\
-% \mathbf{0} 		&\ldots 	 	&\mathbf{0}				& A^{N-1} - D_{+}^{N-1} & D_{+}^{N-1}\\
-% \mathbf{0} 		&\ldots 		&						& \mathbf{0}	&A^N
-% \end{bmatrix}\in\R^{(N I)\times (N I)}
-% \end{align}
-
-% Then stack up the $R^n$ and $b^n$ vectors in \cref{eq:R-n,eq:b-n}\footnote{Can combine the $R^n$ in the definitino of A}
-% \begin{align}
-% R &= \begin{bmatrix}
-% 	R^1 & \mathbf{0} & \ldots & \mathbf{0}\\
-% 	\mathbf{0} & R^2 & \ldots &\mathbf{0}\\
-% 	\vdots \\
-% 	\mathbf{0} & \ldots &\mathbf{0}& R^N \end{bmatrix}\in\R^{(N I)\times (N I)}\label{eq:R}\\
-% b &=\begin{bmatrix}
-% 	b^1 \\
-% 	\vdots \\ b^N \end{bmatrix}\in\R^{N I}\label{eq:b}
-% \end{align}
-		
-% With these definitions, \cref{eq:R,eq:b,eq:A}, the solution to the entire vector is the sparse system
-% \begin{align}
-% (R - A) v = b \label{eq:linear-system}
-% \end{align}
-% Note that the bottom right corner exactly nests \cref{eq:linear-system-N}, so this should simultaneously calculate the stationary distribution.
-
-% For the convergence criteria on the growth rates, \cref{eq:vm-GBM-dynamic-discretized} must hold for every $n$
-
-% \begin{align}
-% 0 &= v_1^n + x^n - \omega \cdot v^n
-% \end{align}
-
-% Change the $g$ vector until this approximately holds for all $n = 1,\ldots N$.
-
-% Alternatively, stack with \cref{eq:vm-stacked} to calculate the residual for all $n$,
-% \begin{align}
-% \mathbf{0} &= \Omega v + x
-% \end{align}
-
-% \section{Transition Dynamics As a Nonlinear System}
-% \paragraph{Nonlinear System for the Stationary Setup}
-% Alternatively, solve the system in \cref{eq:bellman-GBM-dynamic-discretized,eq:vm-GBM-dynamic-discretized,eq:sp-GBM-dynamic-discretized,eq:reflecting-GBM-dynamic-discretized} directly as a nonlinear system of $I+1$ equations.  In this case, we could use the less worrying, alternative right-hand boundary value since linearity is no longer required.
-
-% While this may be a system of a large number of equations, it is very sparse.  To get a sense of this, consider each row of the Jacobian separately:
-% \begin{itemize}
-% 	\item The $i$th row in \cref{eq:bellman-GBM-dynamic-discretized} contains $v_i, g, v_{i-1}, v_{i+1}$ for a total of $4$ nonzeros per row in the jacobian
-% 	\item \cref{eq:sp-GBM-dynamic-discretized} contains 2 nonzeros.
-% 	\item \cref{eq:vm-GBM-dynamic-discretized} contains I nonzeros.
-% 	\item \cref{eq:alternative-rhs-GBM-dynamic-discretized-stationary} contains 3 nonzeros (and \cref{eq:reflecting-GBM-dynamic-discretized} has 2)
-% \end{itemize}
-
-% Therefore, for the system of $I+1$ equations, there are only around $5 I - 3 \ll (I+1)^2$ nonzeros in the jacobian---i.e., very sparse.  We can try to use auto-differentiation, or directly compute the jacobian (which should be fairly easy in this case).  However, solving this as a system is impossible without using a solver that can handle large sparse systems.
-
-% \paragraph{Nonlinear System}
-% Again, as before we can solve for the $v\in\R^{IN}$ and $g\in N$ together as a single system.  To understand the sparsity:
-% \begin{itemize}
-% 	\item \cref{eq:bellman-GBM-dynamic-discretized} has $N(I-2)$ equations with $5$ nonzeros per row.
-% 	\item \cref{eq:sp-GBM-dynamic-discretized} provides $N$ equations with 2 nonzeros per row
-% 	\item \cref{eq:alt-rhs-GBM-dynamic-discretized} provides $N$ equations with  3 nonzeros per row, while \cref{eq:reflecting-GBM-dynamic-discretized} has 2
-% 	\item \cref{eq:vm-GBM-dynamic-discretized}  provides $N$ equations with $I$ nonzeros per row 
-% \end{itemize}
-% To summarize, this is a system of $N(I+1)$ equations with about $N(6 I - 5) \ll \left(N(I+1)\right)^2$ non-zeros in the Jacobian.  Completely infeasible without sparse derivatives, but not an especially large system otherwise.
-
-% \section{Systems of ODEs Backwards in Time}
-% Another approach to this is solve a system of ODEs backwards in time using typical ODE libraries.  In particular, rearrange \cref{eq:bellman-GBM-dynamic-discretized} to give,
-
-% \begin{align}
-% - \partial_t v_i(t)	 &= -(r - g(t)) v_i(t) - \pi_i(t) + (\gamma - g(t))\frac{v_i(t) - v_{i-1}(t)}{\Delta_{i,-}} + \frac{\sigma^2}{2}\frac{\Delta_{i,-}v_{i+1}(t) - (\Delta_{i,-}+\Delta_{i,+})v_i(t)+\Delta_{i,+}v_{i-1}(t)}{\frac1{2}(\Delta_{i,+}+\Delta_{i,-})\Delta_{i,+}\Delta_{i,-}}
-% \intertext{Where the initial condition is from \cref{eq:v-gbm-sol-discretized},}
-% v_i(T) &= \frac1{r-\gamma - \sigma^2/2}\left(e^{z_i} + \frac1{\nu} e^{-\nu z_i}\right), \text{ for all }i = 1,\ldots I
-% \end{align}
-
-% \noindent This is an initial value problem.  A system of $I$ ODEs, with $g(t)$, $r(t)$ and $\pi_i(t)$ time-varying.  Lets say we reverse time, with $\hat{t} = T - t$ and $\hat{v}_i(\hat{t}) = v_i(T - \hat{t})$.  Then the initial condition is at $\hat{t} = 0$, $\hat{v}_i(0) = v_i(T)$.  Finally, in the change of variables note that $- \partial_t v_i = - \partial_{\hat{t}}\hat{v}_i$. Since this is the only change, we will abuse notation and keep denoting as $v_i(\hat{t})$.  Summarizing the solution for $\hat{t} \in [0,T]$,
-% \begin{align}
-% v_i(0) &= \frac1{r-\gamma - \sigma^2/2}\left(e^{z_i} + \frac1{\nu} e^{-\nu z_i}\right)\\
-% \partial_{\hat{t}} v_i(\hat{t})	 &= -(r - g(\hat{t})) v_i(\hat{t}) - \pi_i(\hat{t}) + (\gamma - g(\hat{t}))\frac{v_i(\hat{t}) - v_{i-1}(\hat{t})}{\Delta_{i,-}} + \frac{\sigma^2}{2}\frac{\Delta_{i,-}v_{i+1}(\hat{t}) - (\Delta_{i,-}+\Delta_{i,+})v_i(\hat{t})+\Delta_{i,+}v_{i-1}(\hat{t})}{\frac1{2}(\Delta_{i,+}+\Delta_{i,-})\Delta_{i,+}\Delta_{i,-}}\label{odesystem}
-% \intertext{Where we change the equations at the boundaries to reflect the boundary conditions.  With this, we need to ensure that $g(\hat{t})$ fulfills \cref{eq:vm-GBM-dynamic-discretized} at all times.  That is,}
-% 0 &= v_1(\hat{t}) + x(\hat{t}) - \sum_{i=1}^I \omega_i \cdot v_i(\hat{t})\label{value-matching}
-% \end{align}
-
-
-% \subsection{DAE Formulation}
-% Note that \cref{value-matching} added to the system of ODEs in \cref{odesystem} can be written as a differential-algebraic equation in $v_i(\hat{t})$ and $g(\hat{t})$.  If so, then (assuming the $g$ is stacked last) the mass matrix is,
-% \begin{align}
-% M &= \begin{bmatrix}I & 0_{I}'\\
-% 					0_{I} & 0\end{bmatrix}_{(I+1)\times(I+1)}
-% \end{align}
-
-
-% \appendix
-% \section{Variational and LCP Problem}\label{sec:variational}
-% \subsection{Alternative Variational Formulation}\label{eq:variational}
-% First, expand the space of $z \in [\underline{z}, \infty)$ where $\underline{z} < 0$.  While the general formulation in the previous section is ideal for solving the analytical versions, we are not sure that above will converge well because of the reliance on \cref{eq:sp-GBM-dynamic}.  Keep in mind that this is an optimal stopping problem, but one where we have normalized the threshold to $0$.
-
-% Writing out the variational version of the optimal stopping problem, take \cref{eq:bellman-GBM-dynamic,eq:vm-GBM-dynamic},
-% \begin{align}
-% 	0 = \min&\left\{(r - g(t)) v(z,t) - \left(\pi(z,t) + (\gamma - g(t)) \D[z] v(z,t) + \tfrac{\sigma^2}{2} \D[zz] v(z,t) + \D[t]v(z,t)\right),\right.\nonumber\\
-% 	&\left.v(z,t)-\left(\int_{0}^{\infty} v(z,t) F'(z)\diff z - x(t)\right)\right\}\label{eq:variational-formulation}
-% \end{align}
-% Note that conditional on a $g(t)$, both functions in the max are linear in $v(z,t)$ (and the smooth pasting condition can be proven to hold).  But this is an incomplete set of equations, because we need to ensure that the $g(t)$ is such that the indifference point of \cref{eq:variational-formulation} is at $z=0$ for every $t$.  The indifference point can be found from either side, but one definition is,
-% \begin{align}
-% 	z^*(t) &\equiv \max\left\{z \geq \underline{z}\,\middle|\,\left(v(z,t)-\left(\int_{0}^{\infty} v(z,t) F'(z)\diff z - x(t)\right)\right) < 0\right\}\label{eq:check-z-0}
-% \end{align}
-% With this, the key to checking the solution is to pick a $g(t)$, solve \cref{eq:variational-formulation}, and then verify that $z^*(t) =0$ for all $t$ through \cref{eq:check-z-0}.
-
-% \subsection{Formulation as a LCP}
-% Take a $x(t), \pi(z,t),$ and $g(t)$ as given.  It may be reasonable to assume that $\pi(z,t) = \pi(0,t)$ for all $z < \underline{z}$ for simplicity.\footnote{We also may need to be careful with the expectation over $F'(z)$ since there would be no mass for $z < \underline{z}$ in equilibrium.  We think that keeping the integral from $0$ is appropriate.}
-
-% Take the same discretization steps as in \cref{eq:discretization,eq:quadrature-finite-differences}, except ensuring that $\underline{z} < 0$.  Then following \cref{eq:discretized-system}, the system can be written as
-% \begin{align}
-% 		0 &= \min\set{((r-g)\mathbf{I} - A) v - \pi,\, \Omega v +  x}\\
-% 	\intertext{where,}
-% 	\Omega &\equiv ...\in\R^{I N}\\
-% 	A &=...\in\R^{I N \times I N}
-% \end{align}
-% $\Omega$ will be fairly dense, probably with bandwidth $I$
-% (\textbf{TODO:}
-% \begin{itemize}
-% 	\item $\pi\in\R^{I N}$ same as before
-% 	\item $x\in\R^{I N}$ same as before, where $x$ is identical for all $i$ given an $n$
-% 	\item $g \in \R^{ I N}$ a guess, where $g$ is identical for all $i$ given an $n$
-% 	\item $A$ from the discretization of the process, probably the same as before.  Similar to what we used before, but with a a reflecting barrier on both sides to keep it linear.
-% 	\item $\Omega$ from $\left(\int_{0}^{\infty} v(z,t) F'(z)\diff z\right)$ using quadrature weights.
-% \end{itemize}
-% From a convenient change of variables to $y$, we should be able to get this into the form 
-% \begin{align}
-% 	0 &= \min\set{B y + q, y}\label{eq:LCP-two}
-% \end{align}
-% where $B$ is extremely sparse.
-% \subsection{Iteratively Solving the LCP}
-% Keep in mind that the $B$ and $q$ in \cref{eq:LCP-two} are functions of the $g$ guess vector.  The iterative solution is to solve this system, calculate the implied threshold from the solution (mapping from $y$ back to $z$ space). then change the $g$ guess until they are all at $0$.
-% \subsection{Solving a MCP}
-% Alternatively, the $g_i$ could be kept as variables in the solution, and the system could be written as a nonlinear system with complementarity constraints.  Something like knitro or PATH should be able to handle this sort of setup.
-
-% \subsection{Stationary Version}
-% In the discretization, let $i_0$ be such that $z_{i_0} = 0$.  This is using a uniform grid, rather than the nonuniform setup.  Discretize the stochastic process reflected at a $\underline{z}$ and $\bar{z}$ as,
-% \begin{align}
-% 	A &\equiv \begin{bmatrix}
-% 		Y_1 + X_1 & Z_1 & 0 & \cdots & \cdots & \cdots & 0 \\
-% 		X_2 & Y_2 & Z_2 & 0 & \ddots& & \vdots \\
-% 		0 & \ddots & \ddots & \ddots & \ddots &  & \vdots \\
-% 		\vdots & &\ddots & \ddots & \ddots & \ddots  & \vdots \\
-% 		\vdots & & & \ddots & X_{I-1} & Y_{I-1}  & Z_{I-1} \\
-% 		0 & \cdots & \cdots & \cdots & 0 & X_I & Y_I+Z_I\\
-% 	\end{bmatrix}\in\R^{I\times I}\label{eq:A}
-% \end{align}
-% Where (note slight difference from previous discretization),
-% \begin{align}
-% 	X &\equiv \frac{\sigma^2}{2\Delta^2}-\frac{\gamma - g}{\Delta}\\
-% 	Y &\equiv \frac{\gamma - g}{\Delta}-\frac{\sigma^2}{\Delta^2}\\
-% 	Z &\equiv \frac{\sigma^2}{2\Delta^2}
-% \end{align}
-% The stopping value (given a $v(z)$) from the value matching condition in \cref{eq:vm-GBM-dynamic}
-% \begin{align}
-% \int_{0}^{\infty} v(z) F'(z)\diff z - x\\
-% \intertext{Discretize using the same quadrature rules as \cref{eq:vm-GBM-dynamic-discretized}, the value of stopping is}
-% \omega \cdot v - x
-% \end{align}
-% Crucially here, the quadrature weights $\omega$ should be $0$ for all $z < 0$, so in effect it is a conditional expectation for $z \geq 0$.  In equilibrium, the threshold will be exactly at $z=0$, so this will not distort the solution.
-	
-% \noindent Then the discretized variational problem is,
-% \begin{align}
-% 	0 &= \min\set{(r-g) v -  \pi - A v,\, v - (\omega \cdot v - x)}\label{eq:variational-discrete-sub}
-% 	\intertext{Define and rearrange,}
-% 	\Omega &\equiv \mathbf{I} - \begin{bmatrix}\omega\\ \vdots \\ \omega\end{bmatrix}\\
-% 	\intertext{Then \cref{eq:variational-discrete-sub} becomes,}
-% 	0 &= \min\set{((r-g)\mathbf{I} - A) v -  \pi,\, \Omega v +  x}\label{eq:variational-discrete-sub2}
-% 	\intertext{Assume $\Omega$ is invertible, define}
-% 	B &\equiv \Omega^{-1}\left((r-g)\mathbf{I} - A\right)\label{eq:B}\\
-% 	S &\equiv -\Omega^{-1}x\\
-% 	u &\equiv \Omega^{-1} \pi
-% 	\intertext{And, using \cref{eq:variational-discrete-sub2}}
-% 	0 &\equiv \min\set{B v - u, v - S}\label{eq:variational-discrete}
-% \intertext{This can be mapped to a standard LCP problem as}
-% 	y &\equiv v - S\label{eq:z}\\
-% q &\equiv -  u + B S\label{eq:q}\\
-% w &\equiv B y + q\label{eq:w}\\
-% \intertext{Substitute \cref{eq:B,eq:z,eq:q} into \cref{eq:variational-discrete}}
-% 0 &= \min\set{B y + q,\, y }
-% \intertext{Which could be written as complementarity slackness conditions,}
-% y^T(B y + q) &= 0 \\
-% y &\geq 0\\
-% B y + q &\geq 0	\\
-% \intertext{Which can be written succinctly with complementarity constraints as,}
-% 0 &\leq (B y + q) \perp y \geq 0
-% \end{align}
-% Note that unlike some LCP problems, $B$ will not be sparse.  The stopping rule here will be when the index for the maximum $y=0$ is exactly at the $i_0$ such that $z_{i_0} = 0$.
-% \section{Some Variations to Consider/Try}
-
-% \begin{itemize}
-% 	\item Unequal grid with Laguerre nodes, and laguerre quadrature rules for the integral.
-% 	\item Both right-hand boundary value approaches
-% 	\item With terminal vs. no terminal condition (i.e., the stationary solution should directly come about in the solution to the problem).
-% \end{itemize}
-% \subsection{Alternative Boundary Value}
-
-% 	Another option is to create a boundary value based on the asymptotic behavior of the value function.  For example, we know for large $z$ and $\pi(z,t) = e^z$ that \cref{eq:v-gbm-sol}  implies $v(z,T) \propto e^z$ for large $z$.  Hence, $\D[z]v(z,T)/v(z,t)$ is constant.  To create a boundary value, add something like the following for a small $\epsilon$, a large $\bar{z}$, and all $t$,
-% 	\begin{align}
-% 		\frac{\D[z]v(\bar{z},t)}{v(\bar{z},t)} &= \frac{\D[z]v(\bar{z}- \epsilon,t)}{v(\bar{z}- \epsilon ,t)}\label{eq:rhs-GBM-dynamic-alt}\\
-% 		\intertext{For the alternative discretization of the rhs boundary value in \cref{eq:rhs-GBM-dynamic-alt}}
-% 		\frac{\frac{v^n_I - v^n_{I-1}}{\Delta}}{v^n_I} &= \frac{\frac{v^n_{I-1} - v^n_{I-2}}{\Delta}}{v^n_{I-1}}\label{eq:rhs-GBM-dynamic-alt-discretized}	\\
-% 		\intertext{Rearrange \cref{eq:rhs-GBM-dynamic-alt-discretized} (as an alternative to \cref{eq:reflecting-GBM-dynamic-discretized}) ,}
-% 		0&= v^n_I\left(v^n_{I-1} - v^n_{I-2}\right)-v^n_{I-1}\left(v^n_I - v^n_{I-1}\right)\label{eq:alt-rhs-GBM-dynamic-discretized}\\
-% 		\intertext{The alternative to \cref{eq:reflecting-rhs-GBM-dynamic-discretized-stationary} for the stationary boundary value is}\\
-% 		0&= v_I\left(v_{I-1} - v_{I-2}\right)-v_{I-1}\left(v_I - v_{I-1}\right)\label{eq:alternative-rhs-GBM-dynamic-discretized-stationary}
-% 	\end{align}
-% 	The issue with this equation is that it is quadratic.  This is less of an issue if we solve a system of equations.
 \end{document}
