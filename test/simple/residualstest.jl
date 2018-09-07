@@ -21,14 +21,11 @@
     # Functional parameters. 
     x_func = t -> ζ_val # Not idiosyncratic, per equation (4)
 
-    r_vector = r_val .+ (1 + 1e-02) * (1 .- t / T_val)
-    r_int = LinInterp(t, r_vector)
-    r_func_varying = t -> r_int(t) # Not idiosyncratic, per intro to doc.    
+    r_func_varying = t -> (r_val - 1e-02 * (1 - t / T_val)) # Not idiosyncratic, per intro to doc.    
     r_func_ = t -> r_val
 
-    π_tilde_vector = r_val .+ (1 + 1e-02) * (1 .- t / T_val)
-    π_tilde_int = LinInterp(t, π_tilde_vector)
-    π_tilde_func_varying = (t, z) -> π_tilde_int(t) # Not idiosyncratic, per intro to doc.    
+    # π_tilde_func_varying = (t, z) -> r_val .- 1e-02 * (1 .- 0* t / T_val) # Not idiosyncratic, per intro to doc.    
+    π_tilde_func_varying = (t, z) -> (1 + 1e-02 * (1 - t / T_val))
     π_tilde_func_ = (t, z) -> 1 # Potentially idiosyncratic. 
     
     # Param generators and param NTs. 
@@ -67,8 +64,7 @@
     @test norm(resid[1]) ≈ 0 atol = 1e-5
     @test norm(resid[end]) ≈ 0 atol = 1e-5
     @test norm(resid) ≈ 0 atol = 1e-5
-
-    #= 
+ 
     # Solve with time-varying r and π_tilde, now with DAE
     daeprob = simpleDAE(params_func_varying_1, settings())
     resid = calculate_residuals(daeprob, x_func, ω, IDA(), t)
@@ -85,7 +81,6 @@
     @test norm(resid[1]) ≈ 0 atol = 1e-5
     @test norm(resid[end]) ≈ 0 atol = 1e-5
     @test norm(resid) ≈ 0 atol = 1e-5
-  =#
   
 #=
     Test advanced options.
