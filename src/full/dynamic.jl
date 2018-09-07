@@ -27,8 +27,8 @@ function solve_dynamics(params, settings, d_0, d_T)
     dae = PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
 
     # solve solutions
-    @time sol = DifferentialEquations.solve(dae.dae_prob, callback = dae.callback) # solve!
-    @time residuals = calculate_residuals_dae(dae.dae_prob.f, deepcopy(sol.du), deepcopy(sol.u), p, sol.t)
+    sol = DifferentialEquations.solve(dae.dae_prob, callback = dae.callback) # solve!
+    residuals = calculate_residuals_dae(dae.dae_prob.f, deepcopy(sol.du), deepcopy(sol.u), p, sol.t)
 
     return @NT(sol = sol, p = p, residuals = residuals)
 end
