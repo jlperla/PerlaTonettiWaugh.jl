@@ -30,7 +30,12 @@ function solve_dynamics(params, settings, d_0, d_T)
     sol = DifferentialEquations.solve(dae.dae_prob, callback = dae.callback) # solve!
     residuals = calculate_residuals_dae(dae.dae_prob.f, deepcopy(sol.du), deepcopy(sol.u), p, sol.t)
 
-    return (sol = sol, p = p, residuals = residuals)
+    v = map(u -> u[1:M], sol.u)
+    g = map(u -> u[M+1], sol.u)
+    z_hat = map(u -> u[M+2], sol.u)
+
+    return (v = v, g = g, z_hat = z_hat, t = sol.t, 
+            p = p, sol = sol, residuals = residuals)
 end
 
 # Implementation of the full model with time-varying objects, represented by DAE
