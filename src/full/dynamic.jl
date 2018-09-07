@@ -45,18 +45,18 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
         L_tilde = Ω * ((N-1) * z_hat^(-θ)*κ + ζ*θ*S + ζ*E*δ / χ)
         z_bar = Ω * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ))
         π_min = (1 - L_tilde) / ((σ-1)*z_bar)
-        return @NT(S = S, L_tilde = L_tilde, z_bar = z_bar, π_min = π_min)
+        return (S = S, L_tilde = L_tilde, z_bar = z_bar, π_min = π_min)
     end
 
     callback = SavingCallback((u,t,integrator)->(t, stationary_equilibrium(u[M+1], u[M+2], E(t), Ω(t), t).L_tilde), 
                                 p.saved_values, 
                                 tdir = -1) # need to compute D_t L(t)
-    
-    # Dynamic calculations, defined for each time ∈ t.  
-    function f!(residual,du,u,p,t) 
-        residual[:] = zeros(u)
-        
-        # Carry out calculations. 
+
+    # Dynamic calculations, defined for each time ∈ t.
+    function f!(residual,du,u,p,t)
+        residual[:] = zeros(M+2)
+
+        # Carry out calculations.
         v = u[1:M]
         g = u[M+1]
         z_hat = u[M+2]
@@ -68,10 +68,12 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
         values_future = p.saved_values.saveval
         L_tilde_derivative = 0 # default value
         forward_index = findlast(x -> x[1] > t, values_future)
-        if (forward_index > 0)
+        if (forward_index != nothing;)
+            if (forward_index > 0)
             t_forward = values_future[forward_index][1]
             L_tilde_t_forward = values_future[forward_index][2]
             L_tilde_t_derivative = (L_tilde_t_forward - L_tilde) / (t_forward - t)
+            end
         end
 
         # form the DAE at t
@@ -86,7 +88,7 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
     u0 = [p.v_T; p.g_T; p.z_hat_T]
     du0 = zeros(M+2)
 
-    return @NT(dae_prob = DAEProblem(f!, du0, u0, (T, 0.0), differential_vars = [trues(M); false; false], p),
+    return (dae_prob = DAEProblem(f!, du0, u0, (T, 0.0), differential_vars = [trues(M); false; false], p),
     callback = callback)
 end
 
