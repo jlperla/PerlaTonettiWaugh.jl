@@ -27,15 +27,35 @@ function solve_dynamics(params, settings, d_0, d_T)
     dae = PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
 
     # solve solutions
-    residuals = calculate_residuals_dae(dae.dae_prob.f, deepcopy(sol.du), deepcopy(sol.u), p, sol.t)
     sol = DifferentialEquations.solve(dae.dae_prob, callback = dae.callback, tstops = 0:1e-3:T) # solve!
+    @unpack u, du, t = sol
 
+    residuals = zeros(length(t), length(u[1]))
+    equilibriums = []
+    for (i, t) in enumerate(t)
+        # compute residual at t
+        residual = zeros(length(u[1]))
+        dae.dae_prob.f(residual, du[i], u[i], p, t)
+        residuals[i,:] = residual 
+        # compute stationary equilibrium at t 
+        g = u[i][M+1]
+        z_hat = u[i][M+2]
+        push!(equilibriums, dae.stationary_equilibrium(g, z_hat, E(t), Ω(t), t))
+    end
+
+    # extract solutions
     v = map(u -> u[1:M], sol.u)
     g = map(u -> u[M+1], sol.u)
     z_hat = map(u -> u[M+2], sol.u)
+    S = map(eq -> eq.S, equilibriums)
+    L_tilde = map(eq -> eq.L_tilde, equilibriums)
+    z_bar = map(eq -> eq.z_bar, equilibriums)
+    π_min = map(eq -> eq.π_min, equilibriums)
+    π_tilde = map(eq -> eq.π_tilde, equilibriums)
 
-    return (v = v, g = g, z_hat = z_hat, t = t, 
-            p = p, sol = sol, residuals = residuals)
+    return (v = v, g = g, z_hat = z_hat, 
+            S = S, L_tilde = L_tilde, z_bar = z_bar, π_min = π_min, π_tilde = π_tilde,
+            t = t, p = p, sol = sol, residuals = residuals, equilibriums = equilibriums)
 end
 
 # Implementation of the full model with time-varying objects, represented by DAE
