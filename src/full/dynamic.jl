@@ -86,7 +86,8 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
     u0 = [p.v_T; p.g_T; p.z_hat_T]
     du0 = zeros(M+2)
 
-    return DAEProblem(f!, resid_M2, u, (T, 0.0), differential_vars = [fill(true, M); false; false], p)
+    return @NT(dae_prob = DAEProblem(f!, du0, u0, (T, 0.0), differential_vars = [trues(M); false; false], p),
+    callback = callback)
 end
 
 # return the parameters and functions needed to define dynamics
