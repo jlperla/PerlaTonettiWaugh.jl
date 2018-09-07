@@ -68,10 +68,12 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
         values_future = p.saved_values.saveval
         L_tilde_derivative = 0 # default value
         forward_index = findlast(x -> x[1] > t, values_future)
-        if (forward_index == nothing)
+        if (forward_index != nothing;)
+            if (forward_index > 0)
             t_forward = values_future[forward_index][1]
             L_tilde_t_forward = values_future[forward_index][2]
             L_tilde_t_derivative = (L_tilde_t_forward - L_tilde) / (t_forward - t)
+            end
         end
 
         # form the DAE at t
