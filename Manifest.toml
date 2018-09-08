@@ -19,6 +19,12 @@ version = "0.5.2"
 [[Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 
+[[BenchmarkTools]]
+deps = ["JSON", "Pkg", "Printf", "Statistics", "Test"]
+git-tree-sha1 = "e686f1754227e4748259f400839b83a1e8773e02"
+uuid = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+version = "0.4.1"
+
 [[BinDeps]]
 deps = ["Compat", "Libdl", "SHA", "URIParser"]
 git-tree-sha1 = "12093ca6cdd0ee547c39b1870e0c9c3f154d9ca9"
@@ -544,9 +550,9 @@ version = "0.6.0"
 
 [[RecursiveArrayTools]]
 deps = ["RecipesBase", "Requires", "StaticArrays", "Statistics", "Test"]
-git-tree-sha1 = "797075ed835f708dec7a8475c67657abdccfd0b3"
+git-tree-sha1 = "5e8a10ef2b3ba2c1d2e3f0a7d15337f97f2dbccf"
 uuid = "731186ca-8d62-57ce-b412-fbd966d074cd"
-version = "0.18.0"
+version = "0.18.1"
 
 [[Reexport]]
 deps = ["Pkg"]
