@@ -1,34 +1,14 @@
-function solve_dynamics(params, settings, d_0, d_T)
-    @unpack δ, N, σ, θ = params
-    @unpack z = settings 
+function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E)
+    @unpack δ, N, σ, θ, d = params_T
+    @unpack z, tstops_min_Δ = settings 
     M = length(z)
-    d = d_T
-
-    # Compute the stationary solution at t = 0 and t = T
-    params_0 = merge(params, (d = d_0,)) # parameters to be used at t = 0
-    params_T = merge(params, (d = d,)) # parameters to be used at t = T
-
-    stationary_sol_0 = stationary_numerical(params_0, z) # solution at t = 0
-    Ω_0 = stationary_sol_0.Ω
-
-    stationary_sol_T = stationary_numerical(params_T, z) # solution at t = T
-    v_T = stationary_sol_T.v_tilde
-    g_T = stationary_sol_T.g
-    z_hat_T = stationary_sol_T.z_hat
-    Ω_T = stationary_sol_T.Ω
-
-    # compute the resulting end time and function of Ω
-    T = (log(Ω_0) - log(Ω_T)) / δ
-    Ω(t) = t < T ? Ω_0 * exp(-δ*t) : Ω_T
-    E(t) = t >= T ? δ : 0
-    E(t) = 1 # TODO: remove this later to see if discontinuity is resolved
 
     # define the corresponding DAE problem
     p = get_p(params_T, stationary_sol_T, settings, Ω, T)
     dae = PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
 
     # solve solutions
-    sol = DifferentialEquations.solve(dae.dae_prob, callback = dae.callback, tstops = 0:1e-3:T) # solve!
+    sol = DifferentialEquations.solve(dae.dae_prob, callback = dae.callback, tstops = 0:tstops_min_Δ:T) # solve!
     @unpack u, du, t = sol
 
     residuals = zeros(length(t), length(u[1]))
