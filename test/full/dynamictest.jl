@@ -10,7 +10,6 @@ tstops_min_Δ_val = 1e-3 # minimum distance between tstops to be used for DE sol
 d_0 = 5
 d_T = 2.3701
 params = (ρ = 0.02, σ = 4.2508, N = 10, θ = 5.1269, γ = 1.01, κ = 0.013, ζ = 1, η = 0, Theta = 1, χ = 1/(2.1868), υ = 0.0593, μ = 0, δ = 0.053) # Baselines per Jesse. 
-settings = (z = z_grid, tstops_min_Δ = tstops_min_Δ_val)
 σ = params.σ
 δ = params.δ
 
@@ -33,6 +32,7 @@ T = (log(Ω_0) - log(Ω_T)) / δ
 E(t) = t >= T ? δ : 0
 E(t) = 1 # TODO: remove this later to see if discontinuity is resolved
 
+settings = (z = z_grid, tstops = 0:1e-3:T)
 
 # Solve and compute residuals
 @time solved = solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E)

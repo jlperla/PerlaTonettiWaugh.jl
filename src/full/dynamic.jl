@@ -1,6 +1,6 @@
 function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E)
     @unpack δ, N, σ, θ, d = params_T
-    @unpack z, tstops_min_Δ = settings 
+    @unpack z, tstops = settings 
     M = length(z)
 
     # define the corresponding DAE problem
@@ -8,7 +8,7 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E)
     dae = PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
 
     # solve solutions
-    sol = DifferentialEquations.solve(dae.dae_prob, callback = dae.callback, tstops = 0:tstops_min_Δ:T) # solve!
+    sol = DifferentialEquations.solve(dae.dae_prob, callback = dae.callback, tstops = tstops) # solve!
     @unpack u, du, t = sol
 
     residuals = zeros(length(t), length(u[1]))
