@@ -4,15 +4,8 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω)
     M = length(z)
 
     # define E(t) based on FD
-    function E(t)
-        if  t < T - Δ_E
-            dΩ = (Ω(t+Δ_E) - Ω(t))/Δ_E
-            return dΩ/Ω(t) + δ
-        else
-            return δ
-        end
-    end
-
+    E(t) = (t < T - Δ_E) ? (log(Ω(t+Δ_E)) + log(Ω(t)))/Δ_E + δ : δ
+    
     # define the corresponding DAE problem
     p = get_p(params_T, stationary_sol_T, settings, Ω, T)
     dae = PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
