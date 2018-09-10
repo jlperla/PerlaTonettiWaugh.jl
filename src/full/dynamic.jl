@@ -1,11 +1,12 @@
 function solve_dynamics(params, settings, d_0, d_T)
-    @unpack δ = params
+    @unpack δ, N, σ, θ = params
     @unpack z = settings 
     M = length(z)
+    d = d_T
 
     # Compute the stationary solution at t = 0 and t = T
     params_0 = merge(params, (d = d_0,)) # parameters to be used at t = 0
-    params_T = merge(params, (d = d_T,)) # parameters to be used at t = T
+    params_T = merge(params, (d = d,)) # parameters to be used at t = T
 
     stationary_sol_0 = stationary_numerical(params_0, z) # solution at t = 0
     Ω_0 = stationary_sol_0.Ω
@@ -40,7 +41,13 @@ function solve_dynamics(params, settings, d_0, d_T)
         # compute stationary equilibrium at t 
         g = u[i][M+1]
         z_hat = u[i][M+2]
-        push!(equilibriums, dae.stationary_equilibrium(g, z_hat, E(t), Ω(t), t))
+        # compute λ_ii and c
+        equilibrium = dae.stationary_equilibrium(g, z_hat, E(t), Ω(t), t)
+        λ_ii = 1 / (1 + (N-1)*z_hat^(σ-1-θ)*d^(1-σ))
+        c = (θ / (1-σ+θ))^(1/(σ-1))*(1-equilibrium.L_tilde)*Ω(t)^(1/(σ-1))*λ_ii^(1/(1-σ))
+        # TODO: add log_M and U later
+        equilibrium = merge(equilibrium, (λ_ii = λ_ii, c = c,))
+        push!(equilibriums, equilibrium)
     end
 
     # extract solutions
@@ -52,9 +59,12 @@ function solve_dynamics(params, settings, d_0, d_T)
     z_bar = map(eq -> eq.z_bar, equilibriums)
     π_min = map(eq -> eq.π_min, equilibriums)
     π_tilde = map(eq -> eq.π_tilde, equilibriums)
+    λ_ii = map(eq -> eq.λ_ii, equilibriums)
+    c = map(eq -> eq.c, equilibriums)
 
     return (v = v, g = g, z_hat = z_hat, 
             S = S, L_tilde = L_tilde, z_bar = z_bar, π_min = π_min, π_tilde = π_tilde,
+            λ_ii = λ_ii, c = c,
             t = t, p = p, sol = sol, residuals = residuals, equilibriums = equilibriums)
 end
 
