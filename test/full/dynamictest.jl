@@ -74,3 +74,6 @@ v_hat_t0 = map(z -> exp((σ-1)*z), z_grid) .* solved.v[1]
 # savefig("test/full/ptw_plots/λ_ii.png")
 # plot(solved.t, solved.c, label = "c", lw = 3)
 # savefig("test/full/ptw_plots/c.png")
+# # ... and entry_residual
+# plot(solved.t, solved.entry_residual, label = "entry_residual", lw = 3)
+# savefig("test/full/ptw_plots/entry_residual.png")
