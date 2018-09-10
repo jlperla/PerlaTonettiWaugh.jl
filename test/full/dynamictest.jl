@@ -29,13 +29,11 @@ z_hat_T = stationary_sol_T.z_hat
 # compute the resulting end time and function of Ω
 T = (log(Ω_0) - log(Ω_T)) / δ
 Ω(t) = t < T ? Ω_0 * exp(-δ*t) : Ω_T
-E(t) = t >= T ? δ : 0
-E(t) = 1 # TODO: remove this later to see if discontinuity is resolved
 
-settings = (z = z_grid, tstops = 0:1e-3:T)
+settings = (z = z_grid, tstops = 0:1e-3:T, Δ_E = 1e-03)
 
 # Solve and compute residuals
-@time solved = solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E)
+@time solved = solve_dynamics(params_T, stationary_sol_T, settings, T, Ω)
 
 @test mean(mean(solved.residuals[:,1:M], dims = 1)) ≈ 0 atol = 1e-03 # mean residuals for system of ODEs
 @test mean(mean(solved.residuals[:,(M+1)])) ≈ 0 atol = 1e-03 # mean residuals for value matching condition
