@@ -1,7 +1,7 @@
 name = "PerlaTonettiWaugh"
 uuid = "d2cacc76-b06b-11e8-362b-f18d03a16405"
-authors = ["arnavs <soodarnav01@gmail.com>", "jlperla <jesseperla@gmail.com>"]
 version = "0.1.0"
+license = "MIT"
 
 [deps]
 BandedMatrices = "aae01518-5342-5314-be14-df237901396f"
