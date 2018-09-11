@@ -1,8 +1,11 @@
-function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E)
+function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω)
     @unpack δ, N, σ, θ, d = params_T
-    @unpack z, tstops = settings 
+    @unpack z, tstops, Δ_E = settings 
     M = length(z)
 
+    # define E(t) based on FD
+    E(t) = (t < T - Δ_E) ? (log(Ω(t+Δ_E)) - log(Ω(t)))/Δ_E + δ : δ
+    
     # define the corresponding DAE problem
     p = get_p(params_T, stationary_sol_T, settings, Ω, T)
     dae = PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
