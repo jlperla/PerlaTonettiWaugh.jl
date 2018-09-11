@@ -1,7 +1,6 @@
 function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω_vec::Array)
     t = range(0.0, stop = T, length = length(Ω_vec))
-    Ω_interpolation_instance = LinInterp(t, Ω_vec) # perform linear interpolation
-    Ω_interpolation(t) = Ω_interpolation_instance(t) # return interpolated Ω based on Ω_vec
+    Ω_interpolation = LinInterp(t, Ω_vec) # perform linear interpolation
     return solve_dynamics(params_T, stationary_sol_T, settings, T, Ω_interpolation)
 end
 
