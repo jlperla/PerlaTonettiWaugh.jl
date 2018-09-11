@@ -1,6 +1,6 @@
 # TODO: ADD `solve_ptw_full` to perform optimization for Ω
 # ASSUMES Ω_nodes[1] ≈ 0 AND Ω_nodes[end] ≈ T AND length(entry_residuals_nodes) >= length(Ω_nodes) - 2 
-function entry_residuals(params_T, stationary_sol_T, settings, Ω_vec::Array, Ω_nodes::Array, entry_residuals_nodes::Array)
+function entry_residuals(params_T, stationary_sol_T, settings, Ω_vec::Array, Ω_nodes, entry_residuals_nodes)
     @unpack δ, χ, ζ = params_T
     T = Ω_nodes[end]
 
