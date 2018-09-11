@@ -1,3 +1,25 @@
+# TODO: ADD `solve_ptw_full` to perform optimization for Ω
+# ASSUMES Ω_nodes[1] ≈ 0 AND Ω_nodes[end] ≈ T AND length(entry_residuals_nodes) >= length(Ω_nodes) - 2 
+function entry_residuals(params_T, stationary_sol_T, settings, Ω_vec::Array, Ω_nodes::Array, entry_residuals_nodes::Array)
+    @unpack δ, χ, ζ = params_T
+    T = Ω_nodes[end]
+
+    Ω_interpolation_instance = LinInterp(Ω_nodes, Ω_vec) # perform linear interpolation
+    Ω_interpolation(t) = Ω_interpolation_instance(t) # return interpolated Ω based on Ω_vec
+    solved_dynamics = solve_dynamics(params_T, stationary_sol_T, settings, T, Ω_interpolation)
+
+    entry_residuals = zeros(length(entry_residuals_nodes))
+    for (i, t) in enumerate(entry_residuals_nodes)
+        v_1 = solved_dynamics.v[i][1] # TODO: change solve_dynamics simpler so that it returns u
+        entry_residuals[i] = v_1 - ζ * (1-χ) / χ
+    end
+
+    entry_residuals_interpolation = LinInterp(entry_residuals_nodes, entry_residuals)
+
+    return (entry_residuals_interpolation = entry_residuals_interpolation,
+            entry_residuals = entry_residuals, solved_dynamics = solved_dynamics)
+end
+
 function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω_vec::Array)
     t = range(0.0, stop = T, length = length(Ω_vec))
     Ω_interpolation = LinInterp(t, Ω_vec) # perform linear interpolation
