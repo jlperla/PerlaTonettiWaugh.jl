@@ -43,9 +43,9 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω)
     end
 
     # extract solutions
-    v = map(u -> u[1:M], sol.u)
-    g = map(u -> u[M+1], sol.u)
-    z_hat = map(u -> u[M+2], sol.u)
+    v = map(u -> u[1:M], u)
+    g = map(u -> u[M+1], u)
+    z_hat = map(u -> u[M+2], u)
     S = map(eq -> eq.S, equilibriums)
     L_tilde = map(eq -> eq.L_tilde, equilibriums)
     z_bar = map(eq -> eq.z_bar, equilibriums)
