@@ -89,9 +89,12 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
     M = length(z)
     @unpack L_1, L_2, z, M, T, μ, υ, σ, d, κ, ω, θ, δ, χ, N, ζ, ρ = p 
 
+    get_S(g::Float64) = g - μ - θ * υ^2/2
+    get_L_tilde(S::Float64, z_hat::Float64, E::Float64, Ω::Float64) = Ω * ((N-1) * z_hat^(-θ)*κ + ζ*θ*S + ζ*E*δ / χ)
+
     function stationary_equilibrium(g, z_hat, E, Ω, t)
-        S = (g - μ - θ * υ^2/2)
-        L_tilde = Ω * ((N-1) * z_hat^(-θ)*κ + ζ*θ*S + ζ*E*δ / χ)
+        S = get_S(g)
+        L_tilde = get_L_tilde(S, z_hat, E, Ω)
         z_bar = Ω * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ))
         π_min = (1 - L_tilde) / ((σ-1)*z_bar)
         π_tilde(z) = π_min * (1+(N-1)*d^(1-σ)*(z >= log(z_hat))) - (N-1)*κ*exp(-(σ-1)*z)*(z >= log(z_hat))
@@ -101,7 +104,7 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
                 π_min = π_min, π_tilde = π_tilde)
     end
 
-    callback = SavingCallback((u,t,integrator)->(t, stationary_equilibrium(u[M+1], u[M+2], E(t), Ω(t), t).L_tilde), 
+    callback = SavingCallback((u,t,integrator)->(t, get_L_tilde(get_S(u[M+1]), u[M+2], E(t), Ω(t))), 
                                 p.saved_values, 
                                 tdir = -1) # need to compute D_t L(t)
 
@@ -117,7 +120,7 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
         x = ζ
         # compute the derivative of L_tilde
         values_future = p.saved_values.saveval
-        L_tilde_derivative = 0 # default value
+        L_tilde_derivative = 0.0 # default value
         forward_index = findlast(x -> x[1] > t, values_future)
         if (forward_index != nothing;)
             if (forward_index > 0)
