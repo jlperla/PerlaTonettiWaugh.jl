@@ -117,6 +117,7 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
         g = u[M+1]
         z_hat = u[M+2]
         S, L_tilde, z_bar, π_min, π_tilde = static_equilibrium(g, z_hat, E(t), Ω(t), t)
+
         x = ζ
 
         # compute the derivative of L_tilde
