@@ -42,7 +42,7 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω)
     L_tilde = map(eq -> eq.L_tilde, equilibriums)
     z_bar = map(eq -> eq.z_bar, equilibriums)
     π_min = map(eq -> eq.π_min, equilibriums)
-    π_tilde = map(eq -> eq.π_tilde, equilibriums)
+    π_tilde = map(eq -> eq.π_tilde.(z), equilibriums)
     λ_ii = map(eq -> eq.λ_ii, equilibriums)
     c = map(eq -> eq.c, equilibriums)
     entry_residual = map(eq -> eq.entry_residual, equilibriums)
@@ -66,8 +66,7 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
         z_bar = Ω * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ))
         π_min = (1 - L_tilde) / ((σ-1)*z_bar)
         π_tilde(z) = π_min * (1+(N-1)*d^(1-σ)*(z >= log(z_hat))) - (N-1)*κ*exp(-(σ-1)*z)*(z >= log(z_hat))
-        # π_tilde(z) = π_min * (1+(N-1)*d^(1-σ)*(z >= z_hat)) - (N-1)*κ*exp(-(σ-1)*z)*(z >= z_hat)
-        π_tilde = π_tilde.(z)
+        # π_tilde(z) = π_min * (1+(N-1)*d^(1-σ)*(z >= z_hat)) - (N-1)*κ*exp(-(σ-1)*z)*(z >= z_hat)        
         entry_residual = v_1 - ζ * (1-χ) / χ
         return (S = S, L_tilde = L_tilde, z_bar = z_bar, 
                 π_min = π_min, π_tilde = π_tilde,
@@ -103,7 +102,7 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
         # form the DAE at t
         ρ_tilde = ρ + δ + L_tilde_derivative - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2)
         A_t = ρ_tilde*I - (μ - g + (σ-1)*υ^2)*L_1 - υ^2/2 * L_2        
-        residual[1:M] = A_t * v - π_tilde # system of ODEs (eq:28)
+        residual[1:M] = A_t * v - π_tilde.(z) # system of ODEs (eq:28)
         residual[M+1] = v[1] + x - dot(ω, v) # residual (eq:25)
         residual[M+2] = z_hat^(σ-1) - κ * d^(σ-1) / π_min # export threshold (eq:31) 
         residual[1:M] .-= du[1:M]    
