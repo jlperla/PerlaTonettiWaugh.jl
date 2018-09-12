@@ -113,9 +113,9 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
         residual[:] = zeros(M+2)
 
         # Carry out calculations.
-        v = u[1:M]
-        g = u[M+1]
-        z_hat = u[M+2]
+        v = abs.(u[1:M])
+        g = abs(u[M+1])
+        z_hat = abs.(u[M+2])
         S, L_tilde, z_bar, π_min = rand(1.0:0.001:10.0, 5)
         π_tilde = ones(size(z))
         x = ζ

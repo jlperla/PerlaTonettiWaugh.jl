@@ -33,10 +33,9 @@ settings = (z = z_grid, tstops = 0:1e-2:T, Δ_E = 1e-03)
 
 # Solve and compute residuals
 @time solved = solve_dynamics(params_T, stationary_sol_T, settings, T, Ω)
-
-@test_broken mean(mean(solved.residuals[:,1:M], dims = 1)) ≈ 0 atol = 1e-01 # mean residuals for system of ODEs
-@test_broken mean(mean(solved.residuals[:,(M+1)])) ≈ 0 atol = 1e-01 # mean residuals for value matching condition
-@test_broken mean(mean(solved.residuals[:,(M+2)])) ≈ 0 atol = 1e-01 # mean residuals for export threshold condition
+@show mean(mean(solved.residuals[:,1:M], dims = 1)) ≈ 0 atol = 1e-01 # mean residuals for system of ODEs
+@show mean(mean(solved.residuals[:,(M+1)])) ≈ 0 atol = 1e-01 # mean residuals for value matching condition
+@show mean(mean(solved.residuals[:,(M+2)])) ≈ 0 atol = 1e-01 # mean residuals for export threshold condition
 
 v_hat_t0 = map(z -> exp((σ-1)*z), z_grid) .* solved.v[1]
 # @test any((v -> v < 0).(diff(v_hat_t0))) == false # after reparametrization v_hat should be increasing
@@ -45,9 +44,9 @@ v_hat_t0 = map(z -> exp((σ-1)*z), z_grid) .* solved.v[1]
 Ω_vec = map(t -> Ω(t), 0:1e-3:T)
 @time solved = solve_dynamics(params_T, stationary_sol_T, settings, T, Ω_vec)
 
-@test_broken mean(mean(solved.residuals[:,1:M], dims = 1)) ≈ 0 atol = 1e-03 # mean residuals for system of ODEs
-@test_broken mean(mean(solved.residuals[:,(M+1)])) ≈ 0 atol = 1e-03 # mean residuals for value matching condition
-@test_broken mean(mean(solved.residuals[:,(M+2)])) ≈ 0 atol = 1e-03 # mean residuals for export threshold condition
+@show mean(mean(solved.residuals[:,1:M], dims = 1)) ≈ 0 atol = 1e-03 # mean residuals for system of ODEs
+@show mean(mean(solved.residuals[:,(M+1)])) ≈ 0 atol = 1e-03 # mean residuals for value matching condition
+@show mean(mean(solved.residuals[:,(M+2)])) ≈ 0 atol = 1e-03 # mean residuals for export threshold condition
 
 v_hat_t0 = map(z -> exp((σ-1)*z), z_grid) .* solved.v[1]
 # @test any((v -> v < 0).(diff(v_hat_t0))) == false # after reparametrization v_hat should be increasing
