@@ -113,12 +113,12 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
         residual[:] = zeros(M+2)
 
         # Carry out calculations.
-        v = abs.(u[1:M])
-        g = abs(u[M+1])
-        z_hat = abs.(u[M+2])
-        S, L_tilde, z_bar, π_min = rand(1.0:0.001:10.0, 5)
-        π_tilde = ones(size(z))
+        v = u[1:M]
+        g = u[M+1]
+        z_hat = u[M+2]
+        S, L_tilde, z_bar, π_min, π_tilde = static_equilibrium(g, z_hat, E(t), Ω(t), t)
         x = ζ
+
         # compute the derivative of L_tilde
         values_future = p.saved_values.saveval
         L_tilde_derivative = 0.0 # default value
@@ -132,7 +132,7 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
         end
 
         # form the DAE at t
-        ρ_tilde = randn()
+        ρ_tilde = ρ + δ + L_tilde_derivative - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2)
         A_t = ρ_tilde*I - (μ - g + (σ-1)*υ^2)*L_1 - υ^2/2 * L_2        
         residual[1:M] .= A_t * v - π_tilde # system of ODEs (eq:28)
         residual[M+1] = v[1] + x - dot(ω, v) # residual (eq:25)
