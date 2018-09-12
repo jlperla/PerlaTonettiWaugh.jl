@@ -54,7 +54,7 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω)
         g = u[i][M+1]
         z_hat = u[i][M+2]
         # compute λ_ii and c
-        equilibrium = dae.stationary_equilibrium(g, z_hat, E(t), Ω(t), t)
+        equilibrium = dae.static_equilibrium(g, z_hat, E(t), Ω(t), t)
         λ_ii = 1 / (1 + (N-1)*z_hat^(σ-1-θ)*d^(1-σ))
         c = (θ / (1-σ+θ))^(1/(σ-1))*(1-equilibrium.L_tilde)*Ω(t)^(1/(σ-1))*λ_ii^(1/(1-σ))
         entry_residual = v_1 - ζ * (1-χ) / χ
@@ -92,7 +92,7 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
     get_S(g::Float64) = g - μ - θ * υ^2/2
     get_L_tilde(S::Float64, z_hat::Float64, E::Float64, Ω::Float64) = Ω * ((N-1) * z_hat^(-θ)*κ + ζ*θ*S + ζ*E*δ / χ)
 
-    function stationary_equilibrium(g, z_hat, E, Ω, t)
+    function static_equilibrium(g, z_hat, E, Ω, t)
         S = get_S(g)
         L_tilde = get_L_tilde(S, z_hat, E, Ω)
         z_bar = Ω * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ))
@@ -116,7 +116,7 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
         v = u[1:M]
         g = u[M+1]
         z_hat = u[M+2]
-        @unpack S, L_tilde, z_bar, π_min, π_tilde = stationary_equilibrium(g, z_hat, E(t), Ω(t), t)
+        @unpack S, L_tilde, z_bar, π_min, π_tilde = static_equilibrium(g, z_hat, E(t), Ω(t), t)
         x = ζ
         # compute the derivative of L_tilde
         values_future = p.saved_values.saveval
@@ -143,7 +143,7 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
     du0 = zeros(M+2)
 
     return (dae_prob = DAEProblem(f!, du0, u0, (T, 0.0), differential_vars = [trues(M); false; false], p),
-            callback = callback, stationary_equilibrium = stationary_equilibrium)
+            callback = callback, static_equilibrium = static_equilibrium)
 end
 
 # return the parameters and functions needed to define dynamics
