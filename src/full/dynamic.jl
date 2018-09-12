@@ -116,7 +116,7 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
         v = u[1:M]
         g = u[M+1]
         z_hat = u[M+2]
-        S, L_tilde, z_bar, π_min = randn(Float64, 5)
+        S, L_tilde, z_bar, π_min = rand(1.0:0.001:10.0, 5)
         π_tilde = ones(size(z))
         x = ζ
         # compute the derivative of L_tilde
@@ -132,7 +132,7 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
         end
 
         # form the DAE at t
-        ρ_tilde = ρ + δ + L_tilde_derivative - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2)
+        ρ_tilde = randn()
         A_t = ρ_tilde*I - (μ - g + (σ-1)*υ^2)*L_1 - υ^2/2 * L_2        
         residual[1:M] .= A_t * v - π_tilde # system of ODEs (eq:28)
         residual[M+1] = v[1] + x - dot(ω, v) # residual (eq:25)
