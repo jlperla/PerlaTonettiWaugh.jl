@@ -4,7 +4,7 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω)
     M = length(z)
 
     # define E(t) based on FD
-    E(t) = (t < T - Δ_E) ? (log(Ω(t+Δ_E)) - log(Ω(t)))/Δ_E + δ : δ
+    E(t) = t < (T - Δ_E) ? (log(Ω(t+Δ_E)) - log(Ω(t)))/Δ_E + δ : δ
     
     # define the corresponding DAE problem
     p = get_p(params_T, stationary_sol_T, settings, Ω, T)
@@ -26,7 +26,7 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω)
         g = u[i][M+1]
         z_hat = u[i][M+2]
         # compute λ_ii and c
-        equilibrium = dae.stationary_equilibrium(v_1, g, z_hat, E(t), Ω(t), t)
+        equilibrium = dae.static_equilibrium(v_1, g, z_hat, E(t), Ω(t), t)
         λ_ii = 1 / (1 + (N-1)*z_hat^(σ-1-θ)*d^(1-σ))
         c = (θ / (1-σ+θ))^(1/(σ-1))*(1-equilibrium.L_tilde)*Ω(t)^(1/(σ-1))*λ_ii^(1/(1-σ))
         # TODO: add log_M and U later
@@ -60,9 +60,9 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
     M = length(z)
     @unpack L_1, L_2, z, M, T, μ, υ, σ, d, κ, ω, θ, δ, χ, N, ζ, ρ = p 
 
-    function stationary_equilibrium(v_1, g, z_hat, E, Ω, t)
-        S = (g - μ - θ * υ^2/2)
-        L_tilde = Ω * ((N-1) * z_hat^(-θ)*κ + ζ*θ*S + ζ*E*δ / χ)
+    function static_equilibrium(v_1, g, z_hat, E, Ω, t)
+        S = θ * (g - μ - θ * υ^2/2)
+        L_tilde = Ω * ((N-1) * z_hat^(-θ)*κ + ζ*(S + E / χ))
         z_bar = Ω * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ))
         π_min = (1 - L_tilde) / ((σ-1)*z_bar)
         π_tilde(z) = π_min * (1+(N-1)*d^(1-σ)*(z >= log(z_hat))) - (N-1)*κ*exp(-(σ-1)*z)*(z >= log(z_hat))
@@ -74,7 +74,7 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
                 entry_residual = entry_residual)
     end
 
-    callback = SavingCallback((u,t,integrator)->(t, stationary_equilibrium(u[1], u[M+1], u[M+2], E(t), Ω(t), t).L_tilde), 
+    callback = SavingCallback((u,t,integrator)->(t, static_equilibrium(u[1], u[M+1], u[M+2], E(t), Ω(t), t).L_tilde), 
                                 p.saved_values, 
                                 tdir = -1) # need to compute D_t L(t)
 
@@ -86,22 +86,22 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
         v = u[1:M]
         g = u[M+1]
         z_hat = u[M+2]
-        @unpack S, L_tilde, z_bar, π_min, π_tilde = stationary_equilibrium(v[1], g, z_hat, E(t), Ω(t), t)
+        @unpack S, L_tilde, z_bar, π_min, π_tilde = static_equilibrium(v[1], g, z_hat, E(t), Ω(t), t)
         x = ζ
         # compute the derivative of L_tilde
         values_future = p.saved_values.saveval
-        L_tilde_derivative = 0 # default value
+        L_tilde_derivative_term = (params_T.γ - 1) * g # default value
         forward_index = findlast(x -> x[1] > t, values_future)
-        if (forward_index != nothing;)
+        if ((T - t) > 1e-3 && forward_index != nothing;) # use callbacks only if t is well-separated from T
             if (forward_index > 0)
             t_forward = values_future[forward_index][1]
             L_tilde_t_forward = values_future[forward_index][2]
-            L_tilde_t_derivative = (L_tilde_t_forward - L_tilde) / (t_forward - t)
+            L_tilde_derivative_term = (log(1 - L_tilde_t_forward) - log(1 - L_tilde)) / (t_forward - t)
             end
         end
 
         # form the DAE at t
-        ρ_tilde = ρ + δ + L_tilde_derivative - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2)
+        ρ_tilde = ρ + δ + L_tilde_derivative_term - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2)
         A_t = ρ_tilde*I - (μ - g + (σ-1)*υ^2)*L_1 - υ^2/2 * L_2        
         residual[1:M] = A_t * v - π_tilde # system of ODEs (eq:28)
         residual[M+1] = v[1] + x - dot(ω, v) # residual (eq:25)
@@ -113,7 +113,7 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
     du0 = zeros(M+2)
 
     return (dae_prob = DAEProblem(f!, du0, u0, (T, 0.0), differential_vars = [trues(M); false; false], p),
-            callback = callback, stationary_equilibrium = stationary_equilibrium)
+            callback = callback, static_equilibrium = static_equilibrium)
 end
 
 # return the parameters and functions needed to define dynamics
