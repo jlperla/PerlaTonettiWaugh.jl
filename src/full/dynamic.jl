@@ -90,7 +90,7 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
         x = ζ
         # compute the derivative of L_tilde
         values_future = p.saved_values.saveval
-        L_tilde_derivative_term = 0 # default value
+        L_tilde_derivative_term = (params_T.γ - 1) * g # default value
         forward_index = findlast(x -> x[1] > t, values_future)
         if ((T - t) > 1e-3 && forward_index != nothing;) # use callbacks only if t is well-separated from T 
             if (forward_index > 0)
