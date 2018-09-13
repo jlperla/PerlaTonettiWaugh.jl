@@ -61,8 +61,8 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
     @unpack L_1, L_2, z, M, T, μ, υ, σ, d, κ, ω, θ, δ, χ, N, ζ, ρ = p 
 
     function stationary_equilibrium(v_1, g, z_hat, E, Ω, t)
-        S = (g - μ - θ * υ^2/2)
-        L_tilde = Ω * ((N-1) * z_hat^(-θ)*κ + ζ*θ*S + ζ*E*δ / χ)
+        S = θ * (g - μ - θ * υ^2/2)
+        L_tilde = Ω * ((N-1) * z_hat^(-θ)*κ + ζ*(S + E*δ / χ))
         z_bar = Ω * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ))
         π_min = (1 - L_tilde) / ((σ-1)*z_bar)
         π_tilde(z) = π_min * (1+(N-1)*d^(1-σ)*(z >= log(z_hat))) - (N-1)*κ*exp(-(σ-1)*z)*(z >= log(z_hat))
