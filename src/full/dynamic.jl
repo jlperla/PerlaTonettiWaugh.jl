@@ -90,18 +90,18 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
         x = ζ
         # compute the derivative of L_tilde
         values_future = p.saved_values.saveval
-        L_tilde_derivative = 0 # default value
+        L_tilde_derivative_term = 0 # default value
         forward_index = findlast(x -> x[1] > t, values_future)
-        if (forward_index != nothing;)
+        if ((T - t) > 1e-3 && forward_index != nothing;) # use callbacks only if t is well-separated from T 
             if (forward_index > 0)
             t_forward = values_future[forward_index][1]
             L_tilde_t_forward = values_future[forward_index][2]
-            L_tilde_t_derivative = (L_tilde_t_forward - L_tilde) / (t_forward - t)
+            L_tilde_derivative_term = (log(1 - L_tilde_t_forward) - log(1 - L_tilde)) / (t_forward - t)
             end
         end
 
         # form the DAE at t
-        ρ_tilde = ρ + δ + L_tilde_derivative - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2)
+        ρ_tilde = ρ + δ + L_tilde_derivative_term - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2)
         A_t = ρ_tilde*I - (μ - g + (σ-1)*υ^2)*L_1 - υ^2/2 * L_2        
         residual[1:M] = A_t * v - π_tilde # system of ODEs (eq:28)
         residual[M+1] = v[1] + x - dot(ω, v) # residual (eq:25)
