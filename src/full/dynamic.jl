@@ -65,7 +65,7 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
         L_tilde = Ω * ((N-1) * z_hat^(-θ)*κ + ζ*(S + E / χ))
         z_bar = Ω * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ))
         π_min = (1 - L_tilde) / ((σ-1)*z_bar)
-        π_tilde = π_min * (1+(N-1)*d^(1-σ)*(z .>= log(z_hat))) - (N-1)*κ*exp(-(σ-1)*z)*(z .>= log(z_hat))
+        π_tilde = π_min * (1.0.+(N-1)*d^(1-σ)*(z .>= log(z_hat))) - (N-1)*κ*exp.(-(σ-1).*z).*(z .>= log(z_hat))
         # π_tilde = π_min * (1+(N-1)*d^(1-σ)*(z .>= log(z_hat))) - (N-1)*κ*exp(-(σ-1)*z)*(z .>= log(z_hat))
         entry_residual = v_1 - ζ * (1-χ) / χ
         return (S = S, L_tilde = L_tilde, z_bar = z_bar, 
