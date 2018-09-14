@@ -4,12 +4,12 @@
 # Gives us the (full algebraic) stationary solution for a set of params and an initial x. 
 function stationary_algebraic(params, init_x = defaultiv(params); kwargs...)
     @assert params.υ > 0 && params.κ > 0 # Parameter validation
-    sol = nlsolve(vals -> stationary_algebraic_aux(vals, params), init_x; inplace = false, kwargs...)
+    sol = nlsolve(vals -> stationary_algebraic_aux(vals, params), init_x; inplace = false, xtol = -Inf, iterations = 10_000, kwargs...) # up iterations for high accuracy
     if ~converged(sol)
         throw(sol) # If it fails, throw the results as an exception. 
     end
     g, z_hat, Ω  = sol.zero
-    @assert z_hat > 1 && Ω > 0 && g > 0 # Validate parameters. 
+    @assert z_hat > 1 && Ω > 0 && g > 0 # Validate solutions. 
     staticvalues = staticvals(sol.zero, params)
     return merge(staticvalues, (g = g, z_hat = z_hat, Ω = Ω))
 end 
@@ -22,11 +22,13 @@ function stationary_algebraic_aux(vals, params)
     g, z_hat, Ω = vals
     # Validate parameters. 
     # Calculate and assign residuals. 
-        big_denom = ν*(θ + ν)*(θ - σ + 1) # Part of H.16
-        denom_1 = a*(g - r) # Part of H.16
-        num_1 = ν*(N-1)*(θ - σ + 1)*(d^(1 - σ)*(θ + ν)*z_hat^(-θ + σ - 1)-b*θ*z_hat^(-θ-ν)) # Part of H.16
-        num_2 = θ*(ν*(N-1)*d^(1-σ)*(θ+ν)*z_hat^(-θ + σ -1) + (ν + σ - 1)*(θ + ν - σ + 1)) # Part of H.16
-    return [x/π_min - a*(χ/(1-χ))*(σ + ν - 1)/ν, 1 + (σ-1)/ν - (num_1/denom_1 + num_2)/big_denom + (χ/(1-χ))*(σ + ν - 1)/(ν), π_min - (1- L_tilde)/((σ -1)*z_bar^(σ-1))]
+        big_denom = ν*(θ + ν)*(θ - σ + 1) # Part of H.16 (working paper)
+        denom_1 = a*(g - r) # Part of H.16 (working paper)
+        num_1 = ν*(N-1)*(θ - σ + 1)*(d^(1 - σ)*(θ + ν)*z_hat^(-θ + σ - 1)-b*θ*z_hat^(-θ-ν)) # Part of H.16 (working paper)
+        num_2 = θ*(ν*(N-1)*d^(1-σ)*(θ+ν)*z_hat^(-θ + σ - 1) + (ν + σ - 1)*(θ + ν - σ + 1)) # Part of H.16 (working paper)
+    return [x/π_min - a*(χ/(1-χ))*(σ + ν - 1)/ν, # H.15 (working paper)
+    1 + (σ-1)/ν - (num_1/denom_1 + num_2)/big_denom + (χ/(1-χ))*(σ + ν - 1)/(ν), # H.16 (working paper)
+    π_min - (1- L_tilde)/((σ -1)*z_bar^(σ-1))] # H.17 (working paper)
 end
 
 function staticvals(vals, params)
