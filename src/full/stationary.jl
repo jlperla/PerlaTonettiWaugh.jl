@@ -18,8 +18,14 @@ end
 function stationary_algebraic_aux(vals, params)    
     # Grab values and intermediate quantities. 
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params
-    g, z_hat, Ω = vals
-    @unpack π, π_min, z_bar, L_tilde, S = staticvals(vals, params)
+    g_raw, z_hat_raw, Ω_raw = vals
+    map_circle = x -> 1/2(x/sqrt(1+x^2)+1)
+    map_g = x -> (map_circle(x))*(1.5 * ρ)  
+    map_z_hat = x -> (map_circle(x) + 1.0)*5 # Hard cutoff at 5. 
+    map_Ω = x -> (map_circle(x) + 1.0)*5 # Hard cutoff at 5. 
+    g = map_g(g_raw)
+    z_hat = map_z_hat(z_hat_raw)
+    Ω = map_Ω(Ω_raw)
     # Validate parameters. 
     # Compute intermediate algebraic quantities. 
     r = ρ + γ*g + δ # H.6 (WORKING PAPER)
@@ -69,10 +75,10 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
     ω = ω_weights(z, θ, σ-1) # Get quadrature weights for the distribution on the rescaled grid. 
 
     # Set up the transformations. 
-    map_circle = x -> x/sqrt(1+x^2)
-    map_g = x -> (map_circle(x) + 1.0)*(1.5 * ρ)  
-    map_z_hat = x -> (map_circle(x) + 1.0)*5 # Hard cutoff at 5. 
-    map_Ω = x -> (map_circle(x) + 1.0)*5 # Hard cutoff at 5. 
+    map_circle = x -> 1/2(x/sqrt(1+x^2)+1)
+    map_g = x -> (map_circle(x))*(1.5 * ρ)  
+    map_z_hat = x -> (map_circle(x) + 1.0)*5 # Hard cutoff at 10. 
+    map_Ω = x -> (map_circle(x))*5 # Hard cutoff at 5. 
 
     # Define the system of equations we're solving.
     function stationary_numerical_given_vals(vals)
