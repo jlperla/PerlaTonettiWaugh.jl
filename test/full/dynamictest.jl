@@ -5,7 +5,6 @@ M = 1000
 z_grid = range(z_min, stop = z_max, length = M) # Since we only care about the grid. 
 
 # Time
-tstops_min_Δ_val = 1e-3 # minimum distance between tstops to be used for DE solvers.
 # Define common objects. 
 d_0 = 5
 d_T = 2.3701
@@ -30,14 +29,24 @@ z_hat_T = stationary_sol_T.z_hat
 T = (log(Ω_0) - log(Ω_T)) / δ
 Ω(t) = t < T ? Ω_0 * exp(-δ*t) : Ω_T
 
-settings = (z = z_grid, tstops = 0:1e-3:T, Δ_E = 1e-03)
+settings = (z = z_grid, tstops = 0:1e-2:T, Δ_E = 1e-03)
 
 # Solve and compute residuals
 @time solved = solve_dynamics(params_T, stationary_sol_T, settings, T, Ω)
+@show mean(mean(solved.residuals[:,1:M], dims = 1)) ≈ 0 atol = 1e-01 # mean residuals for system of ODEs
+@show mean(mean(solved.residuals[:,(M+1)])) ≈ 0 atol = 1e-01 # mean residuals for value matching condition
+@show mean(mean(solved.residuals[:,(M+2)])) ≈ 0 atol = 1e-01 # mean residuals for export threshold condition
 
-@test mean(mean(solved.residuals[:,1:M], dims = 1)) ≈ 0 atol = 1e-03 # mean residuals for system of ODEs
-@test mean(mean(solved.residuals[:,(M+1)])) ≈ 0 atol = 1e-03 # mean residuals for value matching condition
-@test mean(mean(solved.residuals[:,(M+2)])) ≈ 0 atol = 1e-03 # mean residuals for export threshold condition
+v_hat_t0 = map(z -> exp((σ-1)*z), z_grid) .* solved.v[1]
+@test any((v -> v < 0).(diff(v_hat_t0))) == false # after reparametrization v_hat should be increasing
+
+# Solve and compute residuals, now using vectorized Ω
+Ω_vec = map(t -> Ω(t), 0:1e-3:T)
+@time solved = solve_dynamics(params_T, stationary_sol_T, settings, T, Ω_vec)
+
+@show mean(mean(solved.residuals[:,1:M], dims = 1)) ≈ 0 atol = 1e-03 # mean residuals for system of ODEs
+@show mean(mean(solved.residuals[:,(M+1)])) ≈ 0 atol = 1e-03 # mean residuals for value matching condition
+@show mean(mean(solved.residuals[:,(M+2)])) ≈ 0 atol = 1e-03 # mean residuals for export threshold condition
 
 v_hat_t0 = map(z -> exp((σ-1)*z), z_grid) .* solved.v[1]
 @test any((v -> v < 0).(diff(v_hat_t0))) == false # after reparametrization v_hat should be increasing
@@ -75,3 +84,13 @@ v_hat_t0 = map(z -> exp((σ-1)*z), z_grid) .* solved.v[1]
 # # ... and entry_residual
 # plot(solved.t, solved.entry_residual, label = "entry_residual", lw = 3)
 # savefig("test/full/ptw_plots/entry_residual.png")
+
+# Ω(t) = t < T ? Ω_0 * exp(-δ*t) : Ω_T # default option for Ω (not in equilibrium)
+# Ω_nodes = 0:1e-2:T
+# Ω_vec = map(t -> Ω(t), Ω_nodes)
+# entry_residual_nodes = 1e-2:1e-2:(T-1e-2)
+
+# # Solve and compute residuals
+# solved = entry_residuals(params_T, stationary_sol_T, settings, Ω_vec, Ω_nodes, entry_residual_nodes)
+
+# entry_residuals(params_T, stationary_sol_T, settings, Ω_vec, Ω_nodes, entry_residual_nodes)
