@@ -12,7 +12,7 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω)
     dae = PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
 
     # solve solutions
-    sol = DifferentialEquations.solve(dae.dae_prob, callback = dae.callback, tstops = tstops) # solve!
+    sol = DifferentialEquations.solve(dae.dae_prob, callback = dae.callback) # solve! # TODO: include tstops = tstops in the argument.
     @unpack u, du, t = sol
 
     residuals = zeros(length(t), length(u[1]))
