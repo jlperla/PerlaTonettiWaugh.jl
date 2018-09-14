@@ -9,7 +9,7 @@ tstops_min_Δ_val = 1e-3 # minimum distance between tstops to be used for DE sol
 # Define common objects. 
 d_0 = 5
 d_T = 2.3701
-params = (ρ = 0.02, σ = 4.2508, N = 10, θ = 5.1269, γ = 1.01, κ = 0.013, ζ = 1, η = 0, Theta = 1, χ = 1/(2.1868), υ = 0.0593, μ = 0, δ = 0.053) # Baselines per Jesse. 
+params = (ρ = 0.02, σ = 4.2508, N = 10, θ = 5.1269, γ = 1.00, κ = 0.013, ζ = 1, η = 0, Theta = 1, χ = 1/(2.1868), υ = 0.0593, μ = 0, δ = 0.053) # Baselines per Jesse. 
 σ = params.σ
 δ = params.δ
 

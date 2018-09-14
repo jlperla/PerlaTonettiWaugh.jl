@@ -1,6 +1,7 @@
 function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω)
     @unpack δ, N, σ, θ, d = params_T
     @unpack z, tstops, Δ_E = settings 
+    @assert params_T.γ ≈ 1 # γ has to be close 1 to have consistent results with the stationary solutions
     M = length(z)
 
     # define E(t) based on FD
