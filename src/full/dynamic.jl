@@ -5,7 +5,7 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω)
     M = length(z)
 
     # define E(t) based on FD
-    E(t) = t < (T - Δ_E) ? (log(Ω(t+Δ_E)) - log(Ω(t)))/Δ_E + δ : δ
+    E(t) = (log(Ω(t+Δ_E)) - log(Ω(t-Δ_E)))/(2*Δ_E) + δ
     
     # define the corresponding DAE problem
     p = get_p(params_T, stationary_sol_T, settings, Ω, T)
