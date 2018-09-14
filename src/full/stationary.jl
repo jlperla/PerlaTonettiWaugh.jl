@@ -19,10 +19,10 @@ function stationary_algebraic_aux(vals, params)
     # Grab values and intermediate quantities. 
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params
     g_raw, z_hat_raw, Ω_raw = vals
-    map_circle = x -> 1/2(x/sqrt(1+x^2)+1)
-    map_g = x -> (map_circle(x))*(1.5 * ρ)  
-    map_z_hat = x -> (map_circle(x) + 1.0)*5 # Hard cutoff at 5. 
-    map_Ω = x -> (map_circle(x) + 1.0)*5 # Hard cutoff at 5. 
+    compactification = ContinuousTransformations.Logistic()
+    map_g(g) = compactification(g)*(1.5ρ) # Make not anonymous for debugging. 
+    map_z_hat(z) = (compactification(z) + 1.01)*5 # In [1, 10]
+    map_Ω(Ω) = (compactification(Ω))*5  # Hard cutoff at 5. 
     g = map_g(g_raw)
     z_hat = map_z_hat(z_hat_raw)
     Ω = map_Ω(Ω_raw)
@@ -75,10 +75,10 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
     ω = ω_weights(z, θ, σ-1) # Get quadrature weights for the distribution on the rescaled grid. 
 
     # Set up the transformations. 
-    map_circle = x -> 1/2(x/sqrt(1+x^2)+1)
-    map_g = x -> (map_circle(x))*(1.5 * ρ)  
-    map_z_hat = x -> (map_circle(x) + 1.0)*5 # Hard cutoff at 10. 
-    map_Ω = x -> (map_circle(x))*5 # Hard cutoff at 5. 
+    compactification = ContinuousTransformations.Logistic()
+    map_g(g) = compactification(g)*(1.5ρ) # Make not anonymous for debugging. 
+    map_z_hat(z) = (compactification(z) + 1.01)*5 # In [1, 10]
+    map_Ω(Ω) = (compactification(Ω))*5  # Hard cutoff at 5. 
 
     # Define the system of equations we're solving.
     function stationary_numerical_given_vals(vals)
