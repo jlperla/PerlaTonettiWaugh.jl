@@ -99,7 +99,7 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
         residual[:] = zeros(M+2)
 
         # Carry out calculations.
-        v = u[1:M]
+        # v = u[1:M]; note that this line is disabled and `v` is replaced with u[1:M] to prevent huge memory allocation 
         g = u[M+1]
         z_hat = u[M+2]
 
@@ -117,10 +117,16 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
         values_future = p.saved_values.saveval
         L_tilde_derivative_term = get_L_tilde_derivative_term(values_future, L_tilde, g, t)
 
-        # form the DAE at t
-        A_t = (ρ + δ + L_tilde_derivative_term - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2))*I - (μ - g + (σ-1)*υ^2)*L_1 - υ^2/2 * L_2
-        residual[1:M] = A_t * v - π_tilde # system of ODEs (eq:28)
-        residual[M+1] = v[1] + x - dot(ω, v) # residual (eq:25)
+        # Form the DAE at t.
+        # Note that
+        # A_t = (ρ + δ + L_tilde_derivative_term - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2))*I - (μ - g + (σ-1)*υ^2)*L_1 - (υ^2/2)*L_2
+        # and we are decomposing this into the terms involving (I with L_1) AND (L_2) -- otherwise it will perform elementwise operation 
+        # on two banded matrices which takes extreme amount of memory that are not needed.
+        residual[1:M] = ((ρ + δ + L_tilde_derivative_term - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2))*I - (μ - g + (σ-1)*υ^2)*L_1) * u[1:M] # system of ODEs (eq:28)
+        residual[1:M] .-= (υ^2/2)*L_2 * u[1:M] 
+        residual[1:M] .-= du[1:M]
+        residual[1:M] .-= π_tilde
+        residual[M+1] = u[1] + x - dot(ω, u[1:M]) # residual (eq:25)
         residual[M+2] = z_hat^(σ-1) - κ * d^(σ-1) / π_min # export threshold (eq:31)
         residual[1:M] .-= du[1:M]
     end
