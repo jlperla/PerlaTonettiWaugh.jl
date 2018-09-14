@@ -60,21 +60,35 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
     M = length(z)
     @unpack L_1, L_2, z, M, T, μ, υ, σ, d, κ, ω, θ, δ, χ, N, ζ, ρ = p 
 
+    get_S(g) = θ * (g - μ - θ * υ^2/2)
+    get_L_tilde(S, z_hat, E, Ω) = Ω * ((N-1) * z_hat^(-θ)*κ + ζ*(S + E / χ)) 
+
+    function get_L_tilde_derivative_term(values_future, L_tilde_t, g_t, t)
+        L_tilde_derivative_term = (params_T.γ - 1.0) * g_t # default value
+        forward_index = findlast(x -> x[1] > t, values_future)
+        if ((T - t) > 1e-3 && forward_index != nothing;) # use callbacks only if t is well-separated from T 
+            if (forward_index > 0)
+            t_forward = values_future[forward_index][1]
+            L_tilde_t_forward = values_future[forward_index][2]
+            L_tilde_derivative_term = (log(1 - L_tilde_t_forward) - log(1 - L_tilde_t)) / (t_forward - t)
+            end
+        end
+        return L_tilde_derivative_term
+    end
+
     function stationary_equilibrium(v_1, g, z_hat, E, Ω, t)
-        S = θ * (g - μ - θ * υ^2/2)
-        L_tilde = Ω * ((N-1) * z_hat^(-θ)*κ + ζ*(S + E / χ))
+        S = get_S(g)
+        L_tilde = get_L_tilde(S, z_hat, E, Ω) 
         z_bar = Ω * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ))
         π_min = (1 - L_tilde) / ((σ-1)*z_bar)
-        π_tilde(z) = π_min * (1+(N-1)*d^(1-σ)*(z >= log(z_hat))) - (N-1)*κ*exp(-(σ-1)*z)*(z >= log(z_hat))
-        # π_tilde(z) = π_min * (1+(N-1)*d^(1-σ)*(z >= z_hat)) - (N-1)*κ*exp(-(σ-1)*z)*(z >= z_hat)
-        π_tilde = π_tilde.(z)
+        π_tilde = π_min * (1.0.+(N-1)*d^(1-σ)*(z .>= log(z_hat))) - (N-1)*κ*exp.(-(σ-1).*z).*(z .>= log(z_hat))
         entry_residual = v_1 - ζ * (1-χ) / χ
         return (S = S, L_tilde = L_tilde, z_bar = z_bar, 
                 π_min = π_min, π_tilde = π_tilde,
                 entry_residual = entry_residual)
     end
 
-    callback = SavingCallback((u,t,integrator)->(t, stationary_equilibrium(u[1], u[M+1], u[M+2], E(t), Ω(t), t).L_tilde), 
+    callback = SavingCallback((u,t,integrator)->(t, get_L_tilde(get_S(u[M+1]), u[M+2], E(t), Ω(t))), 
                                 p.saved_values, 
                                 tdir = -1) # need to compute D_t L(t)
 
@@ -86,23 +100,23 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
         v = u[1:M]
         g = u[M+1]
         z_hat = u[M+2]
-        @unpack S, L_tilde, z_bar, π_min, π_tilde = stationary_equilibrium(v[1], g, z_hat, E(t), Ω(t), t)
+        
         x = ζ
+        Ω_t = Ω(t)
+        E_t = E(t)
+        
+        S = get_S(g)
+        L_tilde = get_L_tilde(S, z_hat, E_t, Ω_t)
+        z_bar = Ω(t) * (θ / (1.0 + θ - σ)) * (1.0 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ))
+        π_min = (1 - L_tilde) / ((σ-1)*z_bar)
+        π_tilde = π_min * (1.0.+(N-1)*d^(1-σ)*(z .>= log(z_hat))) - (N-1)*κ*exp.(-(σ-1).*z).*(z .>= log(z_hat))
+
         # compute the derivative of L_tilde
         values_future = p.saved_values.saveval
-        L_tilde_derivative_term = (params_T.γ - 1) * g # default value
-        forward_index = findlast(x -> x[1] > t, values_future)
-        if ((T - t) > 1e-3 && forward_index != nothing;) # use callbacks only if t is well-separated from T 
-            if (forward_index > 0)
-            t_forward = values_future[forward_index][1]
-            L_tilde_t_forward = values_future[forward_index][2]
-            L_tilde_derivative_term = (log(1 - L_tilde_t_forward) - log(1 - L_tilde)) / (t_forward - t)
-            end
-        end
+        L_tilde_derivative_term = get_L_tilde_derivative_term(values_future, L_tilde, g, t)
 
         # form the DAE at t
-        ρ_tilde = ρ + δ + L_tilde_derivative_term - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2)
-        A_t = ρ_tilde*I - (μ - g + (σ-1)*υ^2)*L_1 - υ^2/2 * L_2        
+        A_t = (ρ + δ + L_tilde_derivative_term - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2))*I - (μ - g + (σ-1)*υ^2)*L_1 - υ^2/2 * L_2        
         residual[1:M] = A_t * v - π_tilde # system of ODEs (eq:28)
         residual[M+1] = v[1] + x - dot(ω, v) # residual (eq:25)
         residual[M+2] = z_hat^(σ-1) - κ * d^(σ-1) / π_min # export threshold (eq:31) 
