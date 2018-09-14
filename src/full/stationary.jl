@@ -26,6 +26,8 @@ function stationary_algebraic_aux(vals, params)
     a = inv(r - g - (σ-1)*(μ-g+(σ-1)*υ^2/2)) # H.4 (WORKING PAPER)
     ν = (μ-g)/υ^2 + sqrt((g-μ)^2/υ^4 + (r-g)/(0.5 * υ^2)) # H.3 (WORKING PAPER)
     b = (1 - a*(r-g))*d^(1-σ)*z_hat^(ν+σ-1) # H.5 (WORKING PAPER)
+    w = 1/σ * z_bar # H.10 (WORKING PAPER)
+    x = ζ * (1-η + η*Theta/w) # H.11 (WORKING PAPER)
     # Calculate and assign residuals. 
         big_denom = ν*(θ + ν)*(θ - σ + 1) # Part of H.16 (WORKING PAPER)
         denom_1 = a*(g - r) # Part of H.16 (WORKING PAPER)
@@ -67,10 +69,10 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
     ω = ω_weights(z, θ, σ-1) # Get quadrature weights for the distribution on the rescaled grid. 
 
     # Set up the transformations. 
-    map_circle = x -> x/sqrt(1+x*x)
-    map_g = x -> (map_circle(x) + 1.1)*(ρ) # Take real values into g values in [1e-10, 0.99ρ]
-    map_z_hat = x -> (map_circle(x) + 1.1)*(10) # Fix upper bound at 10 arbitrarily. Since z_bar = f(z_hat), which we're solving for. 
-    map_Ω = x -> (map_circle(x) + 1.1)*10 # Takes real values into Ω values in [0, 10]
+    map_circle = x -> x/sqrt(1+x^2)
+    map_g = x -> (map_circle(x) + 1.0)*(1.5 * ρ)  
+    map_z_hat = x -> (map_circle(x) + 1.0)*5 # Hard cutoff at 5. 
+    map_Ω = x -> (map_circle(x) + 1.0)*5 # Hard cutoff at 5. 
 
     # Define the system of equations we're solving.
     function stationary_numerical_given_vals(vals)
@@ -82,10 +84,9 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
         # Compute static numerical values. 
         @unpack π, π_min, z_bar, L_tilde, S = staticvals(vals, params) # Grab static values. 
         # Set the backward-looking derivative. 
-        L_tilde_derivative = 0.0 # In the steady state. 
         # Compute more interim quantities. 
-        ρ_tilde = ρ + δ + (σ-1)*(μ - g + (σ-1)*υ^2/2) # 33 (PDF)
-        A = ρ_tilde*I - (μ - g + (σ-1)*υ^2)*L_1 - (υ^2/2)*L_2 # 23 (PDF)
+        ρ_tilde = ρ + δ + (σ-1)*(μ - g + (σ-1)*υ^2/2) # 33 (PDF) (L_tilde_derivative = 0.0 in steady state)
+        A = ρ_tilde*I - (μ - g + (σ-1)*υ^2)*L_1_minus - (υ^2/2)*L_2 # 23 (PDF)
         # We know from (24, PDF) that A*v = π.(z), because in steady state v'(t) = 0
         v = π.(z) \ A # This is rescaled. 
 
@@ -120,7 +121,18 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
     Ω_T = map_Ω(Ω_T_raw)
 
     # Recreate the stationary_numerical_given_vals from those values. 
+    @unpack π, π_min, z_bar, L_tilde, S = staticvals([g_T, z_hat_T, Ω_T], params) # Grab static values. 
+    ρ_tilde_T = ρ + δ + (σ-1)*(μ - g_T + (σ-1)*υ^2/2) # 33 (PDF)
+    A_T = ρ_tilde_T*I - (μ - g_T + (σ-1)*υ^2)*L_1_minus - (υ^2/2)*L_2 # 23 (PDF)
+    v_T = π.(z) \ A_T # This is rescaled. 
+    # Residuals. 
+    # Value-matching condition. 
+    value_matching = v_T[1] - dot(v_T, ω) + ζ # 25 (PDF)
+    # Export threshold condition. 
+    export_threshold = z_hat_T^(σ-1) - κ*d^(σ-1)*π_min^(-1) # 26 (PDF)
+    # Free-entry condition. 
+    free_entry = v_T[1] - ζ*(1-χ)/(χ) # 27 (PDF)
 
-
-    return merge(staticvalues, (g = g_T, z_hat = z_hat_T, Ω = Ω_T, v_tilde = v_tilde))
+    # Return. 
+    return merge(staticvalues, (g = g_T, z_hat = z_hat_T, Ω = Ω_T, v = v_T, residuals = [value_matching, export_threshold, free_entry]))
 end 
