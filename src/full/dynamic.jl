@@ -51,8 +51,8 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω)
 
     return (v = v, g = g, z_hat = z_hat, 
             S = S, L_tilde = L_tilde, z_bar = z_bar, π_min = π_min, π_tilde = π_tilde,
-            λ_ii = λ_ii, c = c, E = E, entry_residual = entry_residual,
-            t = t, p = p, sol = sol, residuals = residuals, equilibriums = equilibriums)
+            λ_ii = λ_ii, c = c, E = E, entry_residual = entry_residual, 
+            t = t, p = p, sol = sol, f! = dae.dae_prob.f, residuals = residuals, equilibriums = equilibriums)
 end
 
 # Implementation of the full model with time-varying objects, represented by DAE
