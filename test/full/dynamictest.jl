@@ -30,7 +30,7 @@ z_hat_T = stationary_sol_T.z_hat
 T = (log(Ω_0) - log(Ω_T)) / δ
 Ω(t) = t < T ? Ω_0 * exp(-δ*t) : Ω_T
 
-settings = (z = z_grid, tstops = 0:1e-3:T, Δ_E = 1e-03)
+settings = (z = z_grid, tstops = 0:1e-3:T, Δ_E = 1e-04)
 
 # Solve and compute residuals
 @time solved = solve_dynamics(params_T, stationary_sol_T, settings, T, Ω)

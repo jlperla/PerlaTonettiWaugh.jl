@@ -32,7 +32,7 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω)
     M = length(z)
 
     # define E(t) based on FD
-    E(t) = (t < T - Δ_E) ? (log(Ω(t+Δ_E)) - log(Ω(t)))/Δ_E + δ : δ
+    E(t) = t < (T - Δ_E) ? (log(Ω(t+Δ_E)) - log(Ω(t)))/Δ_E + δ : δ
     
     # define the corresponding DAE problem
     p = get_p(params_T, stationary_sol_T, settings, Ω, T)
@@ -90,8 +90,8 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
     @unpack L_1, L_2, z, M, T, μ, υ, σ, d, κ, ω, θ, δ, χ, N, ζ, ρ = p 
 
     function stationary_equilibrium(g, z_hat, E, Ω, t)
-        S = (g - μ - θ * υ^2/2)
-        L_tilde = Ω * ((N-1) * z_hat^(-θ)*κ + ζ*θ*S + ζ*E*δ / χ)
+        S = θ * (g - μ - θ * υ^2/2)
+        L_tilde = Ω * ((N-1) * z_hat^(-θ)*κ + ζ*(S + E / χ))
         z_bar = Ω * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ))
         π_min = (1 - L_tilde) / ((σ-1)*z_bar)
         π_tilde(z) = π_min * (1+(N-1)*d^(1-σ)*(z >= log(z_hat))) - (N-1)*κ*exp(-(σ-1)*z)*(z >= log(z_hat))
@@ -117,18 +117,18 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
         x = ζ
         # compute the derivative of L_tilde
         values_future = p.saved_values.saveval
-        L_tilde_derivative = 0 # default value
+        L_tilde_derivative_term = (params_T.γ - 1) * g # default value
         forward_index = findlast(x -> x[1] > t, values_future)
-        if (forward_index != nothing;)
+        if ((T - t) > 1e-3 && forward_index != nothing;) # use callbacks only if t is well-separated from T 
             if (forward_index > 0)
             t_forward = values_future[forward_index][1]
             L_tilde_t_forward = values_future[forward_index][2]
-            L_tilde_t_derivative = (L_tilde_t_forward - L_tilde) / (t_forward - t)
+            L_tilde_derivative_term = (log(1 - L_tilde_t_forward) - log(1 - L_tilde)) / (t_forward - t)
             end
         end
 
         # form the DAE at t
-        ρ_tilde = ρ + δ + L_tilde_derivative - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2)
+        ρ_tilde = ρ + δ + L_tilde_derivative_term - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2)
         A_t = ρ_tilde*I - (μ - g + (σ-1)*υ^2)*L_1 - υ^2/2 * L_2        
         residual[1:M] = A_t * v - π_tilde # system of ODEs (eq:28)
         residual[M+1] = v[1] + x - dot(ω, v) # residual (eq:25)
