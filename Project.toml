@@ -1,11 +1,12 @@
 name = "PerlaTonettiWaugh"
 uuid = "d2cacc76-b06b-11e8-362b-f18d03a16405"
-version = "0.1.0"
 license = "MIT"
+version = "0.1.0"
 
 [deps]
 BandedMatrices = "aae01518-5342-5314-be14-df237901396f"
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+ContinuousTransformations = "98729d58-ae14-580b-85cc-57d472ed321e"
 DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
