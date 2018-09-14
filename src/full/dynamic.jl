@@ -128,7 +128,6 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
         residual[1:M] .-= π_tilde
         residual[M+1] = u[1] + x - dot(ω, u[1:M]) # residual (eq:25)
         residual[M+2] = z_hat^(σ-1) - κ * d^(σ-1) / π_min # export threshold (eq:31)
-        residual[1:M] .-= du[1:M]
     end
 
     u0 = [p.v_T; p.g_T; p.z_hat_T]
