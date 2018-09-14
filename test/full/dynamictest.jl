@@ -28,7 +28,12 @@ z_hat_T = stationary_sol_T.z_hat
 
 # compute the resulting end time and function of Ω
 T = (log(Ω_0) - log(Ω_T)) / δ
-Ω(t) = t < T ? Ω_0 * exp(-δ*t) : Ω_T
+
+# T = sqrt(2*(log(Ω_0) - log(Ω_T)) / δ)
+# Ω(t) = t < T ? Ω_0 * exp(-δ*T*t + δ*t^2/2) : Ω_T
+
+T = 20.0
+Ω(t) = Ω_T
 
 settings = (z = z_grid, tstops = 0:1e-3:T, Δ_E = 1e-04)
 
