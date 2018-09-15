@@ -122,8 +122,9 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
         # A_t = (ρ + δ + L_tilde_derivative_term - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2))*I - (μ - g + (σ-1)*υ^2)*L_1 - (υ^2/2)*L_2
         # and we are decomposing this into the terms involving (I with L_1) AND (L_2) -- otherwise it will perform elementwise operation 
         # on two banded matrices which takes extreme amount of memory that are not needed.
-        residual[1:M] = ((ρ + δ + L_tilde_derivative_term - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2))*I - (μ - g + (σ-1)*υ^2)*L_1) * u[1:M] # system of ODEs (eq:28)
-        residual[1:M] .-= (υ^2/2)*L_2 * u[1:M] 
+        residual[1:M] = (ρ + δ + L_tilde_derivative_term - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2))*u[1:M] # system of ODEs (eq:28)
+        residual[1:M] .-= (μ - g + (σ-1)*υ^2)*L_1*u[1:M] 
+        residual[1:M] .-= (υ^2/2)*L_2*u[1:M] 
         residual[1:M] .-= du[1:M]
         residual[1:M] .-= π_tilde
         residual[M+1] = u[1] + x - dot(ω, u[1:M]) # residual (eq:25)
