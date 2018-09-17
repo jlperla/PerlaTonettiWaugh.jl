@@ -28,4 +28,4 @@ z_hat_T = stationary_sol_T.z_hat
 T = 20.0
 Ω(t) = Ω_T
 
-settings = (z = z_grid, tstops = 0:1e-3:T, Δ_E = 1e-04)
+settings = (z = z_grid, tstops = 0:1e-3:T, Δ_E = 1e-06)
