@@ -139,13 +139,3 @@ dae = PerlaTonettiWaugh.PTW_DAEProblem(params_0, stationary_sol_T, settings, E, 
 
 
 end
-
-# Solve and compute residuals
-@time solved = solve_dynamics(params_T, stationary_sol_T, settings, T, Ω)
-
-@test mean(mean(solved.residuals[:,1:M], dims = 1)) ≈ 0 atol = 1e-03 # mean residuals for system of ODEs
-@test mean(mean(solved.residuals[:,(M+1)])) ≈ 0 atol = 1e-03 # mean residuals for value matching condition
-@test mean(mean(solved.residuals[:,(M+2)])) ≈ 0 atol = 1e-03 # mean residuals for export threshold condition
-
-v_hat_t0 = map(z -> exp((σ-1)*z), z_grid) .* solved.v[1]
-@test any((v -> v < 0).(diff(v_hat_t0))) == false # after reparametrization v_hat should be increasing
