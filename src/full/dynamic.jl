@@ -105,9 +105,12 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
         π_tilde = π_min * (1.0.+(N-1)*d^(1-σ)*(z .>= log(z_hat))) - (N-1)*κ*exp.(-(σ-1).*z).*(z .>= log(z_hat))
 
         # compute the derivative of L_tilde
-        old_t = p.ts[end]
-        old_L_tilde = p.vals[end]
-        L_tilde_derivative_term = (log(1 - old_L_tilde) - log(1-L_tilde))/(old_t-t) # Reverse direction. 
+        L_tilde_derivative_term = 0
+        if (t < T)
+            t_forward = p.ts[end]
+            L_tilde_forward = p.vals[end]
+            L_tilde_derivative_term = (log(1 - L_tilde_forward) - log(1-L_tilde))/(t_forward-t) # Reverse direction. 
+        end
 
         # Form the DAE at t.
         # Note that
@@ -148,15 +151,13 @@ function get_p(params_T, stationary_sol_T, settings, Ω, T)
     # Discretize the operator.
     z, L_1_minus, L_1_plus, L_2 = rescaled_diffusionoperators(z, σ-1) # L_1_minus ≡ L_1 is the only one we use.
 
-    # Create the arrays to hold ts and L_tildes. 
-    ts = Array{Float64}(undef, 0)
-    vals = Array{Float64}(undef, 0)
-
     # Pre-load the arrays with the stationary values. 
-    L_tilde = stationary_sol_T.L_tilde 
-    push!(ts, T+0.01)
-    push!(vals, L_tilde)
+    L_tilde_T = stationary_sol_T.L_tilde 
 
+    # Create the arrays to hold ts and L_tildes. 
+    ts = Array{Float64}([T])
+    vals = Array{Float64}([L_tilde_T])
+        
     # Bundle as before.
     p = (L_1 = L_1_minus, L_2 = L_2, z = z, N = N, M = M, T = T, θ = θ, σ = σ, κ = κ,
         ζ = ζ, d = d, ρ = ρ, δ = δ, μ = μ, υ = υ, χ = χ, ω = ω, Ω = Ω,
