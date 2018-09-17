@@ -1,5 +1,5 @@
 using PerlaTonettiWaugh, Test, LinearAlgebra
-using Distributions, Sundials, BenchmarkTools, Parameters, QuantEcon, Interpolations, NLsolve, Optim, DifferentialEquations, DiffEqCallbacks
+using Distributions, Sundials, BenchmarkTools, Parameters, QuantEcon, Interpolations, NLsolve, Optim, DifferentialEquations, DiffEqCallbacks, Random
 
 @elapsed begin 
   @time @testset "Simple Stationary" begin include("simple/stationarytest.jl") end

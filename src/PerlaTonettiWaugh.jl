@@ -1,7 +1,7 @@
 module PerlaTonettiWaugh
 
 # Dependencies.
-using NLsolve, DifferentialEquations, BandedMatrices, Sundials, Distributions, Roots, Optim, QuantEcon, LinearAlgebra
+using NLsolve, DifferentialEquations, BandedMatrices, Sundials, Distributions, Roots, Optim, QuantEcon, LinearAlgebra, Random
 import Parameters: @with_kw, @unpack
 
 # General discretization files.
