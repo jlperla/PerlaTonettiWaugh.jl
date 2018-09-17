@@ -4,8 +4,6 @@ z_max = 5.0
 M = 1000
 z_grid = range(z_min, stop = z_max, length = M) # Since we only care about the grid. 
 
-# Time
-tstops_min_Δ_val = 1e-3 # minimum distance between tstops to be used for DE solvers.
 # Define common objects. 
 d_0 = 5
 d_T = 2.3701
@@ -27,11 +25,6 @@ z_hat_T = stationary_sol_T.z_hat
 Ω_T = stationary_sol_T.Ω
 
 # compute the resulting end time and function of Ω
-T = (log(Ω_0) - log(Ω_T)) / δ
-
-# T = sqrt(2*(log(Ω_0) - log(Ω_T)) / δ)
-# Ω(t) = t < T ? Ω_0 * exp(-δ*T*t + δ*t^2/2) : Ω_T
-
 T = 20.0
 Ω(t) = Ω_T
 
