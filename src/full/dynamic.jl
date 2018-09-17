@@ -12,7 +12,7 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω)
     dae = PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
 
     # solve solutions
-    sol = DifferentialEquations.solve(dae.dae_prob, callback = dae.callback) # solve! # TODO: include tstops = tstops in the argument.
+    sol = DifferentialEquations.solve(dae.dae_prob, callback = dae.cb) # solve! # TODO: include tstops = tstops in the argument.
     @unpack u, du, t = sol
 
     residuals = zeros(length(t), length(u[1]))
@@ -65,19 +65,6 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
     get_S(g) = θ * (g - μ - θ * υ^2/2)
     get_L_tilde(S, z_hat, E, Ω) = Ω * ((N-1) * z_hat^(-θ)*κ + ζ*(S + E / χ))
 
-    function get_L_tilde_derivative_term(values_future, L_tilde_t, g_t, t)
-        L_tilde_derivative_term = (params_T.γ - 1.0) * g_t # default value
-        forward_index = findlast(x -> x[1] > t, values_future)
-        if ((T - t) > 1e-3 && forward_index != nothing;) # use callbacks only if t is well-separated from T
-            if (forward_index > 0)
-            t_forward = values_future[forward_index][1]
-            L_tilde_t_forward = values_future[forward_index][2]
-            L_tilde_derivative_term = (log(1 - L_tilde_t_forward) - log(1 - L_tilde_t)) / (t_forward - t)
-            end
-        end
-        return L_tilde_derivative_term
-    end
-
     function stationary_equilibrium(v_1, g, z_hat, E, Ω, t)
         S = get_S(g)
         L_tilde = get_L_tilde(S, z_hat, E, Ω)
@@ -90,9 +77,7 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
                 entry_residual = entry_residual)
     end
 
-    callback = SavingCallback((u,t,integrator)->(t, get_L_tilde(get_S(u[M+1]), u[M+2], E(t), Ω(t))),
-                                p.saved_values,
-                                tdir = -1) # need to compute D_t L(t)
+    cb = FunctionCallingCallback((u, t, integrator) -> (push!(p.ts, t); push!(p.vals, get_L_tilde(get_S(u[M+1]), u[M+2], E(t), Ω(t)))), tdir = -1, func_start = false)
 
     # Dynamic calculations, defined for each time ∈ t.
     function f!(residual,du,u,p,t)
@@ -114,8 +99,9 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
         π_tilde = π_min * (1.0.+(N-1)*d^(1-σ)*(z .>= log(z_hat))) - (N-1)*κ*exp.(-(σ-1).*z).*(z .>= log(z_hat))
 
         # compute the derivative of L_tilde
-        values_future = p.saved_values.saveval
-        L_tilde_derivative_term = get_L_tilde_derivative_term(values_future, L_tilde, g, t)
+        old_t = p.ts[end]
+        old_L_tilde = p.vals[end]
+        L_tilde_derivative_term = (log(1 - old_L_tilde) - log(1-L_tilde))/(old_t-t) # Reverse direction. 
 
         # Form the DAE at t.
         # Note that
@@ -135,7 +121,7 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
     du0 = zeros(M+2)
 
     return (dae_prob = DAEProblem(f!, du0, u0, (T, 0.0), differential_vars = [trues(M); false; false], p),
-            callback = callback, stationary_equilibrium = stationary_equilibrium, f! = f!)
+            cb = cb, stationary_equilibrium = stationary_equilibrium, f! = f!)
 end
 
 # return the parameters and functions needed to define dynamics
@@ -156,10 +142,19 @@ function get_p(params_T, stationary_sol_T, settings, Ω, T)
     # Discretize the operator.
     z, L_1_minus, L_1_plus, L_2 = rescaled_diffusionoperators(z, σ-1) # L_1_minus ≡ L_1 is the only one we use.
 
+    # Create the arrays to hold ts and L_tildes. 
+    ts = Array{Float64}(undef, 0)
+    vals = Array{Float64}(undef, 0)
+
+    # Pre-load the arrays with the stationary values. 
+    L_tilde = stationary_sol_T.L_tilde 
+    push!(ts, T+0.01)
+    push!(vals, L_tilde)
+
     # Bundle as before.
     p = (L_1 = L_1_minus, L_2 = L_2, z = z, N = N, M = M, T = T, θ = θ, σ = σ, κ = κ,
         ζ = ζ, d = d, ρ = ρ, δ = δ, μ = μ, υ = υ, χ = χ, ω = ω, Ω = Ω,
         v_T = v_T, g_T = g_T, z_hat_T = z_hat_T, Ω_T = Ω_T,
-        saved_values = SavedValues(Float64, Tuple{Float64,Float64})) #Named tuple for parameters.
+        ts = ts, vals = vals) #Named tuple for parameters.
     return p
 end
