@@ -17,10 +17,16 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω)
 
     residuals = zeros(length(t), length(u[1]))
     equilibriums = []
+    p_for_extraction_template = (; [pair for pair in pairs(p) if pair[1] != :ts && pair[1] != :vals]...) # copy, removing ts and vals 
     for (i, t) in enumerate(t)
+        # change p so that the last element in ts/vals is from one time step forward, not the end of the entire history 
+        p_for_extraction = merge(p_for_extraction_template, 
+                                (ts = [p.ts[max(1, (i-1))]],
+                                vals = [p.vals[max(1, i-1)]]))
+
         # compute residual at t
         residual = zeros(length(u[1]))
-        dae.dae_prob.f(residual, du[i], u[i], p, t)
+        dae.dae_prob.f(residual, du[i], u[i], p_for_extraction, t)
         residuals[i,:] = residual
         # compute stationary equilibrium at t
         v_1 = u[i][1]
