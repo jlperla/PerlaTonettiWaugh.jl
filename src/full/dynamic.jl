@@ -7,25 +7,39 @@ function entry_residuals(params_T, stationary_sol_T, settings, T, Ω_vec0, Ω_no
     @assert Ω_nodes[1] ≈ 0
     @assert Ω_nodes[end] ≈ T
 
-    Ω_interpolation_instance = LinInterp(Ω_nodes, Ω_vec) # perform linear interpolation
-    Ω_interpolation(t) = Ω_interpolation_instance(t) # return interpolated Ω based on Ω_vec
-    solved_dynamics = solve_dynamics(params_T, stationary_sol_T, settings, T, Ω_interpolation)
 
-    entry_residuals = zeros(length(entry_residuals_nodes))
-    for (i, t) in enumerate(entry_residuals_nodes)
-        v_1 = solved_dynamics.v[i][1] # TODO: change solve_dynamics simpler so that it returns u
-        entry_residuals[i] = v_1 - ζ * (1-χ) / χ
+    entry_residuals = similar(entry_residuals_nodes) # entry_residuals from equil. Ω, evaluated at entry_residuals_nodes
+
+    ## TODO: add optimization step; each candidate for solution is denoted as Ω_vec.  
+    ## find the equilibrium Ω based on entry_residuals
+    Ω_vec = Ω_vec0 # TODO: remove this -- this assumes that the first guess for Ω_vec is used throughout the code
+    solved_dynamics = solve_dynamics_by_vector_Ω(params_T, stationary_sol_T, settings, T, Ω_vec, Ω_nodes)
+
+    t = solved_dynamics.sol.t # FIXME: later make solved_dynamics return t so that we don't need to call the entire sol
+    v = solved_dynamics.v
+    if (!issorted(t)) # FIXME: later make solved_dynamics return t in sorted way
+        # this assumes that t and v are in the same orders 
+        v = sort(sortperm(t))
+        t = sort(t)
     end
+    v_interpolation = LinInterp(t, v)
+    # compute entry residuals from the solution
+    entry_residuals_vec = map(t -> v_interpolation(t)[1] - ζ * (1-χ) / χ, entry_residuals_nodes)
+    ## end of optimization
 
-    entry_residuals_interpolation = LinInterp(entry_residuals_nodes, entry_residuals)
+    # perform linear interpolation on entry_residuals 
+    entry_residuals_interpolation = LinInterp(entry_residuals_nodes, entry_residuals_vec)
 
     return (entry_residuals_interpolation = entry_residuals_interpolation,
-            entry_residuals = entry_residuals, solved_dynamics = solved_dynamics)
+            entry_residuals = entry_residuals_vec, solved_dynamics = solved_dynamics)
 end
 
-function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω_vec::Array)
-    t = range(0.0, stop = T, length = length(Ω_vec))
-    Ω_interpolation = LinInterp(t, Ω_vec) # perform linear interpolation
+function solve_dynamics_by_vector_Ω(params_T, stationary_sol_T, settings, T, Ω_vec, Ω_nodes)
+    # interpolate Ω based on candidate Ω_vec
+    Ω_interpolation_instance = LinInterp(Ω_nodes, Ω_vec) # perform linear interpolation
+    Ω_interpolation(t) = Ω_interpolation_instance(t) # return interpolated Ω based on Ω_vec
+
+    # solve ptw problem based on the interpolated Ω
     return solve_dynamics(params_T, stationary_sol_T, settings, T, Ω_interpolation)
 end
 
