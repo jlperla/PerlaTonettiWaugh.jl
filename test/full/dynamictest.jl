@@ -33,7 +33,7 @@ E(t) = (log(Ω(t+settings.Δ_E)) - log(Ω(t-settings.Δ_E)))/(2*settings.Δ_E) +
 p = PerlaTonettiWaugh.get_p(params_T, stationary_sol_T, settings, Ω, T);
 dae = PerlaTonettiWaugh.PTW_DAEProblem(params_0, stationary_sol_T, settings, E, Ω, T, p);
 
-# regression tests, based on version 6453342
+# regression tests, based on version b20c067
 @testset "Regression tests for f! in `solve_dynamics`" begin
     RNG_SEED_ORIGIN = 123456 # set RNG seed for reproducibility
     @testset "t = T" begin
