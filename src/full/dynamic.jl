@@ -1,8 +1,11 @@
 # TODO: ADD `solve_ptw_full` to perform optimization for Ω
-# ASSUMES Ω_nodes[1] ≈ 0 AND Ω_nodes[end] ≈ T AND length(entry_residuals_nodes) >= length(Ω_nodes) - 2 
-function entry_residuals(params_T, stationary_sol_T, settings, Ω_vec::Array, Ω_nodes, entry_residuals_nodes)
+function entry_residuals(params_T, stationary_sol_T, settings, T, Ω_vec0, Ω_nodes, entry_residuals_nodes)
     @unpack δ, χ, ζ = params_T
-    T = Ω_nodes[end]
+    @unpack z = settings
+    M = length(z)
+    @assert length(entry_residuals_nodes) >= length(Ω_nodes) - 2 # there should be enough sample points
+    @assert Ω_nodes[1] ≈ 0
+    @assert Ω_nodes[end] ≈ T
 
     Ω_interpolation_instance = LinInterp(Ω_nodes, Ω_vec) # perform linear interpolation
     Ω_interpolation(t) = Ω_interpolation_instance(t) # return interpolated Ω based on Ω_vec
