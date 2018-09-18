@@ -1,22 +1,22 @@
 #=
-    Discretization code with rescaling. 
+    Discretization code with rescaling.
 =#
 
-# Regular grids. 
+# Regular grids.
 function rescaled_diffusionoperators(x::AbstractRange, ξ)
-    # Insert algebra here. 
+    # Insert algebra here.
     Δ = step(x)
     M = length(x)
 
     dl_1 = zeros(M-1)
     d_1 = -1 * ones(M)
     du_1 = ones(M-1)
-    d_1[end] = d_1[end] + du_1[end] * (1-ξ*Δ[end]) 
+    d_1[end] = d_1[end] + du_1[end] * (1-ξ*Δ[end])
     L_1_plus = Tridiagonal(dl_1, d_1, du_1)/Δ
 
     dl_m1 = -ones(M-1)/Δ
     d_m1 = ones(M)/Δ
-    d_m1[1] = d_m1[1] + (1+ξ*Δ[1]) * dl_m1[1] 
+    d_m1[1] = d_m1[1] + (1+ξ*Δ[1]) * dl_m1[1]
     du_m1 = zeros(M-1)/Δ
     L_1_minus = Tridiagonal(dl_m1, d_m1, du_m1)
 
@@ -27,13 +27,13 @@ function rescaled_diffusionoperators(x::AbstractRange, ξ)
     du_2 = ones(M-1)
     L_2 = Tridiagonal(dl_2, d_2, du_2)/(Δ^2)
 
-    #BandedMatrix are much faster, probably because of better specializations in the composition
-    return (x, BandedMatrix(L_1_minus, (1,1)), BandedMatrix(L_1_plus, (1, 1)), BandedMatrix(L_2, (1, 1))) #The (1,1) are the off-diagonal bandwidths
+    #BandedMatrix are seems slower when not compos4ed.
+    return (x, L_1_minus, L_1_plus, L_2)
 end
 
-# Irregular grids. 
+# Irregular grids.
 function rescaled_diffusionoperators(x::AbstractArray, ξ)
-    # Insert algebra here. 
+    # Insert algebra here.
     d = diff(x)
     M = length(x)
     Δ_m = zeros(M)
@@ -64,13 +64,11 @@ function rescaled_diffusionoperators(x::AbstractArray, ξ)
     d_2 = d_2./(Δ_p.*Δ_m)
     du_2 = 2*ones(M-1)./(Δ_p[1:end-1].*Δ[1:end-1])
     L_2 = Tridiagonal(dl_2, d_2, du_2)
-
-    #BandedMatrix are much faster, probably because of better specializations in the composition
-    return (x, BandedMatrix(L_1_minus, (1, 1)),BandedMatrix(L_1_plus, (1, 1)), BandedMatrix(L_2, (1, 1))) #The (1,1) are the off-diagonal bandwidths
-end 
+    return (x, L_1_minus, L_1_plus, L_2)
+end
 
 
-# Method for regular grids. 
+# Method for regular grids.
 function diffusionoperators(x::AbstractRange)
     Δ = step(x)
     M = length(x)
@@ -83,7 +81,7 @@ function diffusionoperators(x::AbstractRange)
 
     dl_m1 = -ones(M-1)/Δ
     d_m1 = ones(M)/Δ
-    d_m1[1] = 0 
+    d_m1[1] = 0
     du_m1 = zeros(M-1)/Δ
     L_1_minus = Tridiagonal(dl_m1, d_m1, du_m1)
 
@@ -94,11 +92,10 @@ function diffusionoperators(x::AbstractRange)
     du_2 = ones(M-1)
     L_2 = Tridiagonal(dl_2, d_2, du_2)/(Δ^2)
 
-    #BandedMatrix are much faster, probably because of better specializations in the composition
-    return (x, BandedMatrix(L_1_minus, (1,1)), BandedMatrix(L_1_plus, (1, 1)), BandedMatrix(L_2, (1, 1))) #The (1,1) are the off-diagonal bandwidths
-end 
+    return (x, L_1_minus, L_1_plus, L_2)
+end
 
-# Method for irregular grids. 
+# Method for irregular grids.
 function diffusionoperators(x::AbstractArray)
     d = diff(x)
     M = length(x)
@@ -131,6 +128,5 @@ function diffusionoperators(x::AbstractArray)
     du_2 = 2*ones(M-1)./(Δ_p[1:end-1].*Δ[1:end-1])
     L_2 = Tridiagonal(dl_2, d_2, du_2)
 
-    #BandedMatrix are much faster, probably because of better specializations in the composition
-    return (x, BandedMatrix(L_1_minus, (1, 1)),BandedMatrix(L_1_plus, (1, 1)), BandedMatrix(L_2, (1, 1))) #The (1,1) are the off-diagonal bandwidths
-end 
+    return (x, L_1_minus, L_1_plus, L_2)
+end
