@@ -4,12 +4,10 @@ z_max = 5.0
 M = 1000
 z_grid = range(z_min, stop = z_max, length = M) # Since we only care about the grid. 
 
-# Time
-tstops_min_Δ_val = 1e-3 # minimum distance between tstops to be used for DE solvers.
 # Define common objects. 
 d_0 = 5
 d_T = 2.3701
-params = (ρ = 0.02, σ = 4.2508, N = 10, θ = 5.1269, γ = 1.01, κ = 0.013, ζ = 1, η = 0, Theta = 1, χ = 1/(2.1868), υ = 0.0593, μ = 0, δ = 0.053) # Baselines per Jesse. 
+params = (ρ = 0.02, σ = 4.2508, N = 10, θ = 5.1269, γ = 1.00, κ = 0.013, ζ = 1, η = 0, Theta = 1, χ = 1/(2.1868), υ = 0.0593, μ = 0, δ = 0.053) # Baselines per Jesse. 
 σ = params.σ
 δ = params.δ
 
@@ -27,62 +25,118 @@ z_hat_T = stationary_sol_T.z_hat
 Ω_T = stationary_sol_T.Ω
 
 # compute the resulting end time and function of Ω
-T = (log(Ω_0) - log(Ω_T)) / δ
-Ω(t) = t < T ? Ω_0 * exp(-δ*t) : Ω_T
+T = 20.0
+Ω(t) = Ω_T
 
-settings = (z = z_grid, tstops = 0:1e-3:T, Δ_E = 1e-04)
+settings = (z = z_grid, tstops = 0:1e-3:T, Δ_E = 1e-06)
+E(t) = (log(Ω(t+settings.Δ_E)) - log(Ω(t-settings.Δ_E)))/(2*settings.Δ_E) + params.δ
+p = PerlaTonettiWaugh.get_p(params_T, stationary_sol_T, settings, Ω, T);
+dae = PerlaTonettiWaugh.PTW_DAEProblem(params_0, stationary_sol_T, settings, E, Ω, T, p);
 
-# Solve and compute residuals
-@time solved = solve_dynamics(params_T, stationary_sol_T, settings, T, Ω)
+# regression tests, based on version b20c067
+@testset "Regression tests for f! in `solve_dynamics`" begin
+    RNG_SEED_ORIGIN = 123456 # set RNG seed for reproducibility
+    @testset "t = T" begin
+        u = [stationary_sol_T.v_tilde; stationary_sol_T.g; stationary_sol_T.z_hat]
+        du = zeros(M+2)
+        resid = similar(u)
+        t = T
 
-@test mean(mean(solved.residuals[:,1:M], dims = 1)) ≈ 0 atol = 1e-03 # mean residuals for system of ODEs
-@test mean(mean(solved.residuals[:,(M+1)])) ≈ 0 atol = 1e-03 # mean residuals for value matching condition
-@test mean(mean(solved.residuals[:,(M+2)])) ≈ 0 atol = 1e-03 # mean residuals for export threshold condition
+        # compute residuals
+        dae.f!(resid,du,u,p,t)
 
-v_hat_t0 = map(z -> exp((σ-1)*z), z_grid) .* solved.v[1]
-@test any((v -> v < 0).(diff(v_hat_t0))) == false # after reparametrization v_hat should be increasing
+        # test if residuals are small enough
+        @test mean(resid[1:M]) ≈ 0 atol = 1e-8
+        @test mean(resid[M+1]) ≈ 0 atol = 1e-8
+        @test mean(resid[M+2]) ≈ 0 atol = 1e-8
 
-# Solve and compute residuals, now using vectorized Ω
-Ω_vec = map(t -> Ω(t), 0:1e-3:T)
-@time solved = solve_dynamics(params_T, stationary_sol_T, settings, T, Ω_vec)
+        # check if values are close enough as before (regression tests)
+        @test resid[1] ≈ -9.016777602344206e-11
+        @test resid[2] ≈ -9.016033752917707e-11
+        @test resid[10] ≈ -9.013649548972325e-11
+        @test resid[M] ≈ -1.392167769953545e-10
+        @test resid[M+1] ≈ -2.7400304247748863e-13
+        @test resid[M+2] ≈ 4.208980275421936e-9
 
-@test mean(mean(solved.residuals[:,1:M], dims = 1)) ≈ 0 atol = 1e-03 # mean residuals for system of ODEs
-@test mean(mean(solved.residuals[:,(M+1)])) ≈ 0 atol = 1e-03 # mean residuals for value matching condition
-@test mean(mean(solved.residuals[:,(M+2)])) ≈ 0 atol = 1e-03 # mean residuals for export threshold condition
+        @test u[1] ≈ 1.186800000000357
+        @test u[2] ≈ 1.168072362393182
+        @test u[10] ≈ 1.0372263636598893
+        @test u[M] ≈ 0.675633431057062
+        @test u[M+1] ≈ 0.020419880554626162
+        @test u[M+2] ≈ 1.425712535487968
+    end
 
-v_hat_t0 = map(z -> exp((σ-1)*z), z_grid) .* solved.v[1]
-@test any((v -> v < 0).(diff(v_hat_t0))) == false # after reparametrization v_hat should be increasing
+    @testset "t = T - 1e-3" begin
+        rng_seed = MersenneTwister(RNG_SEED_ORIGIN)
+        u = [stationary_sol_T.v_tilde; stationary_sol_T.g; stationary_sol_T.z_hat]
+        du = zeros(M+2)
+        resid = similar(u)
+        t = T - 1e-3
 
-# # plot v_hat, v, g, and z_hat in `test/full/ptw_plots/`
-# using Plots
-# v0 = map(v -> v[1], solved.v)
-# plot(z_grid, v_hat_t0, label = "v_hat at t = 0", lw = 3)
-# savefig("test/full/ptw_plots/v_hat_t0.png")
-# plot(z_grid, solved.v[1], label = "v at t = 0", lw = 3)
-# savefig("test/full/ptw_plots/v_t0.png")
-# plot(z_grid, solved.v[end], label = "v at t = T", lw = 3)
-# savefig("test/full/ptw_plots/v_tT.png")
-# plot(solved.t, v0, label = "v0", lw = 3)
-# savefig("test/full/ptw_plots/v0.png")
-# plot(solved.t, solved.g, label = "g", lw = 3)
-# savefig("test/full/ptw_plots/g.png")
-# plot(solved.t, solved.z_hat, label = "z_hat", lw = 3)
-# savefig("test/full/ptw_plots/z_hat.png")
-# # ... and S, L_tilde, z_bar, π_min, π_tilde_z0, λ_ii, c
-# plot(solved.t, solved.S, label = "S", lw = 3)
-# savefig("test/full/ptw_plots/S.png")
-# plot(solved.t, solved.L_tilde, label = "L_tilde", lw = 3)
-# savefig("test/full/ptw_plots/L_tilde.png")
-# plot(solved.t, solved.z_bar, label = "z_bar", lw = 3)
-# savefig("test/full/ptw_plots/z_bar.png")
-# plot(solved.t, solved.π_min, label = "pi_min", lw = 3)
-# savefig("test/full/ptw_plots/π_min.png")
-# plot(z_grid, solved.π_tilde[1], label = "pi_tilde at t = 0", lw = 3)
-# savefig("test/full/ptw_plots/π_tilde_t0.png")
-# plot(solved.t, solved.λ_ii, label = "lambda_ii", lw = 3)
-# savefig("test/full/ptw_plots/λ_ii.png")
-# plot(solved.t, solved.c, label = "c", lw = 3)
-# savefig("test/full/ptw_plots/c.png")
-# # ... and entry_residual
-# plot(solved.t, solved.entry_residual, label = "entry_residual", lw = 3)
-# savefig("test/full/ptw_plots/entry_residual.png")
+        # give some changes
+        u[2:3] = u[2:3] .+ rand(rng_seed, 2) * 1e-3
+        u[M+1:M+2] = u[M+1:M+2] .+ rand(rng_seed, 2) * 1e-3
+        du = rand(rng_seed, length(du)) * 1e-3
+
+        # compute residuals
+        dae.f!(resid,du,u,p,t)
+
+        # check if values are close enough as before (regression tests)
+        @test resid[1] ≈ 4.542052507407285
+        @test resid[2] ≈ 4.529892925281381
+        @test resid[10] ≈ 4.0020542455673995
+        @test resid[M] ≈ 2.6065676236341866
+        @test resid[M+1] ≈ -3.1764554464519534e-5
+        @test resid[M+2] ≈ -0.010535368447424975
+    end
+
+    @testset "t = T / 2" begin
+        rng_seed = MersenneTwister(RNG_SEED_ORIGIN)
+        u = [stationary_sol_T.v_tilde; stationary_sol_T.g; stationary_sol_T.z_hat]
+        du = zeros(M+2)
+        resid = similar(u)
+        t = T / 2
+
+        # give some changes
+        u[2:3] = u[2:3] .+ rand(rng_seed, 2) * 1e-3
+        u[M+1:M+2] = u[M+1:M+2] .+ rand(rng_seed, 2) * 1e-3
+        du = rand(rng_seed, length(du)) * 1e-3
+        du[1] = du[1] + 1e-2
+
+        # compute residuals
+        dae.f!(resid,du,u,p,t)
+
+        # check if values are close enough as before (regression tests)
+        @test resid[1] ≈ -0.046196065731366004
+        @test resid[2] ≈ 0.02190136138358488
+        @test resid[10] ≈ 0.0008070940285961892
+        @test resid[M] ≈ 0.00021626561191201432
+        @test resid[M+1] ≈ -3.1764554464519534e-5
+        @test resid[M+2] ≈ -0.010535368447424975
+    end
+    
+    @testset "t = 0.1" begin
+        rng_seed = MersenneTwister(RNG_SEED_ORIGIN)
+        u = [stationary_sol_T.v_tilde; stationary_sol_T.g; stationary_sol_T.z_hat]
+        du = zeros(M+2)
+        resid = similar(u)
+        t = 0.1
+
+        # give some changes
+        u[1:5] = u[1:5] .+ rand(rng_seed, 5) * 1e-2
+        u[M+1:M+2] = u[M+1:M+2] .+ rand(rng_seed, 2) * 1e-3
+        du = rand(rng_seed, length(du)) * 1e-3
+        du[3] = du[3] - 1e-2
+
+        # compute residuals
+        dae.f!(resid,du,u,p,t)
+
+        # check if values are close enough as before (regression tests)
+        @test resid[1] ≈ -0.16437057505724734
+        @test resid[2] ≈ 0.27593757590866175
+        @test resid[10] ≈ 0.0005903931927783018
+        @test resid[M] ≈  6.730926950911098e-5
+        @test resid[M+1] ≈ 0.004653937079329484
+        @test resid[M+2] ≈ -0.00815101908664495
+    end
+end
