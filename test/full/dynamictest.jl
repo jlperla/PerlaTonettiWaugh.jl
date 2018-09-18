@@ -35,7 +35,7 @@ dae = PerlaTonettiWaugh.PTW_DAEProblem(params_0, stationary_sol_T, settings, E, 
 
 # regression tests, based on version 6453342
 @testset "Regression tests for f! in `solve_dynamics`" begin
-    rng_seed = MersenneTwister(123456) # set RNG seed for reproducibility
+    RNG_SEED_ORIGIN = 123456 # set RNG seed for reproducibility
     @testset "t = T" begin
         u = [stationary_sol_T.v_tilde; stationary_sol_T.g; stationary_sol_T.z_hat]
         du = zeros(M+2)
@@ -67,6 +67,7 @@ dae = PerlaTonettiWaugh.PTW_DAEProblem(params_0, stationary_sol_T, settings, E, 
     end
 
     @testset "t = T - 1e-3" begin
+        rng_seed = MersenneTwister(RNG_SEED_ORIGIN)
         u = [stationary_sol_T.v_tilde; stationary_sol_T.g; stationary_sol_T.z_hat]
         du = zeros(M+2)
         resid = similar(u)
@@ -81,15 +82,16 @@ dae = PerlaTonettiWaugh.PTW_DAEProblem(params_0, stationary_sol_T, settings, E, 
         dae.f!(resid,du,u,p,t)
 
         # check if values are close enough as before (regression tests)
-        @test resid[1] ≈ -0.036653936375744864
-        @test resid[2] ≈ 0.02145051714277048
-        @test resid[10] ≈ 0.0004069292969686722
-        @test resid[M] ≈ -4.439559001072346e-5
+        @test resid[1] ≈ 4.542052507407285
+        @test resid[2] ≈ 4.529892925281381
+        @test resid[10] ≈ 4.0020542455673995
+        @test resid[M] ≈ 2.6065676236341866
         @test resid[M+1] ≈ -3.1764554464519534e-5
         @test resid[M+2] ≈ -0.010535368447424975
     end
 
     @testset "t = T / 2" begin
+        rng_seed = MersenneTwister(RNG_SEED_ORIGIN)
         u = [stationary_sol_T.v_tilde; stationary_sol_T.g; stationary_sol_T.z_hat]
         du = zeros(M+2)
         resid = similar(u)
@@ -105,15 +107,16 @@ dae = PerlaTonettiWaugh.PTW_DAEProblem(params_0, stationary_sol_T, settings, E, 
         dae.f!(resid,du,u,p,t)
 
         # check if values are close enough as before (regression tests)
-        @test resid[1] ≈  -0.04387774636852337
-        @test resid[2] ≈  0.022224588053667838
-        @test resid[10] ≈ -0.00016380102265192709
-        @test resid[M] ≈ -0.00022529945836316512
-        @test resid[M+1] ≈ -2.802589158656943e-5
-        @test resid[M+2] ≈  0.008324583711737166
+        @test resid[1] ≈ -0.046196065731366004
+        @test resid[2] ≈ 0.02190136138358488
+        @test resid[10] ≈ 0.0008070940285961892
+        @test resid[M] ≈ 0.00021626561191201432
+        @test resid[M+1] ≈ -3.1764554464519534e-5
+        @test resid[M+2] ≈ -0.010535368447424975
     end
     
     @testset "t = 0.1" begin
+        rng_seed = MersenneTwister(RNG_SEED_ORIGIN)
         u = [stationary_sol_T.v_tilde; stationary_sol_T.g; stationary_sol_T.z_hat]
         du = zeros(M+2)
         resid = similar(u)
@@ -129,13 +132,11 @@ dae = PerlaTonettiWaugh.PTW_DAEProblem(params_0, stationary_sol_T, settings, E, 
         dae.f!(resid,du,u,p,t)
 
         # check if values are close enough as before (regression tests)
-        @test resid[1] ≈ 0.09009608302866695
-        @test resid[2] ≈ 0.24485202918954876
-        @test resid[10] ≈ -0.0006604034953704707
-        @test resid[M] ≈ -0.0005796653180272643
-        @test resid[M+1] ≈ 0.006699045899212219
-        @test resid[M+2] ≈ -0.001569813559400668
+        @test resid[1] ≈ -0.16437057505724734
+        @test resid[2] ≈ 0.27593757590866175
+        @test resid[10] ≈ 0.0005903931927783018
+        @test resid[M] ≈  6.730926950911098e-5
+        @test resid[M+1] ≈ 0.004653937079329484
+        @test resid[M+2] ≈ -0.00815101908664495
     end
-
-
 end
