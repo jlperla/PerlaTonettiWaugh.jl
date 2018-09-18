@@ -140,3 +140,22 @@ dae = PerlaTonettiWaugh.PTW_DAEProblem(params_0, stationary_sol_T, settings, E, 
         @test resid[M+2] ≈ -0.00815101908664495
     end
 end
+
+# regression tests, based on version b20c067
+@testset "Regression tests for `solve_dynamics_by_vector_Ω`" begin
+    # Solve and compute residuals, now using vectorized Ω
+    Ω_nodes = 0:1e-1:T
+    Ω_vec = map(t -> Ω(t), Ω_nodes)
+    @time solved = PerlaTonettiWaugh.solve_dynamics_by_vector_Ω(params_T, stationary_sol_T, settings, T, Ω_vec, Ω_nodes)
+
+    # solved residuals should be close to zero, but more generous criteria due to discreteness of Ω_vec
+    @test mean(mean(solved.residuals[:,1:M], dims = 1)) ≈ 0 atol = 1e-03 # mean residuals for system of ODEs
+    @test mean(mean(solved.residuals[:,(M+1)])) ≈ 0 atol = 1e-03 # mean residuals for value matching condition
+    @test mean(mean(solved.residuals[:,(M+2)])) ≈ 0 atol = 1e-03 # mean residuals for export threshold condition
+
+    # check if values are close enough as before (regression tests)
+    @test solved.residuals[1,1] ≈ -9.016777602344206e-11
+    @test solved.residuals[2,2] ≈ 8.515632643479876e-12
+    @test solved.residuals[3,M] ≈ -4.96713781217295e-12
+    @test solved.residuals[4,M+1] ≈ 1.1857181902996672e-13
+end
