@@ -28,7 +28,7 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω)
       dae = PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
 
     # Define the results data frame we'll be using and push the stationary onto it. 
-      resultsDF = DataFrame(t = T, g = g_T, z_hat = z_hat_T, Ω = Ω_T, E = δ, v_0 = v_T[1], L_tilde = L_tilde_T, entry_residual = 0.0)
+      results = DataFrame(t = T, g = g_T, z_hat = z_hat_T, Ω = Ω_T, E = δ, v_0 = v_T[1], L_tilde = L_tilde_T)
 
     # Define the callback we'll be using.
       function cb_aux(u, p, t, integrator) # Function we'll be executing
@@ -109,7 +109,7 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
       π_min = (1 - L_tilde_t) / ((σ-1)*z_bar) # [EQUATION NUMBER NEEDED]
       i_vectorized = z .>= log(z_hat) # Vectorized indicator function 
       π_tilde = π_min * (1.0.+(N-1)*d^(1-σ)*i_vectorized) - (N-1)*κ*exp.(-(σ-1).*z).*i_vectorized # [EQUATION NUMBER NEEDED]
-      entry_residual = v_0 - ζ * (1-χ) / χ
+      entry_residual = v_0 - ζ * (1-χ) / χ # [EQUATION NUMBER NEEDED]
       return (S_t = S_t, L_tilde_t = L_tilde_t, z_bar = z_bar, π_min = π_min, π_tilde = π_tilde, entry_residual = entry_residual)
     end 
 
