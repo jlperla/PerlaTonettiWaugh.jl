@@ -159,3 +159,21 @@ end
     @test solved.residuals[3,M] ≈ -4.96713781217295e-12
     @test solved.residuals[4,M+1] ≈ 1.1857181902996672e-13
 end
+
+# regression tests, based on version b20c067
+@testset "Regression tests for `entry_residuals`" begin
+    # Solve and compute residuals, now using vectorized Ω
+    Ω_nodes = 0:1e-1:T
+    Ω_vec0 = map(t -> Ω(t), Ω_nodes)
+    entry_residuals_nodes = 1e-1:1e-1:(T-1e-1)
+    entry_residuals_nodes_last = entry_residuals_nodes[end]
+    @time solved = entry_residuals(params_T, stationary_sol_T, settings, T, Ω_vec0, Ω_nodes, entry_residuals_nodes)
+
+    # check if values are close enough as before (regression tests)
+    @test solved.entry_residuals[1] ≈ -0.1765540983606555
+    @test solved.entry_residuals[2] ≈  -0.16630819672131136
+    @test solved.entry_residuals[3] ≈ -0.156062295081967
+    @test solved.entry_residuals_interpolation(entry_residuals_nodes[1] + 1e-3) ≈ -0.17645163934426206
+    @test solved.entry_residuals_interpolation(entry_residuals_nodes_last) ≈ 7.563199999999956
+    @test solved.entry_residuals_interpolation(entry_residuals_nodes_last) ≈ solved.entry_residuals[end]
+end
