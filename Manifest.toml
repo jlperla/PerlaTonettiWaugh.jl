@@ -56,10 +56,10 @@ uuid = "764a87c0-6b3e-53db-9096-fe964310641d"
 version = "2.2.0"
 
 [[CMake]]
-deps = ["BinDeps", "Libdl", "Test"]
-git-tree-sha1 = "573cf0e6029444bf26353eaf2b293369e888ca46"
+deps = ["BinDeps", "Libdl", "Pkg", "Test"]
+git-tree-sha1 = "4f0b34e12d4d2c6a367d62c73c961ad468d62b7b"
 uuid = "631607c0-34d2-5d66-819e-eb0f9aa2061a"
-version = "1.0.1"
+version = "1.0.2"
 
 [[CMakeWrapper]]
 deps = ["BinDeps", "CMake", "Libdl", "Parameters", "Pkg", "Test"]

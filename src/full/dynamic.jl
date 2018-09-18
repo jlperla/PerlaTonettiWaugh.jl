@@ -11,6 +11,9 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω)
     # Validate parameters 
       @assert params_T.γ ≈ 1 # γ has to be close 1 to have consistent results with the stationary solutions
 
+    # Define the results data frame we'll be using and push the stationary onto it. 
+    results = DataFrame(t = T, g = g_T, z_hat = z_hat_T, Ω = Ω_T, E = δ, v_0 = v_T[1], L_tilde = L_tilde_T)
+
     # Define intermediate quantitities. 
       M = length(z)
       ω = ω_weights(z, θ, σ-1) # [TODO: compute integral for eq 30] <-- may be an obsolete comment
@@ -24,12 +27,61 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω)
     # Define E(t) based on forward difference 
       E(t) = (log(Ω(t+Δ_E)) - log(Ω(t-Δ_E)))/(2*Δ_E) + δ
 
-    # Define the corresponding DAE problem 
-      dae = PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
+    # Define the intermediate quantities for the DAE problem. 
+      S(g) = θ * (g - μ - θ * υ^2/2) # Compute S given g. [EQUATION NUMBER NEEDED]
+      L_tilde(S, z_hat, E_t, Ω_t) = Ω_t * ((N-1) * z_hat^(-θ)*κ + ζ*(S + E_t / χ)) # Compute L_tilde. [EQUATION NUMBER NEEDED]
 
-    # Define the results data frame we'll be using and push the stationary onto it. 
-      results = DataFrame(t = T, g = g_T, z_hat = z_hat_T, Ω = Ω_T, E = δ, v_0 = v_T[1], L_tilde = L_tilde_T)
+    # Define a function to compute the static equilibrium quantities. 
+     function static_equilibrium(v_0, g, z_hat, E_t, Ω_t)
+      S_t = S(g)
+      L_tilde_t = L_tilde(S_t, z_hat, E_t, Ω_t)
+      z_bar = Ω_t * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ)) # [EQUATION NUMBER NEEDED]
+      π_min = (1 - L_tilde_t) / ((σ-1)*z_bar) # [EQUATION NUMBER NEEDED]
+      i_vectorized = z .>= log(z_hat) # Vectorized indicator function 
+      π_tilde = π_min * (1.0.+(N-1)*d^(1-σ)*i_vectorized) - (N-1)*κ*exp.(-(σ-1).*z).*i_vectorized # [EQUATION NUMBER NEEDED]
+      entry_residual = v_0 - ζ * (1-χ) / χ # [EQUATION NUMBER NEEDED]
+      return (S_t = S_t, L_tilde_t = L_tilde_t, z_bar = z_bar, π_min = π_min, π_tilde = π_tilde, entry_residual = entry_residual)
+    end 
 
+    # Set the initial conditions. 
+      u0 = [v_T; p.g_T; z_hat_T]
+      du0 = zeros(M+2)
+
+    # Write the actual f! to be called by the DAE solver. 
+        function f!(residual,du,u,p,t)
+      
+          # Setup (unpack arguments, reset residual, grab E and Ω evaluations, etc.) 
+            residual .= 0
+            # v = u[1:M] (this line is commented to cut down on memory allocations)
+            g = u[M+1]
+            z_hat = u[M+2] 
+            x = ζ 
+            Ω_t = Ω(t)
+            E_t = E(t)
+    
+          # Get static equilibrium values 
+            @unpack S_t, L_tilde_t, z_bar, π_min, π_tilde = static_equilibrium(u[1], g, z_hat, E_t, Ω_t)
+    
+          # Grab the L_tilde derivative. 
+            L_tilde_log_derivative = 0.0 # Default to Float literal. 
+            if (t < T)
+              t_forward = results[:t][end]
+              L_tilde_forward = results[:L_tilde][end]
+              L_tilde_log_derivative = (log(1 - L_tilde_forward) - log(1 - L_tilde_t))/(t_forward - t) # Forward differences.  
+            end 
+    
+          #=  Reset the residuals to slack in the DAE conditions. 
+              Note that A_t = (ρ + δ + L_tilde_log_derivative - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2))*I - (μ - g + (σ-1)*υ^2)*L_1 - (υ^2/2)*L_2 and we're decomposing this. 
+          =#
+            residual[1:M] = (ρ + δ + L_tilde_log_derivative - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2))*u[1:M] # system of ODEs (eq:28)
+            residual[1:M] .-= (μ - g + (σ-1)*υ^2)*L_1*u[1:M] 
+            residual[1:M] .-= (υ^2/2)*L_2*u[1:M] 
+            residual[1:M] .-= du[1:M]
+            residual[1:M] .-= π_tilde
+            residual[M+1] = u[1] + x - dot(ω, u[1:M]) # residual (eq:25)
+            residual[M+2] = z_hat^(σ-1) - κ * d^(σ-1) / π_min # export threshold (eq:31)
+        end
+    
     # Define the callback we'll be using.
       function cb_aux(u, p, t, integrator) # Function we'll be executing
         # Unpack the u
@@ -43,14 +95,13 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω)
             S_t = dae.S(g)
             L_tilde_t = dae.L_tilde(S_t, z_hat, E, Ω)
         # Push to results 
-          push!(results, (t = t, g = g_t, z_hat = z_hat_t, Ω = Ω_t, E = E_t, v_0 = v_0_t, L_tilde = L_tilde_t))
+          push!(p.results, (t = t, g = g_t, z_hat = z_hat_t, Ω = Ω_t, E = E_t, v_0 = v_0_t, L_tilde = L_tilde_t))
       end 
 
       cb = FunctionCallingCallback(cb_aux, tdir = -1, func_start = false) # Callback object. 
 
-    # Solve that DAE problem and grab the solutions. 
+    # Solve that DAE problem. 
       sol = DifferentialEquations.solve(dae.dae_prob, callback = cb) # solve! # TODO: include tstops = tstops in the argument.
-      @unpack u, du, t = sol 
 
     # Post-process the results DataFrame.
       # Define the welfare, etc. quantities in terms of quantities in the DataFrame. 
@@ -67,94 +118,7 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω)
         results = @transform(results, z_bar = gen_z_bar.(:Ω, :z_hat)) # z_bar column. 
         results = @transform(results, π_min = gen_π_min.(:L_tilde, :z_bar)) # π_min column. 
         results = @transform(results, entry_residual = gen_entry_residual.(:v_0)) # entry_residual column 
-      # Extract columns. 
-        ts = results[:t]
-        gs = results[:g]
-        z_hats = results[:z_hat]
-        Ωs = results[:Ω]
-        Es = results[:E]
-        v_0s = results[:v_0]
-        L_tildes = results[:L_tilde]
-        λ_iis = results[:λ_ii]
-        cs = results[:c]
-        Ss = results[:S]
-        z_bars = results[:z_bar]
-        π_mins = results[:π_min]
-        entry_residuals = results[:entry_residual]
 
     # Return. 
-      return (results = results, # The DataFrame. 
-      ts = ts, gs = gs, z_hats = z_hats, Ωs = Ωs, Es = Es, v_0s = v_0s, L_tildes = L_tildes, λ_iis = λ_iis, cs = cs, Ss = Ss, z_bars = z_bars, π_mins = π_mins, entry_residuals = entry_residuals, # The individual columns 
-      sol = sol, u = u, du = du, t = t, # The DAE solution objects.  
-      f! = dae.dae_prob.f, p = p, static_equilibrium = dae.static_equilibrium) # The DAE problem objects.  
-    
-end
-
-# Implementation of the full model with time-varying objects, represented by DAE
-function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
-  # Unpack arguments.   
-    @unpack L_1, L_2, z, M, T, μ, υ, σ, d, κ, ω, θ, δ, χ, N, ζ, ρ = p
-    z = settings.z
-  
-  # Define intermediate quantities and functions. 
-    M = length(z)
-    S(g) = θ * (g - μ - θ * υ^2/2) # Compute S given g. [EQUATION NUMBER NEEDED]
-    L_tilde(S, z_hat, E_t, Ω_t) = Ω_t * ((N-1) * z_hat^(-θ)*κ + ζ*(S + E_t / χ)) # Compute L_tilde. [EQUATION NUMBER NEEDED]
-
-  # Define a function to compute static equilibrium conditions. 
-    function static_equilibrium(v_0, g, z_hat, E_t, Ω_t)
-      S_t = S(g)
-      L_tilde_t = L_tilde(S_t, z_hat, E_t, Ω_t)
-      z_bar = Ω_t * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ)) # [EQUATION NUMBER NEEDED]
-      π_min = (1 - L_tilde_t) / ((σ-1)*z_bar) # [EQUATION NUMBER NEEDED]
-      i_vectorized = z .>= log(z_hat) # Vectorized indicator function 
-      π_tilde = π_min * (1.0.+(N-1)*d^(1-σ)*i_vectorized) - (N-1)*κ*exp.(-(σ-1).*z).*i_vectorized # [EQUATION NUMBER NEEDED]
-      entry_residual = v_0 - ζ * (1-χ) / χ # [EQUATION NUMBER NEEDED]
-      return (S_t = S_t, L_tilde_t = L_tilde_t, z_bar = z_bar, π_min = π_min, π_tilde = π_tilde, entry_residual = entry_residual)
-    end 
-
-    # Define the actual function to be run by the DAE solver. 
-    function f!(residual,du,u,p,t)
-      
-      # Setup (unpack arguments, reset residual, grab E and Ω evaluations, etc.) 
-        residual .= 0
-        # v = u[1:M] (this line is commented to cut down on memory allocations)
-        g = u[M+1]
-        z_hat = u[M+2] 
-        x = ζ 
-        Ω_t = Ω(t)
-        E_t = E(t)
-
-      # Get static equilibrium values 
-         @unpack S_t, L_tilde_t, z_bar, π_min, π_tilde = static_equilibrium(u[1], g, z_hat, E_t, Ω_t)
-
-      # Grab the L_tilde derivative. 
-        L_tilde_log_derivative = 0.0 # Default to Float literal. 
-        if (t < T)
-          t_forward = results[:t][end]
-          L_tilde_forward = results[:L_tilde][end]
-          L_tilde_log_derivative = (log(1 - L_tilde_forward) - log(1 - L_tilde_t))/(t_forward - t) # Forward differences.  
-        end 
-
-      #=  Reset the residuals to slack in the DAE conditions. 
-          Note that A_t = (ρ + δ + L_tilde_log_derivative - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2))*I - (μ - g + (σ-1)*υ^2)*L_1 - (υ^2/2)*L_2 and we're decomposing this. 
-      =#
-        residual[1:M] = (ρ + δ + L_tilde_log_derivative - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2))*u[1:M] # system of ODEs (eq:28)
-        residual[1:M] .-= (μ - g + (σ-1)*υ^2)*L_1*u[1:M] 
-        residual[1:M] .-= (υ^2/2)*L_2*u[1:M] 
-        residual[1:M] .-= du[1:M]
-        residual[1:M] .-= π_tilde
-        residual[M+1] = u[1] + x - dot(ω, u[1:M]) # residual (eq:25)
-        residual[M+2] = z_hat^(σ-1) - κ * d^(σ-1) / π_min # export threshold (eq:31)
-    end
-
-    # Initial conditions. 
-      u0 = [p.v_T; p.g_T; p.z_hat_T]
-      du0 = zeros(M+2)
-
-    # Construct the DAEProblem.
-    dae_prob = DAEProblem(f!, du0, u0, (T, 0.0), differential_vars = [trues(M); false; false], p)
-    
-    # Return everything. 
-    return (dae_prob = dae_prob, static_equilibrium = static_equilibrium, f! = f!, S = S, L_tilde = L_tilde) # The last two are functions. 
+      return (results = results, sol = sol, dae = dae) # The results, raw DAE solution, and DAE problem (including f!, static_equilibrium, etc.) objects.  
 end
