@@ -132,7 +132,7 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
 
     # Dynamic calculations, defined for each time ∈ t.
     function f!(residual,du,u,p,t)
-        residual[:] = zeros(M+2)
+        residual .= 0
 
         # Carry out calculations.
         # v = u[1:M]; note that this line is disabled and `v` is replaced with u[1:M] to prevent huge memory allocation 
