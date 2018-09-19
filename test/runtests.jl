@@ -1,5 +1,5 @@
 using PerlaTonettiWaugh, Test, LinearAlgebra
-using Distributions, Sundials, BenchmarkTools, Parameters, QuantEcon, Interpolations, NLsolve, Optim, DifferentialEquations, DiffEqCallbacks, Random
+using Distributions, Sundials, BenchmarkTools, Parameters, QuantEcon, Interpolations, NLsolve, Optim, DifferentialEquations, DiffEqCallbacks, Random, Statistics
 
 @elapsed begin 
   @time @testset "Utilities" begin include("util/runtests.jl") end

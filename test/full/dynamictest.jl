@@ -1,179 +1,109 @@
-# State grid. 
-z_min = 0.0 
-z_max = 5.0
-M = 1000
-z_grid = range(z_min, stop = z_max, length = M) # Since we only care about the grid. 
+# User settings. 
+  # Time and space grid. 
+    z_min = 0.0 
+    z_max = 5.0 
+    M = 1000
+    T = 20.0 
+  # Experiment settings. 
+    d_0 = 5.0
+    d_T = 2.3701
+    Δ_E = 1e-06
+  # Overall parameters. 
+    params = (ρ = 0.02, σ = 4.2508, N = 10, θ = 5.1269, γ = 1.00, κ = 0.013, ζ = 1, η = 0, Theta = 1, χ = 1/(2.1868), υ = 0.0593, μ = 0, δ = 0.053)
+  # Solver settings. 
+    tstops = 0:1e-3:T # We don't currently use this anywhere. 
 
-# Define common objects. 
-d_0 = 5
-d_T = 2.3701
-params = (ρ = 0.02, σ = 4.2508, N = 10, θ = 5.1269, γ = 1.00, κ = 0.013, ζ = 1, η = 0, Theta = 1, χ = 1/(2.1868), υ = 0.0593, μ = 0, δ = 0.053) # Baselines per Jesse. 
-σ = params.σ
-δ = params.δ
+# Construct intermediate objects. 
+  z = range(z_min, stop = z_max, length = M)
+  settings = (z = z, tstops = tstops, Δ_E = Δ_E)
+  params_0 = merge(params, (d = d_0,))
+  params_T = merge(params, (d = d_T,))
+  
+# Get (numerical) stationary solution. 
+  stationary_0 = stationary_numerical(params_0, z)
+  stationary_T = stationary_numerical(params_T, z)
 
-# Compute the stationary solution at t = 0 and t = T first
-params_0 = merge(params, (d = d_0,)) # parameters to be used at t = 0
-params_T = merge(params, (d = d_T,)) # parameters to be used at t = T
+# Process those 
+  Ω_0 = stationary_0.Ω
+  Ω_T = stationary_T.Ω
+  v_T = stationary_T.v_tilde
+  g_T = stationary_T.g 
+  z_hat_T = stationary_T.z_hat 
 
-stationary_sol_0 = stationary_numerical(params_0, z_grid) # solution at t = 0
-Ω_0 = stationary_sol_0.Ω
+# Define more interim quantities. 
+  Ω = t -> Ω_T # This is constant. 
+  E = t -> (log(Ω(t + Δ_E)) - (log(t - Δ_E)))/(2*Δ_E) + params.δ # Log forward differences. 
 
-stationary_sol_T = stationary_numerical(params_T, z_grid) # solution at t = T
-v_T = stationary_sol_T.v_tilde
-g_T = stationary_sol_T.g
-z_hat_T = stationary_sol_T.z_hat
-Ω_T = stationary_sol_T.Ω
+@testset "Regression Tests" begin 
+  # Run the solver. 
+    sol = solve_dynamics(params_T, stationary_T, settings, T, Ω)
+  # Spot-checks.
+    @test sol.sol.t[5] ≈ 19.840000000000003
+    @test sol.results[:λ_ii][end] ≈ 0.7813233366790822
+    @test sol.sol.u[4][3] ≈ 1.1499093016834008
+    @test sol.sol.prob.u0[1] ≈ 1.1868000000001158
+  # Consistency checks. 
+    @test norm(sol.results[:g] .- 0.0204198805) ≈ 0.0 atol = 1e-8 # Probably the most important of these checks. 
+    @test norm(sol.results[:z_hat] .- 1.42571253) ≈ 0.0 atol = 1e-7 
+    @test norm(sol.results[:Ω] .- 1.036549465138955) ≈ 0.0 atol = 1e-8
+    @test all(sol.results[:E] .== 0.053)
+    @test norm(sol.results[:S] .-  0.058475033) ≈ 0.0 atol = 1e-8 
+    @test norm(sol.results[:L_tilde] .- 0.200430770) ≈ 0.0 atol = 1e-8
 
-# compute the resulting end time and function of Ω
-T = 20.0
-Ω(t) = Ω_T
-
-settings = (z = z_grid, tstops = 0:1e-3:T, Δ_E = 1e-06)
-E(t) = (log(Ω(t+settings.Δ_E)) - log(Ω(t-settings.Δ_E)))/(2*settings.Δ_E) + params.δ
-p = PerlaTonettiWaugh.get_p(params_T, stationary_sol_T, settings, Ω, T);
-dae = PerlaTonettiWaugh.PTW_DAEProblem(params_0, stationary_sol_T, settings, E, Ω, T, p);
-
-# regression tests, based on version b20c067
-@testset "Regression tests for f! in `solve_dynamics`" begin
-    RNG_SEED_ORIGIN = 123456 # set RNG seed for reproducibility
-    @testset "t = T" begin
-        u = [stationary_sol_T.v_tilde; stationary_sol_T.g; stationary_sol_T.z_hat]
-        du = zeros(M+2)
-        resid = similar(u)
-        t = T
-
-        # compute residuals
-        dae.f!(resid,du,u,p,t)
-
-        # test if residuals are small enough
-        @test mean(resid[1:M]) ≈ 0 atol = 1e-8
-        @test mean(resid[M+1]) ≈ 0 atol = 1e-8
-        @test mean(resid[M+2]) ≈ 0 atol = 1e-8
-
-        # check if values are close enough as before (regression tests)
-        @test resid[1] ≈ -9.016777602344206e-11
-        @test resid[2] ≈ -9.016033752917707e-11
-        @test resid[10] ≈ -9.013649548972325e-11
-        @test resid[M] ≈ -1.392167769953545e-10
-        @test resid[M+1] ≈ -2.7400304247748863e-13
-        @test resid[M+2] ≈ 4.208980275421936e-9
-
-        @test u[1] ≈ 1.186800000000357
-        @test u[2] ≈ 1.168072362393182
-        @test u[10] ≈ 1.0372263636598893
-        @test u[M] ≈ 0.675633431057062
-        @test u[M+1] ≈ 0.020419880554626162
-        @test u[M+2] ≈ 1.425712535487968
-    end
-
-    @testset "t = T - 1e-3" begin
-        rng_seed = MersenneTwister(RNG_SEED_ORIGIN)
-        u = [stationary_sol_T.v_tilde; stationary_sol_T.g; stationary_sol_T.z_hat]
-        du = zeros(M+2)
-        resid = similar(u)
-        t = T - 1e-3
-
-        # give some changes
-        u[2:3] = u[2:3] .+ rand(rng_seed, 2) * 1e-3
-        u[M+1:M+2] = u[M+1:M+2] .+ rand(rng_seed, 2) * 1e-3
-        du = rand(rng_seed, length(du)) * 1e-3
-
-        # compute residuals
-        dae.f!(resid,du,u,p,t)
-
-        # check if values are close enough as before (regression tests)
-        @test resid[1] ≈ 4.542052507407285
-        @test resid[2] ≈ 4.529892925281381
-        @test resid[10] ≈ 4.0020542455673995
-        @test resid[M] ≈ 2.6065676236341866
-        @test resid[M+1] ≈ -3.1764554464519534e-5
-        @test resid[M+2] ≈ -0.010535368447424975
-    end
-
-    @testset "t = T / 2" begin
-        rng_seed = MersenneTwister(RNG_SEED_ORIGIN)
-        u = [stationary_sol_T.v_tilde; stationary_sol_T.g; stationary_sol_T.z_hat]
-        du = zeros(M+2)
-        resid = similar(u)
-        t = T / 2
-
-        # give some changes
-        u[2:3] = u[2:3] .+ rand(rng_seed, 2) * 1e-3
-        u[M+1:M+2] = u[M+1:M+2] .+ rand(rng_seed, 2) * 1e-3
-        du = rand(rng_seed, length(du)) * 1e-3
-        du[1] = du[1] + 1e-2
-
-        # compute residuals
-        dae.f!(resid,du,u,p,t)
-
-        # check if values are close enough as before (regression tests)
-        @test resid[1] ≈ -0.046196065731366004
-        @test resid[2] ≈ 0.02190136138358488
-        @test resid[10] ≈ 0.0008070940285961892
-        @test resid[M] ≈ 0.00021626561191201432
-        @test resid[M+1] ≈ -3.1764554464519534e-5
-        @test resid[M+2] ≈ -0.010535368447424975
-    end
-    
-    @testset "t = 0.1" begin
-        rng_seed = MersenneTwister(RNG_SEED_ORIGIN)
-        u = [stationary_sol_T.v_tilde; stationary_sol_T.g; stationary_sol_T.z_hat]
-        du = zeros(M+2)
-        resid = similar(u)
-        t = 0.1
-
-        # give some changes
-        u[1:5] = u[1:5] .+ rand(rng_seed, 5) * 1e-2
-        u[M+1:M+2] = u[M+1:M+2] .+ rand(rng_seed, 2) * 1e-3
-        du = rand(rng_seed, length(du)) * 1e-3
-        du[3] = du[3] - 1e-2
-
-        # compute residuals
-        dae.f!(resid,du,u,p,t)
-
-        # check if values are close enough as before (regression tests)
-        @test resid[1] ≈ -0.16437057505724734
-        @test resid[2] ≈ 0.27593757590866175
-        @test resid[10] ≈ 0.0005903931927783018
-        @test resid[M] ≈  6.730926950911098e-5
-        @test resid[M+1] ≈ 0.004653937079329484
-        @test resid[M+2] ≈ -0.00815101908664495
-    end
+  # Run the solver for another case. 
+    sol = solve_dynamics(params_0, stationary_0, settings, T, Ω)
+  # Spot-checks. 
+    @test sol.sol.t[5] == 19.852
+    @test sol.results[:λ_ii][1] ≈ 0.9929472025880611
+    @test sol.sol.u[4][3] ≈ 1.153063927522336
+    @test sol.sol.prob.u0[1] ≈ 1.1868000000002454
+  # Detailed checks. 
+    @test sol.results[:g][1] ≈ 0.020019475192487802 # g check.
+    @test sol.results[:g][end] ≈ 0.007963191154810903 # g check. 
+    @test sol.results[:z_hat][1] ≈ 2.771561823423923 
+    @test sol.results[:z_hat][(end-9)] ≈ 2.77021657056094 atol = 1e-8
 end
 
-# regression tests, based on version b20c067
-@testset "Regression tests for `solve_dynamics_by_vector_Ω`" begin
-    # Solve and compute residuals, now using vectorized Ω
+@testset "Correctness Tests" begin # Here, we compare the DAE output to known correct values, such as MATLAB output or analytical results.
+  # First case. 
+  sol = solve_dynamics(params_T, stationary_T, settings, T, Ω)
+  @test all([isapprox(x, 0.0, atol = 1e-9) for x in sol.results[:entry_residual]]) # Free-entry condition holds ∀ t. 
+
+  # Second case. 
+  sol = solve_dynamics(params_0, stationary_0, settings, T, Ω)
+  @test_broken all([isapprox(x, 0.0, atol = 1e-9) for x in sol.results[:entry_residual]]) # Free-entry condition holds ∀ t.   
+end 
+
+@testset "Interpolation and entry_residuals Tests" begin 
+  # Objects for interpolation. 
     Ω_nodes = 0:1e-1:T
+    entry_residuals_nodes = Ω_nodes
     Ω_vec = map(t -> Ω(t), Ω_nodes)
-    @time solved = PerlaTonettiWaugh.solve_dynamics_by_vector_Ω(params_T, stationary_sol_T, settings, T, Ω_vec, Ω_nodes)
+  # First case. 
+    @time sol = solve_dynamics(params_T, stationary_T, settings, T, Ω_vec, Ω_nodes)
+  # Tests. 
+    @test mean(sol.results[:entry_residual]) ≈ 0.0 atol = 1e-10
+    residuals_interp = entry_residuals(params_T, stationary_T, settings, T, Ω_vec, Ω_nodes, entry_residuals_nodes).entry_residuals_interpolation
+    @test mean(residuals_interp.(Ω_nodes)) ≈ 0.0 atol = 1e-9
+end 
 
-    # solved residuals should be close to zero, but more generous criteria due to discreteness of Ω_vec
-    @test mean(mean(solved.residuals[:,1:M], dims = 1)) ≈ 0 atol = 1e-03 # mean residuals for system of ODEs
-    @test mean(mean(solved.residuals[:,(M+1)])) ≈ 0 atol = 1e-03 # mean residuals for value matching condition
-    @test mean(mean(solved.residuals[:,(M+2)])) ≈ 0 atol = 1e-03 # mean residuals for export threshold condition
-
-    # check if values are close enough as before (regression tests)
-    @test solved.residuals[1,1] ≈ -9.016777602344206e-11
-    @test solved.residuals[2,2] ≈ 8.515632643479876e-12
-    @test solved.residuals[3,M] ≈ -4.96713781217295e-12
-    @test solved.residuals[4,M+1] ≈ 1.1857181902996672e-13
-end
-
-# regression tests, based on version b20c067
-@testset "Regression tests for `entry_residuals`" begin
-    # Solve and compute residuals, now using vectorized Ω
-    Ω_nodes = 0:1e-1:T
-    Ω_vec0 = map(t -> Ω(t), Ω_nodes)
-    entry_residuals_nodes = 1e-1:1e-1:(T-1e-1)
-    entry_residuals_nodes_last = entry_residuals_nodes[end]
-    @time solved = entry_residuals(params_T, stationary_sol_T, settings, T, Ω_vec0, Ω_nodes, entry_residuals_nodes)
-
-    # check if values are close enough as before (regression tests)
-    @test solved.entry_residuals[1] ≈ -0.1765540983606555
-    @test solved.entry_residuals[2] ≈  -0.16630819672131136
-    @test solved.entry_residuals[3] ≈ -0.156062295081967
-    @test solved.entry_residuals_interpolation(entry_residuals_nodes[1] + 1e-3) ≈ -0.17645163934426206
-    @test solved.entry_residuals_interpolation(entry_residuals_nodes_last) ≈ 7.563199999999956
-    @test solved.entry_residuals_interpolation(entry_residuals_nodes_last) ≈ solved.entry_residuals[end]
-end
+@testset "Regression Tests for f! at T" begin 
+  # Instantiate the f! arguments
+    du = zeros(M+2)
+    u = [v_T..., g_T, z_hat_T]
+    resid = zeros(M+2)
+    t = T 
+    p = []
+  # Fill the residuals vector 
+    f! = solve_dynamics(params_T, stationary_T, settings, T, Ω).f!
+    f!(resid, du, u, p, t) # Kept the p from the old tests, since the solver complains without it. But it's a dummy. 
+  # Tests
+    # Accuracy
+      @test mean(resid[1:M]) ≈ 0 atol = 1e-8
+      @test mean(resid[M+1]) ≈ 0 atol = 1e-8
+      @test mean(resid[M+2]) ≈ 0 atol = 1e-8
+      @test all(abs.(resid) .<= 1e-6) # Test that we have small residuals across the board. 
+    # Regression 
+      @test resid[4] ≈ -9.016225266389455e-11
+      @test resid[100] ≈ -1.3923034947183055e-10 
+end 

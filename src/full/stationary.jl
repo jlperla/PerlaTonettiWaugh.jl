@@ -124,16 +124,3 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
 
     return merge(staticvalues, (g = g_T, z_hat = z_hat_T, Ω = Ω_T, v_tilde = v_tilde))
 end 
-
-function diffsols(sol1, sol2)
-    if :g ∈ fieldnames(sol1) @show sol1.g - sol2.g end 
-    if :a ∈ fieldnames(sol1) @show sol1.a - sol2.a end 
-    if :b ∈ fieldnames(sol1) @show sol1.b - sol2.b end 
-    if :S ∈ fieldnames(sol1) @show sol1.S - sol2.S end 
-    if :L_tilde ∈ fieldnames(sol1) @show sol1.L_tilde - sol2.L_tilde end 
-    if :w ∈ fieldnames(sol1) @show sol1.w - sol2.w end 
-    if :x ∈ fieldnames(sol1) @show sol1.x - sol2.x end 
-    if :π_min ∈ fieldnames(sol1) @show sol1.π_min - sol2.π_min end 
-    if :r ∈ fieldnames(sol1) @show sol1.r - sol2.r end 
-    if :ν ∈ fieldnames(sol1) @show sol1.ν - sol2.ν end 
-end 
