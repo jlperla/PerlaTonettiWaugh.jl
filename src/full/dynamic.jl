@@ -1,9 +1,12 @@
 # Method for interpolation with Ω. 
 function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω_vec, Ω_nodes)
+  # Validate the interpolation objects.
+    @assert Ω_nodes[1] ≈ 0.0 
+    @assert Ω_nodes[1] ≈ T
   # Get the (callable) interpolation object. 
-    Ω_interp = LinInterp(Ω_nodes, Ω_vec) # QuantEcon routine. 
+    Ω = LinInterp(Ω_nodes, Ω_vec) # QuantEcon routine. 
   # Run the main method. 
-    r = solve_dynamics(params_T, stationary_sol_T, settings, T, Ω) # This will get returned. 
+    r = solve_dynamics(params_T, stationary_sol_T, settings, T, Ω) 
 end 
 
 # Main method.
