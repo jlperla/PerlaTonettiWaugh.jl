@@ -86,3 +86,24 @@ end
     residuals_interp = entry_residuals(params_T, stationary_T, settings, T, Ω_vec, Ω_nodes, entry_residuals_nodes).entry_residuals_interpolation
     @test mean(residuals_interp.(Ω_nodes)) ≈ 0.0 atol = 1e-9
 end 
+
+@testset "Regression Tests for f! at T" begin 
+  # Instantiate the f! arguments
+    du = zeros(M+2)
+    u = [v_T..., g_T, z_hat_T]
+    resid = zeros(M+2)
+    t = T 
+    p = []
+  # Fill the residuals vector 
+    f! = solve_dynamics(params_T, stationary_T, settings, T, Ω).f!
+    f!(resid, du, u, p, t) # Kept the p from the old tests, since the solver complains without it. But it's a dummy. 
+  # Tests
+    # Accuracy
+      @test mean(resid[1:M]) ≈ 0 atol = 1e-8
+      @test mean(resid[M+1]) ≈ 0 atol = 1e-8
+      @test mean(resid[M+2]) ≈ 0 atol = 1e-8
+      @test all(abs.(resid) .<= 1e-9) # Test that we have small residuals across the board. 
+    # Regression 
+      @test resid[4] ≈ -9.016225266389455e-11
+      @test resid[100] ≈ -1.3923034947183055e-10 
+end 
