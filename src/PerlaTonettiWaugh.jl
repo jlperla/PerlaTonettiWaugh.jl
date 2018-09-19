@@ -4,6 +4,8 @@ module PerlaTonettiWaugh
 using NLsolve, DifferentialEquations, BandedMatrices, Sundials, Distributions, Roots, Optim, QuantEcon, LinearAlgebra, Random
 import Parameters: @with_kw, @unpack
 
+# Utilities
+include("util/compactify.jl")
 # General discretization files.
 include("diffusionoperators.jl")
 include("quadrature.jl")
