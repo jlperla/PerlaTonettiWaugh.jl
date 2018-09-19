@@ -1,3 +1,12 @@
+# Method for interpolation with Ω. 
+function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω_vec, Ω_nodes)
+  # Get the (callable) interpolation object. 
+    Ω_interp = LinInterp(Ω_nodes, Ω_vec) # QuantEcon routine. 
+  # Run the main method. 
+    r = solve_dynamics(params_T, stationary_sol_T, settings, T, Ω) # This will get returned. 
+end 
+
+# Main method.
 function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω)
     # Unpack arguments 
       @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params_T # Parameters

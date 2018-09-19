@@ -34,7 +34,6 @@
   Ω = t -> Ω_T # This is constant. 
   E = t -> (log(Ω(t + Δ_E)) - (log(t - Δ_E)))/(2*Δ_E) + params.δ # Log forward differences. 
 
-
 @testset "Regression Tests" begin 
   # Run the solver. 
     sol = solve_dynamics(params_T, stationary_T, settings, T, Ω)
