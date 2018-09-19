@@ -45,7 +45,7 @@
   # Consistency checks. 
     @test norm(sol.results[:g] .- 0.0204198805) ≈ 0.0 atol = 1e-8 # Probably the most important of these checks. 
     @test norm(sol.results[:z_hat] .- 1.42571253) ≈ 0.0 atol = 1e-7 
-    @test norm(sol.results[:Ω] .- 1.036549465138955) ≈ 0.0
+    @test norm(sol.results[:Ω] .- 1.036549465138955) ≈ 0.0 atol = 1e-8
     @test all(sol.results[:E] .== 0.053)
     @test norm(sol.results[:S] .-  0.058475033) ≈ 0.0 atol = 1e-8 
     @test norm(sol.results[:L_tilde] .- 0.200430770) ≈ 0.0 atol = 1e-8
