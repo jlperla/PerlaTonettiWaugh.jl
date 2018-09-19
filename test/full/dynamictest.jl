@@ -82,4 +82,7 @@ end
     @time sol = solve_dynamics(params_T, stationary_T, settings, T, Ω_vec, Ω_nodes)
   # Tests. 
     @test mean(sol.results[:entry_residual]) ≈ 0.0 atol = 1e-10
+    residuals_interp = entry_residuals(params_T, stationary_T, settings, T, Ω_vec, Ω_nodes)
+    @test residuals_interp.(Ω_nodes) == sol.results[:entry_residual]
+    @test mean(residuals_interp.(Ω_nodes)) ≈ 0.0 atol = 1e-10
 end 
