@@ -69,7 +69,6 @@ end
   # First case. 
   sol = solve_dynamics(params_T, stationary_T, settings, T, Ω)
   @test all([isapprox(x, 0.0, atol = 1e-9) for x in sol.results[:entry_residual]]) # Free-entry condition holds ∀ t. 
-  
 
   # Second case. 
   sol = solve_dynamics(params_0, stationary_0, settings, T, Ω)
