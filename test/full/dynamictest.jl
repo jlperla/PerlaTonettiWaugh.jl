@@ -77,11 +77,12 @@ end
 @testset "Interpolation and entry_residuals Tests" begin 
   # Objects for interpolation. 
     Ω_nodes = 0:1e-1:T
+    entry_residuals_nodes = Ω_nodes
     Ω_vec = map(t -> Ω(t), Ω_nodes)
   # First case. 
     @time sol = solve_dynamics(params_T, stationary_T, settings, T, Ω_vec, Ω_nodes)
   # Tests. 
     @test mean(sol.results[:entry_residual]) ≈ 0.0 atol = 1e-10
-    residuals_interp = entry_residuals(params_T, stationary_T, settings, T, Ω_vec, Ω_nodes)
+    residuals_interp = entry_residuals(params_T, stationary_T, settings, T, Ω_vec, Ω_nodes, entry_residuals_nodes)
     @test mean(residuals_interp.(Ω_nodes)) ≈ 0.0 atol = 1e-9
 end 

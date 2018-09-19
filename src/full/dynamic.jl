@@ -1,12 +1,17 @@
 # Residuals function. 
-function entry_residuals(params_T, stationary_sol_T, settings, T, Ω_vec, Ω_nodes)
+function entry_residuals(params_T, stationary_sol_T, settings, T, Ω_vec, Ω_nodes, entry_residuals_nodes)
+    @unpack ζ, χ = params_T
   # Get the solver solution. 
     sol = solve_dynamics(params_T, stationary_sol_T, settings, T, Ω_vec, Ω_nodes)
   # Grab the entry residuals and time points. 
-    entry_residuals = sol.results[:entry_residual]
+    v_0s = sol.results[:v_0]
     ts = sol.results[:t]
-  # Interpolate these over t. 
-    entry_residuals_interp = LinInterp(reverse(ts), reverse(entry_residuals)) # This will be returned. 
+    v_0_interpolation = LinInterp(ts, v_0s)
+    # compute entry residuals from the solution
+    entry_residuals_vec = map(t -> v_0_interpolation(t) - ζ * (1-χ) / χ, entry_residuals_nodes)
+
+    # perform linear interpolation on entry_residuals 
+    entry_residuals_interpolation = LinInterp(entry_residuals_nodes, entry_residuals_vec)
 end 
 
 # Method for interpolation with Ω. 
