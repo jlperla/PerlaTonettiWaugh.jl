@@ -1,8 +1,8 @@
 # Residuals function. 
-function entry_residuals(params_T, stationary_sol_T, settings, T, Ω_vec, Ω_nodes, entry_residuals_nodes)
+function entry_residuals(params_T, stationary_sol_T, settings, T, Ω_vec, Ω_nodes, entry_residuals_nodes; stopwithf! = false)
     @unpack ζ, χ = params_T
   # Get the solver solution. 
-    sol = solve_dynamics(params_T, stationary_sol_T, settings, T, Ω_vec, Ω_nodes)
+    sol = solve_dynamics(params_T, stationary_sol_T, settings, T, Ω_vec, Ω_nodes; stopwithf! = stopwithf!)
   # Grab the entry residuals and time points. 
     v_0s = sol.results[:v_0]
     ts = sol.results[:t]
@@ -18,18 +18,18 @@ function entry_residuals(params_T, stationary_sol_T, settings, T, Ω_vec, Ω_nod
 end 
 
 # Method for interpolation with Ω. 
-function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω_vec, Ω_nodes)
+function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω_vec, Ω_nodes; stopwithf! = false)
   # Validate the interpolation objects.
     @assert Ω_nodes[1] ≈ 0.0 
     @assert Ω_nodes[end] ≈ T
   # Get the (callable) interpolation object. 
     Ω = LinInterp(Ω_nodes, Ω_vec) # QuantEcon routine. 
   # Run the main method. 
-    r = solve_dynamics(params_T, stationary_sol_T, settings, T, Ω) 
+    r = solve_dynamics(params_T, stationary_sol_T, settings, T, Ω; stopwithf! = stopwithf!) 
 end 
 
 # Main method.
-function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω)
+function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω; stopwithf! = false)
     # Unpack arguments 
       @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params_T # Parameters
       @unpack z, tstops, Δ_E = settings # Settings 
@@ -103,6 +103,10 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω)
           residual[1:M] .-= π_tilde
           residual[M+1] = u[1] + x - dot(ω, u[1:M]) # residual (eq:25)
           residual[M+2] = z_hat^(σ-1) - κ * d^(σ-1) / π_min # export threshold (eq:31)
+      end
+
+      if stopwithf! # TODO: remove this when finalizing the package
+        return f!
       end
 
     # Bundle all of this into an actual DAE problem. 
