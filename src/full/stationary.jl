@@ -1,5 +1,5 @@
 # Default initial values 
-defaultiv(params) = [0.01, 2.0, 1.0]
+defaultiv(params) = [-1.0, -0.5, -0.75]
 
 # Gives us the (full algebraic) stationary solution for a set of params and an initial x. 
 function stationary_algebraic(params, init_x = defaultiv(params); kwargs...)
@@ -32,14 +32,14 @@ function stationary_algebraic(params, init_x = defaultiv(params); kwargs...)
 
   # Define the function we'll pass to the solver. 
     function stationary_algebraic_given_vals(vals)
-      # Grab the static values. 
-        @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x, π_min = staticvals(vals)
       # Unpack the argument. 
         g, z_hat, Ω = vals
       # Validate arguments. 
         @assert z_hat > 1 
         @assert Ω > 0 
-        @assert g > 0 
+        @assert g > 0       
+      # Grab the static values. 
+        @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x, π_min = staticvals(vals)
       # Calculate and assign residuals. 
         big_denom = ν*(θ + ν)*(θ - σ + 1) # Part of H.16
         denom_1 = a*(g - r) # Part of H.16
@@ -49,7 +49,7 @@ function stationary_algebraic(params, init_x = defaultiv(params); kwargs...)
     end 
 
     # Run the solver. 
-      sol = nlsolve(stationary_algebraic_given_vals, init_x; inplace = false, kwargs...)
+      sol = nlsolve(stationary_algebraic_given_vals, init_x; inplace = false, iterations = 50_000, kwargs...)
 
     # Throw error if we didn't converge. 
     if ~converged(sol)
@@ -61,7 +61,7 @@ function stationary_algebraic(params, init_x = defaultiv(params); kwargs...)
       @assert z_hat > 1 
       @assert Ω > 0 
       @assert g > 0 # Final results check. 
-      staticvalues = staticvals(sol.zero, params)
+      staticvalues = staticvals(sol.zero)
       return merge(staticvalues, (g = g, z_hat = z_hat, Ω = Ω))
 end 
 
@@ -76,16 +76,15 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
       @assert κ > 0 
       @assert γ ≈ 1 # For the same reason we do this in the dynamics. 
 
+    # Compactification maps 
+      map_g = bridge(ℝ, Segment(1e-10, 2.0 * ρ))
+      map_z_hat = bridge(ℝ, Segment(1.0 + 1e-10, 3.0))
+      map_Ω = bridge(ℝ, Segment(0.0, 3.0))
+
     # Discretization objects and quadrature weights. 
       z, L_1_minus, L_1_plus, L_2 = rescaled_diffusionoperators(z, σ-1) # Operators. 
       L_1 = L_1_minus # L_1 ≡ L_1_minus. 
       ω = ω_weights(z, θ, σ-1) # Get quadrature weights for the distribution on the rescaled grid. 
-
-    # Set up the continuous transformations. 
-      map_circle = x -> x/sqrt(1+x*x)
-      map_g = x -> (map_circle(x) + 1 + 1e-10)*(ρ) # Take real values into g values in [1e-10, 0.99ρ]
-      map_z_hat = x -> (map_circle(x) + 1 + 1e-5)*(10) # Fix upper bound at 10 arbitrarily. Since z_bar = f(z_hat), which we're solving for. 
-      map_Ω = x -> (map_circle(x) + 1)*10 # Takes real values into Ω values in [0, 10]
 
     # Set up static value calculations. 
       function staticvals(vals)
@@ -108,13 +107,14 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
       function stationary_numerical_given_vals(vals)
         # Unpack and transform the raw arguments. 
           g_raw, z_hat_raw, Ω_raw = vals 
+        # Apply the continuous transformations. 
           g = map_g(g_raw)
           z_hat = map_z_hat(z_hat_raw)
           Ω = map_Ω(Ω_raw)
         # Validate the variables. 
-          @assert g > 0 
-          @assert z_hat > 1
-          @assert Ω > 0 
+          @assert g > 0.0
+          @assert z_hat > 1.0
+          @assert Ω > 0.0
         # Grab the static values. 
           @unpack S, E, L_tilde, z_bar, π_min, π, ρ_tilde = staticvals([g, z_hat, Ω])
         # Define the discretized aggregate operator. 
@@ -130,7 +130,7 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
       end
 
     # Solve the above equation. 
-      sol = nlsolve(stationary_numerical_given_vals, init_x; inplace = false, xtol = -Inf, kwargs...)
+      sol = nlsolve(stationary_numerical_given_vals, init_x; inplace = false, iterations = 50_000, xtol = -Inf, kwargs...)
     
     # Throw an error if we failed to converge. 
       if ~converged(sol)
@@ -139,9 +139,10 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
 
     # Recreate the economic calculations from the solver results. 
       g_T_raw, z_hat_T_raw, Ω_T_raw = sol.zero # Grab raw values. 
-      g_T = map(g_T_raw) # Transform raw values. 
-      z_hat_T = map(z_hat_T_raw)
-      Ω_T = map(Ω_T_raw)
+    # Apply compactification. 
+      g_T = map_g(g_T_raw)
+      z_hat_T = map_z_hat(z_hat_T_raw)
+      Ω_T = map_Ω(Ω_T_raw)
     # Validate parameters as a final check. 
       @assert g_T > 0 
       @assert z_hat_T > 1 
