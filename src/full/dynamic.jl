@@ -6,7 +6,7 @@ function entry_residuals(params_T, stationary_sol_T, settings, T, Ω_vec, Ω_nod
     entry_residuals = sol.results[:entry_residual]
     ts = sol.results[:t]
   # Interpolate these over t. 
-    entry_residuals_interp = LinInterp(ts, entry_residuals) # This will be returned. 
+    entry_residuals_interp = LinInterp(reverse(ts), reverse(entry_residuals)) # This will be returned. 
 end 
 
 # Method for interpolation with Ω. 
