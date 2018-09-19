@@ -74,7 +74,7 @@ end
   @test_broken all([isapprox(x, 0.0, atol = 1e-9) for x in sol.results[:entry_residual]]) # Free-entry condition holds ∀ t.   
 end 
 
-@testset "Interpolation Method Tests" begin 
+@testset "Interpolation and entry_residuals Tests" begin 
   # Objects for interpolation. 
     Ω_nodes = 0:1e-1:T
     Ω_vec = map(t -> Ω(t), Ω_nodes)
@@ -82,5 +82,4 @@ end
     @time sol = solve_dynamics(params_T, stationary_T, settings, T, Ω_vec, Ω_nodes)
   # Tests. 
     @test mean(sol.results[:entry_residual]) ≈ 0.0 atol = 1e-10
-    @test 
 end 
