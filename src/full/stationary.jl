@@ -63,10 +63,9 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
     ω = ω_weights(z, θ, σ-1) # Get quadrature weights for the distribution on the rescaled grid. 
 
     # Set up the transformations. 
-    map_circle = x -> x/sqrt(1+x*x)
-    map_g = x -> (map_circle(x) + 1 + 1e-10)*(ρ) # Take real values into g values in [1e-10, 0.99ρ]
-    map_z_hat = x -> (map_circle(x) + 1 + 1e-5)*(10) # Fix upper bound at 10 arbitrarily. Since z_bar = f(z_hat), which we're solving for. 
-    map_Ω = x -> (map_circle(x) + 1)*10 # Takes real values into Ω values in [0, 10]
+    map_g = Compactifier(1e-10*ρ, (2+1e-10)*ρ)
+    map_z_hat = Compactifier(1e-5, (2+1e-5)*10)
+    map_Ω = Compactifier(0.0, 20.0)
 
     # Define the system of equations we're solving.
     function stationary_numerical_given_vals(vals)
