@@ -138,5 +138,5 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω)
         results = @transform(results, entry_residual = gen_entry_residual.(:v_0)) # entry_residual column 
 
     # Return. 
-      return (results = results, sol = sol, f! = f!, static_equilibrium = static_equilibrium) # The results, raw DAE solution, and DAE problem (f!, static_equilibrium, etc.) objects.  
+      return (results = sort!(results), sol = sol, f! = f!, static_equilibrium = static_equilibrium) # The results, raw DAE solution, and DAE problem (f!, static_equilibrium, etc.) objects.  
 end

@@ -54,14 +54,14 @@
     sol = solve_dynamics(params_0, stationary_0, settings, T, Ω)
   # Spot-checks. 
     @test sol.sol.t[5] == 19.852
-    @test sol.results[:λ_ii][end] ≈ 0.9929472025880611
+    @test sol.results[:λ_ii][1] ≈ 0.9929472025880611
     @test sol.sol.u[4][3] ≈ 1.153063927522336
     @test sol.sol.prob.u0[1] ≈ 1.1868000000002454
   # Detailed checks. 
-    @test sol.results[:g][end] ≈ 0.020019475192487802 # g check.
-    @test sol.results[:g][1] ≈ 0.007963191154810903 # g check. 
-    @test sol.results[:z_hat][end] ≈ 2.771561823423923 
-    @test sol.results[:z_hat][10] ≈ 2.77021657056094 atol = 1e-8
+    @test sol.results[:g][1] ≈ 0.020019475192487802 # g check.
+    @test sol.results[:g][end] ≈ 0.007963191154810903 # g check. 
+    @test sol.results[:z_hat][1] ≈ 2.771561823423923 
+    @test sol.results[:z_hat][(end-9)] ≈ 2.77021657056094 atol = 1e-8
 end
 
 @testset "Correctness Tests" begin # Here, we compare the DAE output to known correct values, such as MATLAB output or analytical results.
