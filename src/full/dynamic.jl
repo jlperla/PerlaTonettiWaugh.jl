@@ -150,7 +150,7 @@ function PTW_DAEProblem(params_T, stationary_sol_T, settings, E, Ω, T, p)
 
         # compute the derivative of L_tilde
         L_tilde_derivative_term = 0
-        if (t < T)
+        if (t < T - eps())
             t_forward = p.ts[end]
             L_tilde_forward = p.vals[end]
             L_tilde_derivative_term = (log(1 - L_tilde_forward) - log(1-L_tilde))/(t_forward-t) # Reverse direction. 
