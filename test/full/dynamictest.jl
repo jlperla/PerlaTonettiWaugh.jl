@@ -39,7 +39,7 @@ dae = PerlaTonettiWaugh.PTW_DAEProblem(params_0, stationary_sol_T, settings, E, 
     @testset "t = T" begin
         u = [stationary_sol_T.v_tilde; stationary_sol_T.g; stationary_sol_T.z_hat]
         du = zeros(M+2)
-        resid = similar(u)
+        resid = zeros(M+2)
         t = T
 
         # compute residuals
@@ -51,12 +51,12 @@ dae = PerlaTonettiWaugh.PTW_DAEProblem(params_0, stationary_sol_T, settings, E, 
         @test mean(resid[M+2]) ≈ 0 atol = 1e-8
 
         # check if values are close enough as before (regression tests)
-        @test resid[1] ≈ -9.016777602344206e-11
-        @test resid[2] ≈ -9.016033752917707e-11
-        @test resid[10] ≈ -9.013649548972325e-11
-        @test resid[M] ≈ -1.392167769953545e-10
-        @test resid[M+1] ≈ -2.7400304247748863e-13
-        @test resid[M+2] ≈ 4.208980275421936e-9
+        @test resid[1] ≈ -8.998873868293344e-11
+        @test resid[2] ≈ -9.017100954800128e-11
+        @test resid[10] ≈ -9.015863056127671e-11
+        @test resid[M] ≈ -1.3922109298736274e-10
+        @test resid[M+1] ≈ 1.829647544582258e-13
+        @test resid[M+2] ≈ 4.2089500773556665e-9
 
         @test u[1] ≈ 1.186800000000357
         @test u[2] ≈ 1.168072362393182
@@ -70,7 +70,7 @@ dae = PerlaTonettiWaugh.PTW_DAEProblem(params_0, stationary_sol_T, settings, E, 
         rng_seed = MersenneTwister(RNG_SEED_ORIGIN)
         u = [stationary_sol_T.v_tilde; stationary_sol_T.g; stationary_sol_T.z_hat]
         du = zeros(M+2)
-        resid = similar(u)
+        resid = zeros(M+2)
         t = T - 1e-3
 
         # give some changes
@@ -94,7 +94,7 @@ dae = PerlaTonettiWaugh.PTW_DAEProblem(params_0, stationary_sol_T, settings, E, 
         rng_seed = MersenneTwister(RNG_SEED_ORIGIN)
         u = [stationary_sol_T.v_tilde; stationary_sol_T.g; stationary_sol_T.z_hat]
         du = zeros(M+2)
-        resid = similar(u)
+        resid = zeros(M+2)
         t = T / 2
 
         # give some changes
@@ -119,7 +119,7 @@ dae = PerlaTonettiWaugh.PTW_DAEProblem(params_0, stationary_sol_T, settings, E, 
         rng_seed = MersenneTwister(RNG_SEED_ORIGIN)
         u = [stationary_sol_T.v_tilde; stationary_sol_T.g; stationary_sol_T.z_hat]
         du = zeros(M+2)
-        resid = similar(u)
+        resid = zeros(M+2)
         t = 0.1
 
         # give some changes
@@ -154,10 +154,10 @@ end
     @test mean(mean(solved.residuals[:,(M+2)])) ≈ 0 atol = 1e-03 # mean residuals for export threshold condition
 
     # check if values are close enough as before (regression tests)
-    @test solved.residuals[1,1] ≈ -9.016777602344206e-11
-    @test solved.residuals[2,2] ≈ 8.515632643479876e-12
-    @test solved.residuals[3,M] ≈ -4.96713781217295e-12
-    @test solved.residuals[4,M+1] ≈ 1.1857181902996672e-13
+    @test solved.residuals[1,1] ≈ -8.998873868293344e-11 
+    @test solved.residuals[2,2] ≈ 8.494746572829115e-12 
+    @test solved.residuals[3,M] ≈ -4.9528436907309015e-12 
+    @test solved.residuals[4,M+1] ≈ -7.771561172376096e-14 
 end
 
 # regression tests, based on version b20c067
