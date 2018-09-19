@@ -49,7 +49,7 @@ function stationary_algebraic(params, init_x = defaultiv(params); kwargs...)
     end 
 
     # Run the solver. 
-      sol = nlsolve(vals -> stationary_algebraic_given_vals(vals, params), init_x; inplace = false, kwargs...)
+      sol = nlsolve(stationary_algebraic_given_vals, init_x; inplace = false, kwargs...)
 
     # Throw error if we didn't converge. 
     if ~converged(sol)
