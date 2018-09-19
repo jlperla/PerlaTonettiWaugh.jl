@@ -52,7 +52,6 @@
     settings = @with_kw (z = z_grid, T = T_val, g = t -> g_stationary, ode_solve_algorithm = CVODE_BDF(), iterations = 1000)
     # Solve for v with time-varying g
     resid = calculate_residuals(params_func_, settings(g = g_func))
-    @test_broken norm(resid) ≈ 0 atol = 1e-10 # since time-varying g is not in equilibrium, we expect broken at this moment
 
     # Test the stationary residual is close to zero.
     resid = calculate_residuals(params_func_, settings())
