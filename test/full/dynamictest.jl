@@ -35,7 +35,7 @@
   E = t -> (log(Ω(t + Δ_E)) - (log(t - Δ_E)))/(2*Δ_E) + params.δ # Log forward differences. 
 
 
-@testset "New Regression Tests" begin 
+@testset "Regression Tests" begin 
   # Run the solver. 
     sol = solve_dynamics(params_T, stationary_T, settings, T, Ω)
   # Spot-checks.
@@ -63,5 +63,15 @@
     @test sol.results[:g][1] ≈ 0.007963191154810903 # g check. 
     @test sol.results[:z_hat][end] ≈ 2.771561823423923 
     @test sol.results[:z_hat][10] ≈ 2.77021657056094 atol = 1e-8
-end 
+end
 
+@testset "Correctness Tests" begin # Here, we compare the DAE output to known correct values, such as MATLAB output or analytical results.
+  # First case. 
+  sol = solve_dynamics(params_T, stationary_T, settings, T, Ω)
+  @test all([isapprox(x, 0.0, atol = 1e-9) for x in sol.results[:entry_residual]]) # Free-entry condition holds ∀ t. 
+  
+
+  # Second case. 
+  sol = solve_dynamics(params_0, stationary_0, settings, T, Ω)
+  @test_broken all([isapprox(x, 0.0, atol = 1e-9) for x in sol.results[:entry_residual]]) # Free-entry condition holds ∀ t.   
+end 
