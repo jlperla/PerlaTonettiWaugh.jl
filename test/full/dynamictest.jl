@@ -104,6 +104,6 @@ end
       @test mean(resid[M+2]) ≈ 0 atol = 1e-8
       @test all(abs.(resid) .<= 1e-6) # Test that we have small residuals across the board. 
     # Regression 
-      @test resid[4] ≈ -9.016225266389455e-11
-      @test resid[100] ≈ -1.3923034947183055e-10 
+      @test resid[4] ≈ 0 atol = 1e-8
+      @test resid[100] ≈ 0 atol = 1e-8 
 end 
