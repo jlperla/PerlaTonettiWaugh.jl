@@ -11,7 +11,7 @@
   # Overall parameters. 
     params = (ρ = 0.02, σ = 4.2508, N = 10, θ = 5.1269, γ = 1.00, κ = 0.013, ζ = 1, η = 0, Theta = 1, χ = 1/(2.1868), υ = 0.0593, μ = 0, δ = 0.053)
   # Solver settings. 
-    tstops = 0:1e-3:T 
+    tstops = 0:1e-3:T # We don't currently use this anywhere. 
 
 # Construct intermediate objects. 
   z = range(z_min, stop = z_max, length = M)
@@ -32,4 +32,36 @@
 
 # Define more interim quantities. 
   Ω = t -> Ω_T # This is constant. 
-  E = t -> (log(Ω(t + \Delta) ))
+  E = t -> (log(Ω(t + Δ_E)) - (log(t - Δ_E)))/(2*Δ_E) + params.δ # Log forward differences. 
+
+
+@testset "New Regression Tests" begin 
+  # Run the solver. 
+    sol = solve_dynamics(params_T, stationary_T, settings, T, Ω)
+  # Spot-checks.
+    @test sol.sol.t[5] ≈ 19.840000000000003
+    @test sol.results[:λ_ii][end] ≈ 0.7813233366790822
+    @test sol.sol.u[4][3] ≈ 1.1499093016834008
+    @test sol.sol.prob.u0[1] ≈ 1.1868000000001158
+  # Consistency checks. 
+    @test norm(sol.results[:g] .- 0.0204198805) ≈ 0.0 atol = 1e-8 # Probably the most important of these checks. 
+    @test norm(sol.results[:z_hat] .- 1.42571253) ≈ 0.0 atol = 1e-7 
+    @test norm(sol.results[:Ω] .- 1.036549465138955) ≈ 0.0
+    @test all(sol.results[:E] .== 0.053)
+    @test norm(sol.results[:S] .-  0.058475033) ≈ 0.0 atol = 1e-8 
+    @test norm(sol.results[:L_tilde] .- 0.200430770) ≈ 0.0 atol = 1e-8
+
+  # Run the solver for another case. 
+    sol = solve_dynamics(params_0, stationary_0, settings, T, Ω)
+  # Spot-checks. 
+    @test sol.sol.t[5] == 19.852
+    @test sol.results[:λ_ii][end] ≈ 0.9929472025880611
+    @test sol.sol.u[4][3] ≈ 1.153063927522336
+    @test sol.sol.prob.u0[1] ≈ 1.1868000000002454
+  # Detailed checks. 
+    @test sol.results[:g][end] ≈ 0.020019475192487802 # g check.
+    @test sol.results[:g][1] ≈ 0.007963191154810903 # g check. 
+    @test sol.results[:z_hat][end] ≈ 2.771561823423923 
+    @test sol.results[:z_hat][10] ≈ 2.77021657056094 atol = 1e-8
+end 
+
