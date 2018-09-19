@@ -80,7 +80,7 @@ end
     entry_residuals_nodes = Ω_nodes
     Ω_vec = map(t -> Ω(t), Ω_nodes)
   # First case. 
-    @time sol = solve_dynamics(params_T, stationary_T, settings, T, Ω_vec, Ω_nodes)
+    @time sol = solve_dynamics(params_T, stationary_T, settings, T, Ω_vec, Ω_nodes).entry_residuals_interpolation
   # Tests. 
     @test mean(sol.results[:entry_residual]) ≈ 0.0 atol = 1e-10
     residuals_interp = entry_residuals(params_T, stationary_T, settings, T, Ω_vec, Ω_nodes, entry_residuals_nodes)

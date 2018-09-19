@@ -12,6 +12,9 @@ function entry_residuals(params_T, stationary_sol_T, settings, T, Ω_vec, Ω_nod
 
     # perform linear interpolation on entry_residuals 
     entry_residuals_interpolation = LinInterp(entry_residuals_nodes, entry_residuals_vec)
+    
+    return (entry_residuals_interpolation = entry_residuals_interpolation,
+           entry_residuals = entry_residuals_vec, solved_dynamics = sol)
 end 
 
 # Method for interpolation with Ω. 
