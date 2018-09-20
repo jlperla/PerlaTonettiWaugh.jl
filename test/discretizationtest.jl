@@ -33,7 +33,7 @@ Test on reascaling method and make comparison
     # Do the conversion
     v_rescale = v_tilde .* exp.(ξ*z)
     # Check for absolute similarity (norms, etc.)
-    @test_broken norm(v-v_rescale,Inf) ≈ 0.0 atol = 1e-2
+    # @test_broken norm(v-v_rescale,Inf) ≈ 0.0 atol = 1e-2
 
     # Check for greater stability with the rescaled problem. 
     z_alt = range(z_min, stop = z_max, length = M+100)
@@ -52,14 +52,14 @@ Test on reascaling method and make comparison
     # conversion to v
     v_rescale_alt = v_tilde_alt.*exp.(ξ*z_alt)
     v_int=LinInterp(z,  v_rescale)
-    @test_broken norm(v_rescale_alt-v_int.(z_alt), Inf) ≈ 0.0 atol = 2e-1
+    # @test_broken norm(v_rescale_alt-v_int.(z_alt), Inf) ≈ 0.0 atol = 2e-1
 
     # use the ordinary method
     z_alt, L_1, L_1_plus, L_2 = diffusionoperators(z_alt) # Regular code. 
     L_T = r*I - μ_val2*L_1 - σ_val2^2/2 * L_2 # Construct the aggregate operator. 
     v_alt = L_T \ π(ξ).(z_alt) # Solution to the differential equation. 
     v_int_old=LinInterp(z,  v)
-    @test_broken norm(v_alt-v_int_old.(z_alt), Inf) ≈ 0.0 atol = 2e-1
+    # @test_broken norm(v_alt-v_int_old.(z_alt), Inf) ≈ 0.0 atol = 2e-1
 
 #Tests for stability of irregular grid
     z_irregular=unique([range(z_min, stop = 1.0, length = 500)' range(1.0, stop = z_max, length = 201)'])
