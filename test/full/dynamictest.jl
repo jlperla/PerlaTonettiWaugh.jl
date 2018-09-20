@@ -50,19 +50,19 @@
     @test norm(sol.results[:S] .-  0.058475033) ≈ 0.0 atol = 1e-8 
     @test norm(sol.results[:L_tilde] .- 0.200430770) ≈ 0.0 atol = 1e-8
   # Full coverage of each column.
-  @test sol.results[:t][4] == 17.44 
-  @test sol.results[:g][5] ≈ 0.020419880572700753 atol = 1e-8
-  @test sol.results[:z_hat][6] ≈ 1.4257125350016342 atol = 1e-8
-  @test sol.results[:Ω][7] ≈ 1.036549465116929 atol = 1e-8
-  @test sol.results[:E][8] == 0.053 atol = 1e-8
-  @test sol.results[:v_0][9] ≈ 1.1867999999850465 atol = 1e-8
-  @test sol.results[:L_tilde][10] ≈ 0.20043077010213567 atol = 1e-8
-  @test sol.results[:λ_ii][11] ≈ 0.7813233366545765 atol = 1e-8
-  @test sol.results[:c][12] ≈ 0.9875840990862862 atol = 1e-8
-  @test sol.results[:S][4] ≈ 0.05847503375286956 atol = 1e-8
-  @test sol.results[:z_bar][3] ≈ 3.625418102683695 atol = 1e-8
-  @test sol.results[:π_min][2] ≈ 0.06784341841210674 atol = 1e-8
-  @test sol.results[:entry_residual][12] ≈ -1.3211653993039363e-13 atol = 1e-8
+    @test sol.results[:t][4] == 17.44 
+    @test sol.results[:g][5] ≈ 0.020419880572700753 atol = 1e-8
+    @test sol.results[:z_hat][6] ≈ 1.4257125350016342 atol = 1e-8
+    @test sol.results[:Ω][7] ≈ 1.036549465116929 atol = 1e-8
+    @test sol.results[:E][8] == 0.053 atol = 1e-8
+    @test sol.results[:v_0][9] ≈ 1.1867999999850465 atol = 1e-8
+    @test sol.results[:L_tilde][10] ≈ 0.20043077010213567 atol = 1e-8
+    @test sol.results[:λ_ii][11] ≈ 0.7813233366545765 atol = 1e-8
+    @test sol.results[:c][12] ≈ 0.9875840990862862 atol = 1e-8
+    @test sol.results[:S][4] ≈ 0.05847503375286956 atol = 1e-8
+    @test sol.results[:z_bar][3] ≈ 3.625418102683695 atol = 1e-8
+    @test sol.results[:π_min][2] ≈ 0.06784341841210674 atol = 1e-8
+    @test sol.results[:entry_residual][12] ≈ -1.3211653993039363e-13 atol = 1e-8
 
   # Run the solver for another case. 
     sol = solve_dynamics(params_0, stationary_0, settings, T, Ω)
