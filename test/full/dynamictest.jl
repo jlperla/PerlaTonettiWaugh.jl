@@ -38,10 +38,10 @@
   # Run the solver. 
     sol = solve_dynamics(params_T, stationary_T, settings, T, Ω)
   # Spot-checks.
-    @test sol.sol.t[5] ≈ 19.840000000000003
-    @test sol.results[:λ_ii][end] ≈ 0.7813233366790822
-    @test sol.sol.u[4][3] ≈ 1.1499093016834008
-    @test sol.sol.prob.u0[1] ≈ 1.1868000000001158
+    @test sol.sol.t[5] ≈ 19.840000000000003 atol = 1e-8
+    @test sol.results[:λ_ii][end] ≈ 0.7813233366790822 atol = 1e-8
+    @test sol.sol.u[4][3] ≈ 1.1499093016834008 atol = 1e-8
+    @test sol.sol.prob.u0[1] ≈ 1.1868000000001158 atol = 1e-8
   # Consistency checks. 
     @test norm(sol.results[:g] .- 0.0204198805) ≈ 0.0 atol = 1e-8 # Probably the most important of these checks. 
     @test norm(sol.results[:z_hat] .- 1.42571253) ≈ 0.0 atol = 1e-7 
@@ -54,14 +54,28 @@
     sol = solve_dynamics(params_0, stationary_0, settings, T, Ω)
   # Spot-checks. 
     @test sol.sol.t[5] == 19.852
-    @test sol.results[:λ_ii][1] ≈ 0.9929472025880611
-    @test sol.sol.u[4][3] ≈ 1.153063927522336
-    @test sol.sol.prob.u0[1] ≈ 1.1868000000002454
+    @test sol.results[:λ_ii][1] ≈ 0.9929472025880611 atol = 1e-8
+    @test sol.sol.u[4][3] ≈ 1.153063927522336 atol = 1e-8
+    @test sol.sol.prob.u0[1] ≈ 1.1868000000002454 atol = 1e-8 
   # Detailed checks. 
-    @test sol.results[:g][1] ≈ 0.020019475192487802 # g check.
-    @test sol.results[:g][end] ≈ 0.007963191154810903 # g check. 
-    @test sol.results[:z_hat][1] ≈ 2.771561823423923 
+    @test sol.results[:g][1] ≈ 0.020019475192487802 atol = 1e-8 # g check.
+    @test sol.results[:g][end] ≈ 0.007963191154810903 atol = 1e-8 # g check. 
+    @test sol.results[:z_hat][1] ≈ 2.771561823423923 atol = 1e-8 
     @test sol.results[:z_hat][(end-9)] ≈ 2.77021657056094 atol = 1e-8
+  # Full coverage of each column.
+    @test sol.results[:t][4] == 17.44 
+    @test sol.results[:g][5] ≈ 0.020419880572700753 atol = 1e-8
+    @test sol.results[:z_hat][6] ≈ 1.4257125350016342 atol = 1e-8
+    @test sol.results[:Ω][7] ≈ 1.036549465116929 atol = 1e-8
+    @test sol.results[:E][8] == 0.053 atol = 1e-8
+    @test sol.results[:v_0][9] ≈ 1.1867999999850465 atol = 1e-8
+    @test sol.results[:L_tilde][10] ≈ 0.20043077010213567 atol = 1e-8
+    @test sol.results[:λ_ii][11] ≈ 0.7813233366545765 atol = 1e-8
+    @test sol.results[:c][12] ≈ 0.9875840990862862 atol = 1e-8
+    @test sol.results[:S][4] ≈ 0.05847503375286956 atol = 1e-8
+    @test sol.results[:z_bar][3] ≈ 3.625418102683695 atol = 1e-8
+    @test sol.results[:π_min][2] ≈ 0.06784341841210674 atol = 1e-8
+    @test sol.results[:entry_residual][12] ≈ -1.3211653993039363e-13 atol = 1e-8
 end
 
 @testset "Correctness Tests" begin # Here, we compare the DAE output to known correct values, such as MATLAB output or analytical results.
