@@ -98,7 +98,7 @@ end
   # Tests. 
     @test mean(sol.results[:entry_residual]) ≈ 0.0 atol = 1e-10
     residuals_interp = entry_residuals(params_T, stationary_T, settings, T, Ω_vec, Ω_nodes, entry_residuals_nodes).entry_residuals_interpolation
-    @test mean(residuals_interp.(Ω_nodes)) ≈ 0.0 atol = 1e-9
+    @test mean(residuals_interp.(entry_residuals_nodes)) ≈ 0.0 atol = 1e-9
 end 
 
 @testset "Regression Tests for f! at T" begin 
