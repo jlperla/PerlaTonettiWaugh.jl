@@ -1,5 +1,5 @@
 using PerlaTonettiWaugh, Test, LinearAlgebra
-using Distributions, Sundials, BenchmarkTools, Parameters, QuantEcon, Interpolations, NLsolve, Optim, DifferentialEquations, DiffEqCallbacks, Random, Statistics
+using Distributions, Sundials, BenchmarkTools, Parameters, QuantEcon, Interpolations, NLsolve, Optim, DifferentialEquations, DiffEqCallbacks, Random, Statistics, Interpolations
 
 @elapsed begin 
   @time @testset "Utilities" begin include("util/compactify.jl") end

@@ -6,12 +6,12 @@ function entry_residuals(params_T, stationary_sol_T, settings, T, Ω_vec, Ω_nod
   # Grab the entry residuals and time points. 
     v_0s = sol.results[:v_0]
     ts = sol.results[:t]
-    v_0_interpolation = LinInterp(ts, v_0s)
+    v_0_interpolation = LinearInterpolation(ts, v_0s)
     # compute entry residuals from the solution
     entry_residuals_vec = map(t -> v_0_interpolation(t) - ζ * (1-χ) / χ, entry_residuals_nodes)
 
     # perform linear interpolation on entry_residuals 
-    entry_residuals_interpolation = LinInterp(entry_residuals_nodes, entry_residuals_vec)
+    entry_residuals_interpolation = LinearInterpolation(entry_residuals_nodes, entry_residuals_vec)
     
     return (entry_residuals_interpolation = entry_residuals_interpolation,
            entry_residuals = entry_residuals_vec, solved_dynamics = sol)
@@ -23,7 +23,7 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω_vec, Ω_node
     @assert Ω_nodes[1] ≈ 0.0 
     @assert Ω_nodes[end] ≈ T
   # Get the (callable) interpolation object. 
-    Ω = LinInterp(Ω_nodes, Ω_vec) # QuantEcon routine. 
+    Ω = LinearInterpolation(Ω_nodes, Ω_vec) # QuantEcon routine. 
   # Run the main method. 
     r = solve_dynamics(params_T, stationary_sol_T, settings, T, Ω; stopwithf! = stopwithf!) 
 end 

@@ -46,19 +46,19 @@ Test on reascaling method and make comparison
     v_tilde_alt = L_T_tilde \ π_tilde.(z_alt) # Solution to the rescaled differential equation. 
     
     # test the pre-conversion difference of v_tilde
-    v_int_tilde=LinInterp(z,  v_tilde)
+    v_int_tilde=LinearInterpolation(z,  v_tilde)
     @test norm(v_tilde_alt-v_int_tilde.(z_alt)) ≈ 0.0 atol = 3e-1
 
     # conversion to v
     v_rescale_alt = v_tilde_alt.*exp.(ξ*z_alt)
-    v_int=LinInterp(z,  v_rescale)
+    v_int=LinearInterpolation(z,  v_rescale)
     # @test_broken norm(v_rescale_alt-v_int.(z_alt), Inf) ≈ 0.0 atol = 2e-1
 
     # use the ordinary method
     z_alt, L_1, L_1_plus, L_2 = diffusionoperators(z_alt) # Regular code. 
     L_T = r*I - μ_val2*L_1 - σ_val2^2/2 * L_2 # Construct the aggregate operator. 
     v_alt = L_T \ π(ξ).(z_alt) # Solution to the differential equation. 
-    v_int_old=LinInterp(z,  v)
+    v_int_old=LinearInterpolation(z,  v)
     # @test_broken norm(v_alt-v_int_old.(z_alt), Inf) ≈ 0.0 atol = 2e-1
 
 #Tests for stability of irregular grid
@@ -92,9 +92,9 @@ Test on reascaling method and make comparison
     v_tilde_irregular_add3 = L_T_tilde_irregular_add3 \ π_tilde.(z_irregular_add3)
 
     # Interpolation
-    v_int1=LinInterp(z_irregular_add1, v_tilde_irregular_add1)
-    v_int2=LinInterp(z_irregular_add2, v_tilde_irregular_add2)
-    v_int3=LinInterp(z_irregular_add3, v_tilde_irregular_add3)
+    v_int1=LinearInterpolation(z_irregular_add1, v_tilde_irregular_add1)
+    v_int2=LinearInterpolation(z_irregular_add2, v_tilde_irregular_add2)
+    v_int3=LinearInterpolation(z_irregular_add3, v_tilde_irregular_add3)
 
     @test norm(v_int1.(z_irregular)-v_tilde_irregular,Inf)≈ 0.0 atol = 1e-2
     @test norm(v_int2.(z_irregular)-v_tilde_irregular,Inf)≈ 0.0 atol = 1e-2

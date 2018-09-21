@@ -45,7 +45,7 @@
 
     # Create the interpolation object of g
     g_vector = g_stationary .+ 0.01 * t
-    g_int = LinInterp(t, g_vector)
+    g_int = LinearInterpolation(t, g_vector)
     g_func = t -> g_int(t) # Not idiosyncratic. 
 
     # Create settings object.
