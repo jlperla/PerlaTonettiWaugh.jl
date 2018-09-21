@@ -21,6 +21,6 @@ export stationary_algebraic, stationary_numerical, simpleODE, simpleDAE, @with_k
 
 
 # export utility for unit tests
-export Compactifier, decompactify_approximately
+export Compactifier, Decompactifier
 
 end # module

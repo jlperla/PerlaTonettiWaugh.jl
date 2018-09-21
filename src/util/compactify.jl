@@ -6,4 +6,10 @@ struct Compactifier
     Compactifier(lb::Float64, ub::Float64) = lb >= ub ? error("ub should be strictly greater than lb.") : new(lb, ub, (ub - lb)/2, (ub + lb)/2)
 end
 (f::Compactifier)(x) = f.a + f.k * x / sqrt(1 + x*x)
+
+struct Decompactifier
+    compactifier::Compactifier
+    Decompactifier(compactifier::Compactifier) = new(compactifier)
+end
 decompactify_approximately(f::Compactifier, y::Float64) = (y - f.a) / sqrt(1 - ((y-f.a)/f.k)^2) # decompactify with some numerical errors
+(f::Decompactifier)(y) = decompactify_approximately(f.compactifier, y)
