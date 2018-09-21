@@ -1,8 +1,17 @@
 # Residuals function. 
-function entry_residuals(params_T, stationary_sol_T, settings, T, Ω_vec, Ω_nodes, entry_residuals_nodes; stopwithf! = false)
-    @unpack ζ, χ = params_T
-  # Get the solver solution. 
-    sol = solve_dynamics(params_T, stationary_sol_T, settings, T, Ω_vec, Ω_nodes; stopwithf! = stopwithf!)
+function entry_residuals(Ω_interior, Ω_0, stationary_sol, T, params, settings, Ω_nodes, entry_residuals_nodes; stopwithf! = false)
+    @unpack ζ, χ = params
+
+  # Validate the interpolation objects.
+    @assert Ω_nodes[1] ≈ 0.0 
+    @assert Ω_nodes[end] ≈ T
+    
+    Ω = LinearInterpolation(Ω_nodes, [Ω_0; Ω_interior; stationary_sol.Ω], # interpolate Ω
+                            extrapolation_bc = Interpolations.Flat()) # constant before 0 / after T 
+    
+  # Run the main method. 
+    sol = solve_dynamics(params, stationary_sol, settings, T, Ω; stopwithf! = stopwithf!) 
+
   # Grab the entry residuals and time points. 
     v_0s = sol.results[:v_0]
     ts = sol.results[:t]
@@ -15,17 +24,6 @@ function entry_residuals(params_T, stationary_sol_T, settings, T, Ω_vec, Ω_nod
     
     return (entry_residuals_interpolation = entry_residuals_interpolation,
            entry_residuals = entry_residuals_vec, solved_dynamics = sol)
-end 
-
-# Method for interpolation with Ω. 
-function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω_vec, Ω_nodes; stopwithf! = false)
-  # Validate the interpolation objects.
-    @assert Ω_nodes[1] ≈ 0.0 
-    @assert Ω_nodes[end] ≈ T
-  # Get the (callable) interpolation object. 
-    Ω = LinearInterpolation(Ω_nodes, Ω_vec) # QuantEcon routine. 
-  # Run the main method. 
-    r = solve_dynamics(params_T, stationary_sol_T, settings, T, Ω; stopwithf! = stopwithf!) 
 end 
 
 # Main method.
