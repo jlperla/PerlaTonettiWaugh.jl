@@ -6,7 +6,7 @@ function entry_residuals(Ω_interior, Ω_0, stationary_sol, T, params, settings,
     @assert Ω_nodes[1] ≈ 0.0 
     @assert Ω_nodes[end] ≈ T
     
-    Ω = LinearInterpolation(Ω_nodes, [Ω_0; Ω_interior; stationary_sol.Ω], # interpolate Ω
+    Ω = CubicSplineInterpolation(Ω_nodes, [Ω_0; Ω_interior; stationary_sol.Ω], # interpolate Ω
                             extrapolation_bc = Interpolations.Flat()) # constant before 0 / after T 
     
   # Run the main method. 

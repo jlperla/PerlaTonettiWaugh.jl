@@ -36,12 +36,9 @@
     tstops = 0:1e-3:T # We don't currently use this anywhere. 
     settings = (z = z, tstops = tstops, Δ_E = Δ_E)
 
-
     # Objects for interpolation. 
-    Ω_Δt = 1e-4
-    Ω_nodes_interior = Ω_Δt:Ω_Δt:(T-Ω_Δt)
-
-    Ω_nodes = [0; Ω_nodes_interior; T]
+    Ω_nodes = range(0.0, stop=T, length=30)
+    Ω_nodes_interior = Ω_nodes[2:(end-1)]
     entry_residuals_nodes = Ω_nodes
 
     Ω_interior = map(t -> Ω(t), Ω_nodes_interior)
