@@ -34,7 +34,7 @@
   Ω = t -> Ω_T # This is constant. 
   E = t -> (log(Ω(t + Δ_E)) - (log(t - Δ_E)))/(2*Δ_E) + params.δ # Log forward differences. 
 
-@testset "Regression Tests" begin 
+@testset "Regression Tests with constant Ω" begin 
   # Run the solver. 
     sol = solve_dynamics(params_T, stationary_T, settings, T, Ω)
   # Spot-checks.
@@ -76,6 +76,40 @@
     @test sol.results[:g][end] ≈ 0.007963191154810903  # g check. 
     @test sol.results[:z_hat][1] ≈ 2.771561823423923  
     @test sol.results[:z_hat][(end-9)] ≈ 2.77021657056094 
+end
+
+@testset "Regression Tests with time-varying Ω" begin 
+    # Run the solver. 
+    T = sqrt(2*(log(Ω_0) - log(Ω_T)) / params.δ) 
+    Ω_t(t) = t < T ? Ω_0 * exp(-params.δ*T*t + params.δ*t*t/2) : Ω_T # Exponential Ω with time smoothing
+        
+    sol = solve_dynamics(params_T, stationary_T, settings, T, Ω_t)
+
+    # Spot-checks.
+    @test sol.sol.t[5] ≈ 4.082084260141162 
+    @test sol.results[:λ_ii][end] ≈ 0.7813233366790822 
+    @test sol.sol.u[4][3] ≈ 1.1499297704103377
+    @test sol.sol.prob.u0[1] ≈ 1.1868000000001158 
+    # Consistency checks. 
+    @test mean(sol.results[:g]) ≈ 0.032776838190899334 # Probably the most important of these checks. 
+    @test mean(sol.results[:z_hat]) ≈ 1.4240459625635837
+    @test mean(sol.results[:Ω]) ≈ 1.1546007592192749
+    @test mean(sol.results[:S]) ≈ 0.12182791972415735 
+    @test mean(sol.results[:L_tilde]) ≈ 0.10681494456873028
+    # Full coverage of each column.
+    @test sol.results[:t][4] ≈ 1.218041271171153 
+    @test sol.results[:g][5] ≈ 0.04344370969889273 
+    @test sol.results[:z_hat][6] ≈ 1.4138759332401472 
+    @test sol.results[:Ω][7] ≈ 1.0852902581449317
+    @test sol.results[:E][8] ≈ -0.0028323783109160325
+    @test sol.results[:v_0][9] ≈ 1.2162498772031762
+    @test sol.results[:L_tilde][10] ≈ 0.18748845694858562 
+    @test sol.results[:λ_ii][11] ≈ 0.7810856222518524 
+    @test sol.results[:c][12] ≈ 0.9889943277839625 
+    @test sol.results[:S][4] ≈  0.18806483645451416 
+    @test sol.results[:z_bar][3] ≈ 4.944304430477969
+    @test sol.results[:π_min][2] ≈ 0.06610896471451441 
+    @test sol.results[:entry_residual][12] ≈ 0.0010887433781643363 atol = 1e-8
 end
 
 @testset "Correctness Tests" begin # Here, we compare the DAE output to known correct values, such as MATLAB output or analytical results.
