@@ -27,23 +27,47 @@
     g_T = stationary_T.g 
     z_hat_T = stationary_T.z_hat 
 
-    # Define more interim quantities. 
-    T = sqrt(2*(log(Ω_0) - log(Ω_T)) / params.δ) 
-    Ω(t) = t < T ? Ω_0 * exp(-params.δ*T*t + params.δ*t*t/2) : Ω_T # Exponential Ω with time smoothing
-    E = t -> (log(Ω(t + Δ_E)) - (log(t - Δ_E)))/(2*Δ_E) + params.δ # Log forward differences. 
+    @testset "entry_residuals with constant Ω" begin
+        # Define more interim quantities. 
+        T = sqrt(2*(log(Ω_0) - log(Ω_T)) / params.δ) 
+        Ω(t) = Ω_T # Constant Ω
+        E = t -> (log(Ω(t + Δ_E)) - (log(t - Δ_E)))/(2*Δ_E) + params.δ # Central differences. 
+        
+        # Solver settings. 
+        tstops = 0:1e-3:T # We don't currently use this anywhere. 
+        settings = (z = z, tstops = tstops, Δ_E = Δ_E)
+
+        # Objects for interpolation. 
+        Ω_nodes = range(0.0, stop=T, length=30)
+        Ω_nodes_interior = Ω_nodes[2:(end-1)]
+        entry_residuals_nodes = Ω_nodes
+
+        Ω_interior = map(t -> Ω(t), Ω_nodes_interior)
+
+        # Tests; note that we forced Ω_0 to be Ω_T to make Ω constant over t = 0 too
+        residuals_interp = entry_residuals(Ω_interior, (Ω_T), stationary_T, T, params_T, settings, Ω_nodes, entry_residuals_nodes).entry_residuals_interpolation
+        @test mean(residuals_interp.(entry_residuals_nodes)) ≈ 0.0 atol = 1 # since `Ω` is not in equilibrium, residuals can be high
+    end
+
+    @testset "entry_residuals with exponential Ω" begin
+        # Define more interim quantities. 
+        T = sqrt(2*(log(Ω_0) - log(Ω_T)) / params.δ) 
+        Ω(t) = t < T ? Ω_0 * exp(-params.δ*T*t + params.δ*t*t/2) : Ω_T # Exponential Ω with time smoothing
+        E = t -> (log(Ω(t + Δ_E)) - (log(t - Δ_E)))/(2*Δ_E) + params.δ # Central differences. 
+        
+        # Solver settings. 
+        tstops = 0:1e-3:T # We don't currently use this anywhere. 
+        settings = (z = z, tstops = tstops, Δ_E = Δ_E)
     
-    # Solver settings. 
-    tstops = 0:1e-3:T # We don't currently use this anywhere. 
-    settings = (z = z, tstops = tstops, Δ_E = Δ_E)
-
-    # Objects for interpolation. 
-    Ω_nodes = range(0.0, stop=T, length=30)
-    Ω_nodes_interior = Ω_nodes[2:(end-1)]
-    entry_residuals_nodes = Ω_nodes
-
-    Ω_interior = map(t -> Ω(t), Ω_nodes_interior)
-
-    # Tests. 
-    residuals_interp = entry_residuals(Ω_interior, (Ω_0), stationary_T, T, params_T, settings, Ω_nodes, entry_residuals_nodes).entry_residuals_interpolation
-    @test mean(residuals_interp.(entry_residuals_nodes)) ≈ 0.0 atol = 1 # since `Ω` is not in equilibrium, residuals can be high
+        # Objects for interpolation. 
+        Ω_nodes = range(0.0, stop=T, length=30)
+        Ω_nodes_interior = Ω_nodes[2:(end-1)]
+        entry_residuals_nodes = Ω_nodes
+    
+        Ω_interior = map(t -> Ω(t), Ω_nodes_interior)
+    
+        # Tests. 
+        residuals_interp = entry_residuals(Ω_interior, (Ω_0), stationary_T, T, params_T, settings, Ω_nodes, entry_residuals_nodes).entry_residuals_interpolation
+        @test mean(residuals_interp.(entry_residuals_nodes)) ≈ 0.0 atol = 1 # since `Ω` is not in equilibrium, residuals can be high
+    end
 end 
