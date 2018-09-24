@@ -28,7 +28,7 @@ value_before_compactified_7 = ub + 595.2     # out of bounds, more extreme value
 @test decompactifier(compactifier(value_before_compactified_7)) ≈ value_before_compactified_7
 
 # setup, logistic
-compactifier = Compactifier(lb, ub, PerlaTonettiWaugh.Logistic())
+compactifier = Compactifier(lb, ub, ContinuousTransformations.Logistic())
 decompactifier = Decompactifier(compactifier)
 
 # values for try

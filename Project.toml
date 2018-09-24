@@ -6,6 +6,7 @@ version = "0.1.0"
 [deps]
 BandedMatrices = "aae01518-5342-5314-be14-df237901396f"
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+ContinuousTransformations = "98729d58-ae14-580b-85cc-57d472ed321e"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DataFramesMeta = "1313f7d8-7da2-5740-9ea0-a2ca25f37964"
 DiffEqCallbacks = "459566f4-90b8-5000-8ac3-15dfb0a30def"
