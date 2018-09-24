@@ -1,29 +1,41 @@
 # Residuals function. 
-function entry_residuals(Ω_interior, Ω_0, stationary_sol, T, params, settings, Ω_nodes, entry_residuals_nodes; stopwithf! = false)
-    @unpack ζ, χ = params
+function entry_residuals(Ω_interior0, Ω_0, stationary_sol, T, params, settings, Ω_nodes, entry_residuals_nodes; stopwithf! = false, iterations = 1000)
+  @unpack ζ, χ = params
+  Ω_T = stationary_sol.Ω
+  compactifier_Ω = Compactifier(min(Ω_0, Ω_T), max(Ω_0, Ω_T), ContinuousTransformations.Logistic())
+  decompactifier_Ω = Decompactifier(compactifier_Ω)
 
   # Validate the interpolation objects.
-    @assert Ω_nodes[1] ≈ 0.0 
-    @assert Ω_nodes[end] ≈ T
-    
-    Ω = CubicSplineInterpolation(Ω_nodes, [Ω_0; Ω_interior; stationary_sol.Ω], # interpolate Ω
+  @assert Ω_nodes[1] ≈ 0.0 
+  @assert Ω_nodes[end] ≈ T
+  
+  function entry_residuals_objective(Ω_interior)
+    # NOTE: compactifier is not being used (due to solver breakdown); to do so, use compactifier_Ω.(Ω_interior) instead
+    Ω = CubicSplineInterpolation(Ω_nodes, [Ω_0; (Ω_interior); Ω_T], # interpolate Ω
                             extrapolation_bc = Interpolations.Flat()) # constant before 0 / after T 
     
-  # Run the main method. 
+    # Run the main method. 
     sol = solve_dynamics(params, stationary_sol, settings, T, Ω; stopwithf! = stopwithf!) 
 
-  # Grab the entry residuals and time points. 
+    # Grab the entry residuals and time points. 
     v_0s = sol.results[:v_0]
     ts = sol.results[:t]
     v_0_interpolation = LinearInterpolation(ts, v_0s)
     # compute entry residuals from the solution
-    entry_residuals_vec = map(t -> v_0_interpolation(t) - ζ * (1-χ) / χ, entry_residuals_nodes)
+    entry_residuals_vec = v_0_interpolation.(entry_residuals_nodes) .- ζ * (1-χ) / χ
+    # println(norm(entry_residuals_vec)) # for debugging; TODO: remove this later after debugging
+    return (entry_residuals_vec)
+  end 
 
-    # perform linear interpolation on entry_residuals 
-    entry_residuals_interpolation = LinearInterpolation(entry_residuals_nodes, entry_residuals_vec)
-    
-    return (entry_residuals_interpolation = entry_residuals_interpolation,
-           entry_residuals = entry_residuals_vec, solved_dynamics = sol)
+  # Solve for Ω at Ω_nodes except 0 and T 
+  # NOTE: decompactifier is not being used (due to solver breakdown); to do so, use decompactifier_Ω.(Ω_interior0) instead
+  sol_Ω = nlsolve(entry_residuals_objective, (Ω_interior0); inplace = false, xtol = -Inf, iterations = iterations)
+
+  # perform linear interpolation on entry_residuals 
+  entry_residuals_interpolation = LinearInterpolation(entry_residuals_nodes, entry_residuals_vec)
+  
+  return (entry_residuals_interpolation = entry_residuals_interpolation,
+          entry_residuals = entry_residuals_vec, solved_dynamics = sol)
 end 
 
 # Main method.
