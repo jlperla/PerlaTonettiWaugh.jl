@@ -23,7 +23,8 @@ function entry_residuals(Ω_interior, Ω_0, stationary_sol, T, params, settings,
     entry_residuals_interpolation = LinearInterpolation(entry_residuals_nodes, entry_residuals_vec)
     
     return (entry_residuals_interpolation = entry_residuals_interpolation,
-           entry_residuals = entry_residuals_vec, solved_dynamics = sol)
+          Ω_interpolation = Ω,
+          entry_residuals = entry_residuals_vec, solved_dynamics = sol)
 end 
 
 # Main method.
