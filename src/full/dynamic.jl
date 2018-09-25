@@ -1,16 +1,17 @@
 # Residuals function. 
 function entry_residuals(Ω_interior, Ω_0, stationary_sol, T, params, settings, Ω_nodes, entry_residuals_nodes; stopwithf! = false)
-    @unpack ζ, χ = params
+    @unpack δ, ζ, χ = params
+    @unpack Δ_E = settings
 
   # Validate the interpolation objects.
     @assert Ω_nodes[1] ≈ 0.0 
     @assert Ω_nodes[end] ≈ T
     
     Ω = CubicSplineInterpolation(Ω_nodes, [Ω_0; Ω_interior; stationary_sol.Ω], # interpolate Ω
-                            extrapolation_bc = Interpolations.Line()) # constant before 0 / after T 
-    
+                            extrapolation_bc = Interpolations.Line()) # line before 0 / after T FIXIT: this needs to be Flat().
+    E = t -> (log(Ω(t + Δ_E)) - (log(Ω(t - Δ_E))))/(2*Δ_E) + δ # Central difference based E(t) 
   # Run the main method. 
-    sol = solve_dynamics(params, stationary_sol, settings, T, Ω; stopwithf! = stopwithf!) 
+    sol = solve_dynamics(params, stationary_sol, settings, T, Ω, E; stopwithf! = stopwithf!) 
 
   # Grab the entry residuals and time points. 
     v_0s = sol.results[:v_0]
@@ -28,10 +29,10 @@ function entry_residuals(Ω_interior, Ω_0, stationary_sol, T, params, settings,
 end 
 
 # Main method.
-function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω; stopwithf! = false)
+function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; stopwithf! = false)
     # Unpack arguments 
       @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params_T # Parameters
-      @unpack z, tstops, Δ_E = settings # Settings 
+      @unpack z, tstops = settings # Settings 
       v_T = stationary_sol_T.v_tilde # Stationary -- 
       g_T = stationary_sol_T.g
       z_hat_T = stationary_sol_T.z_hat
@@ -49,9 +50,6 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω; stopwithf! 
       ω = ω_weights(z, θ, σ-1) # Quadrature weights. 
       z, L_1_minus, L_1_plus, L_2 = rescaled_diffusionoperators(z, σ-1) # Operator Discretization. 
       L_1 = L_1_minus # L_1 ≡ L_1_minus.
-
-    # Define E(t) based on forward difference 
-      E(t) = (log(Ω(t+Δ_E)) - log(Ω(t-Δ_E)))/(2*Δ_E) + δ
 
     # Define the intermediate quantities for the DAE problem. 
       S(g) = θ * (g - μ - θ * υ^2/2) # Compute S given g. [EQUATION NUMBER NEEDED]

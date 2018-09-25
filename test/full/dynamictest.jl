@@ -32,11 +32,10 @@
 
 # Define more interim quantities. 
   Ω = t -> Ω_T # This is constant. 
-  E = t -> (log(Ω(t + Δ_E)) - (log(t - Δ_E)))/(2*Δ_E) + params.δ # Log forward differences. 
-
+  E = t -> (log(Ω(t + Δ_E)) - (log(Ω(t - Δ_E))))/(2*Δ_E) + params.δ # central differences. 
 @testset "Regression Tests with constant Ω" begin 
   # Run the solver. 
-    sol = solve_dynamics(params_T, stationary_T, settings, T, Ω)
+    sol = solve_dynamics(params_T, stationary_T, settings, T, Ω, E)
   # Spot-checks.
     @test sol.sol.t[5] ≈ 19.840000000000003 
     @test sol.results[:λ_ii][end] ≈ 0.7813233366790822 
@@ -65,7 +64,7 @@
     @test sol.results[:entry_residual][12] ≈ -1.3211653993039363e-13 atol = 1e-8
 
   # Run the solver for another case. 
-    sol = solve_dynamics(params_0, stationary_0, settings, T, Ω)
+    sol = solve_dynamics(params_0, stationary_0, settings, T, Ω, E)
   # Spot-checks. 
     @test sol.sol.t[5] == 19.852
     @test sol.results[:λ_ii][1] ≈ 0.9929472025880611 
@@ -82,8 +81,8 @@ end
     # Run the solver. 
     T = sqrt(2*(log(Ω_0) - log(Ω_T)) / params.δ) 
     Ω_t(t) = t < T ? Ω_0 * exp(-params.δ*T*t + params.δ*t*t/2) : Ω_T # Exponential Ω with time smoothing
-        
-    sol = solve_dynamics(params_T, stationary_T, settings, T, Ω_t)
+    E_t = t -> (log(Ω_t(t + Δ_E)) - (log(Ω_t(t - Δ_E))))/(2*Δ_E) + params.δ # central differences. 
+    sol = solve_dynamics(params_T, stationary_T, settings, T, Ω_t, E_t)
 
     # Spot-checks.
     @test sol.sol.t[5] ≈ 4.082084260141162 
@@ -114,11 +113,11 @@ end
 
 @testset "Correctness Tests" begin # Here, we compare the DAE output to known correct values, such as MATLAB output or analytical results.
   # First case. 
-  sol = solve_dynamics(params_T, stationary_T, settings, T, Ω)
+  sol = solve_dynamics(params_T, stationary_T, settings, T, Ω, E)
   @test all([isapprox(x, 0.0, atol = 1e-9) for x in sol.results[:entry_residual]]) # Free-entry condition holds ∀ t. 
 
   # Second case. 
-  sol = solve_dynamics(params_0, stationary_0, settings, T, Ω)
+  sol = solve_dynamics(params_0, stationary_0, settings, T, Ω, E)
   # @show all([isapprox(x, 0.0, atol = 1e-6) for x in sol.results[:entry_residual]]) # Free-entry condition holds ∀ t.   
 end 
 
@@ -130,7 +129,7 @@ end
     t = T 
     p = []
   # Fill the residuals vector 
-    f! = solve_dynamics(params_T, stationary_T, settings, T, Ω).f!
+    f! = solve_dynamics(params_T, stationary_T, settings, T, Ω, E).f!
     f!(resid, du, u, p, t) # Kept the p from the old tests, since the solver complains without it. But it's a dummy. 
   # Tests
     # Accuracy
