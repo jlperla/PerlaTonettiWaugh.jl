@@ -27,16 +27,16 @@
     g_T = stationary_T.g 
     z_hat_T = stationary_T.z_hat 
 
+    # Solver settings. 
+    tstops = tstops = range(0.0, stop = T, length = 100) 
+    settings = (z = z, tstops = tstops, Δ_E = Δ_E)
+
     @testset "entry_residuals with constant Ω" begin
         # Define more interim quantities. 
         T = sqrt(2*(log(Ω_0) - log(Ω_T)) / params.δ) 
         Ω(t) = Ω_T # Constant Ω
         E = t -> (log(Ω(t + Δ_E)) - (log(t - Δ_E)))/(2*Δ_E) + params.δ # Central differences. 
         
-        # Solver settings. 
-        tstops = 0:1e-3:T # We don't currently use this anywhere. 
-        settings = (z = z, tstops = tstops, Δ_E = Δ_E)
-
         # Objects for interpolation. 
         Ω_nodes = range(0.0, stop=T, length=30)
         Ω_nodes_interior = Ω_nodes[2:(end-1)]
@@ -54,10 +54,6 @@
         T = sqrt(2*(log(Ω_0) - log(Ω_T)) / params.δ) 
         Ω(t) = t < T ? Ω_0 * exp(-params.δ*T*t + params.δ*t*t/2) : Ω_T # Exponential Ω with time smoothing
         E = t -> (log(Ω(t + Δ_E)) - (log(t - Δ_E)))/(2*Δ_E) + params.δ # Central differences. 
-        
-        # Solver settings. 
-        tstops = 0:1e-3:T # We don't currently use this anywhere. 
-        settings = (z = z, tstops = tstops, Δ_E = Δ_E)
     
         # Objects for interpolation. 
         Ω_nodes = range(0.0, stop=T, length=30)

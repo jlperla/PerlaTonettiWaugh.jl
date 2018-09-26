@@ -11,7 +11,7 @@
   # Overall parameters. 
     params = (ρ = 0.02, σ = 4.2508, N = 10, θ = 5.1269, γ = 1.00, κ = 0.013, ζ = 1, η = 0, Theta = 1, χ = 1/(2.1868), υ = 0.0593, μ = 0, δ = 0.053)
   # Solver settings. 
-    tstops = 0:1e-3:T # We don't currently use this anywhere. 
+    tstops = nothing
 
 # Construct intermediate objects. 
   z = range(z_min, stop = z_max, length = M)

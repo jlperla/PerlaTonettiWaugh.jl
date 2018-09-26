@@ -128,7 +128,11 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; stopwith
       cb = FunctionCallingCallback(cb_aux, tdir = -1, func_start = false) # Callback object. 
 
     # Solve that DAE problem. 
-      sol = DifferentialEquations.solve(dae_prob, callback = cb) # solve! # TODO: include tstops = tstops in the argument.
+      if (tstops == nothing)
+        sol = DifferentialEquations.solve(dae_prob, callback = cb) # solve! # TODO: include tstops = tstops in the argument.
+      else
+        sol = DifferentialEquations.solve(dae_prob, callback = cb, tstops = tstops) # solve! # TODO: include tstops = tstops in the argument.
+      end
 
     # Post-process the results DataFrame.
       # Define the welfare, etc. quantities in terms of quantities in the DataFrame. 
