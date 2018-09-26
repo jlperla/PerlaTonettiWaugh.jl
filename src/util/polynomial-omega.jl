@@ -6,7 +6,11 @@ struct PolynomialΩ
     Ω::Function
 
     function PolynomialΩ(c_and_T::Array{Float64,1}, Ω_0::Float64, Ω_T::Float64, δ::Float64)
-        PolynomialΩ(c_and_T[1:(end-1)], c_and_T[end], Ω_0, Ω_T, δ)
+        if (length(c_and_T) == 1)
+            PolynomialΩ(c_and_T[1], Ω_0, Ω_T, δ)
+        else
+            PolynomialΩ(c_and_T[1:(end-1)], c_and_T[end], Ω_0, Ω_T, δ)
+        end
     end
 
     # linear case
