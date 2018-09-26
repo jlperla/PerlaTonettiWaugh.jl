@@ -5,14 +5,23 @@ struct PolynomialΩ
     E_derivative::Function
     Ω::Function
 
+    # linear case
+    function PolynomialΩ(T::Float64, Ω_0::Float64, Ω_T::Float64, δ::Float64)
+        Ω = t -> Ω_0 * (Ω_0/Ω_T)^(t*(t-2.0*T)/(T*T))
+        E = t -> 2*(t-T)*log(Ω_0/Ω_T)/T^2 + δ
+        E_derivative = t -> 2*(t-T)*log(Ω_0/Ω_T)/T^2 + δ
+
+        @assert Ω(0) ≈ Ω_0
+        @assert Ω(T) ≈ Ω_T
+        @assert E(T) ≈ δ
+
+        new(E, E_derivative, Ω)
+    end
+
     function PolynomialΩ(c::Array{Float64,1}, T::Float64, Ω_0::Float64, Ω_T::Float64, δ::Float64)
         deg = length(c) + 1 
         if (deg < 1 || deg > 5) throw("Up to quartic polynomials are supported.") end
-        if (deg == 1)
-            Ω = t -> Ω_0 * (Ω_0/Ω_T)^(t*(t-2.0*T)/(T*T))
-            E = t -> 2*(t-T)*log(Ω_0/Ω_T)/T^2 + δ
-            E_derivative = t -> 2*(t-T)*log(Ω_0/Ω_T)/T^2 + δ
-        end
+        # note that deg == 1 implies that c is empty (which will return type error as c is a Float64 array)
         if (deg == 2)
             Ω = t -> exp(c[1]*t*((t-T)^2)/3 ) * Ω_0 * (Ω_0/Ω_T)^(t*(t-2.0*T)/(T*T))
             E = t -> c[1]*(3*t*t-4*t*T+T*T)/3 + 2*(t-T)*log(Ω_0/Ω_T)/T^2 + δ
