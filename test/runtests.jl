@@ -1,8 +1,8 @@
 using PerlaTonettiWaugh, Test, LinearAlgebra
-using Distributions, Sundials, BenchmarkTools, Parameters, QuantEcon, Interpolations, NLsolve, Optim, DifferentialEquations, DiffEqCallbacks, Random, Statistics, Interpolations, ContinuousTransformations
+using Distributions, Sundials, BenchmarkTools, Parameters, QuantEcon, Interpolations, NLsolve, Optim, DifferentialEquations, DiffEqCallbacks, Random, Statistics, Interpolations, ContinuousTransformations, Roots
 
 @elapsed begin 
-  @time @testset "Utilities" begin include("util/compactify.jl") end
+  @time @testset "Utilities" begin include("util/runtests.jl") end
   @time @testset "Simple Stationary" begin include("simple/stationarytest.jl") end
   @time @testset "Full Stationary" begin include("full/stationarytest.jl") end
   @time @testset "Discretization and Rescaling Tests" begin include("discretizationtest.jl") end 

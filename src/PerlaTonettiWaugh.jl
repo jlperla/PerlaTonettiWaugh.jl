@@ -6,6 +6,7 @@ import Parameters: @with_kw, @unpack
 
 # Utilities
 include("util/compactify.jl")
+include("util/zero_is_in_interval.jl")
 # General discretization files.
 include("diffusionoperators.jl")
 include("quadrature.jl")
@@ -21,6 +22,6 @@ export stationary_algebraic, stationary_numerical, simpleODE, simpleDAE, @with_k
 
 
 # export utility for unit tests
-export Compactifier, Decompactifier
+export Compactifier, Decompactifier, zero_is_in_interval
 
 end # module
