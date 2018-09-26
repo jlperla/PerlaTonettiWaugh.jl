@@ -17,7 +17,7 @@ struct PolynomialΩ
     function PolynomialΩ(T::Float64, Ω_0::Float64, Ω_T::Float64, δ::Float64)
         Ω = t -> Ω_0 * (Ω_0/Ω_T)^(t*(t-2.0*T)/(T*T))
         E = t -> 2*(t-T)*log(Ω_0/Ω_T)/T^2 + δ
-        E_derivative = t -> 2*(t-T)*log(Ω_0/Ω_T)/T^2 + δ
+        E_derivative = t -> 2*log(Ω_0/Ω_T)/T^2
 
         @assert Ω(0) ≈ Ω_0
         @assert Ω(T) ≈ Ω_T
