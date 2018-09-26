@@ -5,6 +5,10 @@ struct PolynomialΩ
     E_derivative::Function
     Ω::Function
 
+    function PolynomialΩ(c_and_T::Array{Float64,1}, Ω_0::Float64, Ω_T::Float64, δ::Float64)
+        PolynomialΩ(c_and_T[1:(end-1)], c_and_T[end], Ω_0, Ω_T, δ)
+    end
+
     # linear case
     function PolynomialΩ(T::Float64, Ω_0::Float64, Ω_T::Float64, δ::Float64)
         Ω = t -> Ω_0 * (Ω_0/Ω_T)^(t*(t-2.0*T)/(T*T))
@@ -45,5 +49,4 @@ struct PolynomialΩ
         new(E, E_derivative, Ω)
     end
 end
-
 (f::PolynomialΩ)(t) = f.Ω(t)
