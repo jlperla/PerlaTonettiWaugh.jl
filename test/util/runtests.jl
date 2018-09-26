@@ -1,2 +1,2 @@
 include("compactify.jl")
-include("zero_is_in_interval.jl")
+include("check-in-interval.jl")
