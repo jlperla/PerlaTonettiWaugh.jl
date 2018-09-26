@@ -36,3 +36,5 @@ struct PolynomialΩ
         new(E, E_derivative, Ω)
     end
 end
+
+(f::PolynomialΩ)(t) = f.Ω(t)
