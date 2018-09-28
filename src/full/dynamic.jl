@@ -129,9 +129,9 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; stopwith
 
     # Solve that DAE problem. 
       if (tstops == nothing)
-        sol = DifferentialEquations.solve(dae_prob, callback = cb) # solve! # TODO: include tstops = tstops in the argument.
+        sol = DifferentialEquations.solve(dae_prob, callback = cb)
       else
-        sol = DifferentialEquations.solve(dae_prob, callback = cb, tstops = tstops) # solve! # TODO: include tstops = tstops in the argument.
+        sol = DifferentialEquations.solve(dae_prob, callback = cb, tstops = tstops)
       end
 
     # Post-process the results DataFrame.
