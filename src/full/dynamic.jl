@@ -29,7 +29,7 @@ function entry_residuals(Ω_interior, Ω_0, stationary_sol, T, params, settings,
 end 
 
 # Main method.
-function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; stopwithf! = false)
+function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; stopwithf! = false, detailed_solution = false)
     # Unpack arguments 
       @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params_T # Parameters
       @unpack z, tstops = settings # Settings 
@@ -144,14 +144,6 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; stopwith
         gen_π_min = (L_tilde_t, z_bar) -> (1 - L_tilde_t) / ((σ-1)*z_bar) # [EQUATION NUMBER NEEDED]
         gen_entry_residual = (v_0) -> v_0 - ζ*(1-χ)/χ # [EQUATION NUMBER NEEDED]
 
-      # other welfare functions.
-        g_interpolated = LinearInterpolation(results[:t], results[:g])
-        z_hat_interpolated = LinearInterpolation(results[:t], results[:z_hat])
-        L_tilde_interpolated = LinearInterpolation(results[:t], results[:L_tilde])
-        λ_ii = t -> gen_λ_ii(z_hat_interpolated(t))
-        log_M = t -> quadgk(g_interpolated, 0, t)[1]
-        log_c = t -> log(gen_c(L_tilde_interpolated(t), Ω(t), λ_ii(t)))
-        U = t -> quadgk(τ -> exp(-ρ*τ)*(log_M(t+τ) + log_c(t+τ)), 0, (T-t))[1] + exp(-ρ*(T-t)/ρ^2)*((1+ρ*(T-t))*g_T + ρ*(log_c(T) + log_M(T)))
 
       # Add these quantities to the DataFrame. 
         results = @transform(results, λ_ii = gen_λ_ii.(:z_hat)) # λ_ii column. 
@@ -160,8 +152,20 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; stopwith
         results = @transform(results, z_bar = gen_z_bar.(:Ω, :z_hat)) # z_bar column. 
         results = @transform(results, π_min = gen_π_min.(:L_tilde, :z_bar)) # π_min column. 
         results = @transform(results, entry_residual = gen_entry_residual.(:v_0)) # entry_residual column 
-        results = @transform(results, log_M = log_M.(:t)) # log_M column 
-        results = @transform(results, U = U.(:t)) # U column
+
+        if (detailed_solution)
+          # other welfare functions.
+          g_interpolated = LinearInterpolation(results[:t], results[:g])
+          z_hat_interpolated = LinearInterpolation(results[:t], results[:z_hat])
+          L_tilde_interpolated = LinearInterpolation(results[:t], results[:L_tilde])
+          λ_ii = t -> gen_λ_ii(z_hat_interpolated(t))
+          log_M = t -> quadgk(g_interpolated, 0, t)[1]
+          log_c = t -> log(gen_c(L_tilde_interpolated(t), Ω(t), λ_ii(t)))
+          U = t -> quadgk(τ -> exp(-ρ*τ)*(log_M(t+τ) + log_c(t+τ)), 0, (T-t))[1] + exp(-ρ*(T-t)/ρ^2)*((1+ρ*(T-t))*g_T + ρ*(log_c(T) + log_M(T)))
+
+          results = @transform(results, log_M = log_M.(:t)) # log_M column 
+          results = @transform(results, U = U.(:t)) # U column
+        end
 
     # Return. 
       return (results = results, sol = sol, f! = f!, static_equilibrium = static_equilibrium) # The results, raw DAE solution, and DAE problem (f!, static_equilibrium, etc.) objects.  
