@@ -29,7 +29,7 @@ function entry_residuals(Ω_interior, Ω_0, stationary_sol, T, params, settings,
 end 
 
 # Main method.
-function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; stopwithf! = false, detailed_solution = false)
+function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; stopwithf! = false, detailed_solution = true)
     # Unpack arguments 
       @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params_T # Parameters
       @unpack z, tstops = settings # Settings 
@@ -146,11 +146,6 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; stopwith
 
 
       # Add these quantities to the DataFrame. 
-        results = @transform(results, λ_ii = gen_λ_ii.(:z_hat)) # λ_ii column. 
-        results = @transform(results, c = gen_c.(:L_tilde, :Ω, :z_hat)) # c column.
-        results = @transform(results, S = gen_S.(:g)) # S column.
-        results = @transform(results, z_bar = gen_z_bar.(:Ω, :z_hat)) # z_bar column. 
-        results = @transform(results, π_min = gen_π_min.(:L_tilde, :z_bar)) # π_min column. 
         results = @transform(results, entry_residual = gen_entry_residual.(:v_0)) # entry_residual column 
 
         if (detailed_solution)
@@ -163,6 +158,11 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; stopwith
           log_c = t -> log(gen_c(L_tilde_interpolated(t), Ω(t), λ_ii(t)))
           U = t -> quadgk(τ -> exp(-ρ*τ)*(log_M(t+τ) + log_c(t+τ)), 0, (T-t))[1] + exp(-ρ*(T-t)/ρ^2)*((1+ρ*(T-t))*g_T + ρ*(log_c(T) + log_M(T)))
 
+          results = @transform(results, λ_ii = gen_λ_ii.(:z_hat)) # λ_ii column. 
+          results = @transform(results, c = gen_c.(:L_tilde, :Ω, :z_hat)) # c column.
+          results = @transform(results, S = gen_S.(:g)) # S column.
+          results = @transform(results, z_bar = gen_z_bar.(:Ω, :z_hat)) # z_bar column. 
+          results = @transform(results, π_min = gen_π_min.(:L_tilde, :z_bar)) # π_min column. 
           results = @transform(results, log_M = log_M.(:t)) # log_M column 
           results = @transform(results, U = U.(:t)) # U column
         end
