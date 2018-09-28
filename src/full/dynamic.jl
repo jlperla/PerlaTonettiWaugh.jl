@@ -135,6 +135,7 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; stopwith
       end
 
     # Post-process the results DataFrame.
+    results = sort!(results)
       # Define the welfare, etc. quantities in terms of quantities in the DataFrame. 
         gen_λ_ii = z_hat -> 1 / (1 + (N-1)*z_hat^(σ-1-θ)*d^(1-σ)) # [EQUATION NUMBER NEEDED]
         gen_c = (L_tilde, Ω, λ_ii) -> (θ / (1-σ+θ))^(1/(σ-1))*(1-L_tilde)*Ω^(1/(σ-1))*λ_ii^(1/(1-σ)) # [EQUATION NUMBER NEEDED]
@@ -142,6 +143,16 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; stopwith
         gen_z_bar = (Ω_t, z_hat) -> Ω_t * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ)) # [EQUATION NUMBER NEEDED]
         gen_π_min = (L_tilde_t, z_bar) -> (1 - L_tilde_t) / ((σ-1)*z_bar) # [EQUATION NUMBER NEEDED]
         gen_entry_residual = (v_0) -> v_0 - ζ*(1-χ)/χ # [EQUATION NUMBER NEEDED]
+
+      # other welfare functions.
+        g_interpolated = LinearInterpolation(results[:t], results[:g])
+        z_hat_interpolated = LinearInterpolation(results[:t], results[:z_hat])
+        L_tilde_interpolated = LinearInterpolation(results[:t], results[:L_tilde])
+        λ_ii = t -> gen_λ_ii(z_hat_interpolated(t))
+        log_M = t -> quadgk(g_interpolated, 0, t)[1]
+        log_c = t -> log(gen_c(L_tilde_interpolated(t), Ω(t), λ_ii(t)))
+        U = t -> quadgk(τ -> exp(-ρ*τ)*(log_M(t+τ) + log_c(t+τ)), 0, (T-t))[1] + exp(-ρ*(T-t)/ρ^2)*((1+ρ*(T-t))*g_T + ρ*(log_c(T) + log_M(T)))
+
       # Add these quantities to the DataFrame. 
         results = @transform(results, λ_ii = gen_λ_ii.(:z_hat)) # λ_ii column. 
         results = @transform(results, c = gen_c.(:L_tilde, :Ω, :z_hat)) # c column.
@@ -149,7 +160,9 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; stopwith
         results = @transform(results, z_bar = gen_z_bar.(:Ω, :z_hat)) # z_bar column. 
         results = @transform(results, π_min = gen_π_min.(:L_tilde, :z_bar)) # π_min column. 
         results = @transform(results, entry_residual = gen_entry_residual.(:v_0)) # entry_residual column 
+        results = @transform(results, log_M = log_M.(:t)) # log_M column 
+        results = @transform(results, U = U.(:t)) # U column
 
     # Return. 
-      return (results = sort!(results), sol = sol, f! = f!, static_equilibrium = static_equilibrium) # The results, raw DAE solution, and DAE problem (f!, static_equilibrium, etc.) objects.  
+      return (results = results, sol = sol, f! = f!, static_equilibrium = static_equilibrium) # The results, raw DAE solution, and DAE problem (f!, static_equilibrium, etc.) objects.  
 end

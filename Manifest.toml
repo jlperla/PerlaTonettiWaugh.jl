@@ -98,9 +98,9 @@ version = "0.4.1"
 
 [[CategoricalArrays]]
 deps = ["Compat", "Future", "JSON", "Missings", "Printf", "Reexport"]
-git-tree-sha1 = "8009a507e2e3db040d6854a82ce959fb5971cb37"
+git-tree-sha1 = "6362c49130b5888f5628bc197ee5f17aec7d2a88"
 uuid = "324d7699-5711-5eae-9e2f-1d82baa6b597"
-version = "0.3.13"
+version = "0.4.0"
 
 [[ChunkedArrays]]
 deps = ["EllipsisNotation"]
@@ -122,9 +122,9 @@ version = "0.2.0"
 
 [[Compat]]
 deps = ["Base64", "Dates", "DelimitedFiles", "Distributed", "InteractiveUtils", "LibGit2", "Libdl", "LinearAlgebra", "Markdown", "Mmap", "Pkg", "Printf", "REPL", "Random", "Serialization", "SharedArrays", "Sockets", "SparseArrays", "Statistics", "Test", "UUIDs", "Unicode"]
-git-tree-sha1 = "ae262fa91da6a74e8937add6b613f58cd56cdad4"
+git-tree-sha1 = "ff2595695fc4f14427358ce2593f867085c45dcb"
 uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
-version = "1.1.0"
+version = "1.2.0"
 
 [[Conda]]
 deps = ["Compat", "JSON", "VersionParsing"]
@@ -145,10 +145,10 @@ uuid = "717857b8-e6f2-59f4-9121-6e50c889abd2"
 version = "0.5.1"
 
 [[DataFrames]]
-deps = ["CategoricalArrays", "CodecZlib", "Compat", "DataStreams", "Dates", "InteractiveUtils", "LinearAlgebra", "Missings", "Pkg", "Printf", "Random", "Reexport", "SortingAlgorithms", "Statistics", "StatsBase", "Test", "TranscodingStreams", "Unicode", "WeakRefStrings"]
-git-tree-sha1 = "31cca86a48add8d5cdd9457c4f75ee5577ef3488"
+deps = ["CategoricalArrays", "CodecZlib", "Compat", "DataStreams", "Dates", "InteractiveUtils", "IteratorInterfaceExtensions", "LinearAlgebra", "Missings", "Pkg", "Printf", "Random", "Reexport", "SortingAlgorithms", "Statistics", "StatsBase", "TableTraits", "Tables", "Test", "TranscodingStreams", "Unicode", "WeakRefStrings"]
+git-tree-sha1 = "0fcb0c9914f31e0607b1965dc5a9e15c969c4806"
 uuid = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
-version = "0.13.1"
+version = "0.14.0"
 
 [[DataFramesMeta]]
 deps = ["DataFrames", "Random", "Statistics", "Test"]
@@ -190,9 +190,9 @@ version = "0.3.2"
 
 [[DiffEqBase]]
 deps = ["Compat", "IteratorInterfaceExtensions", "LinearAlgebra", "Pkg", "RecipesBase", "RecursiveArrayTools", "Requires", "StaticArrays", "Statistics", "TableTraits", "Test", "TreeViews"]
-git-tree-sha1 = "165144542378abd71d421ad0dcd4c1f7d88a94f3"
+git-tree-sha1 = "bc82bd3bc98020c3c515637450d6f6fda70ca2a5"
 uuid = "2b5f629d-d688-5b77-993f-72d75c75574e"
-version = "4.26.0"
+version = "4.26.1"
 
 [[DiffEqBiological]]
 deps = ["Compat", "DataStructures", "DiffEqBase", "DiffEqJump", "MacroTools", "Random", "Reexport", "Statistics", "SymEngine", "Test"]
@@ -533,15 +533,15 @@ version = "2.0.0"
 
 [[OrderedCollections]]
 deps = ["Pkg", "Random", "Serialization", "Test"]
-git-tree-sha1 = "41da1edba028376b58520ca01d9a41e29f855d55"
+git-tree-sha1 = "85619a3f3e17bb4761fe1b1fd47f0e979f964d5b"
 uuid = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
-version = "1.0.1"
+version = "1.0.2"
 
 [[OrdinaryDiffEq]]
 deps = ["DataStructures", "DiffEqBase", "DiffEqDiffTools", "DiffEqOperators", "ExponentialUtilities", "ForwardDiff", "GenericSVD", "InteractiveUtils", "LinearAlgebra", "Logging", "MuladdMacro", "NLsolve", "Parameters", "Printf", "Random", "RecursiveArrayTools", "Reexport", "Roots", "SparseArrays", "StaticArrays", "Statistics", "Test"]
-git-tree-sha1 = "f34f059b0226fa7446b3aed3a636277e931c23c8"
+git-tree-sha1 = "6317da7d50f23905743b445fda093f4983d77c06"
 uuid = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
-version = "4.12.1"
+version = "4.12.4"
 
 [[PDMats]]
 deps = ["Arpack", "LinearAlgebra", "SparseArrays", "SuiteSparse", "Test"]
@@ -767,6 +767,12 @@ deps = ["IteratorInterfaceExtensions", "Test"]
 git-tree-sha1 = "afee1fb3bc99c28eb4533ff0f22e33f6effcec18"
 uuid = "3783bdb8-4a98-5b6b-af9a-565f29a5fe9c"
 version = "0.3.1"
+
+[[Tables]]
+deps = ["Pkg", "Requires", "Test"]
+git-tree-sha1 = "277464179bc7cfb1b4d5a4f3ccde0fc75792157f"
+uuid = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"
+version = "0.1.8"
 
 [[Test]]
 deps = ["Distributed", "InteractiveUtils", "Logging", "Random"]
