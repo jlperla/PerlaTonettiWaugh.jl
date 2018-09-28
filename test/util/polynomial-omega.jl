@@ -21,6 +21,16 @@
     @assert Ω(0.0) ≈ Ω_0
     @assert Ω(T) ≈ Ω_T
     @assert Ω.E(T) ≈ δ
+
+    Ω = PolynomialΩ([-0.1; 0.2; 0.03; 0.04], T, Ω_0, Ω_T, δ)
+    @assert Ω(0.0) ≈ Ω_0
+    @assert Ω(T) ≈ Ω_T
+    @assert Ω.E(T) ≈ δ
+
+    Ω = PolynomialΩ([-0.01; 0.03; -0.01; 0.05; 0.01], T, Ω_0, Ω_T, δ)
+    @assert Ω(0.0) ≈ Ω_0
+    @assert Ω(T) ≈ Ω_T
+    @assert Ω.E(T) ≈ δ
 end
 
 # make sure that all passes do pass
