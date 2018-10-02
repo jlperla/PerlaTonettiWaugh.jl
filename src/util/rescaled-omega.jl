@@ -11,7 +11,7 @@ struct RescaledΩ
 
         Ω_derivative(Ω,p,t) = M*E_hat(t)*Ω
         Ω_solution = DifferentialEquations.solve(ODEProblem(Ω_derivative,Ω_0,(0.0, T)), reltol = 1e-15)
-        Ω(t::Float64) = Ω_solution(t)
+        Ω(t::Float64) = t <= T ? Ω_solution(t) : Ω_solution(T)
         E(t) = M*E_hat(t) + δ
         
 
@@ -31,7 +31,7 @@ struct RescaledΩ
         M = log(Ω_T/Ω_0) / quadgk(E_hat, 0, T)[1]
         Ω_derivative(Ω,p,t) = M*E_hat(t)*Ω
         Ω_solution = DifferentialEquations.solve(ODEProblem(Ω_derivative,Ω_0,(0.0, T)), reltol = 1e-15)
-        Ω(t::Float64) = Ω_solution(t)
+        Ω(t::Float64) = t <= T ? Ω_solution(t) : Ω_solution(T)
         E(t) = M*E_hat(t) + δ
 
         new(E, E_hat, Ω)
