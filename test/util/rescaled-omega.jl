@@ -24,13 +24,13 @@ end
     Ω_T = 9.0
     δ = 0.05
 
-    # RescaledΩ with piecewise linear interpolation E
+    # RescaledΩ with cubic spline interpolation E
     Ω = RescaledΩ([-1.0, 0.5, 0.1], T, Ω_0, Ω_T, δ)
     @test Ω(0.0) ≈ Ω_0
     @test Ω(T) ≈ Ω_T atol = 1e-4
     @test Ω.E(T) ≈ δ
 
-    # RescaledΩ with piecewise linear interpolation E
+    # RescaledΩ with cubic spline interpolation E
     Ω = RescaledΩ([-1.0, 0.5, 0.1, -0.1], T, Ω_0, Ω_T, δ)
     @test Ω(0.0) ≈ Ω_0
     @test Ω(T) ≈ Ω_T atol = 1e-4
