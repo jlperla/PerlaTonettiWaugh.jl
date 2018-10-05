@@ -25,13 +25,13 @@ end
     δ = 0.05
 
     # RescaledΩ with cubic spline interpolation E
-    Ω = RescaledΩ([-1.0, 0.5, 0.1], T, Ω_0, Ω_T, δ)
+    Ω = RescaledΩ([-1.0, 0.5, 0.1, 0.06], T, Ω_0, Ω_T, δ)
     @test Ω(0.0) ≈ Ω_0
     @test Ω(T) ≈ Ω_T atol = 1e-4
     @test Ω.E(T) ≈ δ
 
     # RescaledΩ with cubic spline interpolation E
-    Ω = RescaledΩ([-1.0, 0.5, 0.1, -0.1], T, Ω_0, Ω_T, δ)
+    Ω = RescaledΩ([-1.0, 0.5, 0.1, -0.1, 0.02], T, Ω_0, Ω_T, δ)
     @test Ω(0.0) ≈ Ω_0
     @test Ω(T) ≈ Ω_T atol = 1e-4
     @test Ω.E(T) ≈ δ
