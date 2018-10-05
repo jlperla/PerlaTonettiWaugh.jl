@@ -74,9 +74,9 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
         z_hat = map_z_hat(z_hat_raw)
         Ω = map_Ω(Ω_raw) 
         @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x, π_min = staticvals([g, z_hat, Ω], params) # Grab static values. 
-        r_tilde = r - g - 0 # g_w = 0 at steady state, equation (TODO: add equation number here)
-        ρ_tilde = r_tilde - (σ - 1)*(μ - g + (σ-1)*(υ^2/2)) # (TODO: add equation number here)
-        L_T = (ρ_tilde * I - (μ - g + (σ-1)*υ^2)*L_1_minus - υ^2/2 * L_2) # Operator for the ξ-rescaled v function (TODO: add equation number here)
+        r_tilde = r - g - 0 # g_w = 0 at steady state, equation B.31 (PDF)
+        ρ_tilde = r_tilde - (σ - 1)*(μ - g + (σ-1)*(υ^2/2)) # B.21 (PDF)
+        L_T = (ρ_tilde * I - (μ - g + (σ-1)*υ^2)*L_1_minus - υ^2/2 * L_2) # Operator for the ξ-rescaled v function (23, PDF)
         i = z -> z >= log(z_hat) ? 1 : 0 # Indicator function for next equation. 
         π_tilde = z -> π_min * (1 + (N-1)*d^(1-σ)*i(z)) - (N-1)*κ*exp(-(σ-1)*z)*i(z) # (eq:32)
         v_tilde = L_T \ π_tilde.(z) # discretized system of ODE for v, where v'(T) = 0 (eq:24)
@@ -114,9 +114,9 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
     staticvalues = staticvals([g_T, z_hat_T, Ω_T], params) # Grab static values.
     @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x, π_min = staticvalues
     # Recreate the steady-state objects using the solution in g, z_hat, Ω. 
-    r_tilde = r - g_T - 0 # g_w = 0 at steady state (TODO: add equation number here)
-    ρ_tilde = r_tilde - (σ - 1)*(μ - g_T + (σ-1)*(υ^2/2)) # (TODO: add equation number here)
-    L_T = (ρ_tilde * I - (μ-g_T + (σ-1)*υ^2)*L_1_minus - υ^2/2 * L_2) # Operator for the ξ-rescaled v function (TODO: add equation number here)
+    r_tilde = r - g_T - 0 # g_w = 0 at steady state (B.31, PDF)
+    ρ_tilde = r_tilde - (σ - 1)*(μ - g_T + (σ-1)*(υ^2/2)) # (B.21, PDF)
+    L_T = (ρ_tilde * I - (μ-g_T + (σ-1)*υ^2)*L_1_minus - υ^2/2 * L_2) # Operator for the ξ-rescaled v function (23, PDF)
     i = z -> z >= log(z_hat_T) ? 1 : 0 # Indicator function for next equation. 
     π_tilde = z -> π_min * (1 + (N-1)*d^(1-σ)*i(z)) - (N-1)*κ*exp(-(σ-1)*z)*i(z) # (eq:32)
     v_tilde = L_T \ π_tilde.(z) # discretized system of ODE for v, where v'(T) = 0 (eq:24)
