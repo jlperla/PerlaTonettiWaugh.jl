@@ -18,7 +18,7 @@ function entry_residuals(Ω_interior, Ω_0, stationary_sol, T, params, settings,
     ts = sol.results[:t]
     v_0_interpolation = LinearInterpolation(ts, v_0s)
     # compute entry residuals from the solution
-    entry_residuals_vec = map(t -> v_0_interpolation(t) - ζ * (1-χ) / χ, entry_residuals_nodes)
+    entry_residuals_vec = map(t -> v_0_interpolation(t) - ζ * (1-χ) / χ, entry_residuals_nodes) # (eq:25)
 
     # perform linear interpolation on entry_residuals 
     entry_residuals_interpolation = LinearInterpolation(entry_residuals_nodes, entry_residuals_vec)
@@ -52,18 +52,18 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; stopwith
       L_1 = L_1_minus # L_1 ≡ L_1_minus.
 
     # Define the intermediate quantities for the DAE problem. 
-      S(g) = θ * (g - μ - θ * υ^2/2) # Compute S given g. [EQUATION NUMBER NEEDED]
-      L_tilde(S, z_hat, E_t, Ω_t) = Ω_t * ((N-1) * z_hat^(-θ)*κ + ζ*(S + E_t / χ)) # Compute L_tilde. [EQUATION NUMBER NEEDED]
+      S(g) = θ * (g - μ - θ * υ^2/2) # Compute S given g. (eq:28)
+      L_tilde(S, z_hat, E_t, Ω_t) = Ω_t * ((N-1) * z_hat^(-θ)*κ + ζ*(S + E_t / χ)) # Compute L_tilde. (eq:29)
 
     # Define a function to compute the static equilibrium quantities. 
       function static_equilibrium(v_0, g, z_hat, E_t, Ω_t)
         S_t = S(g)
         L_tilde_t = L_tilde(S_t, z_hat, E_t, Ω_t)
-        z_bar = Ω_t * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ)) # [EQUATION NUMBER NEEDED]
-        π_min = (1 - L_tilde_t) / ((σ-1)*z_bar) # [EQUATION NUMBER NEEDED]
+        z_bar = Ω_t * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ)) # (eq:30)
+        π_min = (1 - L_tilde_t) / ((σ-1)*z_bar) # (eq:31)
         i_vectorized = z .>= log(z_hat) # Vectorized indicator function 
-        π_tilde = π_min * (1.0.+(N-1)*d^(1-σ)*i_vectorized) - (N-1)*κ*exp.(-(σ-1).*z).*i_vectorized # [EQUATION NUMBER NEEDED]
-        entry_residual = v_0 - ζ * (1-χ) / χ # [EQUATION NUMBER NEEDED]
+        π_tilde = π_min * (1.0.+(N-1)*d^(1-σ)*i_vectorized) - (N-1)*κ*exp.(-(σ-1).*z).*i_vectorized # (eq:32)
+        entry_residual = v_0 - ζ * (1-χ) / χ # value matching condition (eq:25)
         return (S_t = S_t, L_tilde_t = L_tilde_t, z_bar = z_bar, π_min = π_min, π_tilde = π_tilde, entry_residual = entry_residual)
       end 
 
@@ -97,7 +97,7 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; stopwith
           residual[1:M] .-= (μ - g + (σ-1)*υ^2)*L_1*u[1:M] 
           residual[1:M] .-= (υ^2/2)*L_2*u[1:M] 
           residual[1:M] .-= du[1:M]
-          residual[1:M] .-= π_tilde
+          residual[1:M] .-= π_tilde # discretized system of ODE for v, where v'(T) = 0 (eq:24)
           residual[M+1] = u[1] + x - dot(ω, u[1:M]) # residual (eq:25)
           residual[M+2] = z_hat^(σ-1) - κ * d^(σ-1) / π_min # export threshold (eq:31)
       end
@@ -137,12 +137,12 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; stopwith
     # Post-process the results DataFrame.
     results = sort!(results)
       # Define the welfare, etc. quantities in terms of quantities in the DataFrame. 
-        gen_λ_ii = z_hat -> 1 / (1 + (N-1)*z_hat^(σ-1-θ)*d^(1-σ)) # [EQUATION NUMBER NEEDED]
-        gen_c = (L_tilde, Ω, λ_ii) -> (θ / (1-σ+θ))^(1/(σ-1))*(1-L_tilde)*Ω^(1/(σ-1))*λ_ii^(1/(1-σ)) # [EQUATION NUMBER NEEDED]
+        gen_λ_ii = z_hat -> 1 / (1 + (N-1)*z_hat^(σ-1-θ)*d^(1-σ)) # (eq:34)
+        gen_c = (L_tilde, Ω, λ_ii) -> (θ / (1-σ+θ))^(1/(σ-1))*(1-L_tilde)*Ω^(1/(σ-1))*λ_ii^(1/(1-σ)) # (eq:35)
         gen_S = S
-        gen_z_bar = (Ω_t, z_hat) -> Ω_t * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ)) # [EQUATION NUMBER NEEDED]
-        gen_π_min = (L_tilde_t, z_bar) -> (1 - L_tilde_t) / ((σ-1)*z_bar) # [EQUATION NUMBER NEEDED]
-        gen_entry_residual = (v_0) -> v_0 - ζ*(1-χ)/χ # [EQUATION NUMBER NEEDED]
+        gen_z_bar = (Ω_t, z_hat) -> Ω_t * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ)) # (eq:29)
+        gen_π_min = (L_tilde_t, z_bar) -> (1 - L_tilde_t) / ((σ-1)*z_bar) # (eq:31)
+        gen_entry_residual = (v_0) -> v_0 - ζ*(1-χ)/χ # (eq:25)
 
 
       # Add these quantities to the DataFrame. 

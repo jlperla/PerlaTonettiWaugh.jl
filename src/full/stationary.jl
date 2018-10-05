@@ -74,25 +74,25 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
         z_hat = map_z_hat(z_hat_raw)
         Ω = map_Ω(Ω_raw) 
         @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x, π_min = staticvals([g, z_hat, Ω], params) # Grab static values. 
-        r_tilde = r - g - 0 # g_w = 0 at steady state, equation (13)
-        ρ_tilde = r_tilde - (σ - 1)*(μ - g + (σ-1)*(υ^2/2)) # (29)
-        L_T = (ρ_tilde * I - (μ - g + (σ-1)*υ^2)*L_1_minus - υ^2/2 * L_2) # Operator for the ξ-rescaled v function (28)
+        r_tilde = r - g - 0 # g_w = 0 at steady state, equation (TODO: add equation number here)
+        ρ_tilde = r_tilde - (σ - 1)*(μ - g + (σ-1)*(υ^2/2)) # (TODO: add equation number here)
+        L_T = (ρ_tilde * I - (μ - g + (σ-1)*υ^2)*L_1_minus - υ^2/2 * L_2) # Operator for the ξ-rescaled v function (TODO: add equation number here)
         i = z -> z >= log(z_hat) ? 1 : 0 # Indicator function for next equation. 
-        π_tilde = z -> π_min * (1 + (N-1)*d^(1-σ)*i(z)) - (N-1)*κ*exp(-(σ-1)*z)*i(z) # (21)
-        v_tilde = L_T \ π_tilde.(z)
+        π_tilde = z -> π_min * (1 + (N-1)*d^(1-σ)*i(z)) - (N-1)*κ*exp(-(σ-1)*z)*i(z) # (eq:32)
+        v_tilde = L_T \ π_tilde.(z) # discretized system of ODE for v, where v'(T) = 0 (eq:24)
 
         #=
             System of equations to be solved. 
         =#
 
         # Value-matching condition. 
-        value_matching = v_tilde[1] - dot(v_tilde, ω) + x # (26), ω contains rescaling factor
+        value_matching = v_tilde[1] - dot(v_tilde, ω) + x # (eq:25)
        
         # Free-entry condition. 
-        free_entry = v_tilde[1] - x*(1-χ)/χ # (D.19) z[1] ≡ 0, so rescaling is moot. 
+        free_entry = v_tilde[1] - x*(1-χ)/χ # (eq:27)
 
         # Adoption threshold.
-        adoption_threshold = π_min - (1 - L_tilde)/((σ-1)*z_bar^(σ-1)) # (H.17) Gives us dependence on Ω, through L_tilde and z_bar. 
+        adoption_threshold = π_min - (1 - L_tilde)/((σ-1)*z_bar^(σ-1)) # (H.17) -- equivalent with (eq:26) 
         
         return [value_matching, free_entry, adoption_threshold]
     end 
@@ -114,12 +114,12 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
     staticvalues = staticvals([g_T, z_hat_T, Ω_T], params) # Grab static values.
     @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x, π_min = staticvalues
     # Recreate the steady-state objects using the solution in g, z_hat, Ω. 
-    r_tilde = r - g_T - 0 # g_w = 0 at steady state, equation (13)
-    ρ_tilde = r_tilde - (σ - 1)*(μ - g_T + (σ-1)*(υ^2/2)) # (29)
-    L_T = (ρ_tilde * I - (μ-g_T + (σ-1)*υ^2)*L_1_minus - υ^2/2 * L_2) # Operator for the ξ-rescaled v function (28)
+    r_tilde = r - g_T - 0 # g_w = 0 at steady state (TODO: add equation number here)
+    ρ_tilde = r_tilde - (σ - 1)*(μ - g_T + (σ-1)*(υ^2/2)) # (TODO: add equation number here)
+    L_T = (ρ_tilde * I - (μ-g_T + (σ-1)*υ^2)*L_1_minus - υ^2/2 * L_2) # Operator for the ξ-rescaled v function (TODO: add equation number here)
     i = z -> z >= log(z_hat_T) ? 1 : 0 # Indicator function for next equation. 
-    π_tilde = z -> π_min * (1 + (N-1)*d^(1-σ)*i(z)) - (N-1)*κ*exp(-(σ-1)*z)*i(z) # (21)
-    v_tilde = L_T \ π_tilde.(z)
+    π_tilde = z -> π_min * (1 + (N-1)*d^(1-σ)*i(z)) - (N-1)*κ*exp(-(σ-1)*z)*i(z) # (eq:32)
+    v_tilde = L_T \ π_tilde.(z) # discretized system of ODE for v, where v'(T) = 0 (eq:24)
 
     return merge(staticvalues, (g = g_T, z_hat = z_hat_T, Ω = Ω_T, v_tilde = v_tilde))
 end 
