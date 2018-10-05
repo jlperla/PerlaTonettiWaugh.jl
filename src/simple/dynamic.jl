@@ -15,11 +15,13 @@ function simpleODE(params, settings)
     π_tilde_T = z -> π_tilde(T, z)
 
     # NOTE: the following two lines overlap with stationary solution
-    L_T = (r_T - g_T - ξ*((μ+υ^2/2) - g_T) - υ^2/2*ξ^2)*I - ((μ+υ^2/2) - g_T + υ^2*ξ)*L_1_minus - υ^2/2 * L_2 # Construct the aggregate operator.
-    v_T = L_T \ π_tilde_T.(z) # Solution to the rescaled differential equation.
+    # Construct the aggregate operator.
+    L_T = (r_T - g_T - ξ*((μ+υ^2/2) - g_T) - υ^2/2*ξ^2)*I - ((μ+υ^2/2) - g_T + υ^2*ξ)*L_1_minus - υ^2/2 * L_2
+    # Solution to the rescaled differential equation.
+    v_T = L_T \ π_tilde_T.(z) 
 
     # Bundle as before. 
-    p = (L_1 = L_1_minus, L_2 = L_2, z = z, g = g, r = r, υ = υ, π_tilde = π_tilde, T = T, μ = μ) #Named tuple for parameters.
+    p = (L_1 = L_1_minus, L_2 = L_2, z = z, g = g, r = r, υ = υ, π_tilde = π_tilde, T = T, μ = μ) 
 
     # Dynamic calculations, defined for each time ∈ t.  
     function f(du,u,p,t)
@@ -29,7 +31,7 @@ function simpleODE(params, settings)
         # Carry out calculations. 
         L = (r(t) - g(t) - ξ*((μ+υ^2/2) - g(t)) - υ^2/2*ξ^2)*I - ((μ+υ^2/2) - g(t) + υ^2*ξ)*L_1 - υ^2/2 * L_2
         mul!(du, L, u)
-        du .-= π_tilde.(t, z)
+        du .-= π_tilde.(t, z) # discretized system of ODE for v (eq:12)
     end
 
     return ODEProblem(f, v_T, (T, 0.0), p)
@@ -53,11 +55,13 @@ function simpleDAE(params, settings)
     g_T = g(T)
 
     # NOTE: the following two lines overlap with stationary solution
-    L_T = (r_T - g_T - ξ*((μ+υ^2/2) - g_T) - υ^2/2*ξ^2)*I - ((μ+υ^2/2) - g_T + υ^2*ξ)*L_1_minus - υ^2/2 * L_2 # Construct the aggregate operator.
-    v_T = L_T \ π_tilde.(Ref(T), z) # Solution to the rescaled differential equation.
+    # Construct the aggregate operator.
+    L_T = (r_T - g_T - ξ*((μ+υ^2/2) - g_T) - υ^2/2*ξ^2)*I - ((μ+υ^2/2) - g_T + υ^2*ξ)*L_1_minus - υ^2/2 * L_2 
+    # Solution to the rescaled differential equation.
+    v_T = L_T \ π_tilde.(Ref(T), z) 
 
     # Bundle as before. 
-    p = (L_1 = L_1_minus, L_2 = L_2, z = z, g = g, r = r, υ = υ, π_tilde = π_tilde, T = T, μ = μ, g_T = g_T, M = M) #Named tuple for parameters.
+    p = (L_1 = L_1_minus, L_2 = L_2, z = z, g = g, r = r, υ = υ, π_tilde = π_tilde, T = T, μ = μ, g_T = g_T, M = M) 
 
     # Dynamic calculations, defined for each time ∈ t.  
     function f!(resid,du,u,p,t)
@@ -67,8 +71,8 @@ function simpleDAE(params, settings)
         g_t = u[M+1]
         L = (r(t) - g_t - ξ*((μ+υ^2/2) - g_t) - υ^2/2*ξ^2)*I - ((μ+υ^2/2) - g_t + υ^2*ξ)*L_1 - υ^2/2 * L_2        
         resid[1:M] = L * v_t - π_tilde.(t, z) 
-        resid[M+1] = v_t[1] + x(t) - dot(ω, v_t)
-        resid[1:M] .-= du[1:M]
+        resid[1:M] .-= du[1:M] # discretized system of ODE for v (eq:12)
+        resid[M+1] = v_t[1] + x(t) - dot(ω, v_t) # value matching condition (eq:13)
     end
 
     u = [v_T; g_T]
