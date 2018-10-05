@@ -103,7 +103,7 @@ In order to solve the dynamic problem in, we need to calculate $\tilde{\rho}(t),
 \subsection{Number of Varieties and Entry in Transition}
 
 Define $E(t)$ such that the \textbf{gross} entry flow is $E(t)\Omega(t)$.  Since the \textbf{gross} exit flow is $\delta \Omega(t)$, then the differential equation for $\Omega(t)$ comes from the net flows,
-\begin{align}
+\begin{align} \label{eq:E-defined-by-Omega}
 	\D[t] \Omega(t) &= \left(E(t) - \delta \right)\Omega(t)\\
 \intertext{Rearrange,}
 E(t) &\equiv \delta + \D[t]\log \Omega(t)
@@ -535,6 +535,28 @@ So from \cref{eq:reflecting-right-nonuniform} the bottom right corner of $A$ mat
 	0 & \ldots & \ldots & \ldots & 0 & X_I^n & Y_I^n+Z_I^n(1-\xi\Delta_{I,-})
 \end{bmatrix}\in\R^{I\times I}\label{eq:A-n}
 \end{align}
+
+
+\section{Computation of equilibrium $\Omega(t)$ and $E(t)$}
+First, note that $\Omega(t)$ is defined by the solution of the differential equation $	\D[t] \Omega(t) = \left(E(t) - \delta \right)\Omega(t)$ from \cref{eq:E-defined-by-Omega} with boundary conditions of $\Omega(0) = \Omega_0$ and $\Omega(T) = \Omega_T$ where $\Omega_0$ and $\Omega_T$ are the stationary solutions for $\Omega(t)$ at $t = 0$ and $t = T$ respectively. Hence, it suffices to find the equilibrium $E(t)$. On the other hand, note that in steady-state we must have $E(t) = \delta$. Thus, the search space for $E(t)$ is a differentiable $E(t)$ such that $E(T) = \delta$. In actual computation, we use cubic splines with nodes that are uniformly distributed across $[0,T]$.
+
+To find the equilibrium $E(t)$, we first find $\widehat E(t)$ with an arbitrary endpoint on $[0,T]$ and rescale $\widehat E(t)$ by $M$ 
+\begin{align}\label{eq:E-normalized-defn}
+	M \widehat E(t) = E(t) - \delta
+\end{align}
+such that $M \widehat E(T) = \delta$. Substituting \cref{eq:E-normalized-defn} in \cref{eq:E-defined-by-Omega}, we have 
+\begin{align}
+\D[t] \Omega(t) = M \widehat{E}(t) \Omega(t)
+\end{align}
+solving for $\Omega(t)$, we have
+\begin{align}
+\Omega_T = \Omega_0 \exp \left(M \int_0^T \widehat{E}(t) dt\right)
+\end{align}
+which yields
+\begin{align}
+M = \log \left(\dfrac{\Omega_T}{\Omega_0}\right)\left(\int_0^T \widehat E(t) dt \right)^{-1}
+\end{align}
+providing the analytic solution for $E(t)$ and $\Omega(t)$ given $\widehat{E} (t)$ with arbitrary endpoints.
 
 
 \end{document}
