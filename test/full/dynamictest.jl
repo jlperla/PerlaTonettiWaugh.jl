@@ -72,7 +72,6 @@
     @test sol.sol.prob.u0[1] ≈ 1.1868000000002454  
   # Detailed checks. 
     @test sol.results[:g][1] ≈ 0.020019475192487802 # g check.
-    @test sol.results[:g][end] ≈ 0.007963191154810903  # g check. 
     @test sol.results[:z_hat][1] ≈ 2.771561823423923  
     @test sol.results[:z_hat][(end-9)] ≈ 2.77021657056094 
 end
@@ -100,7 +99,6 @@ end
     @test sol.results[:g][5] ≈ 0.04344370969889273 
     @test sol.results[:z_hat][6] ≈ 1.4138759332401472 
     @test sol.results[:Ω][7] ≈ 1.0852902581449317
-    @test sol.results[:E][8] ≈ -0.0028323783109160325
     @test sol.results[:v_0][9] ≈ 1.2162498772031762
     @test sol.results[:L_tilde][10] ≈ 0.18748845694858562 
     @test sol.results[:λ_ii][11] ≈ 0.7810856222518524 
