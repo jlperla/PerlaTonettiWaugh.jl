@@ -1,7 +1,7 @@
 module PerlaTonettiWaugh
 
 # Dependencies.
-using NLsolve, DifferentialEquations, BandedMatrices, Sundials, Distributions, Roots, Optim, QuantEcon, LinearAlgebra, Random, DataFrames, DataFramesMeta, DiffEqCallbacks, Interpolations, ContinuousTransformations, QuadGK, Dierckx
+using NLsolve, DifferentialEquations, BandedMatrices, Sundials, Distributions, Roots, QuantEcon, LinearAlgebra, Random, DataFrames, DataFramesMeta, DiffEqCallbacks, Interpolations, ContinuousTransformations, QuadGK, Dierckx, NLopt, ForwardDiff
 import Parameters: @with_kw, @unpack
 
 # Utilities
