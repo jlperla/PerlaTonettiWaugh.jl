@@ -84,7 +84,7 @@ end
     sol = solve_dynamics(params_T, stationary_T, settings, T, Ω_t, E_t)
 
     # Spot-checks.
-    @test sol.sol.t[5] ≈ 4.082084260141162 
+    @test sol.sol.t[5] ≈ 4.0820840627115444 
     @test sol.results[:λ_ii][end] ≈ 0.7813233366790822 
     @test sol.sol.u[4][3] ≈ 1.1499297704103377
     @test sol.sol.prob.u0[1] ≈ 1.1868000000001158 
@@ -92,10 +92,10 @@ end
     @test mean(sol.results[:g]) ≈ 0.032776838190899334 # Probably the most important of these checks. 
     @test mean(sol.results[:z_hat]) ≈ 1.4240459625635837
     @test mean(sol.results[:Ω]) ≈ 1.1546007592192749
-    @test mean(sol.results[:S]) ≈ 0.12182791972415735 
-    @test mean(sol.results[:L_tilde]) ≈ 0.10681494456873028
+    @test mean(sol.results[:S]) ≈ 0.12182791761996183 
+    @test mean(sol.results[:L_tilde]) ≈ 0.1068149526037354
     # Full coverage of each column.
-    @test sol.results[:t][4] ≈ 1.218041271171153 
+    @test sol.results[:t][4] ≈ 1.2180412122607018 
     @test sol.results[:g][5] ≈ 0.04344370969889273 
     @test sol.results[:z_hat][6] ≈ 1.4138759332401472 
     @test sol.results[:Ω][7] ≈ 1.0852902581449317
@@ -103,8 +103,8 @@ end
     @test sol.results[:L_tilde][10] ≈ 0.18748845694858562 
     @test sol.results[:λ_ii][11] ≈ 0.7810856222518524 
     @test sol.results[:c][12] ≈ 0.9889943277839625 
-    @test sol.results[:S][4] ≈  0.18806483645451416 
-    @test sol.results[:z_bar][3] ≈ 4.944304430477969
+    @test sol.results[:S][4] ≈ 0.18806483288417494
+    @test sol.results[:z_bar][3] ≈ 4.944304290926497
     @test sol.results[:π_min][2] ≈ 0.06610896471451441 
     @test sol.results[:entry_residual][12] ≈ 0.0010887433781643363 atol = 1e-8
 end
