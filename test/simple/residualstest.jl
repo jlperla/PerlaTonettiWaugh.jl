@@ -37,7 +37,6 @@
     params_func_varying_2 = params_func(r = r_func_varying)
     params_func_varying_3 = params_func(r = r_func_varying, π_tilde = π_tilde_func_varying)
 
-    
     # Solutions.
     # Solve for the numerical stationary g_T. 
     result_ns = stationary_numerical_simple(params_, z_grid)
@@ -80,55 +79,3 @@
     @test norm(resid[1]) ≈ 0 atol = 1e-5
     @test norm(resid[end]) ≈ 0 atol = 1e-5
     @test norm(resid) ≈ 0 atol = 1e-5
-  
-#=
-    Test advanced options.
-=#
-
-    # tstops. 
-    daeprob = simpleDAE(params_func_, settings()) # Use the vanilla example.
-    sol_vanilla = DifferentialEquations.solve(daeprob)
-    tstops = [1.0, 11.3, 27.4, 30.0] # Arbitrary tstops. 
-    sol_tstops = DifferentialEquations.solve(daeprob, tstops = tstops)
-    @test tstops ⊆ sol_tstops.t # Check to see if the tstops are included. 
-    @test norm(sol_vanilla.u[end] - sol_tstops.u[end]) ≈ 0.0 atol = 1e-5 # Check that the two solutions end up fairly close to one another. 
-
-    # differencing.
-        # Naive way to do it (no callbacks).
-        function f(u, p, t) # Default example from DifferentialEquations.jl tutorial. 
-            val = 1.01*u
-            push!(p, (t, val))
-            return val
-        end 
-        u0=1/2
-        tspan = (0.0,-1.0)
-        tstops = [-0.1, -0.2, -0.3, -1.0]
-        p = []
-        odeprob = ODEProblem(f,u0,tspan,p)
-        sol_vanilla = DifferentialEquations.solve(odeprob, tstops = tstops)
-
-        function growth(p, tstops)
-            ourPoints = [p[i] for i = 1:2:length(p) if p[i][1] ∈ tstops] # Need the 2 because the solutions seem to come in slightly different pairs. 
-            diffs = [(ourPoints[i+1][2] - ourPoints[i][2])/(ourPoints[i+1][1] - ourPoints[i][1]) for i = 1:length(ourPoints)-1]
-        end 
-
-        # proper way to do it (with callbacks).
-        u0=1/2
-        tspan = (0.0,-1.0)
-        tstops = [-0.1, -0.2, -0.3, -1.0]
-        p = (saved_values = SavedValues(Float64, Tuple{Float64,Float64}),)
-        odeprob = ODEProblem((u, p, t) -> begin
-            vals = p.saved_values.saveval
-                if t < 0.0
-                i = findlast(x -> x[1] > t, vals); # Sign is becuase of backwards time. 
-                d = (u - vals[i][2])/(vals[i][1] - t); # Differences for backwards time, per notes. 
-            end 
-            return 1.01*u 
-        end, u0, tspan, p) # To confirm that we have access to saved_values during the runs. 
-        cb = SavingCallback((u,t,integrator)->(t, u), p.saved_values, tdir = -1)
-        sol_callback = DifferentialEquations.solve(odeprob, callback=cb, tstops = tstops)
-        print(p.saved_values.saveval)
-        print(p.saved_values.t)
-
-
-
