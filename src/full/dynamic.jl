@@ -156,7 +156,7 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; stopwith
           λ_ii = t -> gen_λ_ii(z_hat_interpolated(t))
           log_M = t -> quadgk(g_interpolated, 0, t)[1]
           log_c = t -> log(gen_c(L_tilde_interpolated(t), Ω(t), λ_ii(t)))
-          U = t -> quadgk(τ -> exp(-ρ*τ)*(log_M(t+τ) + log_c(t+τ)), 0, (T-t))[1] + exp(-ρ*(T-t)/ρ^2)*((1+ρ*(T-t))*g_T + ρ*(log_c(T) + log_M(T)))
+          U = t -> quadgk(τ -> exp(-ρ*τ)*(log_M(t+τ) + log_c(t+τ)), 0, (T-t))[1] + exp(-ρ*(T-t))/(ρ^2)*((1+ρ*(T-t))*g_T + ρ*(log_c(T) + log_M(T)))
 
           results = @transform(results, λ_ii = gen_λ_ii.(:z_hat)) # λ_ii column. 
           results = @transform(results, c = gen_c.(:L_tilde, :Ω, :z_hat)) # c column.
