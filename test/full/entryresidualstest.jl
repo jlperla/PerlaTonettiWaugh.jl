@@ -1,4 +1,4 @@
-@testset "entry_residuals Tests" begin 
+@testset "entry_residuals tests" begin 
     # User settings. 
     # Space grid. 
     z_min = 0.0 

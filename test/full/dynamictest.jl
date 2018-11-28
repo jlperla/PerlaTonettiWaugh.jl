@@ -128,7 +128,7 @@ end
     p = []
   # Fill the residuals vector 
     f! = solve_dynamics(params_T, stationary_T, settings, T, Ω, E).f!
-    f!(resid, du, u, p, t) # Kept the p from the old tests, since the solver complains without it. But it's a dummy. 
+    f!(resid, du, u, p, t) 
   # Tests
     # Accuracy
       @test mean(resid[1:M]) ≈ 0 atol = 1e-6

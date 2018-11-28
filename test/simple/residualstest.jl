@@ -20,7 +20,6 @@
     
 # Functional parameters. 
     x_func = t -> ζ_val # Not idiosyncratic, per equation (4)
-
     r_func_varying = t -> (r_val - 1e-02 * (1 - t / T_val)) # Not idiosyncratic, per intro to doc.    
     r_func_ = t -> r_val
 
@@ -29,7 +28,7 @@
     π_tilde_func_ = (t, z) -> 1 # Potentially idiosyncratic. 
     
 # Param generators and param NTs. 
-    params_ = @with_kw (μ = 0.0, υ = υ_val, θ = θ_val, r = r_val, ζ = ζ_val, ξ = ξ_val, π_tilde = z -> 1) 
+    params_ = @with_kw (μ = 0.0, υ = υ_val, θ = θ_val, r = r_val, ζ = ζ_val, ξ = ξ_val, π_tilde = z -> 1)
     params_func = @with_kw (μ = 0.0, υ = υ_val, θ = θ_val, r = r_func_, x = x_func, ξ = ξ_val, π_tilde = π_tilde_func_)
     params_ = params_()
     params_func_ = params_func()
