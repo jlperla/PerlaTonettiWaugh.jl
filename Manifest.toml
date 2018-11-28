@@ -179,9 +179,9 @@ version = "0.3.2"
 
 [[DiffEqBase]]
 deps = ["Compat", "IteratorInterfaceExtensions", "LinearAlgebra", "RecipesBase", "RecursiveArrayTools", "Requires", "Roots", "SparseArrays", "StaticArrays", "Statistics", "SuiteSparse", "TableTraits", "Test", "TreeViews"]
-git-tree-sha1 = "a79e0d74bdc91d4dfc501fe03af762b48cbc3764"
+git-tree-sha1 = "b8c9c5a296e426d0ad978e6e7ad699dde444d3a1"
 uuid = "2b5f629d-d688-5b77-993f-72d75c75574e"
-version = "4.31.0"
+version = "4.31.1"
 
 [[DiffEqBiological]]
 deps = ["Compat", "DataStructures", "DiffEqBase", "DiffEqJump", "MacroTools", "Random", "Reexport", "Statistics", "SymEngine", "Test"]
@@ -256,10 +256,10 @@ uuid = "055956cb-9e8b-5191-98cc-73ae4a59e68a"
 version = "3.1.0"
 
 [[DiffEqSensitivity]]
-deps = ["Compat", "DiffEqBase", "DiffEqCallbacks", "DiffEqDiffTools", "ForwardDiff", "LinearAlgebra", "QuadGK", "RecursiveArrayTools", "Statistics", "Test"]
-git-tree-sha1 = "cc4716516bd4a60e092e8a909efcbd26170cd358"
+deps = ["Compat", "DiffEqBase", "DiffEqCallbacks", "DiffEqDiffTools", "ForwardDiff", "LinearAlgebra", "QuadGK", "RecursiveArrayTools", "ReverseDiff", "Statistics", "Test"]
+git-tree-sha1 = "76f33416ee523314b7fcdc08696408861489c427"
 uuid = "41bf760c-e81c-5289-8e54-58b1f1f8abe2"
-version = "2.2.0"
+version = "2.3.0"
 
 [[DiffEqUncertainty]]
 deps = ["DiffEqBase", "Test"]
@@ -510,9 +510,9 @@ version = "1.0.2"
 
 [[OrdinaryDiffEq]]
 deps = ["DataStructures", "DiffEqBase", "DiffEqDiffTools", "DiffEqOperators", "ExponentialUtilities", "ForwardDiff", "GenericSVD", "InteractiveUtils", "LinearAlgebra", "Logging", "MuladdMacro", "NLsolve", "Parameters", "Printf", "Random", "RecursiveArrayTools", "Reexport", "SparseArrays", "StaticArrays", "Statistics", "Test"]
-git-tree-sha1 = "44b786ca14842e30eba2656d83c7055f8a20b74d"
+git-tree-sha1 = "06b6488f3f17f816de2c96fc071a8115b84ca736"
 uuid = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
-version = "4.17.2"
+version = "4.18.0"
 
 [[PDMats]]
 deps = ["Arpack", "LinearAlgebra", "SparseArrays", "SuiteSparse", "Test"]
@@ -631,6 +631,12 @@ deps = ["Random", "StaticArrays", "Test"]
 git-tree-sha1 = "263fe0a06007bf5ba8f72c55475f58fc9bf81834"
 uuid = "ae5879a3-cd67-5da8-be7f-38c6eb64a37b"
 version = "0.5.0"
+
+[[ReverseDiff]]
+deps = ["DiffResults", "DiffRules", "ForwardDiff", "FunctionWrappers", "LinearAlgebra", "NaNMath", "Random", "SpecialFunctions", "StaticArrays", "Statistics", "Test"]
+git-tree-sha1 = "d44e80d815a1a5abaf1ff1def21bb629cabaffec"
+uuid = "37e2e3b7-166d-5795-8a7a-e32c996b4267"
+version = "0.3.1"
 
 [[Rmath]]
 deps = ["BinaryProvider", "Libdl", "Random", "Statistics", "Test"]
