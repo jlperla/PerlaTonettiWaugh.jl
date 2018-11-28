@@ -62,17 +62,9 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
     z, L_1_minus, L_1_plus, L_2 = rescaled_diffusionoperators(z, σ-1) # Operators. 
     ω = ω_weights(z, θ, σ-1) # Get quadrature weights for the distribution on the rescaled grid. 
 
-    # Set up the transformations. 
-    map_g = Compactifier(1e-10*ρ, (2+1e-10)*ρ)
-    map_z_hat = Compactifier(1e-5, (2+1e-5)*10)
-    map_Ω = Compactifier(0.0, 20.0)
-
     # Define the system of equations we're solving.
     function stationary_numerical_given_vals(vals)
-        g_raw, z_hat_raw, Ω_raw = vals 
-        g = map_g(g_raw)
-        z_hat = map_z_hat(z_hat_raw)
-        Ω = map_Ω(Ω_raw) 
+        g, z_hat, Ω = vals 
         @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x, π_min = staticvals([g, z_hat, Ω], params) # Grab static values. 
         r_tilde = r - g - 0 # g_w = 0 at steady state, equation B.31 (PDF)
         ρ_tilde = r_tilde - (σ - 1)*(μ - g + (σ-1)*(υ^2/2)) # B.21 (PDF)
@@ -97,19 +89,34 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
         return [value_matching, free_entry, adoption_threshold]
     end 
 
-    # Solve the equation for the steady state.
-    sol = nlsolve(stationary_numerical_given_vals, init_x; inplace = false, xtol = -Inf, kwargs...)
-
-    # Error if not converged
-    if ~converged(sol)
-        throw(sol) # If it fails, throw the results as an exception. 
+    function f(x) 
+        resids = stationary_numerical_given_vals(x)
+        return sum(resids .* resids)
     end
 
-    g_T_raw, z_hat_T_raw, Ω_T_raw = sol.zero
-    
-    g_T = map_g(g_T_raw)
-    z_hat_T = map_z_hat(z_hat_T_raw)
-    Ω_T = map_Ω(Ω_T_raw)
+    function g!(G::Vector, x::Vector)
+        ForwardDiff.gradient!(G, f, x)
+    end
+
+    function fg!(x::Vector, grad::Vector)
+        if length(grad) > 0 # gradient of f(x)
+            g!(grad, x)
+        end
+        f(x)
+    end
+
+    # define the optimization problem
+    opt = Opt(:LD_LBFGS, 3) # 2 indicates the length of `x`
+    lower_bounds!(opt, fill(0.0, 3)) # find `x` above 0
+    min_objective!(opt, fg!) # specifies that optimization problem is on minimization
+    xtol_rel!(opt, -Inf)
+    xtol_abs!(opt, -Inf)
+    ftol_rel!(opt, -Inf)
+    ftol_abs!(opt, -Inf)
+
+    # solve the optimization problem
+    (minf,minx,ret) = NLopt.optimize(opt, [0.02; 18.94; 17.07])
+    g_T, z_hat_T, Ω_T = minx
 
     staticvalues = staticvals([g_T, z_hat_T, Ω_T], params) # Grab static values.
     @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x, π_min = staticvalues
