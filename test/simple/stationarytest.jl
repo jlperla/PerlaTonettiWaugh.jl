@@ -38,11 +38,5 @@ z = unique([range(0.0, stop = 1.0, length = 300)' range(1.0, stop = 2.0, length 
 results = stationary_numerical_simple(simple_params(), z)
 @test results.g ≈ 0.0211710310711 # Growth rate
 
-
-#= 
-baselineparams = @with_kw (ρ = 0.02, σ = 4.2508, N = 10, θ = 5.1269, γ = 1.01, d = 2.3701, κ = 0.013, ζ = 1, η = 0, Theta = 1, χ = 1/(2.1868), υ = 0.0593, μ = 0, δ = 0.053) # Baselines per Jesse. 
-=#
-
 baselineparams = simple_params(θ = 5.1269, υ = 0.0593, μ = 0.0, ζ = 1) # μ should probably be 0.0
 results_baseline_algebraic = stationary_algebraic_simple(baselineparams)
-# Numerical needs compression to work.
