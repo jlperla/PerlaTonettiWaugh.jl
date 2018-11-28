@@ -1,4 +1,4 @@
-# Global constants. 
+# User settings. 
     # State grid. 
     z_min = 0.0 
     z_max = 5.0
