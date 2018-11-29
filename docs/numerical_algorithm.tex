@@ -420,6 +420,27 @@ U(t) &= \int_0^{T-t}e^{-\rho \tau}\left(\log M(t+\tau)+\log c(t+\tau)\right)\dif
 c(t) &= \left(\frac{\theta}{1-\sigma+\theta}\right)^{\frac{1}{\sigma-1}}\left(1 - \tilde{L}(t)\right)\Omega(t)^{\frac{1}{\sigma - 1}} \lambda_{ii}(t)^{\frac{1}{1-\sigma}}\label{eq:c-def}
 \end{align}
 
+\subsection{Consumption Equivalent}
+Note that we need to consider if $M(0) \neq 1$.  Modifiy \cref{eq:log-M}
+\begin{align}
+\log M(t) &= \log M(0) + \int_0^t g(s)\diff s\label{eq:log-M-notone}\\
+\intertext{Hence, modifying \cref{eq:U-def} to get the welfare at time $0$ given a $M(0)$}
+U(0; M(0)) &= \log M(0)\int_0^{\infty}e^{-\rho \tau} \diff \tau + \int_0^{\infty}e^{-\rho \tau}\left(\int_0^\tau g(s)\diff s\right)\diff \tau + \int_0^{\infty}e^{-\rho \tau}\log c(\tau)\diff \tau\label{eq:U-def-notone}
+\end{align}
+If we were in the steady state, then the second two terms are simply be the welfare if $M(0) = 1$, hence,
+\begin{align}
+U(0, M(0)) &= \frac{\log M(0)}{\rho} + U(0, 1)
+\end{align}
+
+
+Calculate the welfare at the steady state before the shock (which assumes a $M(0) = 1$) as define it as $U^{\text{old}}(0)$, then calculate from \cref{eq:U-dynamics} the welfare at time $0$ after the shock as just realized, and calculated as $U(0)$, then to find the indifference level of $M(0)$, equate
+\begin{align}
+	U(0) &= U^{\text{old}}(0)  + \frac{\log M(0)}{\rho}\\
+	\intertext{Solve for $M(0)$}
+	M(0) &= \exp \left(\rho(U(0) - U^{\text{old}}(0))\right)
+\end{align}
+
+Then the $M(0)$ should be greater than $1$, and it is the inverse of the proportion of consumption the would be willing to give up to change regimes.
 
 
 \section{Discretization}\label{sec:discretization}
