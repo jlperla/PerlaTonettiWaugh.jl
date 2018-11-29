@@ -2,15 +2,12 @@
 function stationary_algebraic_simple(params)
     # Unpack parameters.
     @unpack μ, υ, θ, r, ζ = params
-    # Create γ
-    γ = μ + υ^2/2
-    # Validate parameters.
     # Calculate g.
-    g = γ + (1-(θ-1)*ζ*(r-γ))/((θ-1)^2 * ζ) + υ^2/2 * (θ*(θ*(θ-1)*(r-γ-υ^2/2)*ζ-2)+1)/((θ-1)*((θ-1)*(r-γ-υ^2/2)*ζ-1)); # (eq:8)
+    g = μ + (1-(θ-1)*ζ*(r-μ))/((θ-1)^2 * ζ) + υ^2/2 * (θ*(θ*(θ-1)*(r-μ-υ^2/2)*ζ-2)+1)/((θ-1)*((θ-1)*(r-μ-υ^2/2)*ζ-1)); # (eq:8)
     # Calculate ν
-    ν = (γ-g)/υ^2 + √(((g-γ)/υ^2)^2 + (r-g)/(υ^2/2)); # (eq:10)
+    ν = (μ-g)/υ^2 + √(((g-μ)/υ^2)^2 + (r-g)/(υ^2/2)); # (eq:10)
     # Calculate a generic v.
-    v(z) = (r - γ - υ^2/2)^(-1) * (exp(z) + 1/ν * exp(-ν*z)); # (eq:9)
+    v(z) = (r - μ - υ^2/2)^(-1) * (1 + 1/ν * exp(-(ν+1)*z)); # (eq:9)
     # Validate parameters.
     # Return.
     return (g = g, ν = ν, v = v)
@@ -26,7 +23,7 @@ function stationary_numerical_simple(params, z)
     # Define the pdf of the truncated exponential distribution
     ω = ω_weights(z, θ, ξ)
 
-    # Function we're solving. 
+    # Function we're solving.
     function stationary_numerical_given_g(g)
         # Construct the aggregate operator.
         L_T = (r - g - ξ*((μ + υ^2/2) - g) - υ^2/2*ξ^2)*I - ((μ + υ^2/2) - g + υ^2*ξ)*L_1_minus - υ^2/2 * L_2
@@ -35,7 +32,7 @@ function stationary_numerical_simple(params, z)
         return diff
     end
 
-    # Find the root. 
+    # Find the root.
     g_T = find_zero(stationary_numerical_given_g, (1e-10, 0.75*r), atol = 1e-10, rtol = 1e-10, xatol = 1e-10, xrtol = 1e-10)
 
     # Check that the solution makes sense.
@@ -43,7 +40,7 @@ function stationary_numerical_simple(params, z)
 
     # Recreate what the ODE returned for the value function.
     # Construct the aggregate operator.
-    L_T = (r - g_T - ξ*((μ + υ^2/2) - g_T) - υ^2/2*ξ^2)*I - ((μ + υ^2/2) - g_T + υ^2*ξ)*L_1_minus - υ^2/2 * L_2 
+    L_T = (r - g_T - ξ*((μ + υ^2/2) - g_T) - υ^2/2*ξ^2)*I - ((μ + υ^2/2) - g_T + υ^2*ξ)*L_1_minus - υ^2/2 * L_2
     v_T = L_T \ π_tilde.(z)  # discretized system of ODE for v, where v'(T) = 0 (eq:12)
     return (g = g_T, v = v_T)
 end
