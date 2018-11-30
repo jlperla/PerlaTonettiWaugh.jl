@@ -22,7 +22,7 @@ function welfare(vals, params, staticvalues)
     c = (1 - L_tilde)*z_bar - η*ζ*Ω*Theta*(S + δ/χ) # (H.22)
     λ_ii = 1/(1 + (N-1)*z_hat^(σ-1-θ)*d^(1-σ)) # (H.21)
     U_bar = γ == 1 ? ρ*log(c) + g : 1/(1-γ) * (c^(1-γ))/(ρ + (γ-1)*g) # (H.20)
-    (π_bar_agg = π_bar_agg, y = y, c = c, λ_ii, U_bar = U_bar)
+    (π_bar_agg = π_bar_agg, y = y, c = c, λ_ii = λ_ii, U_bar = U_bar)
 end
 
 # Gives us the residuals for a point x in state-space and a set of params.
