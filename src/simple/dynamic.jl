@@ -1,4 +1,3 @@
-
 # Implementation of the simple model with time-varying objects.
 function simpleODE(params, settings)
     # Unpack necessary objects.

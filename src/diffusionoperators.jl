@@ -27,7 +27,6 @@ function rescaled_diffusionoperators(x::AbstractRange, ξ)
     du_2 = ones(M-1)
     L_2 = Tridiagonal(dl_2, d_2, du_2)/(Δ^2)
 
-    #BandedMatrix are seems slower when not compos4ed.
     return (x, L_1_minus, L_1_plus, L_2)
 end
 
