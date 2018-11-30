@@ -17,11 +17,11 @@ function welfare(vals, params, staticvalues)
     g, z_hat, Ω = vals
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params
     @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x, π_min = staticvals(vals, params)
-    π_bar_agg = π_min*z_bar^(σ-1) - Ω*(N-1)*(1-F(z_hat))*κ # (H.18)
-    y = (1 - L_tilde)*z_bar # (H.19)
-    c = (1 - L_tilde)*z_bar - η*ζ*Ω*Theta*(S + δ/χ) # (H.22)
-    λ_ii = 1/(1 + (N-1)*z_hat^(σ-1-θ)*d^(1-σ)) # (H.21)
-    U_bar = γ == 1 ? ρ*log(c) + g : 1/(1-γ) * (c^(1-γ))/(ρ + (γ-1)*g) # (H.20)
+    π_bar_agg = π_min*z_bar^(σ-1) - Ω*(N-1)*(1-F(z_hat))*κ # (eq:B.50)
+    y = (1 - L_tilde)*z_bar # (eq:B.51)
+    c = (1 - L_tilde)*z_bar - η*ζ*Ω*Theta*(S + δ/χ) # (eq:B.54)
+    λ_ii = 1/(1 + (N-1)*z_hat^(σ-1-θ)*d^(1-σ)) # (eq:B.53)
+    U_bar = γ == 1 ? ρ*log(c) + g : 1/(1-γ) * (c^(1-γ))/(ρ + (γ-1)*g) # (eq:B.22)
     (π_bar_agg = π_bar_agg, y = y, c = c, λ_ii = λ_ii, U_bar = U_bar)
 end
 
