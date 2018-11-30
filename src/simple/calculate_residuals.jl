@@ -3,13 +3,10 @@ function calculate_residuals(params, settings) # To keep the params consistent w
     # Setup
     @unpack μ, υ, θ, r, x, ξ, π_tilde = params
     @unpack z, g, T, ode_solve_algorithm = settings
-    # Quadrature weighting
-    ω = ω_weights(z, θ, ξ)
-    # Grid for t (default to have the same length as the one for z)
-    ts = range(0.0, stop = T, length = length(z))
-    # Define and solve dynamic ODE.
-    ode_prob = simpleODE(params, settings)
-
+    # Calculations
+    ω = ω_weights(z, θ, ξ) # Quadrature weighting
+    ts = range(0.0, stop = T, length = length(z)) # Grid for t (default to have the same length as the one for z)
+    ode_prob = simpleODE(params, settings)  # Define and solve dynamic ODE.
     return calculate_residuals(ode_prob, x, ω, ode_solve_algorithm, ts)
 end
 
@@ -23,6 +20,5 @@ function calculate_residuals(ode_prob, x, ω, ode_solve_algorithm, ts) # To keep
         v_t = sol(t)[1:M] # i.e., the value function at the point.
         residuals[i] = v_t[1] + x(t) - dot(ω, v_t)
     end
-    
     return residuals
 end
