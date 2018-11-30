@@ -5,9 +5,7 @@
 function stationary_algebraic(params, init_x = defaultiv(params); kwargs...)
     @assert params.υ > 0 && params.κ > 0 # Parameter validation
     sol = nlsolve(vals -> stationary_algebraic_aux(vals, params), init_x; inplace = false, kwargs...)
-    if ~converged(sol)
-        throw(sol) # If it fails, throw the results as an exception.
-    end
+    converged(sol) || throw(sol)
     g, z_hat, Ω  = sol.zero
     @assert z_hat > 1 && Ω > 0 && g > 0 # Validate parameters.
     staticvalues = staticvals(sol.zero, params)
