@@ -40,7 +40,7 @@ function f!(resid,du,u,p,t)
     v_t = u[1:M]
     g_t = u[M+1]
     L = (r(t) - g_t - ξ*(μ - g_t) - ξ^2 * υ^2/2)*I - (μ - g_t + υ^2*ξ)*L_1 - υ^2/2 * L_2 # (eq:A.9)
-    resid[1:M] = L * v_t - π_tilde.(t, z)
+    resid[1:M] .= L * v_t - π_tilde.(t, z)
     resid[1:M] .-= du[1:M] # discretized system of ODE for v (eq:12)
     resid[M+1] = v_t[1] + x(t) - dot(ω, v_t) # value matching condition (eq:13)
 end
