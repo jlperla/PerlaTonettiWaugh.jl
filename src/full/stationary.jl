@@ -9,7 +9,20 @@ function stationary_algebraic(params, init_x = defaultiv(params); kwargs...)
     g, z_hat, Ω  = sol.zero
     @assert z_hat > 1 && Ω > 0 && g > 0 # Validate parameters.
     staticvalues = staticvals(sol.zero, params)
-    return merge(staticvalues, (g = g, z_hat = z_hat, Ω = Ω))
+    return merge(staticvalues, (g = g, z_hat = z_hat, Ω = Ω), welfare(sol.zero, params, staticvalues))
+end
+
+# Welfare function
+function welfare(vals, params, staticvalues)
+    g, z_hat, Ω = vals
+    @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params
+    @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x, π_min = staticvals(vals, params)
+    π_bar_agg = π_min*z_bar^(σ-1) - Ω*(N-1)*(1-F(z_hat))*κ # (H.18)
+    y = (1 - L_tilde)*z_bar # (H.19)
+    c = (1 - L_tilde)*z_bar - η*ζ*Ω*Theta*(S + δ/χ) # (H.22)
+    λ_ii = 1/(1 + (N-1)*z_hat^(σ-1-θ)*d^(1-σ)) # (H.21)
+    U_bar = γ == 1 ? ρ*log(c) + g : 1/(1-γ) * (c^(1-γ))/(ρ + (γ-1)*g) # (H.20)
+    (π_bar_agg = π_bar_agg, y = y, c = c, λ_ii, U_bar = U_bar)
 end
 
 # Gives us the residuals for a point x in state-space and a set of params.
@@ -44,16 +57,9 @@ function staticvals(vals, params)
     w = σ^(-1)*z_bar # H.10
     x = ζ * (1- η + η * Theta / w) # H.11
     π_min = (d^(σ-1) * κ)/(z_hat^(σ-1)) # Inversion of H.9
-    # Compute welfare quantities
-    π_bar_agg = π_min*z_bar^(σ-1) - Ω*(N-1)*(1-F(z_hat))*κ # (H.18)
-    y = (1 - L_tilde)*z_bar # (H.19)
-    c = (1 - L_tilde)*z_bar - η*ζ*Ω*Theta*(S + δ/χ) # (H.22)
-    λ_ii = 1/(1 + (N-1)*z_hat^(σ-1-θ)*d^(1-σ)) # (H.21)
-    U_bar = γ == 1 ? ρ*log(c) + g : 1/(1-γ) * (c^(1-γ))/(ρ + (γ-1)*g) # (H.20)
 
     return (F = F, r = r, ν = ν, a = a, b = b, S = S, L_tilde = L_tilde, z_bar = z_bar,
-            w = w, x = x, π_min = π_min, π_bar_agg = π_bar_agg, y = y, c = c, λ_ii = λ_ii,
-            U_bar = U_bar)
+            w = w, x = x, π_min = π_min)
 end
 
 # Default initial values
@@ -139,5 +145,5 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
     # c_bar = (θ/(1-σ+θ))^(1/(σ-1))*(1-L_tilde)*Ω_T^(1/(σ-1))*λ_ii # (eq:B.54)
     # U_bar = ρ*log(c_bar) + g_T # (eq:43)
 
-    return merge(staticvalues, (g = g_T, z_hat = z_hat_T, Ω = Ω_T, v_tilde = v_tilde))
+    return merge(staticvalues, (g = g_T, z_hat = z_hat_T, Ω = Ω_T, v_tilde = v_tilde), welfare(minx, params, staticvalues))
 end
