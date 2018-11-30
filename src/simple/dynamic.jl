@@ -1,11 +1,13 @@
 # Implementation of the simple model with time-varying objects.
 # Dynamic calculations, defined for each time ∈ t.
 function f(du,u,p,t)
-    @unpack L_1, L_2, z, r, μ, g, υ, π_tilde, T, ξ = p
+    @unpack L_1, L_2, z, r, μ, g, υ, π_tilde, T, ξ, z = p
     # Validate upwind scheme direction.
     μ + υ^2/2 - g(t) < 0 || error("Drift must be strictly negative at all times")
+    r = r(t)
+    g = g(t)
     # Carry out calculations.
-    L = (r(t) - g(t) - ξ*(μ - g(t)) - ξ^2 * υ^2/2)*I - (μ + ξ*υ^2 - g_t)*L_1 - υ^2/2 * L_2 # (eq:A.9)
+    L = (r - g - ξ*(μ - g) - ξ^2 * υ^2/2)*I - (μ + ξ*υ^2 - g)*L_1 - υ^2/2 * L_2 # (eq:A.9)
     mul!(du, L, u)
     du .-= π_tilde.(t, z) # discretized system of ODE for v (eq:12)
 end
@@ -27,14 +29,13 @@ function simpleODE(params, settings)
     v_T = L_T \ π_tilde_T
     # Bundle as before.
     p = (L_1 = L_1_minus, L_2 = L_2, z = z, g = g, r = r, υ = υ, π_tilde = π_tilde, T = T, μ = μ, ξ = ξ)
-
     return ODEProblem(f, v_T, (T, 0.0), p)
 end
 
 # Implementation of the simple model with time-varying objects, represented by DAE
 # Dynamic calculations, defined for each time ∈ t.
 function f!(resid,du,u,p,t)
-    @unpack L_1, L_2, z, r, μ, g, υ, π_tilde, T, M, ξ = p
+    @unpack L_1, L_2, z, r, μ, g, υ, π_tilde, T, M, ξ, x, ω = p
     # Carry out calculations.
     v_t = u[1:M]
     g_t = u[M+1]
@@ -50,7 +51,6 @@ function simpleDAE(params, settings)
     @unpack μ, υ, θ, r, x, ξ, π_tilde = params
     @unpack z, T, g = settings
     M = length(z)
-
     # Quadrature weighting
     ω = ω_weights(z, θ, ξ)
     # Discretize the operator.
@@ -61,11 +61,10 @@ function simpleDAE(params, settings)
     L_T = (r_T - g_T - ξ*(μ-g_T) - ξ^2 * υ^2/2)*I - (μ + ξ*υ^2 - g_T)*L_1_minus - υ^2/2 * L_2 # (eq:A.9)
     v_T = L_T \ π_tilde.(Ref(T), z)
     # Bundle as before.
-    p = (L_1 = L_1_minus, L_2 = L_2, z = z, g = g, r = r, υ = υ, π_tilde = π_tilde, T = T, μ = μ, g_T = g_T, M = M, ξ = ξ)
+    p = (L_1 = L_1_minus, L_2 = L_2, z = z, g = g, r = r, υ = υ, π_tilde = π_tilde, T = T, μ = μ, g_T = g_T, M = M, ξ = ξ, x = x, ω = ω)
     # Other objects
     u = [v_T; g_T]
     du = zeros(M+1)
     resid_M1 = zeros(M+1)
-
     return DAEProblem(f!, resid_M1, u, (T, 0.0), differential_vars = [fill(true, M); false], p)
 end
