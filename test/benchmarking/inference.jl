@@ -23,24 +23,24 @@ end
 function test_simpleODE()
     params = (μ = 0.0, υ = 0.1, θ = 2.1, r = x -> 1., x = n -> 1., ξ = 1., π_tilde = (t, z) -> 1.) # Arbitrary parameter set
     settings = (z = 0.:0.1:3., T = 10., g = x -> 0.02)
-    @btime simpleODE(params, settings)
+    simpleODE(params, settings)
 end
 
-test_simpleODE()
+@btime test_simpleODE()
 
 # simpleDAE
 function test_simpleDAE()
     params = (μ = 0.0, υ = 0.1, θ = 2.1, r = x -> 1., x = n -> 1., ξ = 1., π_tilde = (t, z) -> 1.) # Arbitrary parameter set
     settings = (z = 0.:0.1:3., T = 10., g = x -> 0.02)
-    @btime simpleDAE(params, settings)
+    simpleDAE(params, settings)
 end
 
-test_simpleDAE()
+@btime test_simpleDAE()
 
 # RESIDUALS CALCULATION
 function test_residuals()
     params = (μ = 0.0, υ = 0.1, θ = 2.1, r = x -> 1., x = n -> 1., ξ = 1., π_tilde = (t, z) -> 1.) # Arbitrary parameter set
-    settings = (z = 0.:0.1:3., T = 10., g = x -> 0.02, ode_solve_algorithm = CVODE_BDF())
+    settings = (z = 0.:0.1:3., T = 10, g = x -> 0.02, ode_solve_algorithm = CVODE_BDF())
     obj1 = calculate_residuals(params, settings)
 
     # Vary the parameters a bit
