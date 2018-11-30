@@ -44,7 +44,16 @@ function staticvals(vals, params)
     w = σ^(-1)*z_bar # H.10
     x = ζ * (1- η + η * Theta / w) # H.11
     π_min = (d^(σ-1) * κ)/(z_hat^(σ-1)) # Inversion of H.9
-    return (F = F, r = r, ν = ν, a = a, b = b, S = S, L_tilde = L_tilde, z_bar = z_bar, w = w, x = x, π_min = π_min)
+    # Compute welfare quantities
+    π_bar_agg = π_min*z_bar^(σ-1) - Ω*(N-1)*(1-F(z_hat))*κ # (H.18)
+    y = (1 - L_tilde)*z_bar # (H.19)
+    c = (1 - L_tilde)*z_bar - η*ζ*Ω*Theta*(S + δ/χ) # (H.22)
+    λ_ii = 1/(1 + (N-1)*z_hat^(σ-1-θ)*d^(1-σ)) # (H.21)
+    U_bar = γ == 1 ? ρ*log(c) + g : 1/(1-γ) * (c^(1-γ))/(ρ + (γ-1)*g) # (H.20)
+
+    return (F = F, r = r, ν = ν, a = a, b = b, S = S, L_tilde = L_tilde, z_bar = z_bar,
+            w = w, x = x, π_min = π_min, π_bar_agg = π_bar_agg, y = y, c = c, λ_ii = λ_ii,
+            U_bar = U_bar)
 end
 
 # Default initial values
