@@ -126,9 +126,9 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
     π_tilde = z -> π_min * (1 + (N-1)*d^(1-σ)*i(z)) - (N-1)*κ*exp(-(σ-1)*z)*i(z) # (eq:32)
     v_tilde = L_T \ π_tilde.(z) # discretized system of ODE for v, where v'(T) = 0 (eq:24)
     # Carry out welfare calculations.
-    λ_ii = 1/(1 + (N-1)*z_hat_T^(σ-1-θ)*d^(1-σ)) # (eq:H.21)
-    c_bar = (θ/(1-σ+θ))^(1/(σ-1))*(1-L_tilde)*Ω_T^(1/(σ-1))*λ_ii # (eq:B.54)
-    U_bar = ρ*log(c_bar) + g_T # (eq:43)
+    # λ_ii = 1/(1 + (N-1)*z_hat_T^(σ-1-θ)*d^(1-σ)) # (eq:H.21)
+    # c_bar = (θ/(1-σ+θ))^(1/(σ-1))*(1-L_tilde)*Ω_T^(1/(σ-1))*λ_ii # (eq:B.54)
+    # U_bar = ρ*log(c_bar) + g_T # (eq:43)
 
-    return merge(staticvalues, (g = g_T, z_hat = z_hat_T, Ω = Ω_T, v_tilde = v_tilde, U = U_bar))
+    return merge(staticvalues, (g = g_T, z_hat = z_hat_T, Ω = Ω_T, v_tilde = v_tilde))
 end
