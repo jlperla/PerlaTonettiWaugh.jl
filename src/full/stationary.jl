@@ -9,7 +9,7 @@ function stationary_algebraic(params, init_x = defaultiv(params); kwargs...)
     g, z_hat, Ω  = sol.zero
     @assert z_hat > 1 && Ω > 0 && g > 0 # Validate parameters.
     staticvalues = staticvals(sol.zero, params)
-    return merge(staticvalues, (g = g, z_hat = z_hat, Ω = Ω), welfare(sol.zero, params, staticvalues))
+    return merge(staticvalues, merge((g = g, z_hat = z_hat, Ω = Ω), welfare(sol.zero, params, staticvalues)))
 end
 
 # Welfare function
@@ -145,5 +145,5 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
     # c_bar = (θ/(1-σ+θ))^(1/(σ-1))*(1-L_tilde)*Ω_T^(1/(σ-1))*λ_ii # (eq:B.54)
     # U_bar = ρ*log(c_bar) + g_T # (eq:43)
 
-    return merge(staticvalues, (g = g_T, z_hat = z_hat_T, Ω = Ω_T, v_tilde = v_tilde), welfare(minx, params, staticvalues))
+    return merge(staticvalues, merge((g = g_T, z_hat = z_hat_T, Ω = Ω_T, v_tilde = v_tilde), welfare(minx, params, staticvalues)))
 end
