@@ -20,7 +20,7 @@ function simpleODE(params, settings)
     function f(du,u,p,t)
         @unpack L_1, L_2, z, r, μ, g, υ, π_tilde, T = p
         # Validate upwind scheme direction.
-        μ+υ^2/2 - g(t) < 0 || error("Drift must be strictly negative at all times")
+        μ + υ^2/2 - g(t) < 0 || error("Drift must be strictly negative at all times")
         # Carry out calculations.
         L = (r(t) - g(t) - ξ*(μ - g(t)) - ξ^2 * υ^2/2)*I - (μ + ξ*υ^2 - g_T)*L_1 - υ^2/2 * L_2 # (eq:A.9)
         mul!(du, L, u)
