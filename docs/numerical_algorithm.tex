@@ -15,13 +15,13 @@ linkcolor=darkgray,
 citecolor=darkgray,
 urlcolor=darkgray,
 filecolor=darkgray,
-anchorcolor=darkgray, 
+anchorcolor=darkgray,
 breaklinks]
 {hyperref}
 \usepackage[capitalise,noabbrev]{cleveref} %
 \crefname{equation}{}{} %
-\crefname{assumption}{Assumption}{Assumptions}	
-\crefname{property}{Property}{Properties}	
+\crefname{assumption}{Assumption}{Assumptions}
+\crefname{property}{Property}{Properties}
 \geometry{left=1in,right=1in,top=0.6in,bottom=1in}
 
 \newcommand{\D}[1][]{\ensuremath{\boldsymbol{\partial}_{#1}}}
@@ -49,7 +49,7 @@ v(0,t) &= \int_{0}^{\infty}  v(z,t) \left(e^z F'(z)\right) \diff z - x(t)\label{
 \D[z]v(0,t) + v(0,t) &= 0\label{eq:simple-summary3}\\
 \intertext{Where,}
 A(t) &\equiv \left(r - \mu - \frac{\upsilon^2}{2}\right) - (\mu+ \upsilon^2 - g(t)) \D[z] - \frac{\upsilon^2}{2} \D[zz]\label{eq:simple-summary4}
-\end{align} 
+\end{align}
 
 \subsection{Steady State}
 For the exogenous $\pi(z,t)$ and $x(t)$ we require that at some $T$ it becomes stationary and
@@ -107,15 +107,15 @@ Define $E(t)$ such that the \textbf{gross} entry flow is $E(t)\Omega(t)$.  Since
 	\D[t] \Omega(t) &= \left(E(t) - \delta \right)\Omega(t)\\
 \intertext{Rearrange,}
 E(t) &\equiv \delta + \D[t]\log \Omega(t)
-\end{align}	
+\end{align}
 Therefore, in the steady-state we must have $E(t) = \delta$.
 
 \subsection{Differential Equations}\label{sec:full-ODE}
 The dynamic set of differential equations (rescaled) is derived in \cref{sec:full-model-derivations}.
 \begin{align}
 %	\tilde{\rho}(t) v(z,t) &= \pi(z,t) + (\mu - g(t) + (\sigma - 1)\upsilon^2)\D[z]v(z,t) + \frac{\upsilon^2}{2}\D[zz]v(z,t) + \D[t]v(z,t)\\
-%	\D[t]v(z,t) &= \left(\tilde{\rho}(t)  - (\mu - g(t) + (\sigma - 1)\upsilon^2)\D[z] - \frac{\upsilon^2}{2}\D[zz]\right)v(z,t) - \pi(z,t) \\	
-	\D[t]v(z,t) &= A(t)v(z,t) - \pi(z,t) \\	
+%	\D[t]v(z,t) &= \left(\tilde{\rho}(t)  - (\mu - g(t) + (\sigma - 1)\upsilon^2)\D[z] - \frac{\upsilon^2}{2}\D[zz]\right)v(z,t) - \pi(z,t) \\
+	\D[t]v(z,t) &= A(t)v(z,t) - \pi(z,t) \\
 	A(t) &\equiv \tilde{\rho}(t)  - (\mu - g(t) + (\sigma - 1)\upsilon^2)\D[z] - \frac{\upsilon^2}{2}\D[zz]\\
 	v(0,t) &= \int_{0}^{\bar{z}}v(z,t) \frac{e^{\sigma - 1}F'(z)}{F(\bar{z})} \diff z - \zeta\\
 	0 &= (\sigma - 1)v(0,t) + \D[z]v(0,t)\\
@@ -133,7 +133,7 @@ To discretize \cref{sec:full-ODE}, define the interior operator, in a way simila
 Discretize this and implement the boundary conditions in the discretized operator, as before, to get the system of ODEs,
 \begin{align}
 	v'(t) &= A(t) v(t) - \pi(t)
-\end{align}	
+\end{align}
 
 The three variables required in the DAE are $g(t), \hat{z}(t),$ and $\Omega(t)$.\footnote{Note: the $\hat{z}(t)$ \textbf{has no log} taken of it, unlike the $z$.  Hence, to see if a firm exports, we need to check if $z \geq \log(\hat{z}(t))$.  Furthermore, it means that the $\hat{z}$ has a minimum value of $1$.}  The \cref{eq:normalized-vm-summary-rescaled} value matching equation uses the same discretization approach as in the simple example (combining everything into the weights $\omega$, with the truncated exponential distribution, etc.) to discretize as
 \begin{align}
@@ -171,7 +171,7 @@ Some additional calculations useful for analyzing the model, but not required fo
 	\lambda_{ii}(t) &= \frac{1}{1 + (N-1)\hat{z}(t)^{\sigma-1-\theta}d^{1-\sigma}}\label{eq:lambda-ii-t-summary}\\
 c(t) &= \left(\frac{\theta}{1-\sigma+\theta}\right)^{\frac{1}{\sigma-1}}\left(1 - \tilde{L}(t)\right)\Omega(t)^{\frac{1}{\sigma - 1}} \lambda_{ii}(t)^{\frac{1}{1-\sigma}}\label{eq:c-summary}\\
 \log M(t) &= \int_0^t g(s)\diff s\label{eq:log-M-summary}\\
-U(t) &= \int_0^{T-t}e^{-\rho \tau}\left(\log M(t+\tau)+\log c(t+\tau)\right)\diff \tau + \frac{e^{-\rho( T-t)}}{\rho^2}\left((1+\rho( T-t))g(T) + \rho\left(\log c(T) + \log M(T) \right) \right)\label{eq:U-dynamics-summary}	
+U(t) &= \int_0^{T-t}e^{-\rho \tau}\left(\log M(t+\tau)+\log c(t+\tau)\right)\diff \tau + \frac{e^{-\rho( T-t)}}{\rho^2}\left((1+\rho( T-t))g(T) + \rho\left(\log c(T) + \log M(T) \right) \right)\label{eq:U-dynamics-summary}
 \end{align}
 
 
@@ -201,7 +201,7 @@ A solution to this problem is a $g(t)$ and $\hat{v}(z,t)$ that fulfills the abov
 	\begin{align}
 	\D[z]\hat{v}(\bar{z},t) &= 0\label{eq:reflecting-GBM-dynamic}
 	\end{align}
-	
+
 
 \subsection{Change of Variables to Normalize and Rescale}\label{eq:simple-rescale}
 Solving \cref{eq:bellman-GBM-dynamic} for $\hat{v}(z,t)$ is problematic since the scale goes from approximatively $1$ to $e^{\bar{z}}$, which is very large for a high $\bar{z}$.  To make the solution more stable, we rescale the equation.  Choose some $\xi \geq 0$ for convenience and to ensure stability and let
@@ -209,7 +209,7 @@ Solving \cref{eq:bellman-GBM-dynamic} for $\hat{v}(z,t)$ is problematic since th
 	v(z,t) &\equiv e^{-\xi z}\hat{v}(z,t) = e^{-\xi z}\frac{V(e^z M(t),t)}{M(t)}\\
 	\intertext{Differentiate and reorganize this expression to yield}
 	\D[z]\hat{v}(z,t) &= e^{\xi z}\left(\xi v(z,t) + \D[z]v(z,t) \right)\\
-	\D[zz]\hat{v}(z,t) &= e^{\xi z}\left(\xi^{2} v(z,t) + 2 \xi\D[z]v(z,t) + \D[zz]v(z,t)  \right)\\	
+	\D[zz]\hat{v}(z,t) &= e^{\xi z}\left(\xi^{2} v(z,t) + 2 \xi\D[z]v(z,t) + \D[zz]v(z,t)  \right)\\
 	\D[t]\hat{v}(z,t) &= e^{\xi z} \D[t]v(z,t)
 \end{align}
 Define $\pi(z,t) = e^{-\xi z}\hat{\pi}(z,t)$ so that if $\hat{\pi}(z,t) = e^{\xi z}$ then $\pi(z,t) = 1$.  Substitute into \cref{eq:bellman-GBM-dynamic}, divide by $e^{\xi z}$ and simplify,
@@ -222,11 +222,11 @@ Now, substitute into the boundary conditions \cref{eq:sp-GBM-dynamic,eq:reflecti
 \begin{align}
 	\xi v(0,t) + \D[z]v(0,t ) &= 0\label{eq:new-BC1}\\
 	\xi v(\bar{z},t) + \D[z]v(\bar{z},t) &= 0\label{eq:new-BC2}
-\end{align}	
+\end{align}
 Finally, in the value matching condition, $\hat{v}(0,t) = e^{0} v(0,t)$ where if the $F'(z) = \theta e^{-\theta z}$ then,
 \begin{align}
 	 v(0,t) &= \int_{0}^{\infty}  v(z,t) \left(e^{\xi z} F'(z)\right) \diff z - x(t)\label{eq:vm-GBM-dynamic-normalized-not-truncated}
-\end{align}	
+\end{align}
 However, for the numerical approximation with the artificial boundary at $\bar{z}$, we need to use a truncated distribution for $F(z)$.  Since we have take the $F(z)$ with support from $[0,\infty)$, and we truncate at $\bar{z} = \bar{z}$ then the equation in \cref{eq:vm-GBM-dynamic-normalized-not-truncated} to work with is,
 \begin{align}
 	 v(0,t) &= \int_{0}^{\bar{z}}  v(z,t) \left(e^{\xi z} \frac{F'(z)}{F(\bar{z})}\right) \diff z - x(t)\label{eq:vm-GBM-dynamic-normalized}
@@ -302,18 +302,18 @@ To use these substitutions, start with \cref{eq:normalized-vm} and use the defin
 v(0,t) &= \theta \int_{0}^{\infty} v(z,t) e^{(-\theta + \sigma - 1)z} \diff z - x(t)\label{eq:normalized-vm-summary-rescaled}\\
 \intertext{Combine \cref{eq:normalized-sp,eq:vt-0-dz} to get}
 0 &= (\sigma - 1) v(0,t) + \D[z]v(0,t)\label{eq:normalized-sp-summary-rescaled}
-\intertext{Finally, substitute all of the derivatives into \cref{eq:normalized-bellman} and divide by $e^{(\sigma - 1)z}$}	
+\intertext{Finally, substitute all of the derivatives into \cref{eq:normalized-bellman} and divide by $e^{(\sigma - 1)z}$}
 \tilde{\rho}(t)  v(z,t) &= \pi(z,t) + (\mu - g(t) + (\sigma - 1)\upsilon^2)\D[z]v(z,t) + \frac{\upsilon^2}{2}\D[zz]v(z,t) + \D[t]v(z,t)
 \intertext{where,}
-\tilde{\rho}(t) &\equiv  r(t) - g(t) - g_w(t) - (\sigma - 1)\left(\mu - g(t) + (\sigma - 1)\frac{\upsilon^2}{2} \right)\label{eq:rhot}	
-\end{align}	
+\tilde{\rho}(t) &\equiv  r(t) - g(t) - g_w(t) - (\sigma - 1)\left(\mu - g(t) + (\sigma - 1)\frac{\upsilon^2}{2} \right)\label{eq:rhot}
+\end{align}
 
 \noindent From (PTW.C.26 to C.28) using the $z\equiv\log(Z/M(t))$ definition,
 \begin{align}
 	\hat{\pi}(z,t) &= \pi_{\min}(t) e^{(\sigma - 1)z}\left(1 + (N-1)d^{1-\sigma}\indicator{z \geq \log(\hat{z}(t))}\right) - (N-1)\kappa\indicator{z \geq \log(\hat{z}(t))}\label{eq:pi-z-t-summary}
 \intertext{Multiply by $e^{-(\sigma - 1)z}$ to get,}
 \pi(z,t) &\equiv \bar{\pi}_{\min}(t)\left(1 + (N-1)d^{1-\sigma}\indicator{z \geq \log(\hat{z}(t))}\right) - (N-1)\kappa e^{-(\sigma - 1)z}\indicator{z \geq \log(\hat{z}(t))}
-\end{align}	
+\end{align}
 
 
 
@@ -349,7 +349,7 @@ r(t) &= \rho + \delta + \gamma \D[t]\log C(t)\\
 
 \noindent This can be simplified in some cases.  From the PTW (C.34), for $\eta = 0$,
  \begin{align}
- \frac{c(t)}{w(t)}&\propto 1 - \tilde{L}(t) 
+ \frac{c(t)}{w(t)}&\propto 1 - \tilde{L}(t)
  \intertext{Taking the log and differentiating,}
 g_c(t) - g_w(t) &= \D[t]\log\left(1 - \tilde{L}(t)\right)\label{eq:g-c-w-diff}
 \intertext{Define,}
@@ -363,7 +363,7 @@ g_c(t) - g_w(t) &= \D[t]\log\left(1 - \tilde{L}(t)\right)\label{eq:g-c-w-diff}
  \tilde{r}(t) &=  \rho+ \delta + \D[t]\log\left(1 - \tilde{L}(t)\right)\label{eq:tilde-r-L}
  \end{align}
 
- 
+
  \subsection{Derivations of Cutoffs and Profits}
  From (PTW H.11), the adoption cost relative to wages remains constant throughout the transition (i.e. assumed $\eta = 0$):
  \begin{align}
@@ -377,8 +377,8 @@ g_c(t) - g_w(t) &= \D[t]\log\left(1 - \tilde{L}(t)\right)\label{eq:g-c-w-diff}
  \bar{z}(t) &= \left[\Omega(t)\left(\expec{z^{\sigma - 1}} + (N-1)(1-F(\hat{z}(t)))d^{1-\sigma}\condexpec{z^{\sigma - 1}}{z > \hat{z}(t)}\right)\right]^{\frac{1}{\sigma - 1}}\\
  &= \left[\Omega(t)
  \frac{\theta}{1+\theta - \sigma}\left(1 + (N-1)d^{-\theta}\left(\frac{\hat{z}}{d} \right)^{\sigma - 1 -\theta} \right)\right]^{\frac{1}{\sigma - 1}}\label{eq:z-bar-sub}\\
- \end{align}	
- 
+ \end{align}
+
  Hence,
  \begin{align}
  \bar{z}(t)^{\sigma - 1}&= \Omega(t)
@@ -405,6 +405,23 @@ M(t) &=M(0)\times\begin{cases}
 \intertext{Assume wlog that $M(0) = 1$, then,}
 \log M(t) &= \int_0^t g(s)\diff s\label{eq:log-M}
 \end{align}
+
+\subsection*{Intermediate Objects}
+
+Before proceeding, define the following intermediate objects (see Appendix H of PTW):
+
+\begin{align}
+	\bar{\pi}_{\textup{agg}} &= \bar{\pi}_{\min}\bar{z}^{\sigma-1} - \Omega(N - 1)(1 - F(\hat{z}))\kappa \\
+	y &= (1 - \tilde{L})\bar{z} \\
+	\bar{U} &=
+	\begin{cases}
+		\rho \log(c) + g, & \gamma = 1 \\
+ 		\frac{1}{1-\gamma} \frac{c^{1 - \gamma}}{\rho + (\gamma - 1)g} & \text{otherwise}
+	\end{cases} \\
+	\lambda_{ii} &= \frac{1}{1 + (N-1)\hat{z}^{\sigma - 1 - \theta}d^{1-\sigma}} \\
+	c &= (1 - \tilde{L})\bar{z} - \eta \zeta \Omega \Theta (S + \frac{\delta}{\chi})
+\end{align}
+
 
 At the steady state, define $\bar{g}$ and $\bar{c}$ as the growth rate and consumption relative to real wages for $t \geq T$.  The consumer welfare can be calculated as from (PTW 1),
 \begin{align}
@@ -463,7 +480,7 @@ This will discretize space with backward differences in the first derivative, an
 			z_I - z_{I-1}
 		\end{bmatrix}
 	\end{align}
-	\item The grid on time $t \in [0,T]$ may be adaptive, and we will let the ODE solver handle the grid.	
+	\item The grid on time $t \in [0,T]$ may be adaptive, and we will let the ODE solver handle the grid.
 	\item Assume a grid of $I$ discrete points in $z$ and $N$ discrete points in time, then denote the value as
 	\begin{align}
 		v(t) &\equiv \set{v(z_i, t)}_{i=1}^I\in\R^I
@@ -474,7 +491,7 @@ This will discretize space with backward differences in the first derivative, an
 \subsection{Discretization Operators}\label{sec:discretization-operators}
 Summarizing the discretized differential operators subject to the boundary conditions.  Let $L_1^{-}$ be the discretized backwards first differences, subject to \cref{eq:new-BC1,eq:new-BC2} and $L_2$ be the discretized central differences subject to \cref{eq:new-BC1,eq:new-BC2}.
 
-Then you can show that the following  
+Then you can show that the following
 
 \begin{align}
 L_1^{-} &\equiv \begin{bmatrix} TODO \end{bmatrix}\\
@@ -502,7 +519,7 @@ If the $z$ grid is uniform, the central differences should end up as just
 
 In the interior ($1 < i < I$), the discretization of finite difference operator is with drift $\mu_i$ split into upwind components is:
 \begin{align}
-\mathcal{A} v(z_i) 
+\mathcal{A} v(z_i)
 &= \underbrace{\left(-\frac{\mu_i^{-}}{\Delta_{i,-}} +\frac{\sigma_i^2}{\Delta_{i,-}(\Delta_{i,+}+\Delta_{i,-})}\right)}_{\equiv X_i}v_{i-1} + \underbrace{\left(\frac{\mu_i^{-}}{\Delta_{i,-}} - \frac{\mu_i^{+}}{\Delta_{i,+}}-\frac{\sigma_i^2}{\Delta_{i,-}\Delta_{i,+}}\right)}_{\equiv Y_i}v_i +\nonumber\\ &\underbrace{\left(\frac{\mu_i^{+}}{\Delta_{i,+}} + \frac{\sigma_i^2}{\Delta_{i,+}(\Delta_{i,+}+\Delta_{i,-})}\right)}_{\equiv Z_i}v_{i+1}\label{eq:A-collected-interior-with-nonuniform-grid}
 \end{align}
 
@@ -551,7 +568,7 @@ So from \cref{eq:reflecting-right-nonuniform} the bottom right corner of $A$ mat
 		A &\equiv \begin{bmatrix}
 	X_1^n(1+\xi\Delta_{1,+})+Y_1^n & Z_1^n & 0 & \ldots & \ldots & \ldots & 0\\
 	X^n_2 & Y^n_2 & Z^n_2 & 0 & 0 & \ldots & 0\\
-	\vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots\\		
+	\vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots\\
 	0 & 0 & 0 & \ldots & X^n_{I-1} & Y^n_{I-1} & Z^n_{I-1}\\
 	0 & \ldots & \ldots & \ldots & 0 & X_I^n & Y_I^n+Z_I^n(1-\xi\Delta_{I,-})
 \end{bmatrix}\in\R^{I\times I}\label{eq:A-n}
@@ -561,11 +578,11 @@ So from \cref{eq:reflecting-right-nonuniform} the bottom right corner of $A$ mat
 \section{Computation of equilibrium $\Omega(t)$ and $E(t)$}
 First, note that $\Omega(t)$ is defined by the solution of the differential equation $	\D[t] \Omega(t) = \left(E(t) - \delta \right)\Omega(t)$ from \cref{eq:E-defined-by-Omega} with boundary conditions of $\Omega(0) = \Omega_0$ and $\Omega(T) = \Omega_T$ where $\Omega_0$ and $\Omega_T$ are the stationary solutions for $\Omega(t)$ at $t = 0$ and $t = T$ respectively. Hence, it suffices to find the equilibrium $E(t)$. On the other hand, note that in steady-state we must have $E(t) = \delta$. Thus, the search space for $E(t)$ is a differentiable $E(t)$ such that $E(T) = \delta$. In actual computation, we use cubic splines with nodes that are uniformly distributed across $[0,T]$.
 
-To find the equilibrium $E(t)$, we first find $\widehat E(t)$ with an arbitrary endpoint on $[0,T]$ and rescale $\widehat E(t)$ by $M$ 
+To find the equilibrium $E(t)$, we first find $\widehat E(t)$ with an arbitrary endpoint on $[0,T]$ and rescale $\widehat E(t)$ by $M$
 \begin{align}\label{eq:E-normalized-defn}
 	M \widehat E(t) = E(t) - \delta
 \end{align}
-such that $M \widehat E(T) = \delta$. Substituting \cref{eq:E-normalized-defn} in \cref{eq:E-defined-by-Omega}, we have 
+such that $M \widehat E(T) = \delta$. Substituting \cref{eq:E-normalized-defn} in \cref{eq:E-defined-by-Omega}, we have
 \begin{align}
 \D[t] \Omega(t) = M \widehat{E}(t) \Omega(t)
 \end{align}
