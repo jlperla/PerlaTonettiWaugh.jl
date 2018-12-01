@@ -13,7 +13,7 @@ function test_ω()
     z = 0.:0.01:5.
     α = 2.1
     ξ = 1.
-    ω_weights(z, α, ξ), ω_weights(collect(z), α, ξ), ω_weights(z, α, 1), ω_weights(collect(z), α, 1) # Different type signatures for input
+    ω_weights(z, α, ξ), ω_weights(collect(z), α, ξ), ω_weights(z, α, 1), ω_weights(collect(z), α, 1), ω_weights(z, 1.0, 2.0) # Different type signatures/values for input
 end
 
 @test @inferred test_ω() == test_ω()

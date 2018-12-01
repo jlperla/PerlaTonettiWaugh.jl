@@ -1,7 +1,6 @@
 #=
     Discretization code with rescaling.
 =#
-
 # Regular grids.
 function rescaled_diffusionoperators(x::AbstractRange, ξ)
     # Insert algebra here.
