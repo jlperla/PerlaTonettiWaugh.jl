@@ -38,6 +38,3 @@ results = stationary_numerical_simple(simple_params(), z)
 z = unique([range(0.0, stop = 1.0, length = 300)' range(1.0, stop = 2.0, length = 50)' range(2.0, stop = 7.0, length = 50)'])
 results = stationary_numerical_simple(simple_params(), z)
 @test abs(results.g - results_algebraic.g) < 1e-4  # Growth rate
-
-baselineparams = simple_params(θ = 5.1269, υ = 0.0593, μ = 0.0, ζ = 1) # μ should probably be 0.0
-results_baseline_algebraic = stationary_algebraic_simple(baselineparams)
