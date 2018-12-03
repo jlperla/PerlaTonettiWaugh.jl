@@ -255,6 +255,33 @@ v_1(t) &= \omega \cdot v(t) - x(t)
 \end{align}
 
 \section{Derivations of Full Model}\label{sec:full-model-derivations}
+
+\subsection{Static Objects and Algebraic Solution}\label{sec:full-algebraic-solution}
+
+Note that we have the following static calculations from the main paper (eqns H.1 - H.11)
+
+\begin{align}
+	F(z) &= 1 - z^{-\theta} \\
+	S &= \theta \left(g - \mu - \theta \frac{\upsilon^2}{2}\right) \\
+	\nu &= \frac{\mu - g}{\upsilon^2} + \sqrt{\left(\frac{g - \mu}{\upsilon^2}\right)^2 + \frac{\upsilon^2}{2}} \\
+	a &= \frac{1}{r - g - (\sigma - 1)(\mu - g  + (\sigma - 1)\upsilon^2/2)} \\
+	b &= (1 - a(r-g))d^{1-\sigma}\hat{z}^{\nu + \sigma -1} \\
+	r &= \rho + \gamma g + \delta \\
+	\tilde{L} &= \Omega [(N-1)(1 - F(\hat{z}))\kappa + (1-\eta)\zeta(S + \delta/\chi)] \\
+	\bar{z} &= [\Omega(\mathbb{E}[z^{\sigma - 1}] + (N-1)(1 - F(\hat{z}))d^{1 - \sigma}\mathbb{E}[z^{\sigma - 1}|z > \hat{z}])]^{1/(\sigma - 1)} \\
+	\hat{z} &= d \left(\frac{\kappa}{\bar{\pi}_{\textup{min}}}\right)^{\frac{1}{\sigma - 1}} \\
+	w &= \frac{1}{\bar{\sigma}}\bar{z} \\
+	x &= \zeta(1 - \eta + \eta \Theta / w)
+\end{align}
+
+This gives us a system of three nonlinear equations to solve:
+
+		\begin{align}
+		\frac{x}{\bar{\pi}_{\min}} &=  a \frac{\chi}{1-\chi}\frac{\sigma + \nu - 1}{\nu} , \\
+		1 + \frac{\sigma - 1}{\nu} &= {\scriptstyle \frac{\frac{\nu  (n-1) (\theta -\sigma +1) \left(d^{1-\sigma } (\theta +\nu ) \hat{z}^{-\theta +\sigma -1}-b \theta  \hat{z}^{-\theta -\nu }\right)}{a (g-r)}+\theta  \left(\nu  (n-1) d^{1-\sigma } (\theta +\nu ) \hat{z}^{-\theta +\sigma -1}+(\nu +\sigma -1) (\theta +\nu -\sigma +1)\right)}{\nu  (\theta +\nu ) (\theta -\sigma +1)} -  \frac{\chi}{1-\chi}\frac{\sigma + \nu - 1}{\nu}} , \\
+		\bar{\pi}_{\min} &= \tfrac{1 - \tilde{L}}{(\sigma - 1) \bar{z}^{\sigma - 1}}.
+		\end{align}
+
 \subsection{Normalization and Rescaling}\label{sec:full-rescaling}
 Note that unlike the PTW paper we have $z \equiv \log(Z/M(t))$ throughout these notes.  The value is normalized as $\hat{v}(z,t) = \frac{V(e^z M(t),t)}{M(t)w(t)}$.  With this,
 \begin{align}
