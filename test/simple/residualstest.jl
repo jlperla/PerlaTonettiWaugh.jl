@@ -47,7 +47,8 @@
     g_func = t -> g_int(t) # Not idiosyncratic.
 
 # Create settings object.
-    settings = @with_kw (z = z_grid, T = T_val, g = t -> g_stationary, ode_solve_algorithm = CVODE_BDF(), iterations = 1000)
+    settings = @with_kw (z = z_grid, T = T_val, g = t -> g_stationary, 
+                        ode_solve_algorithm = CVODE_BDF(), iterations = 1000, t_grid = range(0.0, stop = T_val, length = length(z_grid)))
 
 # Test the stationary residual is close to zero.
     resid = calculate_residuals(params_func_, settings())

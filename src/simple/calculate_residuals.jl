@@ -2,12 +2,11 @@
 function calculate_residuals(params, settings) # To keep the params consistent with other tuples.
     # Setup
     @unpack μ, υ, θ, r, x, ξ, π_tilde = params
-    @unpack z, g, T, ode_solve_algorithm = settings
+    @unpack z, g, T, ode_solve_algorithm, t_grid = settings
     # Calculations
     ω = ω_weights(z, θ, ξ) # Quadrature weighting
-    ts = range(0.0, stop = T, length = length(z)) # Grid for t (default to have the same length as the one for z)
     ode_prob = simpleODE(params, settings)  # Define and solve dynamic ODE.
-    return calculate_residuals(ode_prob, x, ω, ode_solve_algorithm, ts)
+    return calculate_residuals(ode_prob, x, ω, ode_solve_algorithm, t_grid)
 end
 
 function calculate_residuals(ode_prob, x, ω, ode_solve_algorithm, ts) # To keep the params consistent with other tuples.
