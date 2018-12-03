@@ -169,7 +169,7 @@ To calculate the $\D[t]\log\left(1 - \tilde{L}(t)\right)$ you need to store the 
 Some additional calculations useful for analyzing the model, but not required for the calculation are
 \begin{align}
 	\lambda_{ii}(t) &= \frac{1}{1 + (N-1)\hat{z}(t)^{\sigma-1-\theta}d^{1-\sigma}}\label{eq:lambda-ii-t-summary}\\
-c(t) &= \left(\frac{\theta}{1-\sigma+\theta}\right)^{\frac{1}{\sigma-1}}\left(1 - \tilde{L}(t)\right)\Omega(t)^{\frac{1}{\sigma - 1}} \lambda_{ii}(t)^{\frac{1}{1-\sigma}}\label{eq:c-summary}\\
+c &= (1 - \tilde{L})\bar{z} \label{eq:c-summary}\\
 \log M(t) &= \int_0^t g(s)\diff s\label{eq:log-M-summary}\\
 U(t) &= \int_0^{T-t}e^{-\rho \tau}\left(\log M(t+\tau)+\log c(t+\tau)\right)\diff \tau + \frac{e^{-\rho( T-t)}}{\rho^2}\left((1+\rho( T-t))g(T) + \rho\left(\log c(T) + \log M(T) \right) \right)\label{eq:U-dynamics-summary}
 \end{align}
@@ -271,7 +271,13 @@ Note that we have the following static calculations from the main paper (eqns H.
 	\bar{z} &= [\Omega(\mathbb{E}[z^{\sigma - 1}] + (N-1)(1 - F(\hat{z}))d^{1 - \sigma}\mathbb{E}[z^{\sigma - 1}|z > \hat{z}])]^{1/(\sigma - 1)} \\
 	\hat{z} &= d \left(\frac{\kappa}{\bar{\pi}_{\textup{min}}}\right)^{\frac{1}{\sigma - 1}} \\
 	w &= \frac{1}{\bar{\sigma}}\bar{z} \\
-	x &= \zeta(1 - \eta + \eta \Theta / w)
+	x &= \zeta(1 - \eta + \eta \Theta / w) \\
+		c &= (1 - \tilde{L})\bar{z} \\
+		\bar{U} &=
+	\begin{cases}
+	\frac{\rho \log(c) + g}{\rho^2}, & \gamma = 1 \\
+	\frac{1}{1-\gamma} \frac{c^{1 - \gamma}}{\rho + (\gamma - 1)g} & \text{otherwise}
+	\end{cases} 
 \end{align}
 
 This gives us a system of three nonlinear equations to solve:
@@ -438,15 +444,9 @@ M(t) &=M(0)\times\begin{cases}
 Before proceeding, define the following intermediate objects (see Appendix H of PTW):
 
 \begin{align}
-	\bar{\pi}_{\textup{agg}} &= \bar{\pi}_{\min}\bar{z}^{\sigma-1} - \Omega(N - 1)(1 - F(\hat{z}))\kappa \\
 	y &= (1 - \tilde{L})\bar{z} \\
-	\bar{U} &=
-	\begin{cases}
-		\frac{\rho \log(c) + g}{\rho^2}, & \gamma = 1 \\
- 		\frac{1}{1-\gamma} \frac{c^{1 - \gamma}}{\rho + (\gamma - 1)g} & \text{otherwise}
-	\end{cases} \\
 	\lambda_{ii} &= \frac{1}{1 + (N-1)\hat{z}^{\sigma - 1 - \theta}d^{1-\sigma}} \\
-	c &= (1 - \tilde{L})\bar{z} - \eta \zeta \Omega \Theta (S + \frac{\delta}{\chi})
+	c &= (1 - \tilde{L})\bar{z} 
 \end{align}
 
 
