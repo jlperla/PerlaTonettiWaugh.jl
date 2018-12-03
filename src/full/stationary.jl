@@ -21,7 +21,7 @@ function welfare(vals, params, staticvalues)
     y = (1 - L_tilde)*z_bar # (eq:B.51)
     c = (1 - L_tilde)*z_bar - η*ζ*Ω*Theta*(S + δ/χ) # (eq:B.54)
     λ_ii = 1/(1 + (N-1)*z_hat^(σ-1-θ)*d^(1-σ)) # (eq:B.53)
-    U_bar = γ == 1 ? ρ*log(c) + g : 1/(1-γ) * (c^(1-γ))/(ρ + (γ-1)*g) # (eq:B.52)
+    U_bar = γ == 1 ? (ρ*log(c) + g) / ρ^2 : 1/(1-γ) * (c^(1-γ))/(ρ + (γ-1)*g) # (eq:B.52)
     (π_bar_agg = π_bar_agg, y = y, c = c, λ_ii = λ_ii, U_bar = U_bar)
 end
 
