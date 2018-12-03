@@ -13,9 +13,9 @@ results_algebraic = stationary_algebraic_simple(simple_params());
 z1 = unique([range(0.0, stop = 1.0, length = 500)' range(1.0, stop = 5.0, length = 201)'])
 results_num1 = stationary_numerical_simple(simple_params(), z1)
 @test results_num1.g ≈ 0.02010032283241259 # Invariance
-@test abs(results_num1.g - results_algebraic.g) < 1e-3
+@test abs(results_num1.g - results_algebraic.g) < 1e-3 # Consistency.
 
-# Test for a third grid.
+# Test for a second grid.
 z = unique([range(0.0, stop = 1.0, length = 1000)' range(1.0, stop = 2.0, length = 11)' range(2.0, stop = 5.0, length = 20)'])
 results_num2 = stationary_numerical_simple(simple_params(), z)
 @test abs(results_num2.g - results_algebraic.g) < 1e-3 # Growth rate
