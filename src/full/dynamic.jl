@@ -138,9 +138,9 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; stopwith
     results = sort!(results)
       # Define the welfare, etc. quantities in terms of quantities in the DataFrame. 
         gen_λ_ii = z_hat -> 1 / (1 + (N-1)*z_hat^(σ-1-θ)*d^(1-σ)) # (eq:34)
-        gen_c = (L_tilde, Ω, λ_ii) -> (θ / (1-σ+θ))^(1/(σ-1))*(1-L_tilde)*Ω^(1/(σ-1))*λ_ii^(1/(1-σ)) # (eq:35)
+        gen_c = (L_tilde, Ω, z_bar, S) -> (1 - L_tilde)*z_bar - η*ζ*Ω*Theta*(S + δ/χ) # (eq:B.54)
         gen_S = S
-        gen_z_bar = (Ω_t, z_hat) -> Ω_t * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ)) # (eq:29)
+        gen_z_bar = (Ω_t, z_hat) -> (Ω_t * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ)))^(1/(σ-1)) # (eq:29)
         gen_π_min = (L_tilde_t, z_bar) -> (1 - L_tilde_t) / ((σ-1)*z_bar) # (eq:31)
         gen_entry_residual = (v_0) -> v_0 - ζ*(1-χ)/χ # (eq:25)
 
@@ -155,13 +155,13 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; stopwith
           L_tilde_interpolated = LinearInterpolation(results[:t], results[:L_tilde])
           λ_ii = t -> gen_λ_ii(z_hat_interpolated(t))
           log_M = t -> quadgk(g_interpolated, 0, t)[1]
-          log_c = t -> log(gen_c(L_tilde_interpolated(t), Ω(t), λ_ii(t)))
+          log_c = t -> log(gen_c(L_tilde_interpolated(t), Ω(t), gen_z_bar(Ω(t), z_hat_interpolated(t)), S(g_interpolated(t))))
           U = t -> quadgk(τ -> exp(-ρ*τ)*(log_M(t+τ) + log_c(t+τ)), 0, (T-t))[1] + exp(-ρ*(T-t))/(ρ^2)*((1+ρ*(T-t))*g_T + ρ*(log_c(T) + log_M(T)))
 
           results = @transform(results, λ_ii = gen_λ_ii.(:z_hat)) # λ_ii column. 
-          results = @transform(results, c = gen_c.(:L_tilde, :Ω, :z_hat)) # c column.
           results = @transform(results, S = gen_S.(:g)) # S column.
           results = @transform(results, z_bar = gen_z_bar.(:Ω, :z_hat)) # z_bar column. 
+          results = @transform(results, c = gen_c.(:L_tilde, :Ω, :z_bar, :S)) # c column.
           results = @transform(results, π_min = gen_π_min.(:L_tilde, :z_bar)) # π_min column. 
           results = @transform(results, log_M = log_M.(:t)) # log_M column 
           results = @transform(results, U = U.(:t)) # U column
