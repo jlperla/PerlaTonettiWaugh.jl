@@ -25,18 +25,18 @@ end
 function minimize_residuals(params, settings)
     # setup
     @unpack μ, υ, θ, r, x, ξ, π_tilde = params
-    @unpack z, g, T, ode_solve_algorithm, t_grid = settings
+    @unpack z, g, T, ode_solve_algorithm, t_grid, g_node_count = settings
     g_T = g(T)
 
     # returns a vector of residuals given a vector of g for linear interpolation
     function calculate_residuals_by_candidate(g_vectorized, params, settings)
-        g_interpolated = LinearInterpolation(settings.t_grid, g_vectorized)
+        g_interpolated = LinearInterpolation(settings.t_node_for_g, g_vectorized)
         return calculate_residuals(params, merge(settings, (g = g_interpolated, )))
     end
 
     # setup for optimization
-    settings = merge(settings, (t_grid = t_grid, )) # TODO: once passed by settings, remove this line
-    g_initial = fill(g_T, length(t_grid))
+    settings = merge(settings, (t_node_for_g = range(0.0, stop = T, length = g_node_count), ))
+    g_initial = fill(g_T, g_node_count)
 
     # solve the optimization problem
     solved = LeastSquaresOptim.optimize(x -> calculate_residuals_by_candidate(x, params, settings), g_initial, 
