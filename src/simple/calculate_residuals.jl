@@ -30,7 +30,7 @@ function minimize_residuals(params, settings)
 
     # returns a vector of residuals given a vector of g for linear interpolation
     function calculate_residuals_by_candidate(g_vectorized, params, settings)
-        g_interpolated = LinearInterpolation(settings.t_node_for_g, g_vectorized)
+        g_interpolated = CubicSplineInterpolation(settings.t_node_for_g, g_vectorized)
         return calculate_residuals(params, merge(settings, (g = g_interpolated, )))
     end
 
