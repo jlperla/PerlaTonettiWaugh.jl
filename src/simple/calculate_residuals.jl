@@ -15,11 +15,14 @@ function calculate_residuals(ode_prob, x, ω, ode_solve_algorithm, ts) # To keep
     M = length(ω)
     # Calculate the residual at each time point
     residuals = zeros(length(ts))
+    v_ts = zeros(M, length(ts))
     for (i, t) in enumerate(ts)
         v_t = sol(t)[1:M] # i.e., the value function at the point.
         residuals[i] = v_t[1] + x(t) - dot(ω, v_t)
+        v_ts[:,i] = v_t
     end
-    return residuals
+
+    return (residuals = residuals, v_ts = v_ts)
 end
 
 function minimize_residuals(params, settings)
@@ -28,10 +31,11 @@ function minimize_residuals(params, settings)
     @unpack z, g, T, ode_solve_algorithm, t_grid, g_node_count = settings
     g_T = g(T)
 
+    interpolate_g(g_vectorized, settings) = CubicSplineInterpolation(settings.t_node_for_g, [g_vectorized; settings.g_T])
     # returns a vector of residuals given a vector of g for linear interpolation
     function calculate_residuals_by_candidate(g_vectorized, params, settings)
-        g_interpolated = CubicSplineInterpolation(settings.t_node_for_g, [g_vectorized; settings.g_T])
-        return calculate_residuals(params, merge(settings, (g = g_interpolated, )))
+        residuals, v_ts = calculate_residuals(params, merge(settings, (g = interpolate_g(g_vectorized, settings), )))
+        return residuals
     end
 
     # setup for optimization
@@ -44,5 +48,7 @@ function minimize_residuals(params, settings)
                                         autodiff = :central,
                                         LeastSquaresOptim.LevenbergMarquardt(), lower = fill(0.0, length(g_initial)))
 
-    return calculate_residuals_by_candidate(solved.minimizer, params, settings) # return the resultiing residuals 
+    settings = merge(settings, (g = interpolate_g(solved.minimizer, settings), ))
+
+    return calculate_residuals(params, settings) # return the resultiing residuals 
 end

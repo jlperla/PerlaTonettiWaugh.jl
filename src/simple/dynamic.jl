@@ -63,8 +63,7 @@ function simpleDAE(params, settings)
     # Bundle as before.
     p = (L_1 = L_1_minus, L_2 = L_2, z = z, g = g, r = r, υ = υ, π_tilde = π_tilde, T = T, μ = μ, g_T = g_T, M = M, ξ = ξ, x = x, ω = ω)
     # Other objects
-    u = [v_T; g_T]
-    du = zeros(M+1)
+    u_T = [v_T; g_T]
     resid_M1 = zeros(M+1)
-    return DAEProblem(f!, resid_M1, u, (T, 0.0), differential_vars = [fill(true, M); false], p)
+    return DAEProblem(f!, resid_M1, u_T, (T, 0.0), differential_vars = [fill(true, M); false], p)
 end
