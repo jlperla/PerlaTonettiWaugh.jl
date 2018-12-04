@@ -21,3 +21,27 @@ function calculate_residuals(ode_prob, x, ω, ode_solve_algorithm, ts) # To keep
     end
     return residuals
 end
+
+function minimize_residuals(params, settings)
+    # setup
+    @unpack μ, υ, θ, r, x, ξ, π_tilde = params
+    @unpack z, g, T, ode_solve_algorithm, t_grid = settings
+    g_T = g(T)
+
+    # returns a vector of residuals given a vector of g for linear interpolation
+    function calculate_residuals_by_candidate(g_vectorized, params, settings)
+        g_interpolated = LinearInterpolation(settings.t_grid, g_vectorized)
+        return calculate_residuals(params, merge(settings, (g = g_interpolated, )))
+    end
+
+    # setup for optimization
+    settings = merge(settings, (t_grid = t_grid, )) # TODO: once passed by settings, remove this line
+    g_initial = fill(g_T, length(t_grid))
+
+    # solve the optimization problem
+    solved = LeastSquaresOptim.optimize(x -> calculate_residuals_by_candidate(x, params, settings), g_initial, 
+                                        autodiff = :central,
+                                        LeastSquaresOptim.LevenbergMarquardt(), lower = fill(0.0, length(g_initial)))
+
+    return calculate_residuals_by_candidate(solved.minimizer, params, settings) # return the resultiing residuals 
+end

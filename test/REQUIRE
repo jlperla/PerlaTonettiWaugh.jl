@@ -10,3 +10,4 @@ Distributions
 Optim
 DifferentialEquations
 DiffEqCallbacks
+LeastSquaresOptim

@@ -87,9 +87,9 @@ version = "0.4.1"
 
 [[CategoricalArrays]]
 deps = ["Compat", "Future", "Missings", "Printf", "Reexport", "Requires"]
-git-tree-sha1 = "64651a0315fc342e7e35d03d67b2da920937c9be"
+git-tree-sha1 = "11419d157ab75a54a8af63315e7a279a593971bc"
 uuid = "324d7699-5711-5eae-9e2f-1d82baa6b597"
-version = "0.5.0"
+version = "0.5.1"
 
 [[ChunkedArrays]]
 deps = ["EllipsisNotation"]
@@ -391,6 +391,12 @@ deps = ["LinearAlgebra", "SparseArrays", "StatsBase", "Test"]
 git-tree-sha1 = "c4b5da6d68517f46f70ed5157b28336b56cd2ff3"
 uuid = "7f8f8fb0-2700-5f03-b4bd-41f8cfc144b6"
 version = "0.2.2"
+
+[[LeastSquaresOptim]]
+deps = ["DiffEqDiffTools", "ForwardDiff", "LinearAlgebra", "Optim", "Printf", "SparseArrays", "Statistics", "SuiteSparse", "Test"]
+git-tree-sha1 = "b00305ea4f807232100e91f161d48e76bae58d75"
+uuid = "0fc2ff8b-aaa3-5acd-a817-1944a5e08891"
+version = "0.7.0"
 
 [[LibGit2]]
 uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
@@ -715,9 +721,9 @@ version = "1.4.0"
 
 [[StochasticDiffEq]]
 deps = ["DataStructures", "DiffEqBase", "DiffEqDiffTools", "DiffEqNoiseProcess", "DiffEqOperators", "Distributed", "ForwardDiff", "LinearAlgebra", "Logging", "MuladdMacro", "NLsolve", "Parameters", "Random", "RandomNumbers", "RecursiveArrayTools", "Reexport", "SparseArrays", "StaticArrays", "Test"]
-git-tree-sha1 = "c1542e708fa2947cf7a82c376a8c99dc448e6ca1"
+git-tree-sha1 = "07b78baa08e1f729039371804030555b5aa10525"
 uuid = "789caeaf-c7a9-5a7d-9973-96adeb23e2a0"
-version = "5.10.1"
+version = "5.10.2"
 
 [[SuiteSparse]]
 deps = ["Libdl", "LinearAlgebra", "SparseArrays"]
