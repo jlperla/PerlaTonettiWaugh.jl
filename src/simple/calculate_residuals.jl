@@ -30,13 +30,14 @@ function minimize_residuals(params, settings)
 
     # returns a vector of residuals given a vector of g for linear interpolation
     function calculate_residuals_by_candidate(g_vectorized, params, settings)
-        g_interpolated = CubicSplineInterpolation(settings.t_node_for_g, g_vectorized)
+        g_interpolated = CubicSplineInterpolation(settings.t_node_for_g, [g_vectorized; settings.g_T])
         return calculate_residuals(params, merge(settings, (g = g_interpolated, )))
     end
 
     # setup for optimization
-    settings = merge(settings, (t_node_for_g = range(0.0, stop = T, length = g_node_count), ))
-    g_initial = fill(g_T, g_node_count)
+    settings = merge(settings, (t_node_for_g = range(0.0, stop = T, length = g_node_count), 
+                                g_T = g_T))
+    g_initial = fill(g_T, g_node_count - 1)
 
     # solve the optimization problem
     solved = LeastSquaresOptim.optimize(x -> calculate_residuals_by_candidate(x, params, settings), g_initial, 

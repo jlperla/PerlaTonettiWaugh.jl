@@ -82,17 +82,17 @@
 
 @testset "minimize_residuals by least SSR" begin 
     # try minimize_residuals by least square optimization instead of solving ODE by DAE
-    # need higher tolerance (atol = 1e-3)
+    # need higher tolerance (atol = 1e-4)
     resid = minimize_residuals(params_func_varying_1, settings())
-    @test norm(resid[1]) ≈ 0 atol = 1e-3
-    @test norm(resid[end]) ≈ 0 atol = 1e-3
-    @test norm(resid) ≈ 0 atol = 1e-3
+    @test norm(resid[1]) ≈ 0 atol = 1e-4
+    @test norm(resid[end]) ≈ 0 atol = 1e-4
+    @test norm(resid) ≈ 0 atol = 1e-4
     resid = minimize_residuals(params_func_varying_2, settings())
-    @test norm(resid[1]) ≈ 0 atol = 1e-3
-    @test norm(resid[end]) ≈ 0 atol = 1e-3
-    @test norm(resid) ≈ 0 atol = 1e-3
+    @test norm(resid[1]) ≈ 0 atol = 1e-4
+    @test norm(resid[end]) ≈ 0 atol = 1e-4
+    @test norm(resid) ≈ 0 atol = 1e-4
     resid = minimize_residuals(params_func_varying_3, settings())
-    @test norm(resid[1]) ≈ 0 atol = 1e-3
-    @test norm(resid[end]) ≈ 0 atol = 1e-3
-    @test norm(resid) ≈ 0 atol = 1e-3
+    @test norm(resid[1]) ≈ 0 atol = 1e-4
+    @test norm(resid[end]) ≈ 0 atol = 1e-4
+    @test norm(resid) ≈ 0 atol = 1e-4
 end
