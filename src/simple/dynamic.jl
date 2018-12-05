@@ -3,7 +3,7 @@
 function f(du,u,p,t)
     @unpack L_1, L_2, z, r, μ, g, υ, π_tilde, T, ξ, z = p
     # Validate upwind scheme direction.
-    μ + υ^2/2 - g(t) < 0 || error("Drift must be strictly negative at all times")
+    # μ + υ^2/2 - g(t) < 0 || @warn "Drift must be strictly negative at all times"
     r = r(t)
     g = g(t)
     # Carry out calculations.

@@ -47,8 +47,8 @@
     g_func = t -> g_int(t) # Not idiosyncratic.
 
 # Create settings object.
-    settings = @with_kw (z = z_grid, T = T_val, g = t -> g_stationary, 
-                        ode_solve_algorithm = CVODE_BDF(), iterations = 1000, 
+    settings = @with_kw (z = z_grid, T = T_val, g = t -> g_stationary,
+                        ode_solve_algorithm = CVODE_BDF(), iterations = 1000,
                         t_grid = range(0.0, stop = T_val, length = length(z_grid)),
                         g_node_count = 30)
 
@@ -83,33 +83,43 @@
     @test norm(residuals) ≈ 0 atol = 1e-5
     v_ts_dae3 = copy(v_ts) # save value functions
 
-@testset "minimize_residuals by least SSR" begin 
+@testset "minimize_residuals by least SSR" begin
     # try minimize_residuals by least square optimization instead of solving ODE by DAE
     # need higher tolerance (atol = 1e-4)
     residuals, v_ts = minimize_residuals(params_func_varying_1, settings())
-    @test norm(residuals[1]) ≈ 0 atol = 1e-4
-    @test norm(residuals[end]) ≈ 0 atol = 1e-4
-    @test norm(residuals) ≈ 0 atol = 1e-4
+    # residuals_p, v_ts_p = minimize_residuals_python(params_func_varying_1, settings())
+    @test norm(residuals[1]) < 1e-7
+    # @test norm(residuals_p[1]) < 1e-7
+    @test norm(residuals[end]) < 1e-7
+    # @test norm(residuals_p[end]) < 1e-7
+    @test norm(residuals) < 1e-5
+    # @test norm(residuals_p) < 1e-7
     # check if dae solution and lssr solution are close enough
     for t in 1:length(settings().t_grid)
         @test norm(v_ts_dae1[:,t] .- v_ts[:,t]) ≈ 0 atol = 2e-1
     end
     residuals, v_ts = minimize_residuals(params_func_varying_2, settings())
-    @test norm(residuals[1]) ≈ 0 atol = 1e-4
-    @test norm(residuals[end]) ≈ 0 atol = 1e-4
-    @test norm(residuals) ≈ 0 atol = 1e-4
-    @test norm(residuals) ≈ 0 atol = 1e-4
+    # residuals_p, v_ts_p = minimize_residuals_python(params_func_varying_2, settings())
+    @test norm(residuals[1]) < 1e-6
+    # @test norm(residuals_p[1]) < 1e-7
+    @test norm(residuals[end]) < 1e-7
+    # @test norm(residuals_p[end]) < 1e-7
+    @test norm(residuals) < 1e-4
+    # @test norm(residuals_p) < 1e-7
     # check if dae solution and lssr solution are close enough
     for t in 1:length(settings().t_grid)
-        @test norm(v_ts_dae2[:,t] .- v_ts[:,t]) ≈ 0 atol = 2e-1 
+        @test norm(v_ts_dae2[:,t] .- v_ts[:,t]) ≈ 0 atol = 2e-1
     end
     residuals, v_ts = minimize_residuals(params_func_varying_3, settings())
-    @test norm(residuals[1]) ≈ 0 atol = 1e-4
-    @test norm(residuals[end]) ≈ 0 atol = 1e-4
-    @test norm(residuals) ≈ 0 atol = 1e-4
-    @test norm(residuals) ≈ 0 atol = 1e-4
+    # residuals_p, v_ts_p = minimize_residuals_python(params_func_varying_3, settings())
+    @test norm(residuals[1]) < 1e-5
+    # @test norm(residuals_p[1]) < 1e-7
+    @test norm(residuals[end]) < 1e-7
+    # @test norm(residuals_p[end]) < 1e-7
+    @test norm(residuals) < 1e-4
+    # @test norm(residuals_p) < 1e-7
     # check if dae solution and lssr solution are close enough
     for t in 1:length(settings().t_grid)
-        @test norm(v_ts_dae3[:,t] .- v_ts[:,t]) ≈ 0 atol = 2e-1 
+        @test norm(v_ts_dae3[:,t] .- v_ts[:,t]) ≈ 0 atol = 2e-1
     end
 end
