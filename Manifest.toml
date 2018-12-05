@@ -121,19 +121,19 @@ git-tree-sha1 = "fb86fe40cb5b35990e368709bfdc1b46dbb99dac"
 uuid = "8f4d0f93-b110-5947-807f-2305c1781a2d"
 version = "1.1.1"
 
-[[DFOGN]]
-deps = ["Conda", "PyCall"]
-git-tree-sha1 = "8086532a5b7499716975cdfccab7dd41d4f35d7b"
+[[DFOLS]]
+deps = ["Printf", "PyCall"]
+git-tree-sha1 = "22cd4034c473bce55df7880da14e87a67c6b47db"
 repo-rev = "master"
-repo-url = "https://github.com/QuantEcon/DFOGN.jl"
-uuid = "8d0d2980-f7ed-11e8-0a89-a76d896ce8f4"
+repo-url = "https://github.com/QuantEcon/DFOLS.jl"
+uuid = "d38edb08-f825-11e8-02cc-c338a489feff"
 version = "0.1.0"
 
 [[DSP]]
 deps = ["AbstractFFTs", "Compat", "FFTW", "LinearAlgebra", "Polynomials", "Random", "Reexport", "SpecialFunctions"]
-git-tree-sha1 = "c90967ff4c5e99f652b278624634dcef73b58848"
+git-tree-sha1 = "5ec38ebc4ddf6320ad50b826eb8fd7fb521993a5"
 uuid = "717857b8-e6f2-59f4-9121-6e50c889abd2"
-version = "0.5.1"
+version = "0.5.2"
 
 [[DataFrames]]
 deps = ["CategoricalArrays", "CodecZlib", "Compat", "DataStreams", "Dates", "InteractiveUtils", "IteratorInterfaceExtensions", "LinearAlgebra", "Missings", "Printf", "Random", "Reexport", "SortingAlgorithms", "Statistics", "StatsBase", "TableTraits", "Tables", "Test", "TranscodingStreams", "Unicode", "WeakRefStrings"]
@@ -390,9 +390,9 @@ version = "0.20.0"
 
 [[LazyArrays]]
 deps = ["FillArrays", "LinearAlgebra", "StaticArrays", "Test"]
-git-tree-sha1 = "80ae09d512afe478575cadf7e301742996d0330d"
+git-tree-sha1 = "282c4d8f504748fcf2530f1f34713c3581093ffc"
 uuid = "5078a376-72f3-5289-bfd5-ec5146d43c02"
-version = "0.4.0"
+version = "0.5.0"
 
 [[LearnBase]]
 deps = ["LinearAlgebra", "SparseArrays", "StatsBase", "Test"]
@@ -530,9 +530,9 @@ version = "4.18.1"
 
 [[PDMats]]
 deps = ["Arpack", "LinearAlgebra", "SparseArrays", "SuiteSparse", "Test"]
-git-tree-sha1 = "9e3e7a5c9b8cfdba8c01a1bcae38fe0144936fda"
+git-tree-sha1 = "b6c91fc0ab970c0563cbbe69af18d741a49ce551"
 uuid = "90014a1f-27ba-587c-ab20-58faa44d9150"
-version = "0.9.5"
+version = "0.9.6"
 
 [[ParameterizedFunctions]]
 deps = ["DataStructures", "DiffEqBase", "InteractiveUtils", "LinearAlgebra", "SimpleTraits", "SymEngine", "Test"]
