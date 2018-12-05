@@ -4,12 +4,34 @@
 # Gives us the (full algebraic) stationary solution for a set of params and an initial x.
 function stationary_algebraic(params, init_x = defaultiv(params); kwargs...)
     @assert params.υ > 0 && params.κ > 0 # Parameter validation
-    sol = nlsolve(vals -> stationary_algebraic_aux(vals, params), init_x; inplace = false, kwargs...)
-    converged(sol) || throw(sol)
-    g, z_hat, Ω  = sol.zero
+    # construct the optimization functions
+    function f(vals) # squared residuals
+        resids = stationary_algebraic_aux(vals, params)
+        return sum(resids .* resids)
+    end
+    function g!(G::Vector, x::Vector)
+        ForwardDiff.gradient!(G, f, x)
+    end
+    function fg!(x::Vector, grad::Vector)
+        if length(grad) > 0 # gradient of f(x)
+            g!(grad, x)
+        end
+        f(x)
+    end
+    # define the optimization problem
+    opt = Opt(:LD_LBFGS, 3) # 3 indicates the length of `x`
+    lower_bounds!(opt, fill(0.0, 3)) # find `x` above 0
+    min_objective!(opt, fg!) # specifies that optimization problem is on minimization
+    xtol_rel!(opt, -Inf)
+    xtol_abs!(opt, -Inf)
+    ftol_rel!(opt, -Inf)
+    ftol_abs!(opt, -Inf)
+    # solve the optimization problem
+    (minf,minx,ret) = NLopt.optimize(opt, [0.02; 18.94; 17.07])
+    g, z_hat, Ω = minx
     @assert z_hat > 1 && Ω > 0 && g > 0 # Validate parameters.
-    staticvalues = staticvals(sol.zero, params)
-    return merge(staticvalues, merge((g = g, z_hat = z_hat, Ω = Ω), welfare(sol.zero, params, staticvalues)))
+    staticvalues = staticvals(minx, params)
+    return merge(staticvalues, merge((g = g, z_hat = z_hat, Ω = Ω), welfare(minx, params, staticvalues)))
 end
 
 # Welfare function
@@ -119,7 +141,7 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
     end
 
     # define the optimization problem
-    opt = Opt(:LD_LBFGS, 3) # 2 indicates the length of `x`
+    opt = Opt(:LD_LBFGS, 3) # 3 indicates the length of `x`
     lower_bounds!(opt, fill(0.0, 3)) # find `x` above 0
     min_objective!(opt, fg!) # specifies that optimization problem is on minimization
     xtol_rel!(opt, -Inf)
