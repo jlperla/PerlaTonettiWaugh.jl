@@ -57,10 +57,10 @@
     @test sol.results[:v_0][9] ≈ 1.1867999999850465 
     @test sol.results[:L_tilde][10] ≈ 0.20043077010213567 
     @test sol.results[:λ_ii][11] ≈ 0.7813233366545765 
-    @test sol.results[:c][12] ≈ 0.9875840990862862 
+    @test sol.results[:c][12] ≈ 1.1882939932974685
     @test sol.results[:S][4] ≈ 0.05847503375286956 
-    @test sol.results[:z_bar][3] ≈ 3.625418102683695 
-    @test sol.results[:π_min][2] ≈ 0.06784341841210674 
+    @test sol.results[:z_bar][3] ≈ 1.4861677378016562 
+    @test sol.results[:π_min][2] ≈ 0.16549999774577948 
     @test sol.results[:entry_residual][12] ≈ -1.3211653993039363e-13 atol = 1e-5
 
   # Run the solver for another case. 
@@ -102,10 +102,10 @@ end
     @test sol.results[:v_0][9] ≈ 1.2162498772031762 atol = 1e-5
     @test sol.results[:L_tilde][10] ≈ 0.18748845694858562 atol = 1e-5
     @test sol.results[:λ_ii][11] ≈ 0.7810856222518524 atol = 1e-5
-    @test sol.results[:c][12] ≈ 0.9889943277839625 atol = 1e-5
+    @test sol.results[:c][12] ≈ 1.1899458996247958 atol = 1e-5
     @test sol.results[:S][4] ≈ 0.18806483288417494 atol = 1e-5
-    @test sol.results[:z_bar][3] ≈ 4.944304290926497 atol = 1e-5
-    @test sol.results[:π_min][2] ≈ 0.06610896471451441 atol = 1e-5
+    @test sol.results[:z_bar][3] ≈ 1.6350019300336807 atol = 1e-5
+    @test sol.results[:π_min][2] ≈ 0.21425367016810465 atol = 1e-5
     @test sol.results[:entry_residual][12] ≈ 0.0010887433781643363 atol = 1e-5
 end
 
