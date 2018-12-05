@@ -3,8 +3,8 @@ module PerlaTonettiWaugh
 # Dependencies.
 using NLsolve, DifferentialEquations, BandedMatrices, Sundials, Distributions, Roots, QuantEcon, LinearAlgebra, Random, DataFrames, DataFramesMeta, DiffEqCallbacks, Interpolations, QuadGK, Dierckx, NLopt, ForwardDiff
 using LeastSquaresOptim
-import DFOGN 
 import Parameters: @with_kw, @unpack
+import DFOLS
 
 # General discretization files.
 include("diffusionoperators.jl")
