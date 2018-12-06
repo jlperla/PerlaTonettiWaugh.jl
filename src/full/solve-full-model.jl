@@ -5,7 +5,6 @@ function solve_full_model_global(solution0, params_T, stationary_sol_T, Ω_0, se
     Ω_T = stationary_sol_T.Ω
   
     function solve_with_candidate(candidate; detailed_solution = false)
-      candidate = [candidate...] # if candidate is a tuple, convert it to an array
       T = candidate[end]
       
       candidate = [sort(candidate[1:(end-1)]); 0.0] # fix the point at T to be zero
