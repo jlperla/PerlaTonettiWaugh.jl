@@ -44,10 +44,15 @@ function residuals_given_solution(solved, entry_residuals_nodes_count)
   return entry_residual_interpolated.(entry_residuals_nodes[2:(end-1)])
 end
 
-function evaluate_candidate(candidate, settings)
+function residuals_given_candidate(candidate, settings)
   # solve the dynamics; if solution is not valid, return Inf
-  solved = try solve_with_candidate(candidate, settings).results catch; return Inf end
+  solved = try solve_with_candidate(candidate, settings).results catch; return fill(Inf, settings.entry_residuals_nodes_count) end
   # get the resulting entry_residual vector
-  residuals = residuals_given_solution(solved, settings.entry_residuals_nodes_count)
+  return residuals_given_solution(solved, settings.entry_residuals_nodes_count)
+end
+
+function evaluate_candidate(candidate, settings) 
+  residuals = residuals_given_candidate(candidate, settings)
+  # solve the dynamics; if solution is not valid, return Inf
   return (sqrt(sum(residuals .* settings.weights .* residuals)))
 end
