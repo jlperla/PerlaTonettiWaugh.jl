@@ -11,3 +11,4 @@ Random
 Interpolations
 NLopt 
 LeastSquaresOptim
+BlackBoxOptim

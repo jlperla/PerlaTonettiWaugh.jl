@@ -6,6 +6,7 @@ version = "0.1.0"
 [deps]
 BandedMatrices = "aae01518-5342-5314-be14-df237901396f"
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+BlackBoxOptim = "a134a8b2-14d6-55f6-9291-3336d3ab0209"
 Conda = "8f4d0f93-b110-5947-807f-2305c1781a2d"
 DFOLS = "d38edb08-f825-11e8-02cc-c338a489feff"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
