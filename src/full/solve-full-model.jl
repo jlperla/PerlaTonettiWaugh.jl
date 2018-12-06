@@ -1,5 +1,5 @@
 function solve_full_model_global(solution0, settings)
-  result = bboptimize(x -> evaluate_candidate(x, settings); SearchRange = settings.ranges, 
+  result = bboptimize(x -> ssr_given_candidate(x, settings); SearchRange = settings.ranges, 
                       NumDimensions = length(settings.ranges), MaxSteps = settings.iterations)
   solution = best_candidate(result)
 
@@ -51,7 +51,7 @@ function residuals_given_candidate(candidate, settings)
   return residuals_given_solution(solved, settings.entry_residuals_nodes_count)
 end
 
-function evaluate_candidate(candidate, settings) 
+function ssr_given_candidate(candidate, settings) 
   residuals = residuals_given_candidate(candidate, settings)
   # solve the dynamics; if solution is not valid, return Inf
   return (sqrt(sum(residuals .* settings.weights .* residuals)))
