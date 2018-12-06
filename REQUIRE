@@ -1,14 +1,13 @@
-NLsolve 
+NLsolve
 DifferentialEquations
-BandedMatrices
 Sundials
 Distributions
 Roots
-Parameters 
+Parameters
 Optim
 QuantEcon 0.15.0+
 Random
 Interpolations
-NLopt 
+NLopt
 LeastSquaresOptim
 BlackBoxOptim

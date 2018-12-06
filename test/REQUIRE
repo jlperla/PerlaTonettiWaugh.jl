@@ -1,8 +1,7 @@
 BenchmarkTools
-NLsolve 
+NLsolve
 Sundials
 Parameters
-BandedMatrices
 Distributions
 Interpolations
 QuantEcon
