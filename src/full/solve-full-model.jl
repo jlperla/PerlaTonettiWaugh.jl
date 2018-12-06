@@ -7,13 +7,14 @@ function solve_full_model_global(solution0, settings)
 end
 
 function solve_with_candidate(candidate, settings; detailed_solution = false)
-  @unpack params_T, stationary_sol_T, Ω_0, E_node_count, entry_residuals_nodes_count, weights, ranges, iterations = settings
+  @unpack params_T, stationary_sol_T, Ω_0, E_node_count, entry_residuals_nodes_count, weights, ranges, iterations, sort_candidate = settings
   δ = params_T.δ    
   Ω_T = stationary_sol_T.Ω
 
   T = candidate[end]
-  
-  candidate = [sort(candidate[1:(end-1)]); 0.0] # fix the point at T to be zero
+
+  # fix the point at T to be zero and sort candidate if needed
+  candidate = sort_candidate ? [sort(candidate[1:(end-1)]); 0.0] : [candidate[1:(end-1)]; 0.0] 
   
   # construct Ω and E
   E_hat_vec_range = candidate[end] - candidate[1]
