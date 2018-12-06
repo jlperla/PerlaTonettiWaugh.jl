@@ -23,6 +23,6 @@ include("full/solve-full-model.jl")
 export parameter_defaults, settings_defaults
 export stationary_algebraic, stationary_numerical, simpleODE, simpleDAE, @with_kw, @unpack, stationary_algebraic_simple, stationary_numerical_simple, ω_weights, calculate_residuals, rescaled_diffusionoperators, diffusionoperators, solve_dynamics, entry_residuals, welfare
 export minimize_residuals, minimize_residuals_python
-export solve_full_model_global
+export solve_full_model_global, solve_full_model_python
 
 end # module
