@@ -1,10 +1,10 @@
-function solve_full_model_global(solution0, params_T, stationary_sol_T, Ω_0, settings; stopwithf! = false, detailed_solution = true)
+function solve_full_model_global(solution0, params_T, stationary_sol_T, Ω_0, settings)
     @unpack δ = params_T
     @unpack E_node_count, entry_residuals_nodes_count, weights, ranges, iterations = settings
   
     Ω_T = stationary_sol_T.Ω
   
-    function solve_with_candidate(candidate)
+    function solve_with_candidate(candidate; detailed_solution = false)
       candidate = [candidate...] # if candidate is a tuple, convert it to an array
       T = candidate[end]
       
@@ -24,7 +24,7 @@ function solve_full_model_global(solution0, params_T, stationary_sol_T, Ω_0, se
       E(t) = M*E_hat(t) + δ
   
       # solve the dynamics and get the resulting entry_residual vector; if solution is not valid, return Inf
-      return solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; stopwithf! = stopwithf!, detailed_solution = detailed_solution)
+      return solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; stopwithf! = false, detailed_solution = detailed_solution)
     end
   
     function residuals_given_solution(solved, entry_residuals_nodes_count)
@@ -49,5 +49,5 @@ function solve_full_model_global(solution0, params_T, stationary_sol_T, Ω_0, se
     result = bboptimize(evaluate_candidate; SearchRange = ranges, NumDimensions = length(ranges), MaxSteps = iterations)
     solution = best_candidate(result)
   
-    return solve_with_candidate(solution)
+    return solve_with_candidate(solution; detailed_solution = true)
 end
