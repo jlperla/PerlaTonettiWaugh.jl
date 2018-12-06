@@ -6,9 +6,9 @@ function solve_full_model_global(solution0, settings)
   return solve_with_candidate(solution, settings; detailed_solution = true)
 end
 
-function solve_full_model_python(x0, settings)
+function solve_full_model_python(x0, settings; user_params = nothing)
   settings = merge(settings, (sort_candidate = false,))
-  sol = DFOLS.solve(x -> residuals_given_candidate(x, settings), x0)
+  sol = DFOLS.solve(x -> residuals_given_candidate(x, settings), x0, user_params = user_params)
   return solve_with_candidate(sol.x, settings; detailed_solution = true) # only runs if we pass the convergence flag in DFOLS.solve
 end
 
