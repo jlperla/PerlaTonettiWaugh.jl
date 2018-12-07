@@ -11,6 +11,7 @@ import DFOLS
 include("params.jl")
 include("diffusionoperators.jl")
 include("quadrature.jl")
+include("util/find-zero.jl")
 # Simple model.
 include("simple/dynamic.jl")
 include("simple/stationary.jl")
