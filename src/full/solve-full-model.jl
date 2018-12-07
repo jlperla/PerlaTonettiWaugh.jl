@@ -1,15 +1,15 @@
 function solve_full_model_global(solution0, settings)
   result = bboptimize(x -> ssr_given_candidate(x, settings); SearchRange = settings.ranges,
                       NumDimensions = length(settings.ranges), MaxSteps = settings.iterations)
-  solution = best_candidate(result)
-
-  return solve_with_candidate(solution, settings; detailed_solution = true)
+  return (solution = solve_with_candidate(best_candidate(result), settings; detailed_solution = true),
+          E_nodes_and_T = best_candidate(result))
 end
 
 function solve_full_model_python(x0, settings; user_params = nothing)
   settings = merge(settings, (sort_candidate = false,))
-  sol = DFOLS.solve(x -> residuals_given_candidate(x, settings), x0, user_params = user_params)
-  return solve_with_candidate(sol.x, settings; detailed_solution = true) # only runs if we pass the convergence flag in DFOLS.solve
+  result = DFOLS.solve(x -> residuals_given_candidate(x, settings), x0, user_params = user_params)
+  return (solution = solve_with_candidate(result.x, settings; detailed_solution = true,
+          E_nodes_and_T = result.x))
 end
 
 function solve_with_candidate(candidate, settings; detailed_solution = false)
