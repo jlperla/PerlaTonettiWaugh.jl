@@ -26,4 +26,5 @@ settings_defaults = @with_kw (z_max = 5,
                                 g_node_count = 30,
                                 T = 100.,
                                 t = range(0.0, T, length = 10),
-                                g = LinearInterpolation(t, stationary_numerical(parameter_defaults(), z).g .+ 0.01*t))
+                                g = LinearInterpolation(t, stationary_numerical(parameter_defaults(), z).g .+ 0.01*t),
+                                tstops = nothing)
