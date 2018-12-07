@@ -17,7 +17,7 @@ function solve_full_model_python(settings; user_params = nothing)
           E_nodes_and_T = result.x))
 end
 
-function solve_with_candidate(candidate, settings; detailed_solution = false)
+function solve_with_candidate(candidate, settings; detailed_solution = false, interp = CubicSplineInterpolation)
   @unpack params_T, stationary_sol_T, Ω_0, E_node_count, entry_residuals_nodes_count, weights, iterations, sort_candidate = settings
   δ = params_T.δ
   Ω_T = stationary_sol_T.Ω
@@ -31,7 +31,7 @@ function solve_with_candidate(candidate, settings; detailed_solution = false)
   E_hat_vec_range = candidate[end] - candidate[1]
   E_hat_vec_scaled = (candidate .- candidate[1]) ./ E_hat_vec_range .- 1.0
   ts = range(0.0, stop=T, length=length(candidate))
-  E_hat_interpolation = CubicSplineInterpolation(ts, E_hat_vec_scaled) # might worth trying cubic spline
+  E_hat_interpolation = interp(ts, E_hat_vec_scaled) # might worth trying cubic spline
   E_hat(t) = E_hat_interpolation(t)
 
   M = log(Ω_T/Ω_0) / quadgk(E_hat, 0, T)[1]
