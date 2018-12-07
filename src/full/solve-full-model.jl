@@ -1,18 +1,25 @@
-function solve_full_model_global(solution0, settings)
-  result = bboptimize(x -> ssr_given_candidate(x, settings); SearchRange = settings.ranges,
-                      NumDimensions = length(settings.ranges), MaxSteps = settings.iterations)
+function solve_full_model_global(settings)
+  settings = merge(settings, (iterations = settings.global_transition_iterations, 
+                              weights = settings.global_transition_weights,
+                              sort_candidate = true))
+  ranges = map(i->(settings.global_transition_lb[i], settings.global_transition_ub[i]), 
+              1:length(settings.global_transition_x0))
+  result = bboptimize(x -> ssr_given_candidate(x, settings); SearchRange = ranges,
+                      NumDimensions = length(ranges), MaxSteps = settings.iterations)
   return (solution = solve_with_candidate(best_candidate(result), settings; detailed_solution = true),
           E_nodes_and_T = best_candidate(result))
 end
 
-function solve_full_model_python(x0, settings; user_params = nothing)
+function solve_full_model_python(settings; user_params = nothing)
   settings = merge(settings, (sort_candidate = false,))
-  result = DFOLS.solve(x -> residuals_given_candidate(x, settings), x0, user_params = user_params)
-  return (solution = solve_with_candidate(result.x, settings; detailed_solution = true), E_nodes_and_T = result.x)
+  result = DFOLS.solve(x -> residuals_given_candidate(x, settings), settings.global_transition_x0, user_params = user_params)
+  return (solution = solve_with_candidate(result.x, settings; detailed_solution = true,
+          E_nodes_and_T = result.x))
 end
 
 function solve_with_candidate(candidate, settings; detailed_solution = false, interp = CubicSplineInterpolation)
-  @unpack params_T, stationary_sol_T, Ω_0, E_node_count, entry_residuals_nodes_count, weights, ranges, iterations, sort_candidate, T = settings
+  @unpack params_T, stationary_sol_T, Ω_0, E_node_count, entry_residuals_nodes_count, weights, iterations, sort_candidate = settings
+
   δ = params_T.δ
   Ω_T = stationary_sol_T.Ω
 
