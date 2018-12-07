@@ -17,7 +17,7 @@ function solve_with_candidate(candidate, settings; detailed_solution = false, in
   Ω_T = stationary_sol_T.Ω
 
   # fix the point at T to be zero and sort candidate if needed
-  candidate = sort_candidate ? [sort(candidate[1:(end-1)]); 0.0] : [candidate[1:(end-1)]; 0.0]
+  candidate = sort_candidate ? [sort(candidate[1:end]); 0.0] : [candidate[1:end]; 0.0]
 
   # construct Ω and E
   E_hat_vec_range = candidate[end] - candidate[1]
