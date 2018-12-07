@@ -12,11 +12,9 @@ function solve_full_model_python(x0, settings; user_params = nothing)
 end
 
 function solve_with_candidate(candidate, settings; detailed_solution = false, interp = CubicSplineInterpolation)
-  @unpack params_T, stationary_sol_T, Ω_0, E_node_count, entry_residuals_nodes_count, weights, ranges, iterations, sort_candidate = settings
+  @unpack params_T, stationary_sol_T, Ω_0, E_node_count, entry_residuals_nodes_count, weights, ranges, iterations, sort_candidate, T = settings
   δ = params_T.δ
   Ω_T = stationary_sol_T.Ω
-
-  T = candidate[end]
 
   # fix the point at T to be zero and sort candidate if needed
   candidate = sort_candidate ? [sort(candidate[1:(end-1)]); 0.0] : [candidate[1:(end-1)]; 0.0]
