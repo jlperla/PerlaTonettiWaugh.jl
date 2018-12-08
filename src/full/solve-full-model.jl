@@ -18,7 +18,7 @@ function solve_full_model_python(settings; user_params = nothing)
 end
 
 function solve_with_candidate(candidate, settings; detailed_solution = false, interp = CubicSplineInterpolation)
-  @unpack T, params_T, stationary_sol_T, Ω_0, E_node_count, entry_residuals_nodes_count, weights, iterations, sort_candidate = settings
+  @unpack T, params_T, stationary_sol_T, Ω_0, E_node_count, entry_residuals_nodes_count, iterations, sort_candidate = settings
 
   δ = params_T.δ
   Ω_T = stationary_sol_T.Ω
