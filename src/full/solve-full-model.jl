@@ -4,31 +4,31 @@ function solve_full_model_global(settings)
                               sort_candidate = true))
   ranges = map(i->(settings.global_transition_lb[i], settings.global_transition_ub[i]),
               1:length(settings.global_transition_x0))
-  result = bboptimize(x -> ssr_given_candidate(x, settings); SearchRange = ranges,
+  result = bboptimize(x -> ssr_given_E_nodes(x, settings); SearchRange = ranges,
                       NumDimensions = length(ranges), MaxSteps = settings.iterations)
-  return (solution = solve_with_candidate(best_candidate(result), settings; detailed_solution = true),
-          E_nodes_and_T = best_candidate(result))
+  return (solution = solve_with_E_nodes(best_candidate(result), settings; detailed_solution = true),
+          E_nodes = best_candidate(result))
 end
 
 function solve_full_model_python(settings; user_params = nothing)
   settings = merge(settings, (sort_candidate = false,))
-  result = DFOLS.solve(x -> residuals_given_candidate(x, settings), settings.global_transition_x0, user_params = user_params)
+  result = DFOLS.solve(x -> residuals_given_E_nodes(x, settings), settings.global_transition_x0, user_params = user_params)
   return (solution = solve_with_candidate(result.x, settings; detailed_solution = true), E_nodes_and_T = result.x, solobj = result)
 end
 
-function solve_with_candidate(candidate, settings; detailed_solution = false, interp = CubicSplineInterpolation)
+function solve_with_E_nodes(E_nodes, settings; detailed_solution = false, interp = CubicSplineInterpolation)
   @unpack T, params_T, stationary_sol_T, Ω_0, E_node_count, entry_residuals_nodes_count, iterations, sort_candidate = settings
 
   δ = params_T.δ
   Ω_T = stationary_sol_T.Ω
 
   # fix the point at T to be zero and sort candidate if needed
-  candidate = sort_candidate ? [sort(candidate[1:end]); 0.0] : [candidate[1:end]; 0.0]
+  E_nodes = sort_candidate ? [sort(E_nodes); 0.0] : [E_nodes; 0.0]
 
-  # construct Ω and E
-  E_hat_vec_range = candidate[end] - candidate[1]
-  E_hat_vec_scaled = (candidate .- candidate[1]) ./ E_hat_vec_range .- 1.0
-  ts = range(0.0, stop=T, length=length(candidate))
+  # construct Ω and E_nodes
+  E_hat_vec_range = E_nodes[end] - E_nodes[1]
+  E_hat_vec_scaled = (E_nodes .- E_nodes[1]) ./ E_hat_vec_range .- 1.0
+  ts = range(0.0, stop=T, length=length(E_nodes))
   E_hat_interpolation = interp(ts, E_hat_vec_scaled) # might worth trying cubic spline
   E_hat(t) = E_hat_interpolation(t)
 
@@ -53,15 +53,14 @@ function residuals_given_solution(solved, entry_residuals_nodes_count)
   return entry_residual_interpolated.(entry_residuals_nodes[2:(end-1)])
 end
 
-function residuals_given_candidate(candidate, settings)
-  # solve the dynamics; if solution is not valid, return Inf
-  solved = try solve_with_candidate(candidate, settings).results catch; return fill(10e20, settings.entry_residuals_nodes_count) end
+function residuals_given_E_nodes(E_nodes, settings)
+  solved = try solve_with_E_nodes(E_nodes, settings).results catch; return fill(10e20, settings.entry_residuals_nodes_count) end
   # get the resulting entry_residual vector
   return residuals_given_solution(solved, settings.entry_residuals_nodes_count)
 end
 
-function ssr_given_candidate(candidate, settings)
-  residuals = residuals_given_candidate(candidate, settings)
+function ssr_given_E_nodes(candidate, settings)
+  residuals = residuals_given_E_nodes(candidate, settings)
   # solve the dynamics; if solution is not valid, return Inf
   return (sqrt(sum(residuals .* settings.weights .* residuals)))
 end
