@@ -13,7 +13,7 @@ end
 function solve_full_model_python(settings; user_params = nothing)
   settings = merge(settings, (sort_candidate = false,))
   result = DFOLS.solve(x -> residuals_given_candidate(x, settings), settings.global_transition_x0, user_params = user_params)
-  return (solution = solve_with_candidate(result.x, settings; detailed_solution = true), E_nodes_and_T = result.x)
+  return (solution = solve_with_candidate(result.x, settings; detailed_solution = true), E_nodes_and_T = result.x, solobj = result)
 end
 
 function solve_with_candidate(candidate, settings; detailed_solution = false, interp = CubicSplineInterpolation)
