@@ -18,7 +18,7 @@ function find_zero(h, x0; lb = fill(0.0, length(x0)), constraints_fg! = nothing,
     end
 
     # define the optimization problem
-    opt = Opt(:LD_SLSQP, length(x0)) # 3 indicates the length of `x`
+    opt = (constraints_fg! == nothing) ? Opt(:LD_LBFGS, length(x0)) : Opt(:LD_SLSQP, length(x0)) # 3 indicates the length of `x`
     lower_bounds!(opt, lb) # find `x` above 0
     min_objective!(opt, fg!) # specifies that optimization problem is on minimization
     if (constraints_fg! != nothing) # add constraints_fg! if needed
