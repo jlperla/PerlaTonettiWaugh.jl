@@ -24,10 +24,8 @@ function find_zero(h, x0; lb = fill(0.0, length(x0)), ub = fill(10e8, length(x0)
         inequality_constraint!(opt, constraints_fg!, constraints_tol)
     end
 
-    xtol_rel!(opt, -Inf)
-    xtol_abs!(opt, -Inf)
-    ftol_rel!(opt, -Inf)
-    ftol_abs!(opt, -Inf)
+    xtol_rel!(opt, 1e-8)
+    xtol_abs!(opt, 1e-8)
 
     # solve the optimization problem
     (minf,minx,ret) = NLopt.optimize(opt, x0)
