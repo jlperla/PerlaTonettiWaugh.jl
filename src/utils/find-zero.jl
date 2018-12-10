@@ -8,10 +8,12 @@ function find_zero(h, x0; lb = fill(0.0, length(x0)), ub = fill(10e8, length(x0)
         return sum(resids .* resids)
     end
 
+    fg!(x::Vector, grad::Vector) = f(x) # fg! for derivative free methods
+
     # define the optimization problem
     opt = (constraints_fg! == nothing) ? Opt(:LD_LBFGS, length(x0)) : Opt(:LN_COBYLA, length(x0)) # 3 indicates the length of `x`
-    f_opt = NLoptAdapter(f, x0, autodiff)
-    min_objective!(opt, f_opt) # specifies that optimization problem is on minimization
+    # specifies that optimization problem is on minimization
+    min_objective!(opt, (constraints_fg! == nothing) ? NLoptAdapter(f, x0, autodiff) : fg!) 
 
     if (lb != nothing)    
         lower_bounds!(opt, lb) # find `x` above lb
@@ -29,7 +31,6 @@ function find_zero(h, x0; lb = fill(0.0, length(x0)), ub = fill(10e8, length(x0)
 
     # solve the optimization problem
     (minf,minx,ret) = NLopt.optimize(opt, x0)
-
     return minx
 end
 
