@@ -8,9 +8,9 @@ import Parameters: @with_kw, @unpack
 import DFOLS
 
 # General utilities files.
-include("params.jl")
-include("diffusionoperators.jl")
-include("quadrature.jl")
+include("utils/params.jl")
+include("utils/diffusionoperators.jl")
+include("utils/quadrature.jl")
 include("utils/find-zero.jl")
 include("utils/consumption-equivalent.jl")
 include("utils/display_stationary_sol.jl")
