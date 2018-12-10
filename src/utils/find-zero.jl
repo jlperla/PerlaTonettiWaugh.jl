@@ -1,26 +1,17 @@
 # returns the m-vector zero of a multivariate function h: R^m -> R^n, using nlopt
 # constraints_fg! takes (h, x, jacobian_t) and assigns jacobian_t and h[:] given current x.
 function find_zero(h, x0; lb = fill(0.0, length(x0)), ub = fill(10e8, length(x0)), 
-                    constraints_fg! = nothing, constraints_tol = fill(1e-8, length(x0)))
+                    constraints_fg! = nothing, constraints_tol = fill(1e-8, length(x0)),
+                    autodiff = :forward)
     function f(x)
         resids = h(x)
         return sum(resids .* resids)
     end
 
-    function g!(G::Vector, x::Vector)
-        ForwardDiff.gradient!(G, f, x)
-    end
-
-    function fg!(x::Vector, grad::Vector)
-        if length(grad) > 0 # gradient of f(x)
-            g!(grad, x)
-        end
-        f(x)
-    end
-
     # define the optimization problem
-    opt = (constraints_fg! == nothing) ? Opt(:LD_LBFGS, length(x0)) : Opt(:LD_SLSQP, length(x0)) # 3 indicates the length of `x`
-    min_objective!(opt, fg!) # specifies that optimization problem is on minimization
+    opt = (constraints_fg! == nothing) ? Opt(:LD_LBFGS, length(x0)) : Opt(:LN_COBYLA, length(x0)) # 3 indicates the length of `x`
+    f_opt = NLoptAdapter(f, x0, autodiff)
+    min_objective!(opt, f_opt) # specifies that optimization problem is on minimization
 
     if (lb != nothing)    
         lower_bounds!(opt, lb) # find `x` above lb
@@ -43,3 +34,15 @@ function find_zero(h, x0; lb = fill(0.0, length(x0)), ub = fill(10e8, length(x0)
 
     return minx
 end
+
+struct NLoptAdapter{T} <: Function where T <: AbstractObjective
+    nlsolver_base::T
+end
+
+# implement fg!; note that the order is reversed
+(adapter::NLoptAdapter)(x, df) = adapter.nlsolver_base.fdf(df, x)
+(adapter::NLoptAdapter)(result, x, jacobian_transpose) = adapter.nlsolver_base.fdf(result, jacobian_transpose', x)
+
+# constructors
+NLoptAdapter(f, x, autodiff = :forward) = NLoptAdapter(OnceDifferentiable(f, x, autodiff = autodiff))
+NLoptAdapter(f!, x::Vector, F::Vector, autodiff = :forward) = NLoptAdapter(OnceDifferentiable(f!, x, F, autodiff = autodiff))

@@ -4,6 +4,7 @@ module PerlaTonettiWaugh
 using DifferentialEquations, Sundials, Distributions, Roots, QuantEcon, LinearAlgebra, Random, DataFrames, DataFramesMeta, DiffEqCallbacks, Interpolations, QuadGK, NLopt, ForwardDiff, SoftGlobalScope
 using LeastSquaresOptim
 using BlackBoxOptim
+using NLSolversBase
 import Parameters: @with_kw, @unpack
 import DFOLS
 
