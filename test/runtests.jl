@@ -1,5 +1,5 @@
 using PerlaTonettiWaugh
-using Test, LinearAlgebra, Statistics, Compat, Random
+using Test, LinearAlgebra, Statistics, Compat
 using Sundials, BenchmarkTools, Interpolations, Parameters
 
 @elapsed begin
