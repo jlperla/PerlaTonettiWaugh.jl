@@ -4,34 +4,11 @@
 # Gives us the (full algebraic) stationary solution for a set of params and an initial x.
 function stationary_algebraic(params, init_x = defaultiv(params); kwargs...)
     @assert params.υ > 0 && params.κ > 0 # Parameter validation
-    # construct the optimization functions
-    function f(vals) # squared residuals
-        resids = stationary_algebraic_aux(vals, params)
-        return sum(resids .* resids)
-    end
-    function g!(G::Vector, x::Vector)
-        ForwardDiff.gradient!(G, f, x)
-    end
-    function fg!(x::Vector, grad::Vector)
-        if length(grad) > 0 # gradient of f(x)
-            g!(grad, x)
-        end
-        f(x)
-    end
-    # define the optimization problem
-    opt = Opt(:LD_LBFGS, 3) # 3 indicates the length of `x`
-    lower_bounds!(opt, fill(0.0, 3)) # find `x` above 0
-    min_objective!(opt, fg!) # specifies that optimization problem is on minimization
-    xtol_rel!(opt, -Inf)
-    xtol_abs!(opt, -Inf)
-    ftol_rel!(opt, -Inf)
-    ftol_abs!(opt, -Inf)
-    # solve the optimization problem
-    (minf,minx,ret) = NLopt.optimize(opt, [0.02; 18.94; 17.07])
-    g, z_hat, Ω = minx
+    # solve for g, z_hat, Ω
+    g, z_hat, Ω = find_zero(x -> stationary_algebraic_aux(x, params), [0.02; 18.94; 17.07])
     @assert z_hat > 1 && Ω > 0 && g > 0 # Validate parameters.
-    staticvalues = staticvals(minx, params)
-    return merge(staticvalues, merge((g = g, z_hat = z_hat, Ω = Ω), welfare(minx, params, staticvalues)))
+    staticvalues = staticvals([g, z_hat, Ω], params)
+    return merge(staticvalues, merge((g = g, z_hat = z_hat, Ω = Ω), welfare([g, z_hat, Ω], params, staticvalues)))
 end
 
 # Welfare function
@@ -124,34 +101,8 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
         return [value_matching, free_entry, adoption_threshold]
     end
 
-    function f(x)
-        resids = stationary_numerical_given_vals(x)
-        return sum(resids .* resids)
-    end
+    g_T, z_hat_T, Ω_T = find_zero(stationary_numerical_given_vals, [0.02; 18.94; 17.07])
 
-    function g!(G::Vector, x::Vector)
-        ForwardDiff.gradient!(G, f, x)
-    end
-
-    function fg!(x::Vector, grad::Vector)
-        if length(grad) > 0 # gradient of f(x)
-            g!(grad, x)
-        end
-        f(x)
-    end
-
-    # define the optimization problem
-    opt = Opt(:LD_LBFGS, 3) # 3 indicates the length of `x`
-    lower_bounds!(opt, fill(0.0, 3)) # find `x` above 0
-    min_objective!(opt, fg!) # specifies that optimization problem is on minimization
-    xtol_rel!(opt, -Inf)
-    xtol_abs!(opt, -Inf)
-    ftol_rel!(opt, -Inf)
-    ftol_abs!(opt, -Inf)
-
-    # solve the optimization problem
-    (minf,minx,ret) = NLopt.optimize(opt, [0.02; 18.94; 17.07])
-    g_T, z_hat_T, Ω_T = minx
     # Grab static objects at steady-state.
     staticvalues = staticvals([g_T, z_hat_T, Ω_T], params) # Grab static values.
     @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x, π_min = staticvalues
@@ -163,5 +114,5 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
     π_tilde = z -> π_min * (1 + (N-1)*d^(1-σ)*i(z)) - (N-1)*κ*exp(-(σ-1)*z)*i(z) # (eq:32)
     v_tilde = L_T \ π_tilde.(z) # discretized system of ODE for v, where v'(T) = 0 (eq:24)
 
-    return merge(staticvalues, merge((g = g_T, z_hat = z_hat_T, Ω = Ω_T, v_tilde = v_tilde), welfare(minx, params, staticvalues)))
+    return merge(staticvalues, merge((g = g_T, z_hat = z_hat_T, Ω = Ω_T, v_tilde = v_tilde), welfare([g_T; z_hat_T; Ω_T], params, staticvalues)))
 end

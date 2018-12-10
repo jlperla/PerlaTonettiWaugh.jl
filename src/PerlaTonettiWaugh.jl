@@ -11,6 +11,7 @@ import DFOLS
 include("params.jl")
 include("diffusionoperators.jl")
 include("quadrature.jl")
+include("util/find-zero.jl")
 include("utils/consumption-equivalent.jl")
 include("utils/display_stationary_sol.jl")
 # Simple model.
