@@ -31,9 +31,8 @@ function stationary_numerical_simple(params, z)
         return diff
     end
     # Find and validate the root.
-    sol = nlsolve(stationary_numerical_given_g, [0.1], inplace = false)
-    converged(sol) || error("Solver did not converge")
-    g_T = sol.zero[1]
+    sol = find_zero(stationary_numerical_given_g, [0.1])
+    g_T = sol[1]
     @assert(μ + υ^2/2 - g_T < 0) # Negative drift condition.
     # Use the g_T to recreate L_T and v_T.
     L_T = (r - g_T - ξ*(μ - g_T) - ξ^2 * υ^2/2)*I - (μ + ξ*υ^2 - g_T)*L_1_minus - υ^2/2 * L_2

@@ -1,7 +1,7 @@
 module PerlaTonettiWaugh
 
 # Dependencies.
-using NLsolve, DifferentialEquations, Sundials, Distributions, Roots, QuantEcon, LinearAlgebra, Random, DataFrames, DataFramesMeta, DiffEqCallbacks, Interpolations, QuadGK, NLopt, ForwardDiff, SoftGlobalScope
+using DifferentialEquations, Sundials, Distributions, Roots, QuantEcon, LinearAlgebra, Random, DataFrames, DataFramesMeta, DiffEqCallbacks, Interpolations, QuadGK, NLopt, ForwardDiff, SoftGlobalScope
 using LeastSquaresOptim
 using BlackBoxOptim
 import Parameters: @with_kw, @unpack
@@ -11,7 +11,7 @@ import DFOLS
 include("params.jl")
 include("diffusionoperators.jl")
 include("quadrature.jl")
-include("util/find-zero.jl")
+include("utils/find-zero.jl")
 include("utils/consumption-equivalent.jl")
 include("utils/display_stationary_sol.jl")
 # Simple model.
