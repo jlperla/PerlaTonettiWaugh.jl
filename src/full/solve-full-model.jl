@@ -61,7 +61,7 @@ function solve_with_E_nodes(E_nodes, settings; detailed_solution = false, interp
   E(t) = M*E_hat(t) + δ
 
   # solve the dynamics and get the resulting entry_residual vector; if solution is not valid, return Inf
-  return solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; stopwithf! = false, detailed_solution = detailed_solution)
+  return solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed_solution = detailed_solution)
 end
 
 function residuals_given_solution(solved, entry_residuals_nodes_count)
@@ -87,6 +87,6 @@ function ssr_given_E_nodes(E_nodes, settings)
   ssr_rooted = sqrt(sum(residuals .* settings.weights .* residuals))
   return ssr_rooted +
           ((settings.global_transition_penalty_coefficient > 0.) ? # add a penalty function for constraints on increasing E
-          (settings.global_transition_penalty_coefficient * sum((max.(0.0, diff(E_nodes))).^2)) : 
-          0.) 
+          (settings.global_transition_penalty_coefficient * sum((max.(0.0, diff(E_nodes))).^2)) :
+          0.)
 end
