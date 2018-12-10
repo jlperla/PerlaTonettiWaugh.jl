@@ -1,8 +1,7 @@
 module PerlaTonettiWaugh
 
 # Dependencies.
-using DifferentialEquations, Sundials, Distributions, QuantEcon, LinearAlgebra, DataFrames, DataFramesMeta, DiffEqCallbacks, Interpolations, QuadGK, NLopt, ForwardDiff, SoftGlobalScope
-using LeastSquaresOptim, BlackBoxOptim
+using DifferentialEquations, Sundials, Distributions, QuantEcon, LinearAlgebra, DataFrames, DataFramesMeta, DiffEqCallbacks, Interpolations, QuadGK, NLopt, ForwardDiff, SoftGlobalScope, LeastSquaresOptim, BlackBoxOptim
 import Parameters: @with_kw, @unpack
 import DFOLS
 
