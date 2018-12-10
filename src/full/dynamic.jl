@@ -2,27 +2,22 @@
 function entry_residuals(Ω_interior, Ω_0, stationary_sol, T, params, settings, Ω_nodes, entry_residuals_nodes)
     @unpack δ, ζ, χ = params
     @unpack Δ_E = settings
-
-  # Validate the interpolation objects.
+  # Validate parameters and construct interpolation objects.
     @assert Ω_nodes[1] ≈ 0.0
     @assert Ω_nodes[end] ≈ T
-
     Ω = CubicSplineInterpolation(Ω_nodes, [Ω_0; Ω_interior; stationary_sol.Ω], # interpolate Ω
                             extrapolation_bc = Interpolations.Flat()) # line before 0 / after T
     E = t -> (log(Ω(t + Δ_E)) - (log(Ω(t - Δ_E))))/(2*Δ_E) + δ # Central difference based E(t)
   # Run the main method.
     sol = solve_dynamics(params, stationary_sol, settings, T, Ω, E)
-
   # Grab the entry residuals and time points.
     v_0s = sol.results[:v_0]
     ts = sol.results[:t]
     v_0_interpolation = LinearInterpolation(ts, v_0s)
     # compute entry residuals from the solution
     entry_residuals_vec = map(t -> v_0_interpolation(t) - ζ * (1-χ) / χ, entry_residuals_nodes) # (eq:25)
-
     # perform linear interpolation on entry_residuals
     entry_residuals_interpolation = LinearInterpolation(entry_residuals_nodes, entry_residuals_vec)
-
     return (entry_residuals_interpolation = entry_residuals_interpolation,
           Ω_interpolation = Ω,
           entry_residuals = entry_residuals_vec, solved_dynamics = sol)
