@@ -17,7 +17,7 @@ include("simple/dynamic.jl")
 include("simple/stationary.jl")
 include("simple/calculate_residuals.jl")
 # Full model.
-include("full/stationary.jl") # Includes params.
+include("full/stationary.jl") 
 include("full/dynamic.jl")
 include("full/solve-full-model.jl")
 
