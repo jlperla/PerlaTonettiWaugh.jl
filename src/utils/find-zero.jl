@@ -1,6 +1,7 @@
 # returns the m-vector zero of a multivariate function h: R^m -> R^n, using nlopt
 # constraints_fg! takes (h, x, jacobian_t) and assigns jacobian_t and h[:] given current x.
-function find_zero(h, x0; lb = fill(0.0, length(x0)), constraints_fg! = nothing, constraints_tol = fill(1e-8, length(x0)))
+function find_zero(h, x0; lb = fill(0.0, length(x0)), ub = fill(10e8, length(x0)), 
+                    constraints_fg! = nothing, constraints_tol = fill(1e-8, length(x0)))
     function f(x)
         resids = h(x)
         return sum(resids .* resids)
@@ -24,6 +25,10 @@ function find_zero(h, x0; lb = fill(0.0, length(x0)), constraints_fg! = nothing,
     if (lb != nothing)    
         lower_bounds!(opt, lb) # find `x` above lb
     end
+    if (ub != nothing)    
+        upper_bounds!(opt, ub) # find `x` below ub
+    end
+
     if (constraints_fg! != nothing) # add constraints_fg! if needed
         inequality_constraint!(opt, constraints_fg!, constraints_tol)
     end
