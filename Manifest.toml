@@ -19,6 +19,12 @@ version = "0.8.0"
 [[Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 
+[[BenchmarkTools]]
+deps = ["JSON", "Printf", "Statistics", "Test"]
+git-tree-sha1 = "e686f1754227e4748259f400839b83a1e8773e02"
+uuid = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+version = "0.4.1"
+
 [[BinDeps]]
 deps = ["Compat", "Libdl", "SHA", "URIParser"]
 git-tree-sha1 = "12093ca6cdd0ee547c39b1870e0c9c3f154d9ca9"
