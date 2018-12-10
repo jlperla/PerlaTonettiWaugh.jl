@@ -24,9 +24,9 @@ version = "0.3.0"
 
 [[BandedMatrices]]
 deps = ["FillArrays", "LazyArrays", "LinearAlgebra", "Random", "SparseArrays", "Test"]
-git-tree-sha1 = "d3c8a883d5470def5f5a2b3c5b20ea5080d325e8"
+git-tree-sha1 = "04a5e589951a6051669560485aa41410201ddec3"
 uuid = "aae01518-5342-5314-be14-df237901396f"
-version = "0.7.2"
+version = "0.8.0"
 
 [[Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
