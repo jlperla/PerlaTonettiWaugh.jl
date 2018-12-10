@@ -8,7 +8,7 @@ function entry_residuals(Ω_interior, Ω_0, stationary_sol, T, params, settings,
     @assert Ω_nodes[end] ≈ T
 
     Ω = CubicSplineInterpolation(Ω_nodes, [Ω_0; Ω_interior; stationary_sol.Ω], # interpolate Ω
-                            extrapolation_bc = Interpolations.Line()) # line before 0 / after T FIXIT: this needs to be Flat().
+                            extrapolation_bc = Interpolations.Flat()) # line before 0 / after T
     E = t -> (log(Ω(t + Δ_E)) - (log(Ω(t - Δ_E))))/(2*Δ_E) + δ # Central difference based E(t)
   # Run the main method.
     sol = solve_dynamics(params, stationary_sol, settings, T, Ω, E)
