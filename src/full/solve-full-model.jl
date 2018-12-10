@@ -76,13 +76,17 @@ function residuals_given_solution(solved, entry_residuals_nodes_count)
 end
 
 function residuals_given_E_nodes(E_nodes, settings)
+  # solve the dynamics; if solution is not valid, return Inf
   solved = try solve_with_E_nodes(E_nodes, settings).results catch; return fill(10e20, settings.entry_residuals_nodes_count) end
   # get the resulting entry_residual vector
   return residuals_given_solution(solved, settings.entry_residuals_nodes_count)
 end
 
-function ssr_given_E_nodes(candidate, settings)
-  residuals = residuals_given_E_nodes(candidate, settings)
-  # solve the dynamics; if solution is not valid, return Inf
-  return (sqrt(sum(residuals .* settings.weights .* residuals)))
+function ssr_given_E_nodes(E_nodes, settings)
+  residuals = residuals_given_E_nodes(E_nodes, settings)
+  ssr_rooted = sqrt(sum(residuals .* settings.weights .* residuals))
+  return ssr_rooted +
+          ((settings.global_transition_penalty_coefficient > 0.) ? # add a penalty function for constraints on increasing E
+          (settings.global_transition_penalty_coefficient * sum((max.(0.0, diff(E_nodes))).^2)) : 
+          0.) 
 end
