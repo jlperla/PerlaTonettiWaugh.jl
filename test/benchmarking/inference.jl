@@ -54,7 +54,6 @@ function test_residuals()
 end
 
 @test @inferred test_residuals() == test_residuals()
-end
 
 println("Benchmarking simple residuals solver")
 @btime test_residuals()
