@@ -11,7 +11,7 @@ function entry_residuals(Ω_interior, Ω_0, stationary_sol, T, params, settings,
                             extrapolation_bc = Interpolations.Line()) # line before 0 / after T FIXIT: this needs to be Flat().
     E = t -> (log(Ω(t + Δ_E)) - (log(Ω(t - Δ_E))))/(2*Δ_E) + δ # Central difference based E(t)
   # Run the main method.
-    sol = solve_dynamics(params, stationary_sol, settings, T, Ω, E!)
+    sol = solve_dynamics(params, stationary_sol, settings, T, Ω, E)
 
   # Grab the entry residuals and time points.
     v_0s = sol.results[:v_0]
@@ -27,6 +27,39 @@ function entry_residuals(Ω_interior, Ω_0, stationary_sol, T, params, settings,
           Ω_interpolation = Ω,
           entry_residuals = entry_residuals_vec, solved_dynamics = sol)
 end
+
+# Kernel function for main method.
+  function f!(residual,du,u,p,t)
+    # Setup (unpack arguments, reset residual, grab E and Ω evaluations, etc.)
+      @unpack ζ, Ω, E, static_equilibrium, T, results, ρ, δ, σ, μ, υ, L_1, L_2, ω, κ, d = p
+      residual .= 0
+      M = length(residual) - 2
+      # v = u[1:M] (this line is commented to cut down on memory allocations)
+      g = u[M+1]
+      z_hat = u[M+2]
+      x = ζ
+      Ω_t = Ω(t)
+      E_t = E(t)
+    # Get static equilibrium values
+      @unpack S_t, L_tilde_t, z_bar, π_min, π_tilde = static_equilibrium(u[1], g, z_hat, E_t, Ω_t)
+    # Grab the L_tilde derivative.
+      L_tilde_log_derivative = 0.0 # Default to Float literal.
+      if (t < T)
+        t_forward = results[:t][end]
+        L_tilde_forward = results[:L_tilde][end]
+        L_tilde_log_derivative = (log(1 - L_tilde_forward) - log(1 - L_tilde_t))/(t_forward - t) # Forward differences.
+      end
+    #=  Reset the residuals to slack in the DAE conditions.
+        Note that A_t = (ρ + δ + L_tilde_log_derivative - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2))*I - (μ - g + (σ-1)*υ^2)*L_1 - (υ^2/2)*L_2 and we're decomposing this.
+    =#
+      residual[1:M] = (ρ + δ + L_tilde_log_derivative - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2))*u[1:M] # system of ODEs (eq:28)
+      residual[1:M] .-= (μ - g + (σ-1)*υ^2)*L_1*u[1:M]
+      residual[1:M] .-= (υ^2/2)*L_2*u[1:M]
+      residual[1:M] .-= du[1:M]
+      residual[1:M] .-= π_tilde # discretized system of ODE for v, where v'(T) = 0 (eq:24)
+      residual[M+1] = u[1] + x - dot(ω, u[1:M]) # residual (eq:25)
+      residual[M+2] = z_hat^(σ-1) - κ * d^(σ-1) / π_min # export threshold (eq:31)
+  end
 
 # Main method.
 function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed_solution = true)
@@ -71,40 +104,13 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
       u0 = [v_T; g_T; z_hat_T]
       du0 = zeros(M+2)
 
-    # Write the actual f! to be called by the DAE solver.
-      function f!(residual,du,u,p,t)
-        # Setup (unpack arguments, reset residual, grab E and Ω evaluations, etc.)
-          residual .= 0
-          # v = u[1:M] (this line is commented to cut down on memory allocations)
-          g = u[M+1]
-          z_hat = u[M+2]
-          x = ζ
-          Ω_t = Ω(t)
-          E_t = E(t)
-        # Get static equilibrium values
-          @unpack S_t, L_tilde_t, z_bar, π_min, π_tilde = static_equilibrium(u[1], g, z_hat, E_t, Ω_t)
-        # Grab the L_tilde derivative.
-          L_tilde_log_derivative = 0.0 # Default to Float literal.
-          if (t < T)
-            t_forward = results[:t][end]
-            L_tilde_forward = results[:L_tilde][end]
-            L_tilde_log_derivative = (log(1 - L_tilde_forward) - log(1 - L_tilde_t))/(t_forward - t) # Forward differences.
-          end
-        #=  Reset the residuals to slack in the DAE conditions.
-            Note that A_t = (ρ + δ + L_tilde_log_derivative - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2))*I - (μ - g + (σ-1)*υ^2)*L_1 - (υ^2/2)*L_2 and we're decomposing this.
-        =#
-          residual[1:M] = (ρ + δ + L_tilde_log_derivative - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2))*u[1:M] # system of ODEs (eq:28)
-          residual[1:M] .-= (μ - g + (σ-1)*υ^2)*L_1*u[1:M]
-          residual[1:M] .-= (υ^2/2)*L_2*u[1:M]
-          residual[1:M] .-= du[1:M]
-          residual[1:M] .-= π_tilde # discretized system of ODE for v, where v'(T) = 0 (eq:24)
-          residual[M+1] = u[1] + x - dot(ω, u[1:M]) # residual (eq:25)
-          residual[M+2] = z_hat^(σ-1) - κ * d^(σ-1) / π_min # export threshold (eq:31)
-      end
-
+    # Create the parameters object
+      p = (ζ = ζ, Ω = Ω, E = E, static_equilibrium = static_equilibrium, T = T,
+            results = results, ρ = ρ, δ = δ, σ = σ, μ = μ, υ = υ, L_1 = L_1, L_2 = L_2,
+            ω = ω, κ = κ, d = d)
 
     # Bundle all of this into an actual DAE problem.
-      dae_prob = DAEProblem(f!, du0, u0, (T, 0.0), differential_vars = [trues(M); false; false])
+      dae_prob = DAEProblem(f!, du0, u0, (T, 0.0), p, differential_vars = [trues(M); false; false])
 
     # Define the callback we'll be using.
       function cb_aux(u, t, integrator) # Function we'll be executing
@@ -165,5 +171,5 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
         end
 
     # Return.
-      return (results = results, sol = sol, f! = f!, static_equilibrium = static_equilibrium) # The results, raw DAE solution, and DAE problem (f!, static_equilibrium, etc.) objects.
+      return (results = results, sol = sol, p = p, static_equilibrium = static_equilibrium) # The results, raw DAE solution, and DAE problem (f!, static_equilibrium, etc.) objects.
 end
