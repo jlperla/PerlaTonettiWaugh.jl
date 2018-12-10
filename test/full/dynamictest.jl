@@ -137,4 +137,7 @@ end
     # Regression
       @test resid[4] ≈ 0 atol = 1e-6
       @test resid[100] ≈ 0 atol = 1e-6
+    # Benchmarking results
+      println("Kernel Benchmarking")
+      @btime f!($resid, $du, $u, $p, $t)
 end
