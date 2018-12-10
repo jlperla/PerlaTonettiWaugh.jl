@@ -1,7 +1,7 @@
 module PerlaTonettiWaugh
 
 # Dependencies.
-using DifferentialEquations, Sundials, Distributions, Roots, QuantEcon, LinearAlgebra, Random, DataFrames, DataFramesMeta, DiffEqCallbacks, Interpolations, QuadGK, NLopt, ForwardDiff, SoftGlobalScope
+using DifferentialEquations, Sundials, Distributions, QuantEcon, LinearAlgebra, Random, DataFrames, DataFramesMeta, DiffEqCallbacks, Interpolations, QuadGK, NLopt, ForwardDiff, SoftGlobalScope
 using LeastSquaresOptim
 using BlackBoxOptim
 using NLSolversBase
@@ -29,6 +29,6 @@ export stationary_algebraic, stationary_numerical, simpleODE, simpleDAE, @with_k
 export minimize_residuals, minimize_residuals_python
 export solve_full_model_global, solve_full_model_nlopt, solve_full_model_python, solve_continuation
 export consumption_equivalent, display_stationary_sol
-export find_zero
+export f!, f!_simple, f_simple, find_zero
 
 end # module

@@ -1,6 +1,6 @@
 # Implementation of the simple model with time-varying objects.
 # Dynamic calculations, defined for each time ∈ t.
-function f(du,u,p,t)
+function f_simple(du,u,p,t)
     @unpack L_1, L_2, z, r, μ, g, υ, π_tilde, T, ξ, z = p
     # Validate upwind scheme direction.
     # μ + υ^2/2 - g(t) < 0 || @warn "Drift must be strictly negative at all times"
@@ -29,12 +29,12 @@ function simpleODE(params, settings)
     v_T = L_T \ π_tilde_T
     # Bundle as before.
     p = (L_1 = L_1_minus, L_2 = L_2, z = z, g = g, r = r, υ = υ, π_tilde = π_tilde, T = T, μ = μ, ξ = ξ)
-    return ODEProblem(f, v_T, (T, 0.0), p)
+    return ODEProblem(f_simple, v_T, (T, 0.0), p)
 end
 
 # Implementation of the simple model with time-varying objects, represented by DAE
 # Dynamic calculations, defined for each time ∈ t.
-function f!(resid,du,u,p,t)
+function f!_simple(resid,du,u,p,t)
     @unpack L_1, L_2, z, r, μ, g, υ, π_tilde, T, M, ξ, x, ω = p
     # Carry out calculations.
     v_t = u[1:M]
@@ -65,5 +65,5 @@ function simpleDAE(params, settings)
     # Other objects
     u_T = [v_T; g_T]
     resid_M1 = zeros(M+1)
-    return DAEProblem(f!, resid_M1, u_T, (T, 0.0), differential_vars = [fill(true, M); false], p)
+    return DAEProblem(f!_simple, resid_M1, u_T, (T, 0.0), differential_vars = [fill(true, M); false], p)
 end

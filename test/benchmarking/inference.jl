@@ -26,6 +26,7 @@ function test_simpleODE()
     simpleODE(params, settings)
 end
 
+println("Benchmarking simpleODE constructor")
 @btime test_simpleODE()
 
 # simpleDAE
@@ -35,6 +36,7 @@ function test_simpleDAE()
     simpleDAE(params, settings)
 end
 
+println("Benchmarking simpleDAE constructor")
 @btime test_simpleDAE()
 
 # RESIDUALS CALCULATION
@@ -52,3 +54,6 @@ function test_residuals()
 end
 
 @test @inferred test_residuals() == test_residuals()
+
+println("Benchmarking simple residuals solver")
+@btime test_residuals()
