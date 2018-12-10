@@ -35,5 +35,6 @@ settings_defaults = @with_kw (z_max = 5,
                                 global_transition_ub = global_transition_lb,
                                 global_transition_iterations = 2, 
                                 global_transition_weights = [fill(15, 3); fill(1, entry_residuals_nodes_count-3)],
+                                global_transition_penalty_coefficient = 0.0, # coefficient to be used for a penalty function for constraints on increasing E
                                 sort_candidate = false,
                                 tstops = nothing)
