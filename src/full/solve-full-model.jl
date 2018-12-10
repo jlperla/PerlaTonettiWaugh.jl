@@ -62,8 +62,9 @@ end
 
 function ssr_given_E_nodes(E_nodes, settings)
   residuals = residuals_given_E_nodes(E_nodes, settings)
-  ssr = sqrt(sum(residuals .* settings.weights .* residuals))
-  return (settings.global_transition_penalty_coefficient > 0.) ? 
-          (ssr + settings.global_transition_penalty_coefficient * sum((max.(0.0, diff(E_nodes))).^2)) : 
-          ssr # add a penalty function for constraints on increasing E
+  ssr_rooted = sqrt(sum(residuals .* settings.weights .* residuals))
+  return ssr_rooted +
+          ((settings.global_transition_penalty_coefficient > 0.) ? # add a penalty function for constraints on increasing E
+          (settings.global_transition_penalty_coefficient * sum((max.(0.0, diff(E_nodes))).^2)) : 
+          0.) 
 end
