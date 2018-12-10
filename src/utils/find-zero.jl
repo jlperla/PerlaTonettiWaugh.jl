@@ -12,8 +12,10 @@ function find_zero(h, x0; lb = fill(0.0, length(x0)), ub = fill(10e8, length(x0)
 
     # define the optimization problem
     opt = (constraints_fg! == nothing) ? Opt(:LD_LBFGS, length(x0)) : Opt(:LN_COBYLA, length(x0)) # 3 indicates the length of `x`
+    opt = (constraints_fg! == nothing && autodiff != :forward) ? Opt(:LN_BOBYQA, length(x0)) : opt
+
     # specifies that optimization problem is on minimization
-    min_objective!(opt, (constraints_fg! == nothing) ? NLoptAdapter(f, x0, autodiff) : fg!) 
+    min_objective!(opt, (autodiff == :forward) ? NLoptAdapter(f, x0, autodiff) : fg!) 
 
     if (lb != nothing)    
         lower_bounds!(opt, lb) # find `x` above lb

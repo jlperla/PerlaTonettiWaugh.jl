@@ -35,22 +35,8 @@ end
 function solve_full_model_nlopt(settings)
   settings = merge(settings, (sort_candidate = false,))
 
-  # constraint for increasing E nodes 
-  function constraints_increasing_E!(h, x, jacobian_t)
-    M = length(x)
-    # A is a matrix whose ith row has 1 in ith col and -1 in (i+1)th col
-    # so ith element of A*x imposes x[i] <= x[i+1]
-    # note that this imposes x[end] <= 0 as well as the last row is [0; 0; ...; 0; 1].
-    A = LinearAlgebra.Tridiagonal(zeros(M-1),ones(M),-ones(M-1))
-    if length(jacobian_t) > 0 # transpose of the Jacobian matrix
-        jacobian_t[:] = A'
-    end
-    h[:] = A*x
-end
-
   result = find_zero(x -> residuals_given_E_nodes(x, settings), settings.global_transition_x0; 
-                    lb = nothing, ub = fill(0.0, length(settings.global_transition_x0)),
-                    constraints_fg! = constraints_increasing_E!, autodiff = :finite)
+                    lb = nothing, ub = fill(0.0, length(settings.global_transition_x0)), autodiff = :finite)
   return (solution = solve_with_E_nodes(result, settings; detailed_solution = true), 
           E_nodes = result)
 end
