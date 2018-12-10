@@ -1,3 +1,24 @@
+function solve_continuation(d_0, d_T; step = 0.005, params = parameter_defaults(), settings = settings_defaults())
+  params_0 = merge(params, (d = d_T,)) # parameters to be used at t = 0
+  params_T = merge(params, (d = d_T,)) # parameters to be used at t = T
+  z_grid = settings.z
+  stationary_sol_0 = stationary_numerical(params_0, z_grid) # solution at t = 0
+  stationary_sol_T = stationary_numerical(params_T, z_grid) # solution at t = T
+  Ω_0 = stationary_sol_0.Ω;
+  settings = merge(settings, (params_T = params_T, stationary_sol_T = stationary_sol_T, Ω_0 = Ω_0));
+  tempd_0 = params_0.d
+  result = 0 # to be overwritten later
+  @softscope while tempd_0 <= d_0
+    tempd_0 += step
+    params_0 = merge(params, (d = tempd_0,))
+    Ω_0 = stationary_numerical(params_0, z_grid).Ω
+    settings = merge(settings, (Ω_0 = Ω_0,))
+    result = solve_full_model_python(settings)
+    settings = merge(settings, (global_transition_x0 = result.solobj.x,))
+  end
+  return settings, result
+end
+
 function solve_full_model_global(settings)
   settings = merge(settings, (iterations = settings.global_transition_iterations,
                               weights = settings.global_transition_weights,
