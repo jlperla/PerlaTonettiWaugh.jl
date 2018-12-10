@@ -15,9 +15,9 @@ include("utils/display_stationary_sol.jl")
 # Simple model.
 include("simple/dynamic.jl")
 include("simple/stationary.jl")
-include("simple/calculate_residuals.jl")
+include("simple/residuals.jl")
 # Full model.
-include("full/stationary.jl") 
+include("full/stationary.jl")
 include("full/dynamic.jl")
 include("full/solve-full-model.jl")
 
