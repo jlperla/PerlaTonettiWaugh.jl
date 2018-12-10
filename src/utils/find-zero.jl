@@ -1,5 +1,7 @@
 # returns the m-vector zero of a multivariate function h: R^m -> R^n, using nlopt
-function find_zero(h, x0; lb = fill(0.0, length(x0)))
+# constraints_fg! takes (h, x, jacobian_t) and assigns jacobian_t and h[:] given current x.
+function find_zero(h, x0; lb = fill(0.0, length(x0)), ub = fill(10e8, length(x0)), 
+                    constraints_fg! = nothing, constraints_tol = fill(1e-8, length(x0)))
     function f(x)
         resids = h(x)
         return sum(resids .* resids)
@@ -17,9 +19,20 @@ function find_zero(h, x0; lb = fill(0.0, length(x0)))
     end
 
     # define the optimization problem
-    opt = Opt(:LD_LBFGS, length(x0)) # 3 indicates the length of `x`
-    lower_bounds!(opt, lb) # find `x` above 0
+    opt = (constraints_fg! == nothing) ? Opt(:LD_LBFGS, length(x0)) : Opt(:LD_SLSQP, length(x0)) # 3 indicates the length of `x`
     min_objective!(opt, fg!) # specifies that optimization problem is on minimization
+
+    if (lb != nothing)    
+        lower_bounds!(opt, lb) # find `x` above lb
+    end
+    if (ub != nothing)    
+        upper_bounds!(opt, ub) # find `x` below ub
+    end
+
+    if (constraints_fg! != nothing) # add constraints_fg! if needed
+        inequality_constraint!(opt, constraints_fg!, constraints_tol)
+    end
+
     xtol_rel!(opt, -Inf)
     xtol_abs!(opt, -Inf)
     ftol_rel!(opt, -Inf)
