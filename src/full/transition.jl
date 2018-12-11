@@ -4,7 +4,6 @@
   The first set of functions are caller functions, which users would interact with. Then come the auxiliary functions used by the callers.
 =#
 
-
 # Continuation solver. Essentially traces out a smooth path from some d_T to d_0, using the result from one step as the x0 for the next.
 # With default parameters we get: [-1.1965566608914664,-0.7506441878495663,-0.6160629809004126,-0.4490604063250066,-0.3457782022324279,-0.26611899012195817,-0.1703597837124977,-0.12538756277279978,-0.10765936098467942,-0.057163395444530966,-0.05297636889833756,-0.032260206198113685,-0.028143386570548785,-0.04434566417370368]
 function solve_continuation(d_0, d_T; step = 0.005, params = parameter_defaults(), settings = settings_defaults())
@@ -16,7 +15,7 @@ function solve_continuation(d_0, d_T; step = 0.005, params = parameter_defaults(
   Ω_0 = stationary_sol_0.Ω;
   settings = merge(settings, (params_T = params_T, stationary_sol_T = stationary_sol_T, Ω_0 = Ω_0));
   tempd_0 = params_0.d
-  result = 0 # to be overwritten later
+  result = 0 # to be overwritten by loop
   @softscope while tempd_0 <= d_0
     tempd_0 += step
     params_0 = merge(params, (d = tempd_0,))
