@@ -2,7 +2,7 @@
 # constraints_fg! takes (h, x, jacobian_t) and assigns jacobian_t and h[:] given current x.
 function find_zero(h, x0; lb = fill(0.0, length(x0)), ub = fill(10e8, length(x0)), 
                     constraints_fg! = nothing, constraints_tol = fill(1e-8, length(x0)),
-                    autodiff = :forward)
+                    autodiff = ((constraints_fg! == nothing) ? :forward : :finite))
     function f(x)
         resids = h(x)
         return sum(resids .* resids)
