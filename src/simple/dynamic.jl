@@ -26,7 +26,7 @@ function simpleODE(params, settings)
     π_tilde_T = π_tilde.(Ref(T), z)
     L_T = (r_T - g_T - ξ*(μ - g_T) - ξ^2 * υ^2/2)*I - (μ + ξ*υ^2 - g_T)*L_1_minus - υ^2/2 * L_2 # (eq:A.9)
     # Solution to the rescaled differential equation.
-    v_T = L_T \ π_tilde_T
+    v_T = L_T \ π_tilde_T # (eq:12)
     # Bundle as before.
     p = (L_1 = L_1_minus, L_2 = L_2, z = z, g = g, r = r, υ = υ, π_tilde = π_tilde, T = T, μ = μ, ξ = ξ)
     return ODEProblem(f_simple, v_T, (T, 0.0), p)

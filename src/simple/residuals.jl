@@ -18,7 +18,7 @@ function calculate_residuals(ode_prob, x, ω, ode_solve_algorithm, ts) # To keep
     v_ts = zeros(M, length(ts))
     for (i, t) in enumerate(ts)
         v_t = sol(t)[1:M] # i.e., the value function at the point.
-        residuals[i] = v_t[1] + x(t) - dot(ω, v_t)
+        residuals[i] = v_t[1] + x(t) - dot(ω, v_t) # (eq:A.20)
         v_ts[:,i] = v_t
     end
 
