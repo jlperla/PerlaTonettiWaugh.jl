@@ -19,7 +19,7 @@ Consider dragging and dropping the folder into Github Desktop or GitKraken in or
 
 The folder will be installed in `~/.julia/dev/PerlaTonettiWaugh`. 
 
-The `~/.julia` folder is somewhere like `C:\Users\USERNAME\.julia\dev` on Windows, and `~/.julia` on mac/Linux.
+The .julia folder is somewhere like `C:\Users\USERNAME\.julia\` on Windows, and `~/.julia` on mac/Linux.
 
 3. Open the above folder in a Jupyter notebook (i.e., go there in a terminal and run `jupyter lab`). If you can't find it, run 
 
