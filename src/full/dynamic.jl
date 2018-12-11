@@ -2,22 +2,20 @@
 function entry_residuals(Ω_interior, Ω_0, stationary_sol, T, params, settings, Ω_nodes, entry_residuals_nodes)
     @unpack δ, ζ, χ = params
     @unpack Δ_E = settings
-  # Validate parameters and construct interpolation objects.
+  # Validate parameters and construct interpolation for Ω.
     @assert Ω_nodes[1] ≈ 0.0
     @assert Ω_nodes[end] ≈ T
-    Ω = CubicSplineInterpolation(Ω_nodes, [Ω_0; Ω_interior; stationary_sol.Ω], # interpolate Ω
-                            extrapolation_bc = Interpolations.Flat()) # line before 0 / after T
+    Ω = CubicSplineInterpolation(Ω_nodes, [Ω_0; Ω_interior; stationary_sol.Ω], extrapolation_bc = Interpolations.Flat()) # interpolate Ω
     E = t -> (log(Ω(t + Δ_E)) - (log(Ω(t - Δ_E))))/(2*Δ_E) + δ # Central difference based E(t)
   # Run the main method.
     sol = solve_dynamics(params, stationary_sol, settings, T, Ω, E)
   # Grab the entry residuals and time points.
     v_0s = sol.results[:v_0]
     ts = sol.results[:t]
-    v_0_interpolation = LinearInterpolation(ts, v_0s)
-    # compute entry residuals from the solution
+  # Interpolate them and return
+    v_0_interpolation = LinearInterpolation(ts, v_0s) # interpolate value function
     entry_residuals_vec = map(t -> v_0_interpolation(t) - ζ * (1-χ) / χ, entry_residuals_nodes) # (eq:25)
-    # perform linear interpolation on entry_residuals
-    entry_residuals_interpolation = LinearInterpolation(entry_residuals_nodes, entry_residuals_vec)
+    entry_residuals_interpolation = LinearInterpolation(entry_residuals_nodes, entry_residuals_vec) # interpolate entry residuals
     return (entry_residuals_interpolation = entry_residuals_interpolation, Ω_interpolation = Ω, entry_residuals = entry_residuals_vec, solved_dynamics = sol)
 end
 
@@ -27,7 +25,6 @@ end
       @unpack ζ, Ω, E, static_equilibrium, T, results, ρ, δ, σ, μ, υ, L_1, L_2, ω, κ, d = p
       residual .= 0
       M = length(residual) - 2
-      # v = u[1:M] (this line is commented to cut down on memory allocations)
       g = u[M+1]
       z_hat = u[M+2]
       x = ζ
@@ -77,11 +74,10 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
       z, L_1_minus, L_1_plus, L_2 = rescaled_diffusionoperators(z, σ-1) # Operator Discretization.
       L_1 = L_1_minus # L_1 ≡ L_1_minus.
 
-    # Define the intermediate quantities for the DAE problem.
+    # Define the auxiliary functions for the DAE problem.
       S(g) = θ * (g - μ - θ * υ^2/2) # Compute S given g. (eq:28)
       L_tilde(S, z_hat, E_t, Ω_t) = Ω_t * ((N-1) * z_hat^(-θ)*κ + ζ*(S + E_t / χ)) # Compute L_tilde. (eq:29)
 
-    # Define a function to compute the static equilibrium quantities.
       function static_equilibrium(v_0, g, z_hat, E_t, Ω_t)
         S_t = S(g)
         L_tilde_t = L_tilde(S_t, z_hat, E_t, Ω_t)
@@ -105,7 +101,7 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
     # Bundle all of this into an actual DAE problem.
       dae_prob = DAEProblem(f!, du0, u0, (T, 0.0), p, differential_vars = [trues(M); false; false])
 
-    # Define the callback we'll be using.
+    # Define the callback we'll be using (i.e., for the backward-looking L_tilde derivative)
       function cb_aux(u, t, integrator) # Function we'll be executing
         # Unpack the u
           # t = t
