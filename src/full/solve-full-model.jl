@@ -32,7 +32,7 @@ function solve_full_model_global(settings)
           E_nodes = best_candidate(result))
 end
 
-function solve_full_model_newoua(settings)
+function solve_full_model_newuoa(settings)
   settings = merge(settings, (sort_candidate = false,))
 
   result = find_zero(x -> residuals_given_E_nodes(x, settings), settings.global_transition_x0; 
