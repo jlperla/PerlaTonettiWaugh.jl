@@ -2,12 +2,11 @@
 
 # Gives us the (full algebraic) stationary solution for a set of params and an initial x.
 function stationary_algebraic(params, init_x = defaultiv(params); kwargs...)
-    @assert params.υ > 0 && params.κ > 0 # Parameter validation
-    # solve for g, z_hat, Ω
+    @assert params.υ > 0 && params.κ > 0 # validate params
     g, z_hat, Ω = find_zero(x -> stationary_algebraic_aux(x, params), [0.02; 18.94; 17.07])
-    @assert z_hat > 1 && Ω > 0 && g > 0 # Validate parameters.
+    @assert z_hat > 1 && Ω > 0 && g > 0 # validate solution
     staticvalues = staticvals([g, z_hat, Ω], params)
-    return merge(staticvalues, merge((g = g, z_hat = z_hat, Ω = Ω), welfare([g, z_hat, Ω], params, staticvalues)))
+    return merge(staticvalues, merge((g = g, z_hat = z_hat, Ω = Ω), welfare([g, z_hat, Ω], params, staticvalues))) # calculate quantities and return
 end
 
 # Welfare function
@@ -96,7 +95,7 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
         free_entry = v_tilde[1] - x*(1-χ)/χ # (eq:27)
 
         # Adoption threshold.
-        adoption_threshold = π_min - (1 - L_tilde)/((σ-1)*z_bar^(σ-1)) # (H.17) -- equivalent with (eq:26)
+        adoption_threshold = π_min - (1 - L_tilde)/((σ-1)*z_bar^(σ-1)) # (eq:26)
 
         return [value_matching, free_entry, adoption_threshold]
     end
