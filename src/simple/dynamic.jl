@@ -1,18 +1,14 @@
-# Implementation of the simple model with time-varying objects.
-# Dynamic calculations, defined for each time ∈ t.
+# ODE kernel, defined for each time ∈ t
 function f_simple(du,u,p,t)
     @unpack L_1, L_2, z, r, μ, g, υ, π_tilde, T, ξ, z = p
-    # Validate upwind scheme direction.
-    # μ + υ^2/2 - g(t) < 0 || @warn "Drift must be strictly negative at all times"
     r = r(t)
     g = g(t)
-    # Carry out calculations.
     L = (r - g - ξ*(μ - g) - ξ^2 * υ^2/2)*I - (μ + ξ*υ^2 - g)*L_1 - υ^2/2 * L_2 # (eq:A.9)
     mul!(du, L, u)
     du .-= π_tilde.(t, z) # discretized system of ODE for v (eq:12)
 end
 
-# Constructor
+# ODE constructor
 function simpleODE(params, settings)
     # Unpack necessary objects.
     @unpack μ, υ, θ, r, x, ξ, π_tilde = params
@@ -32,8 +28,7 @@ function simpleODE(params, settings)
     return ODEProblem(f_simple, v_T, (T, 0.0), p)
 end
 
-# Implementation of the simple model with time-varying objects, represented by DAE
-# Dynamic calculations, defined for each time ∈ t.
+# DAE kernel, defined for each time ∈ t.
 function f!_simple(resid,du,u,p,t)
     @unpack L_1, L_2, z, r, μ, g, υ, π_tilde, T, M, ξ, x, ω = p
     # Carry out calculations.
@@ -45,7 +40,7 @@ function f!_simple(resid,du,u,p,t)
     resid[M+1] = v_t[1] + x(t) - dot(ω, v_t) # value matching condition (eq:13)
 end
 
-# Constructor
+# DAE constructor
 function simpleDAE(params, settings)
     # Unpack necessary objects.
     @unpack μ, υ, θ, r, x, ξ, π_tilde = params
