@@ -21,10 +21,12 @@ The folder will be installed in `~/.julia/dev/PerlaTonettiWaugh`.
 
 The `~/.julia` folder is somewhere like `C:\Users\USERNAME\.julia\dev` on Windows, and `~/.julia` on mac/Linux.
 
-3. Open the above folder in a Jupyter notebook. If you can't find it, run 
+3. Open the above folder in a Jupyter notebook (i.e., go there in a terminal and run `jupyter lab`). If you can't find it, run 
 
 ```julia
 joinpath(DEPOT_PATH[1], "dev", "PerlaTonettiWaugh")
 ```
+
+to get the path. 
 
 4. [NOTEBOOK AND SOLVER INSTRUCTIONS]
