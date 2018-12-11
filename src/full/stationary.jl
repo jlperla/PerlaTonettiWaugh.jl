@@ -1,6 +1,5 @@
 # Implements the algebraic stationary solution for the full model. Returns the equilibrium quantities (g, Ω, π) determined by equations H.15-H.17.
 
-
 # Gives us the (full algebraic) stationary solution for a set of params and an initial x.
 function stationary_algebraic(params, init_x = defaultiv(params); kwargs...)
     @assert params.υ > 0 && params.κ > 0 # Parameter validation

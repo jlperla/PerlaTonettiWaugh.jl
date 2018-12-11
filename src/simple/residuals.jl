@@ -60,7 +60,7 @@ function minimize_residuals_python(params, settings)
     settings = merge(settings, (t_node_for_g = range(0.0, stop = T, length = g_node_count), g_T = g_T))
     g_initial = fill(g_T, g_node_count - 1)
     # solve the optimization problem
-    sol = DFOLS.solve(x -> calculate_residuals_by_candidate(x, params, settings), g_initial, lower = fill(0., size(g_initial)))
+    sol = DFOLS.solve(x -> calculate_residuals_by_candidate(x, params, settings), g_initial, bounds = (fill(0., size(g_initial)), nothing))
     settings = merge(settings, (g = interpolate_g(DFOLS.optimizer(sol), settings), )) # only runs if converged(sol), otherwise throws error(sol.msg)
     return calculate_residuals(params, settings) # return the resultiing residuals
 end

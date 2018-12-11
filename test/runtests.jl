@@ -1,5 +1,6 @@
-using PerlaTonettiWaugh, Test, LinearAlgebra, Statistics, Compat
-using Distributions, Sundials, BenchmarkTools, Parameters, QuantEcon, Interpolations, Optim, DifferentialEquations, DiffEqCallbacks, Random, Statistics, Interpolations, QuadGK
+using PerlaTonettiWaugh
+using Test, LinearAlgebra, Statistics, Compat
+using Sundials, BenchmarkTools, Interpolations, Parameters
 
 @elapsed begin
   @time @testset "Simple Stationary" begin include("simple/stationarytest.jl") end
