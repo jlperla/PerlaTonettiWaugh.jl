@@ -41,7 +41,7 @@ function solve_full_model_newuoa(settings)
 
   result = find_zero(x -> residuals_given_E_nodes(x, settings), settings.global_transition_x0;
                     lb = nothing, ub = fill(0.0, length(settings.global_transition_x0)), autodiff = :finite)
-  return (solution = solve_with_E_nodes(result, settings; detailed_solution = true),
+  return (solution = solve_model_from_E_nodes(result, settings; detailed_solution = true),
           E_nodes = result)
 end
 
@@ -62,7 +62,7 @@ function solve_full_model_nlopt(settings)
    result = find_zero(x -> residuals_given_E_nodes(x, settings), settings.global_transition_x0;
                     lb = nothing, ub = fill(0.0, length(settings.global_transition_x0)),
                     constraints_fg! = constraints_increasing_E!)
-  return (solution = solve_with_E_nodes(result, settings; detailed_solution = true),
+  return (solution = solve_model_from_E_nodes(result, settings; detailed_solution = true),
           E_nodes = result)
 end
 
