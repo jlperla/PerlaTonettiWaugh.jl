@@ -87,37 +87,25 @@
     # try minimize_residuals by least square optimization instead of solving ODE by DAE
     # need higher tolerance (atol = 1e-4)
     residuals, v_ts = minimize_residuals(params_func_varying_1, settings())
-    # residuals_p, v_ts_p = minimize_residuals_python(params_func_varying_1, settings())
     @test norm(residuals[1]) < 1e-7
-    # @test norm(residuals_p[1]) < 1e-7
     @test norm(residuals[end]) < 1e-7
-    # @test norm(residuals_p[end]) < 1e-7
     @test norm(residuals) < 1e-5
-    # @test norm(residuals_p) < 1e-7
     # check if dae solution and lssr solution are close enough
     for t in 1:length(settings().t_grid)
         @test norm(v_ts_dae1[:,t] .- v_ts[:,t]) ≈ 0 atol = 2e-1
     end
     residuals, v_ts = minimize_residuals(params_func_varying_2, settings())
-    # residuals_p, v_ts_p = minimize_residuals_python(params_func_varying_2, settings())
     @test norm(residuals[1]) < 1e-6
-    # @test norm(residuals_p[1]) < 1e-7
     @test norm(residuals[end]) < 1e-7
-    # @test norm(residuals_p[end]) < 1e-7
     @test norm(residuals) < 1e-4
-    # @test norm(residuals_p) < 1e-7
     # check if dae solution and lssr solution are close enough
     for t in 1:length(settings().t_grid)
         @test norm(v_ts_dae2[:,t] .- v_ts[:,t]) ≈ 0 atol = 2e-1
     end
     residuals, v_ts = minimize_residuals(params_func_varying_3, settings())
-    # residuals_p, v_ts_p = minimize_residuals_python(params_func_varying_3, settings())
     @test norm(residuals[1]) < 1e-5
-    # @test norm(residuals_p[1]) < 1e-7
     @test norm(residuals[end]) < 1e-7
-    # @test norm(residuals_p[end]) < 1e-7
     @test norm(residuals) < 1e-4
-    # @test norm(residuals_p) < 1e-7
     # check if dae solution and lssr solution are close enough
     for t in 1:length(settings().t_grid)
         @test norm(v_ts_dae3[:,t] .- v_ts[:,t]) ≈ 0 atol = 2e-1
