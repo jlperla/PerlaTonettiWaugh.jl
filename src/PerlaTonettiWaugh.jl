@@ -19,7 +19,7 @@ include("simple/residuals.jl")
 # Full model.
 include("full/stationary.jl")
 include("full/dynamic.jl")
-include("full/solve-full-model.jl")
+include("full/transition.jl")
 
 export parameter_defaults, settings_defaults
 export stationary_algebraic, stationary_numerical, simpleODE, simpleDAE, stationary_algebraic_simple, stationary_numerical_simple, ω_weights, calculate_residuals, rescaled_diffusionoperators, diffusionoperators, solve_dynamics, entry_residuals, welfare
