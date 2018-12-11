@@ -33,22 +33,22 @@ function solve_full_model_global(settings)
   settings = merge(settings, (iterations = settings.global_transition_iterations, weights = settings.global_transition_weights, sort_candidate = true))
   ranges = map(i->(settings.global_transition_lb[i], settings.global_transition_ub[i]), 1:length(settings.global_transition_x0))
   result = bboptimize(x -> ssr_given_E_nodes(x, settings); SearchRange = ranges, NumDimensions = length(ranges), MaxSteps = settings.iterations)
-  return (solution = solve_with_E_nodes(best_candidate(result), settings; detailed_solution = true), E_nodes = best_candidate(result))
+  return (solution = solve_model_from_E_nodes(best_candidate(result), settings; detailed_solution = true), E_nodes = best_candidate(result))
 end
 
 # DFOLS (Derivative-Free Optimization for Least Squares) solver.
 function solve_full_model_python(settings; user_params = nothing)
   settings = merge(settings, (sort_candidate = false,))
   result = DFOLS.solve(x -> residuals_given_E_nodes(x, settings), settings.global_transition_x0, user_params = user_params)
-  return (solution = solve_with_E_nodes(result.x, settings; detailed_solution = true), E_nodes_and_T = result.x, solobj = result)
+  return (solution = solve_model_from_E_nodes(result.x, settings; detailed_solution = true), E_nodes_and_T = result.x, solobj = result)
 end
 
 #=
-  Auxiliary functions. Organized from most fundamental to least fundamental (i.e., 1 --> 2 --> 3 --> 4 is the call order).
+  Auxiliary functions. Organized from most fundamental to least fundamental.
 =#
 
-# Returns model solution from solve_dynamics given a set of E_nodes.
-function solve_with_E_nodes(E_nodes, settings; detailed_solution = false, interp = CubicSplineInterpolation)
+# Returns model solution (i.e., solve_dynamics output) given a set of E nodes. Used by all solvers.
+function solve_model_from_E_nodes(E_nodes, settings; detailed_solution = false, interp = CubicSplineInterpolation)
   @unpack T, params_T, stationary_sol_T, Ω_0, E_node_count, entry_residuals_nodes_count, iterations, sort_candidate = settings
   δ = params_T.δ
   Ω_T = stationary_sol_T.Ω
@@ -63,27 +63,22 @@ function solve_with_E_nodes(E_nodes, settings; detailed_solution = false, interp
   # Formulate and solve ODEProblem
   M = log(Ω_T/Ω_0) / quadgk(E_hat, 0, T)[1]
   Ω_derivative(Ω,p,t) = M*E_hat(t)*Ω
-  Ω_solution = try DifferentialEquations.solve(ODEProblem(Ω_derivative,Ω_0,(0.0, T)), reltol = 1e-15) catch; return Inf end
+  Ω_solution = DifferentialEquations.solve(ODEProblem(Ω_derivative,Ω_0,(0.0, T)), reltol = 1e-15) # if this fails, error will be thrown
   Ω(t) = t <= T ? Ω_solution(t) : Ω_solution(T)
   E(t) = M*E_hat(t) + δ
   # solve the dynamics and get the resulting entry_residual vector; if solution is not valid, return Inf
   return solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed_solution = detailed_solution)
 end
 
-# Returns entry residuals given a model solution.
-function residuals_given_solution(solved, entry_residuals_nodes_count)
+# Call the above and then get the residual. Entry point for DFOLS solver.
+function residuals_given_E_nodes(E_nodes, settings)
+  solved = try solve_model_from_E_nodes(E_nodes, settings).results catch; return fill(10e20, settings.entry_residuals_nodes_count) end
   entry_residual_interpolated = LinearInterpolation(solved.t, solved.entry_residual)
-  entry_residuals_nodes = range(0, stop = solved.t[end], length = entry_residuals_nodes_count + 2)
+  entry_residuals_nodes = range(0, stop = solved.t[end], length = settings.entry_residuals_nodes_count + 2)
   return entry_residual_interpolated.(entry_residuals_nodes[2:(end-1)])
 end
 
-# Call the two functions above to get residuals from E nodes.
-function residuals_given_E_nodes(E_nodes, settings)
-  solved = try solve_with_E_nodes(E_nodes, settings).results catch; return fill(10e20, settings.entry_residuals_nodes_count) end
-  return residuals_given_solution(solved, settings.entry_residuals_nodes_count)
-end
-
-# Call the three functions above to get a sum of squared residuals given E nodes.
+# Call the above two functions and get the SSR. Entry point for global solver.
 function ssr_given_E_nodes(E_nodes, settings)
   residuals = residuals_given_E_nodes(E_nodes, settings)
   ssr_rooted = sqrt(sum(residuals .* settings.weights .* residuals))
