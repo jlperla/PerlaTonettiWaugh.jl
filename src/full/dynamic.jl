@@ -18,9 +18,7 @@ function entry_residuals(Ω_interior, Ω_0, stationary_sol, T, params, settings,
     entry_residuals_vec = map(t -> v_0_interpolation(t) - ζ * (1-χ) / χ, entry_residuals_nodes) # (eq:25)
     # perform linear interpolation on entry_residuals
     entry_residuals_interpolation = LinearInterpolation(entry_residuals_nodes, entry_residuals_vec)
-    return (entry_residuals_interpolation = entry_residuals_interpolation,
-          Ω_interpolation = Ω,
-          entry_residuals = entry_residuals_vec, solved_dynamics = sol)
+    return (entry_residuals_interpolation = entry_residuals_interpolation, Ω_interpolation = Ω, entry_residuals = entry_residuals_vec, solved_dynamics = sol)
 end
 
 # Kernel function for main method.
@@ -42,18 +40,18 @@ end
       if (t < T)
         t_forward = results[:t][end]
         L_tilde_forward = results[:L_tilde][end]
-        L_tilde_log_derivative = (log(1 - L_tilde_forward) - log(1 - L_tilde_t))/(t_forward - t) # Forward differences.
+        L_tilde_log_derivative = (log(1 - L_tilde_forward) - log(1 - L_tilde_t))/(t_forward - t) # See note under (eq:33)
       end
     #=  Reset the residuals to slack in the DAE conditions.
-        Note that A_t = (ρ + δ + L_tilde_log_derivative - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2))*I - (μ - g + (σ-1)*υ^2)*L_1 - (υ^2/2)*L_2 and we're decomposing this.
+        Note that (eqn:19, eqn:33) yield A_t = (ρ + δ + L_tilde_log_derivative - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2))*I - (μ - g + (σ-1)*υ^2)*L_1 - (υ^2/2)*L_2 and we're decomposing this.
     =#
-      residual[1:M] = (ρ + δ + L_tilde_log_derivative - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2))*u[1:M] # system of ODEs (eq:28)
+      residual[1:M] = (ρ + δ + L_tilde_log_derivative - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2))*u[1:M]
       residual[1:M] .-= (μ - g + (σ-1)*υ^2)*L_1*u[1:M]
       residual[1:M] .-= (υ^2/2)*L_2*u[1:M]
       residual[1:M] .-= du[1:M]
       residual[1:M] .-= π_tilde # discretized system of ODE for v, where v'(T) = 0 (eq:24)
       residual[M+1] = u[1] + x - dot(ω, u[1:M]) # residual (eq:25)
-      residual[M+2] = z_hat^(σ-1) - κ * d^(σ-1) / π_min # export threshold (eq:31)
+      residual[M+2] = z_hat^(σ-1) - κ * d^(σ-1) / π_min # export threshold (eq:26)
   end
 
 # Main method.

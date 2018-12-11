@@ -21,15 +21,10 @@ function solve_continuation(d_0, d_T; step = 0.005, params = parameter_defaults(
 end
 
 function solve_full_model_global(settings)
-  settings = merge(settings, (iterations = settings.global_transition_iterations,
-                              weights = settings.global_transition_weights,
-                              sort_candidate = true))
-  ranges = map(i->(settings.global_transition_lb[i], settings.global_transition_ub[i]),
-              1:length(settings.global_transition_x0))
-  result = bboptimize(x -> ssr_given_E_nodes(x, settings); SearchRange = ranges,
-                      NumDimensions = length(ranges), MaxSteps = settings.iterations)
-  return (solution = solve_with_E_nodes(best_candidate(result), settings; detailed_solution = true),
-          E_nodes = best_candidate(result))
+  settings = merge(settings, (iterations = settings.global_transition_iterations, weights = settings.global_transition_weights, sort_candidate = true))
+  ranges = map(i->(settings.global_transition_lb[i], settings.global_transition_ub[i]), 1:length(settings.global_transition_x0))
+  result = bboptimize(x -> ssr_given_E_nodes(x, settings); SearchRange = ranges, NumDimensions = length(ranges), MaxSteps = settings.iterations)
+  return (solution = solve_with_E_nodes(best_candidate(result), settings; detailed_solution = true), E_nodes = best_candidate(result))
 end
 
 function solve_full_model_python(settings; user_params = nothing)
@@ -40,26 +35,22 @@ end
 
 function solve_with_E_nodes(E_nodes, settings; detailed_solution = false, interp = CubicSplineInterpolation)
   @unpack T, params_T, stationary_sol_T, Ω_0, E_node_count, entry_residuals_nodes_count, iterations, sort_candidate = settings
-
   δ = params_T.δ
   Ω_T = stationary_sol_T.Ω
-
   # fix the point at T to be zero and sort candidate if needed
   E_nodes = sort_candidate ? [sort(E_nodes); 0.0] : [E_nodes; 0.0]
-
   # construct Ω and E_nodes
   E_hat_vec_range = E_nodes[end] - E_nodes[1]
   E_hat_vec_scaled = (E_hat_vec_range != 0) ? (E_nodes .- E_nodes[1]) ./ E_hat_vec_range .- 1.0 : zeros(length(E_nodes))
   ts = range(0.0, stop=T, length=length(E_nodes))
   E_hat_interpolation = interp(ts, E_hat_vec_scaled) # might worth trying cubic spline
   E_hat(t) = E_hat_interpolation(t)
-
+  # Formulate and solve ODEProblem
   M = log(Ω_T/Ω_0) / quadgk(E_hat, 0, T)[1]
   Ω_derivative(Ω,p,t) = M*E_hat(t)*Ω
   Ω_solution = try DifferentialEquations.solve(ODEProblem(Ω_derivative,Ω_0,(0.0, T)), reltol = 1e-15) catch; return Inf end
   Ω(t) = t <= T ? Ω_solution(t) : Ω_solution(T)
   E(t) = M*E_hat(t) + δ
-
   # solve the dynamics and get the resulting entry_residual vector; if solution is not valid, return Inf
   return solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed_solution = detailed_solution)
 end
@@ -67,10 +58,8 @@ end
 function residuals_given_solution(solved, entry_residuals_nodes_count)
   # interpolate on returned entry_residual
   entry_residual_interpolated = LinearInterpolation(solved.t, solved.entry_residual)
-
   # evaluate entry_residual on entry_residual_nodes, return the norm
   entry_residuals_nodes = range(0, stop = solved.t[end], length = entry_residuals_nodes_count + 2)
-
   # returns the vector of residuals
   return entry_residual_interpolated.(entry_residuals_nodes[2:(end-1)])
 end
