@@ -1,24 +1,30 @@
 [![Build Status](https://travis-ci.com/jlperla/PerlaTonettiWaugh.jl.svg?token=G6ge79qYLosYiRGJBp1G&branch=master)](https://travis-ci.com/jlperla/PerlaTonettiWaugh.jl)
 
-# To Install
-In Julia,
+# Overview
+
+Can put some text here using the link to [the paper](http://jesseperla.com/papers/perla_tonetti_waugh.pdf), 
+
+## Installation and Use
+
+1. Follow the instructions to [install Julia](https://lectures.quantecon.org/jl/getting_started.html#Installing-Julia-and-Dependencies)
+
+2. Install the package by running 
+
+```julia 
+using Pkg 
+pkg"dev https://github.com/jlperla/PerlaTonettiWaugh.jl.git" 
+```
+
+Consider dragging and dropping the folder into Github Desktop or GitKraken in order to make changes. 
+
+The folder will be installed in `~/.julia/dev/PerlaTonettiWaugh`. 
+
+The `~/.julia` folder is somewhere like `C:\Users\USERNAME\.julia\dev` on Windows, and `~/.julia` on mac/Linux.
+
+3. Open the above folder in a Jupyter notebook. If you can't find it, run 
+
 ```julia
-] dev https://github.com/jlperla/PerlaTonettiWaugh.jl.git
-```
-- Then consider dragging and dropping this into Github Desktop or GitKraken in order to make changes.  The default location is something like `C:\Users\USERNAME\.julia\dev` on Windows.
-
-# To Use
-At that point, in the REPL you can
-```
-using PerlaTonettiWaugh
+joinpath(DEPOT_PATH[1], "dev", "PerlaTonettiWaugh")
 ```
 
-To run the full regression test,
-```
-] test PerlaTonettiWaugh
-```
-Or, go to the folder, and go
-```
-] activate .
-] test
-```
+4. [NOTEBOOK AND SOLVER INSTRUCTIONS]
