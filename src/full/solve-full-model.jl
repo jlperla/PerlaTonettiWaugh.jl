@@ -49,7 +49,7 @@ function solve_with_E_nodes(E_nodes, settings; detailed_solution = false, interp
 
   # construct Ω and E_nodes
   E_hat_vec_range = E_nodes[end] - E_nodes[1]
-  E_hat_vec_scaled = (E_nodes .- E_nodes[1]) ./ E_hat_vec_range .- 1.0
+  E_hat_vec_scaled = (E_hat_vec_range != 0) ? (E_nodes .- E_nodes[1]) ./ E_hat_vec_range .- 1.0 : zeros(length(E_nodes))
   ts = range(0.0, stop=T, length=length(E_nodes))
   E_hat_interpolation = interp(ts, E_hat_vec_scaled) # might worth trying cubic spline
   E_hat(t) = E_hat_interpolation(t)
