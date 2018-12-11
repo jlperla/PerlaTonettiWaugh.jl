@@ -35,7 +35,39 @@ function solve_full_model_global(settings)
   return (solution = solve_model_from_E_nodes(best_candidate(result), settings; detailed_solution = true), E_nodes = best_candidate(result))
 end
 
-# DFOLS (Derivative-Free Optimization for Least Squares) solver.
+
+function solve_full_model_newuoa(settings)
+  settings = merge(settings, (sort_candidate = false,))
+
+  result = find_zero(x -> residuals_given_E_nodes(x, settings), settings.global_transition_x0;
+                    lb = nothing, ub = fill(0.0, length(settings.global_transition_x0)), 
+                    autodiff = :finite, algorithm = :LN_NEWUOA_BOUND)
+  return (solution = solve_model_from_E_nodes(result, settings; detailed_solution = true),
+          E_nodes = result)
+end
+
+function solve_full_model_nlopt(settings)
+  settings = merge(settings, (sort_candidate = false,))
+   # constraint for increasing E nodes
+  function constraints_increasing_E!(h, x, jacobian_t)
+    M = length(x)
+    # A is a matrix whose ith row has 1 in ith col and -1 in (i+1)th col
+    # so ith element of A*x imposes x[i] <= x[i+1]
+    # note that this imposes x[end] <= 0 as well as the last row is [0; 0; ...; 0; 1].
+    A = LinearAlgebra.Tridiagonal(zeros(M-1),ones(M),-ones(M-1))
+    if length(jacobian_t) > 0 # transpose of the Jacobian matrix
+        jacobian_t[:] = A'
+    end
+    h[:] = A*x
+  end
+   result = find_zero(x -> residuals_given_E_nodes(x, settings), settings.global_transition_x0;
+                    lb = nothing, ub = fill(0.0, length(settings.global_transition_x0)),
+                    constraints_fg! = constraints_increasing_E!,
+                    algorithm = :LD_SLSQP)
+  return (solution = solve_model_from_E_nodes(result, settings; detailed_solution = true),
+          E_nodes = result)
+end
+
 function solve_full_model_python(settings; user_params = nothing)
   settings = merge(settings, (sort_candidate = false,))
   result = DFOLS.solve(x -> residuals_given_E_nodes(x, settings), settings.global_transition_x0, user_params = user_params)
@@ -83,5 +115,5 @@ function ssr_given_E_nodes(E_nodes, settings)
   ssr_rooted = sqrt(sum(residuals .* settings.weights .* residuals))
   return ssr_rooted +
           ((settings.global_transition_penalty_coefficient > 0.) ? # add a penalty function for constraints on increasing E
-          (settings.global_transition_penalty_coefficient * sum((max.(0.0, diff(E_nodes))).^2)) : 0.) # returns 0. if condition above is false, and the coefficient otherwise. 
+          (settings.global_transition_penalty_coefficient * sum((max.(0.0, diff(E_nodes))).^2)) : 0.) # returns 0. if condition above is false, and the coefficient otherwise.
 end
