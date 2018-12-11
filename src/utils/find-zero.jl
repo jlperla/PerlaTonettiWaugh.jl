@@ -2,7 +2,8 @@
 # constraints_fg! takes (h, x, jacobian_t) and assigns jacobian_t and h[:] given current x.
 function find_zero(h, x0; lb = fill(0.0, length(x0)), ub = fill(10e8, length(x0)), 
                     constraints_fg! = nothing, constraints_tol = fill(1e-8, length(x0)),
-                    autodiff = ((constraints_fg! == nothing) ? :forward : :finite))
+                    autodiff = (constraints_fg! == nothing) ? :forward : :finite,
+                    algorithm = (constraints_fg! == nothing) ? :LD_LBFGS : :LD_SLSQP)
     function f(x)
         resids = h(x)
         return sum(resids .* resids)
@@ -11,8 +12,7 @@ function find_zero(h, x0; lb = fill(0.0, length(x0)), ub = fill(10e8, length(x0)
     fg!(x::Vector, grad::Vector) = f(x) # fg! for derivative free methods
 
     # define the optimization problem
-    opt = (constraints_fg! == nothing) ? Opt(:LD_LBFGS, length(x0)) : Opt(:LD_SLSQP, length(x0)) # 3 indicates the length of `x`
-    opt = (constraints_fg! == nothing && autodiff != :forward) ? Opt(:LN_NEWUOA_BOUND, length(x0)) : opt
+    opt = (constraints_fg! == nothing && autodiff != :forward) ? Opt(:LN_NEWUOA_BOUND, length(x0)) : Opt(algorithm, length(x0))
 
     # specifies that optimization problem is on minimization
     min_objective!(opt, (constraints_fg! == nothing && autodiff != :forward) ? fg! : NLoptAdapter(f, x0, autodiff)) 
