@@ -15,7 +15,7 @@ function find_zero(h, x0; lb = fill(0.0, length(x0)), ub = fill(10e8, length(x0)
     opt = (constraints_fg! == nothing && autodiff != :forward) ? Opt(:LN_NEWUOA_BOUND, length(x0)) : opt
 
     # specifies that optimization problem is on minimization
-    min_objective!(opt, (autodiff == :forward) ? NLoptAdapter(f, x0, autodiff) : fg!) 
+    min_objective!(opt, (constraints_fg! == nothing && autodiff != :forward) ? fg! : NLoptAdapter(f, x0, autodiff)) 
 
     if (lb != nothing)    
         lower_bounds!(opt, lb) # find `x` above lb
