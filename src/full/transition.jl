@@ -33,14 +33,14 @@ end
 function solve_full_model_global(settings; impose_E_monotonicity_constraints = true)
   settings = merge(settings, (iterations = settings.transition_iterations, weights = settings.transition_weights))
   ranges = map(i->(settings.transition_lb[i], settings.transition_ub[i]), 1:length(settings.transition_x0))
-  result = bboptimize(x -> ssr_given_E_nodes(impose_E_monotonicity_constraints ? sort(x) : x, settings); 
+  result = bboptimize(x -> ssr_given_E_nodes_interior(impose_E_monotonicity_constraints ? sort(x) : x, settings); 
                       SearchRange = ranges, NumDimensions = length(ranges), MaxSteps = settings.iterations)
   return (solution = solve_model_from_E_nodes(best_candidate(result), settings; detailed_solution = true), E_nodes = best_candidate(result))
 end
 
 
 function solve_full_model_newuoa(settings)
-  result = solve_system(x -> residuals_given_E_nodes(x, settings), settings.transition_x0;
+  result = solve_system(x -> residuals_given_E_nodes_interior(x, settings), settings.transition_x0;
                     lb = nothing, ub = fill(0.0, length(settings.transition_x0)), 
                     autodiff = :finite, algorithm = :LN_NEWUOA_BOUND)
   return (solution = solve_model_from_E_nodes(result, settings; detailed_solution = true),
@@ -60,7 +60,7 @@ function solve_full_model_nlopt(settings; impose_E_monotonicity_constraints = tr
     end
     h[:] = A*x
   end
-   result = solve_system(x -> residuals_given_E_nodes(x, settings), settings.transition_x0;
+   result = solve_system(x -> residuals_given_E_nodes_interior(x, settings), settings.transition_x0;
                     lb = nothing, ub = fill(0.0, length(settings.transition_x0)),
                     constraints_fg! = impose_E_monotonicity_constraints ? constraints_increasing_E! : nothing,
                     algorithm = impose_E_monotonicity_constraints ? :LD_SLSQP : :LD_LBFGS)
@@ -69,7 +69,7 @@ function solve_full_model_nlopt(settings; impose_E_monotonicity_constraints = tr
 end
 
 function solve_full_model_python(settings; user_params = nothing)
-  result = DFOLS.solve(x -> residuals_given_E_nodes(x, settings), settings.transition_x0, user_params = user_params)
+  result = DFOLS.solve(x -> residuals_given_E_nodes_interior(x, settings), settings.transition_x0, user_params = user_params)
   return (solution = solve_model_from_E_nodes(result.x, settings; detailed_solution = true), E_nodes = result.x, solobj = result)
 end
 
@@ -78,12 +78,12 @@ end
 =#
 
 # Returns model solution (i.e., solve_dynamics output) given a set of E nodes. Used by all solvers.
-function solve_model_from_E_nodes(E_nodes, settings; detailed_solution = false, interp = CubicSplineInterpolation)
+function solve_model_from_E_nodes(E_nodes_interior, settings; detailed_solution = false, interp = CubicSplineInterpolation)
   @unpack T, params_T, stationary_sol_T, Ω_0, E_node_count, entry_residuals_nodes_count, iterations = settings
   δ = params_T.δ
   Ω_T = stationary_sol_T.Ω
   # fix the point at T to be zero and sort candidate if needed
-  E_nodes = [E_nodes; 0.0]
+  E_nodes = [-1.0; E_nodes_interior; 0.0]
   # construct Ω and E_nodes
   E_hat_vec_range = E_nodes[end] - E_nodes[1]
   E_hat_vec_scaled = (E_hat_vec_range != 0) ? (E_nodes .- E_nodes[1]) ./ E_hat_vec_range .- 1.0 : zeros(length(E_nodes))
@@ -101,18 +101,18 @@ function solve_model_from_E_nodes(E_nodes, settings; detailed_solution = false, 
 end
 
 # Call the above and then get the residual. Entry point for DFOLS solver.
-function residuals_given_E_nodes(E_nodes, settings)
-  solved = try solve_model_from_E_nodes(E_nodes, settings).results catch; return fill(10e20, settings.entry_residuals_nodes_count) end
+function residuals_given_E_nodes_interior(E_nodes_interior, settings)
+  solved = try solve_model_from_E_nodes(E_nodes_interior, settings).results catch; return fill(10e20, settings.entry_residuals_nodes_count) end
   entry_residual_interpolated = LinearInterpolation(solved.t, solved.entry_residual)
   entry_residuals_nodes = range(0, stop = solved.t[end], length = settings.entry_residuals_nodes_count + 2)
   return entry_residual_interpolated.(entry_residuals_nodes[2:(end-1)])
 end
 
 # Call the above two functions and get the SSR. Entry point for global solver.
-function ssr_given_E_nodes(E_nodes, settings)
-  residuals = residuals_given_E_nodes(E_nodes, settings)
+function ssr_given_E_nodes_interior(E_nodes_interior, settings)
+  residuals = residuals_given_E_nodes_interior(E_nodes_interior, settings)
   ssr_rooted = sqrt(sum(residuals .* settings.weights .* residuals))
   return ssr_rooted +
           ((settings.transition_penalty_coefficient > 0.) ? # add a penalty function for constraints on increasing E
-          (settings.transition_penalty_coefficient * sum((max.(0.0, diff(E_nodes))).^2)) : 0.) # returns 0. if condition above is false, and the coefficient otherwise.
+          (settings.transition_penalty_coefficient * sum((max.(0.0, diff(E_nodes_interior))).^2)) : 0.) # returns 0. if condition above is false, and the coefficient otherwise.
 end
