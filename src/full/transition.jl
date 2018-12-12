@@ -48,7 +48,7 @@ function solve_full_model_newuoa(settings)
           E_nodes = result)
 end
 
-function solve_full_model_nlopt(settings)
+function solve_full_model_nlopt(settings; impose_E_monotonicity_constraints = true)
   settings = merge(settings, (sort_candidate = false,))
    # constraint for increasing E nodes
   function constraints_increasing_E!(h, x, jacobian_t)
@@ -64,8 +64,8 @@ function solve_full_model_nlopt(settings)
   end
    result = find_zero(x -> residuals_given_E_nodes(x, settings), settings.global_transition_x0;
                     lb = nothing, ub = fill(0.0, length(settings.global_transition_x0)),
-                    constraints_fg! = constraints_increasing_E!,
-                    algorithm = :LD_SLSQP)
+                    constraints_fg! = impose_E_monotonicity_constraints ? constraints_increasing_E! : nothing,
+                    algorithm = impose_E_monotonicity_constraints ? :LD_SLSQP : :LD_LBFGS)
   return (solution = solve_model_from_E_nodes(result, settings; detailed_solution = true),
           E_nodes = result)
 end
