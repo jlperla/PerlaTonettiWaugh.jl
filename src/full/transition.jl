@@ -30,17 +30,16 @@ function solve_continuation(d_0, d_T; step = 0.005, params = parameter_defaults(
 end
 
 # Global solver.
-function solve_full_model_global(settings)
-  settings = merge(settings, (iterations = settings.global_transition_iterations, weights = settings.global_transition_weights, sort_candidate = true))
+function solve_full_model_global(settings; impose_E_monotonicity_constraints = true)
+  settings = merge(settings, (iterations = settings.global_transition_iterations, weights = settings.global_transition_weights))
   ranges = map(i->(settings.global_transition_lb[i], settings.global_transition_ub[i]), 1:length(settings.global_transition_x0))
-  result = bboptimize(x -> ssr_given_E_nodes(x, settings); SearchRange = ranges, NumDimensions = length(ranges), MaxSteps = settings.iterations)
+  result = bboptimize(x -> ssr_given_E_nodes(impose_E_monotonicity_constraints ? sort(x) : x, settings); 
+                      SearchRange = ranges, NumDimensions = length(ranges), MaxSteps = settings.iterations)
   return (solution = solve_model_from_E_nodes(best_candidate(result), settings; detailed_solution = true), E_nodes = best_candidate(result))
 end
 
 
 function solve_full_model_newuoa(settings)
-  settings = merge(settings, (sort_candidate = false,))
-
   result = find_zero(x -> residuals_given_E_nodes(x, settings), settings.global_transition_x0;
                     lb = nothing, ub = fill(0.0, length(settings.global_transition_x0)), 
                     autodiff = :finite, algorithm = :LN_NEWUOA_BOUND)
@@ -49,7 +48,6 @@ function solve_full_model_newuoa(settings)
 end
 
 function solve_full_model_nlopt(settings; impose_E_monotonicity_constraints = true)
-  settings = merge(settings, (sort_candidate = false,))
    # constraint for increasing E nodes
   function constraints_increasing_E!(h, x, jacobian_t)
     M = length(x)
@@ -71,7 +69,6 @@ function solve_full_model_nlopt(settings; impose_E_monotonicity_constraints = tr
 end
 
 function solve_full_model_python(settings; user_params = nothing)
-  settings = merge(settings, (sort_candidate = false,))
   result = DFOLS.solve(x -> residuals_given_E_nodes(x, settings), settings.global_transition_x0, user_params = user_params)
   return (solution = solve_model_from_E_nodes(result.x, settings; detailed_solution = true), E_nodes = result.x, solobj = result)
 end
@@ -82,11 +79,11 @@ end
 
 # Returns model solution (i.e., solve_dynamics output) given a set of E nodes. Used by all solvers.
 function solve_model_from_E_nodes(E_nodes, settings; detailed_solution = false, interp = CubicSplineInterpolation)
-  @unpack T, params_T, stationary_sol_T, Ω_0, E_node_count, entry_residuals_nodes_count, iterations, sort_candidate = settings
+  @unpack T, params_T, stationary_sol_T, Ω_0, E_node_count, entry_residuals_nodes_count, iterations = settings
   δ = params_T.δ
   Ω_T = stationary_sol_T.Ω
   # fix the point at T to be zero and sort candidate if needed
-  E_nodes = sort_candidate ? [sort(E_nodes); 0.0] : [E_nodes; 0.0]
+  E_nodes = [E_nodes; 0.0]
   # construct Ω and E_nodes
   E_hat_vec_range = E_nodes[end] - E_nodes[1]
   E_hat_vec_scaled = (E_hat_vec_range != 0) ? (E_nodes .- E_nodes[1]) ./ E_hat_vec_range .- 1.0 : zeros(length(E_nodes))
