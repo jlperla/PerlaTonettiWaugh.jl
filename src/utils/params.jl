@@ -32,7 +32,7 @@ settings_defaults = @with_kw (z_max = 5,
                                 fifty_node_iv = [-0.929218, -0.89344, -0.857663, -0.821886, -0.782924, -0.733344, -0.683764, -0.634184, -0.593334, -0.562668, -0.532002, -0.501336, -0.46303, -0.421328, -0.379627, -0.337925, -0.312701, -0.28885, -0.264999, -0.244818, -0.244818, -0.244818, -0.244818, -0.232931, -0.202027, -0.171122, -0.140217, -0.121969, -0.111632, -0.101294, -0.0909562, -0.087134, -0.0844965, -0.081859, -0.0789053, -0.0721574, -0.0654095, -0.0586616, -0.0530022, -0.0497918, -0.0465814, -0.043371, -0.0399571, -0.0363686, -0.0327801, -0.0291917, -0.0283636, -0.0283636, -0.0283636, -0.0283636],
                                 transition_lb = -ones(length(transition_x0)),
                                 transition_ub = zeros(length(transition_x0)),
-                                transition_iterations = 2,
+                                transition_iterations = 1000,
                                 transition_weights = [fill(15, 3); fill(1, entry_residuals_nodes_count-3)],
                                 transition_penalty_coefficient = 0.0, # coefficient to be used for a penalty function for constraints on increasing E
                                 tstops = nothing)
