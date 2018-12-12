@@ -83,16 +83,13 @@ function solve_model_from_E_nodes(E_nodes_interior, settings; detailed_solution 
   δ = params_T.δ
   Ω_T = stationary_sol_T.Ω
   # fix the point at T to be zero and sort candidate if needed
-  E_nodes = [-1.0; E_nodes_interior; 0.0]
-  # construct Ω and E_nodes
-  E_hat_vec_range = E_nodes[end] - E_nodes[1]
-  E_hat_vec_scaled = (E_hat_vec_range != 0) ? (E_nodes .- E_nodes[1]) ./ E_hat_vec_range .- 1.0 : zeros(length(E_nodes))
+  E_nodes = [-1.0; E_nodes_interior; 0.0] # fix the end points to remove indeterminacy problems 
   ts = range(0.0, stop=T, length=length(E_nodes))
-  E_hat_interpolation = interp(ts, E_hat_vec_scaled) # might worth trying cubic spline
+  E_hat_interpolation = interp(ts, E_nodes) # might worth trying cubic spline
   E_hat(t) = E_hat_interpolation(t)
   E_hat_integral = quadgk(E_hat, 0, T)[1]
   # Formulate and solve ODEProblem
-  M = (E_hat_vec_range != 0) ? log(Ω_T/Ω_0) / E_hat_integral : 0.0 # when Ω_T = Ω_0, then M = 0 so that E(t) is constant with δ as expected
+  M = log(Ω_T/Ω_0) / E_hat_integral # when Ω_T = Ω_0, then M = 0 so that E(t) is constant with δ as expected
   Ω_derivative(Ω,p,t) = M*E_hat(t)*Ω
   Ω_solution = DifferentialEquations.solve(ODEProblem(Ω_derivative,Ω_0,(0.0, T)), reltol = 1e-15) # if this fails, error will be thrown
   Ω(t) = t <= T ? Ω_solution(t) : Ω_solution(T)
