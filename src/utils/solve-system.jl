@@ -1,6 +1,6 @@
 # returns the m-vector zero of a multivariate function h: R^m -> R^n, using nlopt
 # constraints_fg! takes (h, x, jacobian_t) and assigns jacobian_t and h[:] given current x.
-function find_zero(h, x0; lb = fill(0.0, length(x0)), ub = fill(10e8, length(x0)), 
+function solve_system(h, x0; lb = fill(0.0, length(x0)), ub = fill(10e8, length(x0)), 
                     constraints_fg! = nothing, constraints_tol = fill(1e-8, length(x0)),
                     autodiff = (constraints_fg! == nothing) ? :forward : :finite,
                     algorithm = (constraints_fg! == nothing) ? :LD_LBFGS : :LD_SLSQP)

@@ -10,7 +10,7 @@ import DFOLS
 include("utils/params.jl")
 include("utils/diffusionoperators.jl")
 include("utils/quadrature.jl")
-include("utils/find-zero.jl")
+include("utils/solve-system.jl")
 include("utils/consumption-equivalent.jl")
 include("utils/display_stationary_sol.jl")
 # Simple model.
@@ -27,6 +27,6 @@ export stationary_algebraic, stationary_numerical, simpleODE, simpleDAE, station
 export minimize_residuals, minimize_residuals_python
 export solve_full_model_global, solve_full_model_nlopt, solve_full_model_newuoa, solve_full_model_python, solve_continuation
 export consumption_equivalent, display_stationary_sol
-export f!, f!_simple, f_simple, find_zero
+export f!, f!_simple, f_simple, solve_system
 
 end # module

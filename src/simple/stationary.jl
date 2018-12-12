@@ -31,7 +31,7 @@ function stationary_numerical_simple(params, z)
         return diff
     end
     # Find and validate the root.
-    sol = find_zero(stationary_numerical_given_g, [0.1])
+    sol = solve_system(stationary_numerical_given_g, [0.1])
     g_T = sol[1]
     @assert(μ + υ^2/2 - g_T < 0) # Negative drift condition.
     # Use the g_T to recreate L_T and v_T.

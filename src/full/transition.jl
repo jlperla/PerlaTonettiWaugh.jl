@@ -40,7 +40,7 @@ end
 
 
 function solve_full_model_newuoa(settings)
-  result = find_zero(x -> residuals_given_E_nodes(x, settings), settings.global_transition_x0;
+  result = solve_system(x -> residuals_given_E_nodes(x, settings), settings.global_transition_x0;
                     lb = nothing, ub = fill(0.0, length(settings.global_transition_x0)), 
                     autodiff = :finite, algorithm = :LN_NEWUOA_BOUND)
   return (solution = solve_model_from_E_nodes(result, settings; detailed_solution = true),
@@ -60,7 +60,7 @@ function solve_full_model_nlopt(settings; impose_E_monotonicity_constraints = tr
     end
     h[:] = A*x
   end
-   result = find_zero(x -> residuals_given_E_nodes(x, settings), settings.global_transition_x0;
+   result = solve_system(x -> residuals_given_E_nodes(x, settings), settings.global_transition_x0;
                     lb = nothing, ub = fill(0.0, length(settings.global_transition_x0)),
                     constraints_fg! = impose_E_monotonicity_constraints ? constraints_increasing_E! : nothing,
                     algorithm = impose_E_monotonicity_constraints ? :LD_SLSQP : :LD_LBFGS)
