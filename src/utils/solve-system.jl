@@ -3,7 +3,8 @@
 function solve_system(h, x0; lb = fill(0.0, length(x0)), ub = fill(10e8, length(x0)), 
                     constraints_fg! = nothing, constraints_tol = fill(1e-8, length(x0)),
                     autodiff = (constraints_fg! == nothing) ? :forward : :finite,
-                    algorithm = (constraints_fg! == nothing) ? :LD_LBFGS : :LD_SLSQP)
+                    algorithm = (constraints_fg! == nothing) ? :LD_LBFGS : :LD_SLSQP,
+                    iterations = 1000)
     function f(x)
         resids = h(x)
         return sum(resids .* resids)
@@ -30,6 +31,7 @@ function solve_system(h, x0; lb = fill(0.0, length(x0)), ub = fill(10e8, length(
 
     xtol_rel!(opt, 1e-8)
     xtol_abs!(opt, 1e-8)
+    maxeval!(opt, iterations)
 
     # solve the optimization problem
     (minf,minx,ret) = NLopt.optimize(opt, x0)
