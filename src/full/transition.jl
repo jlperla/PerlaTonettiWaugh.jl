@@ -24,15 +24,15 @@ function solve_continuation(d_0, d_T; step = 0.005, params = parameter_defaults(
     Ω_0 = stationary_numerical(params_0, z_grid).Ω
     settings = merge(settings, (Ω_0 = Ω_0,))
     result = solver(settings)
-    settings = merge(settings, (global_transition_x0 = result.E_nodes,)) # this is agnostic to the solver 
+    settings = merge(settings, (transition_x0 = result.E_nodes,)) # this is agnostic to the solver 
   end
   return settings, result
 end
 
 # Global solver.
 function solve_full_model_global(settings; impose_E_monotonicity_constraints = true)
-  settings = merge(settings, (iterations = settings.global_transition_iterations, weights = settings.global_transition_weights))
-  ranges = map(i->(settings.global_transition_lb[i], settings.global_transition_ub[i]), 1:length(settings.global_transition_x0))
+  settings = merge(settings, (iterations = settings.transition_iterations, weights = settings.transition_weights))
+  ranges = map(i->(settings.transition_lb[i], settings.transition_ub[i]), 1:length(settings.transition_x0))
   result = bboptimize(x -> ssr_given_E_nodes(impose_E_monotonicity_constraints ? sort(x) : x, settings); 
                       SearchRange = ranges, NumDimensions = length(ranges), MaxSteps = settings.iterations)
   return (solution = solve_model_from_E_nodes(best_candidate(result), settings; detailed_solution = true), E_nodes = best_candidate(result))
@@ -40,8 +40,8 @@ end
 
 
 function solve_full_model_newuoa(settings)
-  result = solve_system(x -> residuals_given_E_nodes(x, settings), settings.global_transition_x0;
-                    lb = nothing, ub = fill(0.0, length(settings.global_transition_x0)), 
+  result = solve_system(x -> residuals_given_E_nodes(x, settings), settings.transition_x0;
+                    lb = nothing, ub = fill(0.0, length(settings.transition_x0)), 
                     autodiff = :finite, algorithm = :LN_NEWUOA_BOUND)
   return (solution = solve_model_from_E_nodes(result, settings; detailed_solution = true),
           E_nodes = result)
@@ -60,8 +60,8 @@ function solve_full_model_nlopt(settings; impose_E_monotonicity_constraints = tr
     end
     h[:] = A*x
   end
-   result = solve_system(x -> residuals_given_E_nodes(x, settings), settings.global_transition_x0;
-                    lb = nothing, ub = fill(0.0, length(settings.global_transition_x0)),
+   result = solve_system(x -> residuals_given_E_nodes(x, settings), settings.transition_x0;
+                    lb = nothing, ub = fill(0.0, length(settings.transition_x0)),
                     constraints_fg! = impose_E_monotonicity_constraints ? constraints_increasing_E! : nothing,
                     algorithm = impose_E_monotonicity_constraints ? :LD_SLSQP : :LD_LBFGS)
   return (solution = solve_model_from_E_nodes(result, settings; detailed_solution = true),
@@ -69,7 +69,7 @@ function solve_full_model_nlopt(settings; impose_E_monotonicity_constraints = tr
 end
 
 function solve_full_model_python(settings; user_params = nothing)
-  result = DFOLS.solve(x -> residuals_given_E_nodes(x, settings), settings.global_transition_x0, user_params = user_params)
+  result = DFOLS.solve(x -> residuals_given_E_nodes(x, settings), settings.transition_x0, user_params = user_params)
   return (solution = solve_model_from_E_nodes(result.x, settings; detailed_solution = true), E_nodes = result.x, solobj = result)
 end
 
@@ -113,6 +113,6 @@ function ssr_given_E_nodes(E_nodes, settings)
   residuals = residuals_given_E_nodes(E_nodes, settings)
   ssr_rooted = sqrt(sum(residuals .* settings.weights .* residuals))
   return ssr_rooted +
-          ((settings.global_transition_penalty_coefficient > 0.) ? # add a penalty function for constraints on increasing E
-          (settings.global_transition_penalty_coefficient * sum((max.(0.0, diff(E_nodes))).^2)) : 0.) # returns 0. if condition above is false, and the coefficient otherwise.
+          ((settings.transition_penalty_coefficient > 0.) ? # add a penalty function for constraints on increasing E
+          (settings.transition_penalty_coefficient * sum((max.(0.0, diff(E_nodes))).^2)) : 0.) # returns 0. if condition above is false, and the coefficient otherwise.
 end

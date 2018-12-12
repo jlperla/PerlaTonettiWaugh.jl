@@ -28,12 +28,12 @@ settings_defaults = @with_kw (z_max = 5,
                                 g = LinearInterpolation(t, stationary_numerical(parameter_defaults(), z).g .+ 0.01*t),
                                 E_node_count = 15,
                                 entry_residuals_nodes_count = 15,
-                                global_transition_x0 = [-0.9283233397558605, -0.7931227777335486, -0.6049356364806617, -0.4927044449099116, -0.3358353090972862, 
+                                transition_x0 = [-0.9283233397558605, -0.7931227777335486, -0.6049356364806617, -0.4927044449099116, -0.3358353090972862, 
                                                         -0.2497406170581776, -0.24267972513426644, -0.1251863870906156, -0.0948087489326721, -0.08776386898955374, 
                                                         -0.05730272455803215, -0.04512884607138278, -0.030714141187059757, -0.03010019595942575],
-                                global_transition_lb = global_transition_x0,
-                                global_transition_ub = global_transition_lb,
-                                global_transition_iterations = 2, 
-                                global_transition_weights = [fill(15, 3); fill(1, entry_residuals_nodes_count-3)],
-                                global_transition_penalty_coefficient = 0.0, # coefficient to be used for a penalty function for constraints on increasing E
+                                transition_lb = transition_x0,
+                                transition_ub = transition_lb,
+                                transition_iterations = 2, 
+                                transition_weights = [fill(15, 3); fill(1, entry_residuals_nodes_count-3)],
+                                transition_penalty_coefficient = 0.0, # coefficient to be used for a penalty function for constraints on increasing E
                                 tstops = nothing)
