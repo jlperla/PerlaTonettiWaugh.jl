@@ -90,8 +90,9 @@ function solve_model_from_E_nodes(E_nodes_interior, settings; detailed_solution 
   ts = range(0.0, stop=T, length=length(E_nodes))
   E_hat_interpolation = interp(ts, E_hat_vec_scaled) # might worth trying cubic spline
   E_hat(t) = E_hat_interpolation(t)
+  E_hat_integral = quadgk(E_hat, 0, T)[1]
   # Formulate and solve ODEProblem
-  M = (E_hat_vec_range != 0) ? log(Ω_T/Ω_0) / quadgk(E_hat, 0, T)[1] : 0.0
+  M = (E_hat_vec_range != 0) ? log(Ω_T/Ω_0) / E_hat_integral : 0.0 # when Ω_T = Ω_0, then M = 0 so that E(t) is constant with δ as expected
   Ω_derivative(Ω,p,t) = M*E_hat(t)*Ω
   Ω_solution = DifferentialEquations.solve(ODEProblem(Ω_derivative,Ω_0,(0.0, T)), reltol = 1e-15) # if this fails, error will be thrown
   Ω(t) = t <= T ? Ω_solution(t) : Ω_solution(T)
