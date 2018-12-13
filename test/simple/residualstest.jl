@@ -49,35 +49,34 @@
 # Create settings object.
     settings = @with_kw (z = z_grid, T = T_val, g = t -> g_stationary,
                         ode_solve_algorithm = CVODE_BDF(), iterations = 1000,
-                        t_grid = range(0.0, stop = T_val, length = length(z_grid)),
-                        g_node_count = 30)
+                        t_grid = range(0.0, stop = T_val, length = length(z_grid)))
 
 # Test the stationary residual is close to zero.
-    residuals, v_ts = calculate_residuals(params_func_, settings())
+    residuals, v_ts, g_ts = calculate_residuals(params_func_, settings())
     @test norm(residuals) ≈ 0 atol = 1e-5
     # even by solving with DAE
     ω = ω_weights(z_grid, θ_val, ξ_val)
     daeprob = simpleDAE(params_func_, settings())
-    residuals, v_ts = calculate_residuals(daeprob, x_func, ω, IDA(), settings().t_grid)
+    residuals, v_ts, g_ts = calculate_residuals(daeprob, x_func, ω, IDA(), settings().t_grid)
     @test norm(residuals[1]) ≈ 0 atol = 1e-5
     @test norm(residuals[end]) ≈ 0 atol = 1e-5
     @test norm(residuals) ≈ 0 atol = 1e-5
 
 # Solve with time-varying r and π_tilde, now with DAE
     daeprob = simpleDAE(params_func_varying_1, settings())
-    residuals, v_ts = calculate_residuals(daeprob, x_func, ω, IDA(), settings().t_grid)
+    residuals, v_ts, g_ts = calculate_residuals(daeprob, x_func, ω, IDA(), settings().t_grid)
     @test norm(residuals[1]) ≈ 0 atol = 1e-5
     @test norm(residuals[end]) ≈ 0 atol = 1e-5
     @test norm(residuals) ≈ 0 atol = 1e-5
     v_ts_dae1 = copy(v_ts) # save value functions
     daeprob = simpleDAE(params_func_varying_2, settings())
-    residuals, v_ts = calculate_residuals(daeprob, x_func, ω, IDA(), settings().t_grid)
+    residuals, v_ts, g_ts = calculate_residuals(daeprob, x_func, ω, IDA(), settings().t_grid)
     @test norm(residuals[1]) ≈ 0 atol = 1e-5
     @test norm(residuals[end]) ≈ 0 atol = 1e-5
     @test norm(residuals) ≈ 0 atol = 1e-5
     v_ts_dae2 = copy(v_ts) # save value functions
     daeprob = simpleDAE(params_func_varying_3, settings())
-    residuals, v_ts = calculate_residuals(daeprob, x_func, ω, IDA(), settings().t_grid)
+    residuals, v_ts, g_ts = calculate_residuals(daeprob, x_func, ω, IDA(), settings().t_grid)
     @test norm(residuals[1]) ≈ 0 atol = 1e-5
     @test norm(residuals[end]) ≈ 0 atol = 1e-5
     @test norm(residuals) ≈ 0 atol = 1e-5
@@ -86,7 +85,7 @@
 @testset "minimize_residuals by least SSR" begin
     # try minimize_residuals by least square optimization instead of solving ODE by DAE
     # need higher tolerance (atol = 1e-4)
-    residuals, v_ts = minimize_residuals(params_func_varying_1, settings())
+    residuals, v_ts, g_ts = minimize_residuals(params_func_varying_1, settings())
     @test norm(residuals[1]) < 1e-7
     @test norm(residuals[end]) < 1e-7
     @test norm(residuals) < 1e-5
@@ -94,7 +93,7 @@
     for t in 1:length(settings().t_grid)
         @test norm(v_ts_dae1[:,t] .- v_ts[:,t]) ≈ 0 atol = 2e-1
     end
-    residuals, v_ts = minimize_residuals(params_func_varying_2, settings())
+    residuals, v_ts, g_ts = minimize_residuals(params_func_varying_2, settings())
     @test norm(residuals[1]) < 1e-6
     @test norm(residuals[end]) < 1e-7
     @test norm(residuals) < 1e-4
@@ -102,7 +101,7 @@
     for t in 1:length(settings().t_grid)
         @test norm(v_ts_dae2[:,t] .- v_ts[:,t]) ≈ 0 atol = 2e-1
     end
-    residuals, v_ts = minimize_residuals(params_func_varying_3, settings())
+    residuals, v_ts, g_ts = minimize_residuals(params_func_varying_3, settings())
     @test norm(residuals[1]) < 1e-5
     @test norm(residuals[end]) < 1e-7
     @test norm(residuals) < 1e-4
