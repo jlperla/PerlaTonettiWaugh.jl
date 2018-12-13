@@ -15,7 +15,7 @@ function solve_continuation(d_0, d_T; step = 0.005, params = parameter_defaults(
   stationary_sol_0 = stationary_numerical(params_0, z_grid) # solution at t = 0
   stationary_sol_T = stationary_numerical(params_T, z_grid) # solution at t = T
   Ω_0 = stationary_sol_0.Ω;
-  settings = merge(settings, (params_T = params_T, stationary_sol_T = stationary_sol_T, Ω_0 = Ω_0, transition_x0 = continuation_x0));
+  settings = merge(settings, (params_T = params_T, stationary_sol_T = stationary_sol_T, Ω_0 = Ω_0, transition_x0 = settings.continuation_x0));
   tempd_0 = params_0.d
   result = 0 # to be overwritten by loop
   @softscope while tempd_0 <= d_0
