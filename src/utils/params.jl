@@ -37,3 +37,27 @@ settings_defaults = @with_kw (z_max = 5,
                                 transition_weights = [fill(15, 3); fill(1, entry_residuals_nodes_count-3)],
                                 transition_penalty_coefficient = 0.0, # coefficient to be used for a penalty function for constraints on increasing E
                                 tstops = nothing)
+
+settings_simple_defaults = @with_kw (z = range(0.0, stop = 5.0, length = 100), 
+                                    T = 100.0, 
+                                    ode_solve_algorithm = CVODE_BDF(), 
+                                    iterations = 1000,
+                                    t_grid = range(0.0, stop = 100.0, length = length(z)),
+                                    g_node_count = 30)
+
+parameter_simple_stationary_defaults = @with_kw (μ = 0.0, 
+    υ = 0.1, 
+    θ = 2.1, 
+    r = 0.05,
+    ζ = 14.5, 
+    ξ = 1.0, 
+    π_tilde = (z->1))
+
+parameter_simple_transition_defaults = @with_kw (μ = 0.0, 
+    υ = 0.1, 
+    θ = 2.1, 
+    r = t -> (0.05 - 1e-02 * (1 - t / 100.0)),
+    ζ = 14.5, 
+    ξ = 1.0, 
+    π_tilde = (t, z) -> (1 + 1e-02 * (1 - t / 100.0)),
+    x = t -> ζ)
