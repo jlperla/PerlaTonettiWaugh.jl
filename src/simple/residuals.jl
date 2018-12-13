@@ -22,7 +22,7 @@ function calculate_residuals(ode_prob, x, ω, ode_solve_algorithm, ts) # To keep
         residuals[i] = v_t[1] + x(t) - dot(ω, v_t) # (eq:A.20)
         v_ts[:,i] = v_t
     end
-    return (residuals = residuals, v_ts = v_ts)
+    return (residuals = residuals, v_ts = v_ts, sol = sol)
 end
 
 # Solve for g by minimizing residuals
@@ -34,7 +34,7 @@ function minimize_residuals(params, settings)
     interpolate_g(g_vectorized, settings) = CubicSplineInterpolation(settings.t_node_for_g, [g_vectorized; settings.g_T])
     # returns a vector of residuals given a vector of g for linear interpolation
     function calculate_residuals_by_candidate(g_vectorized, params, settings)
-        residuals, v_ts = calculate_residuals(params, merge(settings, (g = interpolate_g(g_vectorized, settings), )))
+        residuals, v_ts, sol = calculate_residuals(params, merge(settings, (g = interpolate_g(g_vectorized, settings), )))
         return residuals
     end
     # setup for optimization
