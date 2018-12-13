@@ -31,7 +31,7 @@ end
 function minimize_residuals(params, settings)
     # setup
     @unpack μ, υ, θ, r, x, ξ, π_tilde = params
-    @unpack z, g, T, ode_solve_algorithm, t_grid, g_node_count = settings
+    @unpack z, g, T, ode_solve_algorithm, t_grid = settings
 
     interpolate_g(g_vectorized, settings) = CubicSplineInterpolation(settings.t_grid, [g_vectorized; settings.g_T])
     # returns a vector of residuals given a vector of g for linear interpolation
