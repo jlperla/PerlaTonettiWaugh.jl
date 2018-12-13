@@ -71,7 +71,10 @@ function solve_full_model_nlopt(settings; impose_E_monotonicity_constraints = tr
 end
 
 function solve_full_model_python(settings; user_params = nothing)
-  result = DFOLS.solve(x -> residuals_given_E_nodes_interior(x, settings), settings.transition_x0, user_params = user_params)
+  if settings.transition_iterations == 0
+    result = (x = settings.transition_x0,) # so that result.x is always defined
+  else
+    result = DFOLS.solve(x -> residuals_given_E_nodes_interior(x, settings), settings.transition_x0, maxfun = settings.transition_iterations, user_params = user_params)
   return (solution = solve_model_from_E_nodes(result.x, settings; detailed_solution = true), E_nodes = result.x, solobj = result)
 end
 
