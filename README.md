@@ -31,4 +31,4 @@ to get the path.
 
 4. The notebook `solve-transition.ipynb` has code to solve the model in steady state and on a transition path between steady states. 
 
-5. At the end, there is a call to the `solve_continuation` method, which returns a relatively robust solution by iteratively perturbing the transition parameter. 
+5. At the end, there is a call to the `solve_continuation` method, which returns a relatively robust solution by smoothly changing the `d_0` parameter from a known steady-state.
