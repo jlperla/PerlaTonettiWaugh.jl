@@ -32,7 +32,6 @@ settings_defaults = @with_kw (z_max = 5,
                                 transition_lb = -ones(length(transition_x0)),
                                 transition_ub = zeros(length(transition_x0)),
                                 transition_iterations = 1000,
-                                transition_weights = [fill(15, 3); fill(1, entry_residuals_nodes_count-3)],
                                 transition_penalty_coefficient = 0.0, # coefficient to be used for a penalty function for constraints on increasing E
                                 tstops = nothing)
 

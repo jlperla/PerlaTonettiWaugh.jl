@@ -31,7 +31,7 @@ end
 
 # Global solver.
 function solve_full_model_global(settings; impose_E_monotonicity_constraints = true)
-  settings = merge(settings, (iterations = settings.transition_iterations, weights = settings.transition_weights))
+  settings = merge(settings, (iterations = settings.transition_iterations, ))
   ranges = map(i->(settings.transition_lb[i], settings.transition_ub[i]), 1:length(settings.transition_x0))
   result = bboptimize(x -> ssr_given_E_nodes_interior(impose_E_monotonicity_constraints ? sort(x) : x, settings);
                       SearchRange = ranges, NumDimensions = length(ranges), MaxSteps = settings.iterations)
@@ -105,7 +105,7 @@ end
 # Call the above two functions and get the SSR. Entry point for global solver.
 function ssr_given_E_nodes_interior(E_nodes_interior, settings)
   residuals = residuals_given_E_nodes_interior(E_nodes_interior, settings)
-  ssr_rooted = sqrt(sum(residuals .* settings.weights .* residuals))
+  ssr_rooted = sqrt(sum(residuals .* residuals))
   return ssr_rooted +
           ((settings.transition_penalty_coefficient > 0.) ? # add a penalty function for constraints on increasing E
           (settings.transition_penalty_coefficient * sum((max.(0.0, diff(E_nodes_interior))).^2)) : 0.) # returns 0. if condition above is false, and the coefficient otherwise.
