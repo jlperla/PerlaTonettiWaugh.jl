@@ -17,12 +17,14 @@ function calculate_residuals(ode_prob, x, ω, ode_solve_algorithm, ts) # To keep
     # Calculate the residual at each time point
     residuals = zeros(length(ts))
     v_ts = zeros(M, length(ts))
+    g_ts = zeros(length(ts))
     for (i, t) in enumerate(ts)
         v_t = sol(t)[1:M] # i.e., the value function at the point.
         residuals[i] = v_t[1] + x(t) - dot(ω, v_t) # (eq:A.20)
         v_ts[:,i] = v_t
+        g_ts[i] = sol(t)[end]
     end
-    return (residuals = residuals, v_ts = v_ts, sol = sol)
+    return (residuals = residuals, v_ts = v_ts, g_ts = g_ts)
 end
 
 # Solve for g by minimizing residuals
