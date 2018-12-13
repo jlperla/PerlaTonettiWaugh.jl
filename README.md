@@ -2,13 +2,11 @@
 
 # Overview
 
-Can put some text here using the link to [the paper](http://jesseperla.com/papers/perla_tonetti_waugh.pdf), 
-
 ## Installation and Use
 
 1. Follow the instructions to [install Julia](https://lectures.quantecon.org/jl/getting_started.html#Installing-Julia-and-Dependencies)
 
-2. Install the package by running 
+2. Install the package, open the Julia REPL (see the documentation above) and then run
 
 ```julia 
 using Pkg 
@@ -17,18 +15,25 @@ pkg"dev https://github.com/jlperla/PerlaTonettiWaugh.jl.git"
 
 Consider dragging and dropping the folder into Github Desktop or GitKraken in order to make changes. 
 
-The folder will be installed in `~/.julia/dev/PerlaTonettiWaugh`. 
+The folder will be installed in `~/.julia/dev/PerlaTonettiWaugh` on mac/linux and in somewhere like `C:\Users\USERNAME\.julia\dev\PerlaTonettiWaugh` on Windows
 
-The .julia folder is somewhere like `C:\Users\USERNAME\.julia\` on Windows, and `~/.julia` on mac/Linux.
-
-3. Open the above folder in a Jupyter notebook (i.e., go there in a terminal and run `jupyter lab`). If you can't find it, run 
-
+If you are having trouble finding it, then (in the REPL) run 
 ```julia
 joinpath(DEPOT_PATH[1], "dev", "PerlaTonettiWaugh")
 ```
 
-to get the path. 
+3. Startup a terminal or Windows Powershell and navigate to that directory.  Then type
+```bash
+jupyter lab
+```
+to open a browser with the Jupyter notebooks
 
-4. The notebook `solve-transition.ipynb` has code to solve the model in steady state and on a transition path between steady states. 
+4. Within the main directory, the notebook `solve-transition.ipynb` has code to solve the model in steady state and on a transition path between steady states. 
 
-5. At the end, there is a call to the `solve_continuation` method, which returns a relatively robust solution by smoothly changing the `d_0` parameter from a known steady-state.
+  * After opening the notebook, `Ctrl-A` to select the whole notebook and then `Shift-Enter` to run it, or just shift enter between cells
+  * The first time it runs, **it will a long time** since it needs to install package dependencies.  Afterwards, it will be faster when you open the notebook.  However, it will still take a few minutes each time you run it the first time (and a few seconds thereafter).
+
+  * At the end, there is a call to the `solve_continuation` method, which returns a relatively robust solution by smoothly changing the `d_0` parameter from a known steady-state. 
+
+6. There is also the `solve-simple-transition.ipynb` notebook to solve the simple variation of the model described in the notes.
+
