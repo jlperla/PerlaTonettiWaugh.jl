@@ -627,12 +627,6 @@ version = "0.8.0"
 [[Sockets]]
 uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
 
-[[SoftGlobalScope]]
-deps = ["Test"]
-git-tree-sha1 = "97f6dfcf612b9a7260fde44170725d9ea34b1431"
-uuid = "b85f4697-e234-5449-a836-ec8e2f98b302"
-version = "1.0.7"
-
 [[SortingAlgorithms]]
 deps = ["DataStructures", "Random", "Test"]
 git-tree-sha1 = "03f5898c9959f8115e30bc7226ada7d0df554ddd"
