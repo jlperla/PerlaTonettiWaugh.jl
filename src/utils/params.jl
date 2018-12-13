@@ -11,10 +11,9 @@ parameter_defaults = @with_kw (ρ = 0.02,
                                 υ = 0.0755,
                                 μ = 0.,
                                 δ = 0.053,
-                                d_0 = 3.0700,
+                                d_0 = 2.8,
                                 d_T = 2.5019,
-                                d = d_T,
-                                d0 = 3.07)
+                                d = d_T)
 
 # some default settings
 settings_defaults = @with_kw (z_max = 5,
@@ -37,25 +36,25 @@ settings_defaults = @with_kw (z_max = 5,
                                 transition_penalty_coefficient = 0.0, # coefficient to be used for a penalty function for constraints on increasing E
                                 tstops = nothing)
 
-settings_simple_defaults = @with_kw (z = range(0.0, stop = 5.0, length = 100), 
-                                    T = 100.0, 
-                                    ode_solve_algorithm = CVODE_BDF(), 
+settings_simple_defaults = @with_kw (z = range(0.0, stop = 5.0, length = 100),
+                                    T = 100.0,
+                                    ode_solve_algorithm = CVODE_BDF(),
                                     iterations = 1000,
                                     t_grid = range(0.0, stop = 100.0, length = length(z)))
 
-parameter_simple_stationary_defaults = @with_kw (μ = 0.0, 
-    υ = 0.1, 
-    θ = 2.1, 
+parameter_simple_stationary_defaults = @with_kw (μ = 0.0,
+    υ = 0.1,
+    θ = 2.1,
     r = 0.05,
-    ζ = 14.5, 
-    ξ = 1.0, 
+    ζ = 14.5,
+    ξ = 1.0,
     π_tilde = (z->1))
 
-parameter_simple_transition_defaults = @with_kw (μ = 0.0, 
-    υ = 0.1, 
-    θ = 2.1, 
+parameter_simple_transition_defaults = @with_kw (μ = 0.0,
+    υ = 0.1,
+    θ = 2.1,
     r = t -> (0.05 - 1e-02 * (1 - t / 100.0)),
-    ζ = 14.5, 
-    ξ = 1.0, 
+    ζ = 14.5,
+    ξ = 1.0,
     π_tilde = (t, z) -> (1 + 1e-02 * (1 - t / 100.0)),
     x = t -> ζ)
