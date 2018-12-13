@@ -5,6 +5,10 @@ function solve_system(h, x0; lb = fill(0.0, length(x0)), ub = fill(10e8, length(
                     autodiff = (constraints_fg! == nothing) ? :forward : :finite,
                     algorithm = (constraints_fg! == nothing) ? :LD_LBFGS : :LD_SLSQP,
                     iterations = 1000)
+    if (iterations < 1) # if no optimization is required, return the initial solution
+        return x0
+    end
+
     function f(x)
         resids = h(x)
         return sum(resids .* resids)
