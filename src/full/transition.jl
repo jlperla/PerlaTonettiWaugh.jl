@@ -79,7 +79,7 @@ end
 
 # Returns model solution (i.e., solve_dynamics output) given a set of E nodes. Used by all solvers.
 function solve_model_from_E_nodes(E_nodes_interior, settings; detailed_solution = false, interp = LinearInterpolation)
-  @unpack T, params_T, stationary_sol_T, Ω_0, E_node_count, entry_residuals_nodes_count, iterations = settings
+  @unpack T, params_T, stationary_sol_T, Ω_0, E_node_count, entry_residuals_nodes_count = settings
   δ = params_T.δ
   Ω_T = stationary_sol_T.Ω
   # fix the point at T to be zero and sort candidate if needed
