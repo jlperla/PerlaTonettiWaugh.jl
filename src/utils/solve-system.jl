@@ -4,14 +4,16 @@ function solve_system(h, x0; lb = fill(0.0, length(x0)), ub = fill(10e8, length(
                     constraints_fg! = nothing, constraints_tol = fill(1e-8, length(x0)),
                     autodiff = (constraints_fg! == nothing) ? :forward : :finite,
                     algorithm = (constraints_fg! == nothing) ? :LD_LBFGS : :LD_SLSQP,
-                    iterations = 1000)
+                    iterations = 1000, increasing_x_penalty_coefficient = 0.)
     if (iterations < 1) # if no optimization is required, return the initial solution
         return x0
     end
 
     function f(x)
         resids = h(x)
-        return sum(resids .* resids)
+        return sum(resids .* resids) +
+            ((increasing_x_penalty_coefficient > 0.) ? # add a penalty function for constraints on increasing E
+            (increasing_x_penalty_coefficient * sum((max.(0.0, diff(x))).^2)) : 0.) 
     end
 
     fg!(x::Vector, grad::Vector) = f(x) # fg! for derivative free methods
