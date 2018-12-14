@@ -31,10 +31,10 @@ end
 
 # Global solver.
 function solve_full_model_global(settings; impose_E_monotonicity_constraints = true)
-  settings = merge(settings, (iterations = settings.transition_iterations, ))
   ranges = map(i->(settings.transition_lb[i], settings.transition_ub[i]), 1:length(settings.transition_x0))
-  result = bboptimize(x -> ssr_given_E_nodes_interior(impose_E_monotonicity_constraints ? sort(x) : x, settings);
-                      SearchRange = ranges, NumDimensions = length(ranges), MaxSteps = settings.iterations)
+  ssr(residuals) = sum(residuals .* residuals)
+  result = bboptimize(x -> ssr(residuals_given_E_nodes_interior(impose_E_monotonicity_constraints ? sort(x) : x, settings));
+                      SearchRange = ranges, NumDimensions = length(ranges), MaxSteps = settings.transition_iterations)
   return (solution = solve_model_from_E_nodes(best_candidate(result), settings; detailed_solution = true), E_nodes = best_candidate(result))
 end
 
@@ -100,13 +100,4 @@ function residuals_given_E_nodes_interior(E_nodes_interior, settings)
   entry_residual_interpolated = LinearInterpolation(solved.t, solved.entry_residual)
   entry_residuals_nodes = range(0, stop = solved.t[end], length = settings.entry_residuals_nodes_count + 2)
   return entry_residual_interpolated.(entry_residuals_nodes[2:(end-1)])
-end
-
-# Call the above two functions and get the SSR. Entry point for global solver.
-function ssr_given_E_nodes_interior(E_nodes_interior, settings)
-  residuals = residuals_given_E_nodes_interior(E_nodes_interior, settings)
-  ssr_rooted = sqrt(sum(residuals .* residuals))
-  return ssr_rooted +
-          ((settings.transition_penalty_coefficient > 0.) ? # add a penalty function for constraints on increasing E
-          (settings.transition_penalty_coefficient * sum((max.(0.0, diff(E_nodes_interior))).^2)) : 0.) # returns 0. if condition above is false, and the coefficient otherwise.
 end
