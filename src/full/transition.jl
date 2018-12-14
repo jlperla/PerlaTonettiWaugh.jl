@@ -31,6 +31,10 @@ end
 
 # Global solver.
 function solve_full_model_global(settings; impose_E_monotonicity_constraints = true)
+  if (settings.transition_iterations < 1)
+    E_nodes_interior = settings.transition_x0
+    return (solution = solve_model_from_E_nodes(E_nodes_interior, settings; detailed_solution = true), E_nodes = E_nodes_interior)
+  end
   ranges = map(i->(settings.transition_lb[i], settings.transition_ub[i]), 1:length(settings.transition_x0))
   ssr(residuals) = sum(residuals .* residuals)
   result = bboptimize(x -> ssr(residuals_given_E_nodes_interior(impose_E_monotonicity_constraints ? sort(x) : x, settings));
