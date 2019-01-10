@@ -3,7 +3,7 @@
 # Gives us the (full algebraic) stationary solution for a set of params and an initial x.
 function stationary_algebraic(params, init_x = defaultiv(params); kwargs...)
     @assert params.υ > 0 && params.κ > 0 # validate params
-    g, z_hat, Ω = solve_system(x -> stationary_algebraic_aux(x, params), [0.02; 18.94; 17.07])
+    g, z_hat, Ω = solve_system(x -> stationary_algebraic_aux(x, params), init_x)
     @assert z_hat > 1 && Ω > 0 && g > 0 # validate solution
     staticvalues = staticvals([g, z_hat, Ω], params)
     return merge(staticvalues, merge((g = g, z_hat = z_hat, Ω = Ω), welfare([g, z_hat, Ω], params, staticvalues))) # calculate quantities and return
@@ -61,7 +61,7 @@ function staticvals(vals, params)
 end
 
 # Default initial values
-defaultiv(params) = [0.01, 2.0, 1.0]
+defaultiv(params) = [0.02; 18.94; 17.07]
 
 # Numerical method.
 function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
