@@ -128,9 +128,9 @@ uuid = "d38c429a-6771-53c6-b99e-75d170b6e991"
 version = "0.5.1"
 
 [[DFOLS]]
-deps = ["LinearAlgebra", "Printf", "PyCall", "Random", "Test"]
-git-tree-sha1 = "a1679faf3558cba2e1974465c2fc5f335a082538"
-uuid = "0dc4ae03-94be-5b30-bb99-4e20affbc5f0"
+deps = ["Printf", "PyCall"]
+path = "/home/arnavsood/.julia/dev/DFOLS"
+uuid = "d38edb08-f825-11e8-02cc-c338a489feff"
 version = "0.1.0"
 
 [[DataFrames]]
@@ -568,9 +568,9 @@ version = "0.22.0"
 
 [[PoissonRandom]]
 deps = ["Random", "Statistics", "Test"]
-git-tree-sha1 = "831a15553303ad6ee277503672b51d1abfd83d38"
+git-tree-sha1 = "99d878d6de90bbf73bca7c970c1a25386b16b11f"
 uuid = "e409e4f3-bfea-5376-8464-e040bb5c01ab"
-version = "0.3.0"
+version = "0.3.1"
 
 [[PositiveFactorizations]]
 deps = ["LinearAlgebra", "Test"]
