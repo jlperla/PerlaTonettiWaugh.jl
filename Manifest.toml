@@ -128,10 +128,10 @@ uuid = "d38c429a-6771-53c6-b99e-75d170b6e991"
 version = "0.5.1"
 
 [[DFOLS]]
-deps = ["Printf", "PyCall"]
-path = "/home/arnavsood/.julia/dev/DFOLS"
-uuid = "d38edb08-f825-11e8-02cc-c338a489feff"
-version = "0.1.0"
+deps = ["LinearAlgebra", "Printf", "PyCall", "Random", "Test"]
+git-tree-sha1 = "0844a07ec62c3c517daeeb39b79e90bbd5a8a72a"
+uuid = "0dc4ae03-94be-5b30-bb99-4e20affbc5f0"
+version = "0.2.0"
 
 [[DataFrames]]
 deps = ["CategoricalArrays", "CodecZlib", "Compat", "DataStreams", "Dates", "InteractiveUtils", "IteratorInterfaceExtensions", "LinearAlgebra", "Missings", "Printf", "Random", "Reexport", "SortingAlgorithms", "Statistics", "StatsBase", "TableTraits", "Tables", "Test", "TranscodingStreams", "Unicode", "WeakRefStrings"]
