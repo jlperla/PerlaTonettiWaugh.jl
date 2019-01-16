@@ -8,7 +8,7 @@
 # With default parameters we get: [-1.1965566608914664,-0.7506441878495663,-0.6160629809004126,-0.4490604063250066,-0.3457782022324279,-0.26611899012195817,-0.1703597837124977,-0.12538756277279978,-0.10765936098467942,-0.057163395444530966,-0.05297636889833756,-0.032260206198113685,-0.028143386570548785,-0.04434566417370368]
 
 #
-function solve_continuation(d_0, d_T; step = 0.005, params = parameter_defaults(), settings = settings_defaults(), solver = solve_full_model_dfols)
+function solve_continuation(d_0, d_T; step = 0.005, params = parameter_defaults(), settings = settings_defaults(), solver = solve_full_model, verbose = false, df = none)
   params_0 = merge(params, (d = d_T,)) # parameters to be used at t = 0
   params_T = merge(params, (d = d_T,)) # parameters to be used at t = T
   z_grid = settings.z
@@ -24,6 +24,9 @@ function solve_continuation(d_0, d_T; step = 0.005, params = parameter_defaults(
     Ω_0 = stationary_numerical(params_0, z_grid).Ω
     settings = merge(settings, (Ω_0 = Ω_0,))
     result = solver(settings)
+    if verbose == true
+      push!(df, (g = result.solution.results.g, entry_residual = result.solution.results.entry_residual))
+    end
     settings = merge(settings, (transition_x0 = result.E_nodes,)) # this is agnostic to the solver
   end
   return settings, result
