@@ -15,7 +15,7 @@ parameter_defaults = @with_kw (ρ = 0.02,
                                 d_T = 2.5019,
                                 d = d_T)
 
-calibrated_parameters = @with_kw parameter_defaults(d = 4.0,
+calibrated_parameters = parameter_defaults(d = 4.0,
                                            θ = 3.1878,
                                            κ = 0.006,
                                            χ = 1.00/2.80,
