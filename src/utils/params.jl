@@ -15,6 +15,15 @@ parameter_defaults = @with_kw (ρ = 0.02,
                                 d_T = 2.5019,
                                 d = d_T)
 
+calibrated_parameters = parameter_defaults(d = 4.0,
+                                           θ = 3.1878,
+                                           κ = 0.006,
+                                           χ = 1.00/2.80,
+                                           υ = 0.001,
+                                           σ = 3.0,
+                                           ζ = 1.00,
+                                           δ = 0.001)
+
 # some default settings
 settings_defaults = @with_kw (z_max = 5,
                                 z = unique([range(0., 0.1, length = 400)' range(0.1, 1., length = 400)' range(1., z_max, length = 100)']),
