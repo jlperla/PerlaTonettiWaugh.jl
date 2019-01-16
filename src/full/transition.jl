@@ -39,7 +39,10 @@ function solve_full_model_global(settings; impose_E_monotonicity_constraints = t
   ssr(residuals) = sum(residuals .* residuals)
   result = bboptimize(x -> ssr(residuals_given_E_nodes_interior(impose_E_monotonicity_constraints ? sort(x) : x, settings));
                       SearchRange = ranges, NumDimensions = length(ranges), MaxSteps = settings.transition_iterations)
-  return (solution = solve_model_from_E_nodes(best_candidate(result), settings; detailed_solution = true), E_nodes = best_candidate(result))
+  E_nodes_found = best_candidate(result)
+  E_nodes_found = impose_E_monotonicity_constraints ? sort(E_nodes_found) : E_nodes_found
+
+  return (solution = solve_model_from_E_nodes(E_nodes_found, settings; detailed_solution = true), E_nodes = E_nodes_found)
 end
 
 function solve_full_model(settings; impose_E_monotonicity_constraints = true)
