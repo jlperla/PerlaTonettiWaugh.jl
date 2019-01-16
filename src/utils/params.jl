@@ -15,7 +15,7 @@ parameter_defaults = @with_kw (ρ = 0.02,
                                 d_T = 2.5019,
                                 d = d_T)
 
-calibrated_parameters = parameter_defaults(d = 4.0,
+parameters_old_paper = parameter_defaults(d = 4.0,
                                            θ = 3.1878,
                                            κ = 0.006,
                                            χ = 1.00/2.80,
@@ -48,6 +48,24 @@ settings_simple_defaults = @with_kw (z = range(0.0, stop = 5.0, length = 100),
                                     ode_solve_algorithm = CVODE_BDF(),
                                     iterations = 1000,
                                     t_grid = range(0.0, stop = 100.0, length = length(z)))
+
+settings_old_paper_defaults = @with_kw (z_max = 5,
+                                z = unique([range(0., 0.1, length = 400)' range(0.1, 1., length = 400)' range(1., 10.0, length = 200)']),
+                                Δ_E = 1e-6,
+                                ode_solve_algorithm = CVODE_BDF(),
+                                T = 120.0,
+                                t = range(0.0, T, length = 10),
+                                g = LinearInterpolation(t, stationary_numerical(parameter_defaults(), z).g .+ 0.01*t),
+                                E_node_count = 15,
+                                entry_residuals_nodes_count = 15,
+                                transition_x0 = [-0.9802869871313153, -0.7679611162133799, -0.6483822140201239, -0.5709998420691726, -0.4410497194161549, -0.35188633823047205, -0.28134090933192113, -0.22721306548238096, -0.2132657066634307, -0.1802989139615504, -0.1407983331567128, -0.10561616300315106, -0.08546763464126883, -0.058948603687082865, -0.02960294672034148, -0.020649289609280547, -0.013922070758445242, -0.008451708149201357, -0.0039236251615955165],
+                                fifty_node_iv = [-1.00157, -0.848157, -0.821211, -0.821211, -0.821211, -0.748497, -0.633587, -0.527711, -0.498239, -0.498239, -0.498239, -0.498239, -0.3316, -0.3316, -0.3316, -0.3316, -0.3316, -0.281318, -0.281318, -0.281318, -0.281318, -0.281318, -0.241756, -0.230492, -0.168434, -0.168434, -0.168434, -0.168434, -0.105236, -0.103655, -0.103655, -0.0787871, -0.0787871, -0.0787871, -0.0787871, -0.0787871, -0.0787871, -0.0713765, -0.0713765, -0.0713765, -0.0713765, -0.0343871, -0.0334064, -0.0334064, -0.029373, -0.029373, -0.029373, -0.029373, -0.029373, -0.029373],
+                                continuation_x0 = zeros(length(transition_x0)),
+                                transition_lb = -ones(length(transition_x0)),
+                                transition_ub = zeros(length(transition_x0)),
+                                transition_iterations = 1000,
+                                transition_penalty_coefficient = 5.0, # coefficient to be used for a penalty function for constraints on increasing E
+                                tstops = nothing)
 
 parameter_simple_stationary_defaults = @with_kw (μ = 0.0,
     υ = 0.1,
