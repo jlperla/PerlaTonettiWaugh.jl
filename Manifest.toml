@@ -67,6 +67,12 @@ git-tree-sha1 = "bdaf1b7ecf8eb6fb3843a1b0d3fccc5f727a49fd"
 uuid = "a9c8d775-2e2e-55fc-8582-045d282d599e"
 version = "0.1.0"
 
+[[CSV]]
+deps = ["CategoricalArrays", "DataFrames", "DataStreams", "Dates", "Mmap", "Parsers", "Profile", "Random", "Tables", "Test", "Unicode", "WeakRefStrings"]
+git-tree-sha1 = "b92c6f626a044cc9619156d54994b94084d40abe"
+uuid = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+version = "0.4.3"
+
 [[Calculus]]
 deps = ["Compat"]
 git-tree-sha1 = "f60954495a7afcee4136f78d1d60350abd37a409"
@@ -538,6 +544,12 @@ git-tree-sha1 = "eec0fe16344cc14aa2e6251874ab30d62aff4f7c"
 uuid = "d96e819e-fc66-5662-9728-84c9c7592b0a"
 version = "0.10.2"
 
+[[Parsers]]
+deps = ["Dates", "Mmap", "Test", "WeakRefStrings"]
+git-tree-sha1 = "400aaa49532991f8e31d13f87c6eeaeee83663d4"
+uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
+version = "0.2.16"
+
 [[PenaltyFunctions]]
 deps = ["InteractiveUtils", "LearnBase", "LinearAlgebra", "RecipesBase", "Reexport", "Test"]
 git-tree-sha1 = "b0baaa5218ca0ffd6a8ae37ef0b58e0df688ac8b"
@@ -581,6 +593,10 @@ version = "0.2.1"
 [[Printf]]
 deps = ["Unicode"]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+
+[[Profile]]
+deps = ["Printf"]
+uuid = "9abbd945-dff8-562f-b5e8-e1ebf5ef1b79"
 
 [[PyCall]]
 deps = ["Compat", "Conda", "MacroTools", "Statistics", "VersionParsing"]

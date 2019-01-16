@@ -6,6 +6,7 @@ version = "0.1.0"
 [deps]
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
 BlackBoxOptim = "a134a8b2-14d6-55f6-9291-3336d3ab0209"
+CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 Compat = "34da2185-b29b-5c13-b0c7-acf172513d20"
 DFOLS = "0dc4ae03-94be-5b30-bb99-4e20affbc5f0"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
