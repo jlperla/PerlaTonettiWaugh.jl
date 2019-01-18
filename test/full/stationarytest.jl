@@ -20,11 +20,11 @@
     # Growth rate tests.
     algebraic_gs = (x -> x.g).(algebraic_sols)
     @test var(algebraic_gs) < 1e-10 # Tests that the solutions are similar to one another.
-    @test all(algebraic_gs .≈ 0.01900455065415125) # Tests proximity to true value.
+    @test algebraic_gs[1] ≈ 0.01900455065415125 # Tests proximity to true value.
     # Ω tests.
     algebraic_Ωs = (x -> x.Ω).(algebraic_sols)
     @test var(algebraic_Ωs) < 1e-10
-    @test all(algebraic_Ωs .≈ 1.06517755)
+    @test algebraic_Ωs[1] ≈ 1.0651775565541244
     # z_hat tests.
     algebraic_zs = (x -> x.z_hat).(algebraic_sols)
     @test var(algebraic_zs) < 1e-10
