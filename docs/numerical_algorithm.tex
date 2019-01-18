@@ -37,21 +37,25 @@ breaklinks]
 \maketitle
 
 \section{Simplified Growth Model with Transition Dynamics}
-We start with an artificially simple version of the model with transition dynamics, which is nested in BPT2.  In the PTW case, $\pi(z,t), r(t), x(t)$ will come from calculations, but the basic structure is otherwise the same.
+We start with an artificially simple version of the model with transition dynamics.  In the more complicated case of this paper, the $\pi(z,t), r(t), x(t)$ will come from calculations rather than being given exogenously, but the basic structure is otherwise the same.
 
-A key simplification maintained in the both this simple and the full PTW transition dynamics: in the transition dynamics experiments we are looking at, the normalized distribution $F(z)$ will remain constant over all time.  Hence, we do not need to jointly solve the KFE as we will be at the stationary level (post-normalization).  This is a major simplification for the transition dynamics case compared to many heterogeneous agent models.  %In particular, we will only look at examples where $F(z) = 1 - e^{-\theta z}$ for all $t$.
+A key simplification maintained in the both this simple and the full PTW transition dynamics: in the transition dynamics experiments we are looking at, the normalized distribution $F(z)$ will remain constant over all time.  Hence, we do not need to jointly solve the KFE as we will be at the stationary level (post-normalization).  This is a consequence of the PDF becomes stationary (after normalization) for this model, regardless of other dynamics and is \textbf{not} an assumption. % However a major simplification for the transition dynamics case compared to many heterogeneous agent models.  %In particular, we will only look at examples where $F(z) = 1 - e^{-\theta z}$ for all $t$.
 
 \subsection{Summary of Equations}
-Let $Z$ be productivity, where $Z(t) \geq M(t)$.  Let $V(Z,t)$ is the value function prior to normalization, $M(t)$ the endogenous threshold, $\Pi(Z,t)$ the profits, and $X(t)$ the adoption cost.  Then define the normalization that $z \equiv \log(Z/M(t))$, $v(z,t) \equiv \frac{e^{-z}}{M(t)}V(M(t)e^z, t))$, $\pi(z,t) \equiv \frac{e^{-z}}{M(t)}\Pi(M(t)e^z, t))$, and $x(t) \equiv X(t)/M(t)$.  \cref{sec:simple-derivation} show the rescaled system of equation is
+We follow the general notation of the main paper wherever possible.  This model is the geometric Brownian motion (GBM) model in Benhabib, Perla, and Tonetti (2019).
+
+Let $Z$ be productivity, where $Z(t) \geq M(t)$.  Let $V(Z,t)$ is the value function prior to normalization, $M(t)$ the endogenous threshold, $\Pi(Z,t)$ the profits, and $X(t)$ the adoption cost.  Then define the normalization that $z \equiv \log(Z/M(t))$, $v(z,t) \equiv \frac{e^{-z}}{M(t)}V(M(t)e^z, t))$, $\pi(z,t) \equiv \frac{e^{-z}}{M(t)}\Pi(M(t)e^z, t))$, and $x(t) \equiv X(t)/M(t)$.  \cref{sec:simple-derivation} show the rescaled system of equations is
 \begin{align}
 \D[t]v(z,t) &= A(t)v(z,t) - \pi(z,t)\label{eq:simple-summary1}\\
 v(0,t) &= \int_{0}^{\infty}  v(z,t) \left(e^z F'(z)\right) \diff z - x(t)\label{eq:simple-summary2}\\
 \D[z]v(0,t) + v(0,t) &= 0\label{eq:simple-summary3}\\
-\intertext{Where,}
-A(t) &\equiv \left(r - \mu - \frac{\upsilon^2}{2}\right) - (\mu+ \upsilon^2 - g(t)) \D[z] - \frac{\upsilon^2}{2} \D[zz]\label{eq:simple-summary4}
+\intertext{Given the operator,}
+A(t) &\equiv \left(r - \mu - \frac{\upsilon^2}{2}\right) - (\mu+ \upsilon^2 - g(t)) \D[z] - \frac{\upsilon^2}{2} \D[zz]\label{eq:simple-summary4}\\
+\intertext{And with the normalized BGP distribution as}
+F(z) &= 1 - e^{-\theta z}
 \end{align}
 
-\subsection{Steady State}
+\subsection{Steady State}\label{sec:simple-steady-state}
 For the exogenous $\pi(z,t)$ and $x(t)$ we require that at some $T$ it becomes stationary and
 \begin{align}
 x(t) &= \zeta,\quad \text{ for all }t \geq T\label{eq:terminal-x}\\
@@ -59,7 +63,7 @@ x(t) &= \zeta,\quad \text{ for all }t \geq T\label{eq:terminal-x}\\
 f(z,t) &= \theta e^{-\theta z},\quad \text{ for all }t \label{eq:f-stationary-summary}
 \end{align}
 
-\noindent With this, BPT2 gives us that,
+\noindent Benhabib, Perla, and Tonetti (2019) gives us a closed-form solution for this balanced growth path (i.e steady state when normalized)
 
 \begin{align}
 g \equiv g(T) &= 	\mu+ \frac{1-(\theta -1) \zeta  \left(r-\mu\right)}{(\theta -1)^2 \zeta }+ \frac{\upsilon^2}{2}\frac{\theta  \left(\theta(\theta -1)    \left(r-\mu-\frac{\upsilon ^2}{2}\right) \zeta-2\right)+1}{(\theta -1) \left((\theta -1)   \left(r-\mu-\frac{\upsilon ^2}{2}\right)\zeta-1\right)}. \label{eq:g-gbm}\\
@@ -68,11 +72,11 @@ v(z,T) &= \frac1{r-\mu- \upsilon^2/2}\left(1 + \frac1{\nu} e^{-(\nu + 1) z}\righ
 \nu &\equiv  \frac{\mu- g}{\upsilon^2} + \sqrt{\left(\frac{g-\mu}{\upsilon^2} \right)^{2} + \frac{r-g}{\upsilon^2/2}}. \label{eq:nu-gbm}
 \end{align}
 
-Note: since $v(z,T)$ has been rescaled by $e^{-z}$ above, it is now a \textbf{decreasing} function for at least some of $z$.
+Note: since $v(z,T)$ has been rescaled by $e^{-z}$ above, it is now a \textbf{decreasing} function for at least some of $z$.  This will lead to appealing numerical properties when solving the PDE for $v(t,z)$ since it becomes asymptoptically constant as $z \to \infty$ for any $t$
 
-\subsection{Spatial Discretization}
+\subsection{Spatial Discretization with Upwind Finite-Differences}
 
-In this subsection we apply a discretization operator and ensure the boundary conditions are fulfilled.
+In order to solve for the dynamics of $v(t,z)$ and $g(t)$, we will discretize the PDE and algebraic equations from \cref{eq:simple-summary1,eq:simple-summary2,eq:simple-summary3,eq:simple-summary4} into a system of ODEs and algebraic equations.  A benefit of this approach is that we can solve the steady state version of the discretized system of ODEs numerically and compare it to the \cref{sec:simple-steady-state} to determine the degree of numerical error.
 
 Define a  grid $\set{z_i}_{i=1}^I$ with $z_1 = 0$ and $z_I = \bar{z}$ is a ``large'' number (keeping in mind that the effective number is $e^{\bar{z}}$).  After discretizing, we will denote the grid with the variable name, i.e. $z \equiv \set{z_i}_{i=1}^I$.  Given the exogenous $\pi(z,t)$ functions, the discretized equivalents is $\pi(t) \in \R^I$.
 
@@ -187,10 +191,125 @@ U(t) &= \int_0^{T-t}e^{-\rho \tau}\left(\log M(t+\tau)+\log c(t+\tau)\right)\dif
 \numberwithin{equation}{section}
 %\let\normalsize\small
 %\small
+
+\section{Spatial Discretization}\label{sec:discretization}
+\subsection{Discretizing the State Space}
+This will discretize space with backward differences in the first derivative, and central in space for the 2nd derivative.\footnote{Under a $g(t) > \gamma$ assumption (which may be a general requirement on parameter restrictions), the drift is negative, and the correct ``upwind'' finite difference scheme is always backwards.}  After discretizing the spatial dimension, we have a system of ODEs in time - which are solved using various time-stepping algorithms.
+
+\begin{itemize}
+	\item Define an irregular  grid $\set{z_i}_{i=1}^I$ with $z_1 = 0$ and $z_I = \bar{z}$ is a ``large'' number (keeping in mind that the effective number is $e^{\bar{z}}$).  After discretizing, we will denote the grid with the variable name, i.e. $z \equiv \set{z_i}_{i=1}^I$.
+	\item Denote the distance between the grid points as the \textit{backwards} difference
+	\begin{align}
+	\Delta_{i,-} &\equiv z_i - z_{i-1},\, \text{for } i = 2,\ldots I\\
+	\Delta_{i,+} &\equiv z_{i+1} - z_i,\, \text{for } i = 1,\ldots I-1
+	\end{align}
+	\item Assume $\Delta_{1, -} = \Delta_{1, +}$ and $\Delta_{I, +} = \Delta_{I, -}$, due to ghost points, $z_0$ and $z_{I+1}$ on both boundaries. (i.e., the distance to the ghost nodes are the same as the distance to the closest nodes).  Then define the vector of backwards and forwards first differences as
+	\begin{align}
+	\Delta_{-} &\equiv \begin{bmatrix} z_2 - z_1 \\
+	\text{diff}(z)
+	\end{bmatrix}\\
+	\Delta_{+} &\equiv \begin{bmatrix} \text{diff}(z)\\
+	z_I - z_{I-1}
+	\end{bmatrix}
+	\end{align}
+	\item The grid on time $t \in [0,T]$ may be adaptive, and we will let the ODE solver handle the grid in order to use optimal time-stepping algorithms.
+	\item Denote time-varying functions on the grid as a vector without the spatial dimension, i.e. 
+	\begin{align}
+	v(t) &\equiv \set{v(z_i, t)}_{i=1}^I\in\R^I\\
+	\hat{\pi}(t) &\equiv	\hat{\pi}(z,t) \in \R^I
+	\end{align}
+\end{itemize}
+
+\subsection{Discretization Operators}\label{sec:discretization-operators}
+Summarizing the discretized differential operators subject to the boundary conditions.  Let $L_1^{-}$ be the discretized backwards first differences, subject to \cref{eq:new-BC1,eq:new-BC2} and $L_2$ be the discretized central differences subject to \cref{eq:new-BC1,eq:new-BC2}.
+
+Then you can show that the following
+
+\begin{align}
+L_1^{-} &\equiv \begin{bmatrix} TODO \end{bmatrix}\\
+L_2 &\equiv \begin{bmatrix}  TODO \end{bmatrix}
+\end{align}
+
+\subsection{Spatial Discretization}\label{sec:spatial-discretization}
+
+
+\textbf{TODO:} This section should be replaced with the operator composition approach.  Note that the boundary conditions are homogenous, which is why the composition works wit.
+
+\paragraph{Interior of $L$:}
+To better understand the construction of $A$ and $b$, look at individual rows of $A$ with the ODE.\footnote{Note that the first derivative is not using central differences.  This is to ensure it is upwind, and hence that this is a monotone sequence, even for vanishing $\sigma$.
+	
+	\begin{align}
+	\D[z]v(z_i, t_n) &\approx \frac{v_i^n - v_{i-1}^n}{\Delta_{i,-}}\label{eq:D-v-z}\\
+	\intertext{And use non-uniform central differences for the 2nd derivative}
+	\D[zz]v(z_i, t_n) &\approx \frac{\Delta_{i,-}v^n_{i+1} - (\Delta_{i,-}+\Delta_{i,+})v^n_i+\Delta_{i,+}v^n_{i-1}}{\frac1{2}(\Delta_{i,+}+\Delta_{i,-})\Delta_{i,-}\Delta_{i,+}}\label{eq:D-v-zz}
+	\end{align}
+	If the $z$ grid is uniform, the central differences should end up as just
+	\begin{align}
+	\D[zz]v(z_i, t_n) &\approx \frac{v_{i+1}^n - 2 v_i^n + v_{i-1}^n}{\Delta^2}\label{eq:D-v-zz-uniform}
+	\end{align}
+}
+
+In the interior ($1 < i < I$), the discretization of finite difference operator is with drift $\mu_i$ split into upwind components is:
+\begin{align}
+\mathcal{A} v(z_i)
+&= \underbrace{\left(-\frac{\mu_i^{-}}{\Delta_{i,-}} +\frac{\sigma_i^2}{\Delta_{i,-}(\Delta_{i,+}+\Delta_{i,-})}\right)}_{\equiv X_i}v_{i-1} + \underbrace{\left(\frac{\mu_i^{-}}{\Delta_{i,-}} - \frac{\mu_i^{+}}{\Delta_{i,+}}-\frac{\sigma_i^2}{\Delta_{i,-}\Delta_{i,+}}\right)}_{\equiv Y_i}v_i +\nonumber\\ &\underbrace{\left(\frac{\mu_i^{+}}{\Delta_{i,+}} + \frac{\sigma_i^2}{\Delta_{i,+}(\Delta_{i,+}+\Delta_{i,-})}\right)}_{\equiv Z_i}v_{i+1}\label{eq:A-collected-interior-with-nonuniform-grid}
+\end{align}
+
+\paragraph{Boundary Value at $x=0$:}
+If the boundary value is $\xi v(0,t) + \D[z]v(0,t )= 0$, use the backward difference approximation $v'(z_i) \approx \frac{v_i-v_{i-1}}{\Delta_{i,-}}$.  Then substituting into the boundary condition we get
+\begin{align}
+0 = \xi v(0,t) + \D[z]v(0,t ) &\approx \xi v_1 + \frac{v_1-v_0}{\Delta_{1,-}}\\
+\intertext{Rearrange, use $\Delta_{1,-} = \Delta_{1,+}$, and solve for $v_0$,}
+v_0 &= (1 + \xi \Delta_{1,+})v_1\label{eq:rescaled-bc-sub}\\
+\intertext{Now, take \cref{eq:A-collected-interior-with-nonuniform-grid}, and remember that given a $v_0$ the function is well defined under the assumption that $\Delta_{1,-} = \Delta_{1,+}$}
+\mathcal{A} v(z_1) &\approx X_1 v_0 + Y_1 v_1 + Z_1 v_2
+\intertext{Substitute in \cref{eq:rescaled-bc-sub} to get}
+\mathcal{A} v(z_1) &\approx \left((1 + \xi \Delta_{1,+})X_1 + Y_1\right) v_1 + Z_1 v_2\label{eq:reflecting-left-nonuniform}
+%\intertext{Substitute this into \cref{eq:A-collected-with-nonuniform-grid-left}}
+% &\approx \left(\underbrace{\left(\frac{-\mu_1^{-}}{\Delta_{1,-}} +\frac{\sigma_1^2}{\Delta_{1,-}(\Delta_{1,+}+\Delta_{1,-})}\right)}_{\equiv X_1}(1+\Delta_{1,-}) + \underbrace{\left(\mu_1^{-} - \frac{\mu_1^{+}}{\Delta_{1,+}}-\frac{\sigma_1^2}{\Delta_{1,+}\Delta_{1,-}}\right)}_{\equiv Y_1}\right)v_1 + \nonumber\\
+% & \underbrace{\left(\frac{\mu_1^{+}}{\Delta_{1,+}} + \frac{\sigma_1^2}{2 \Delta_{1,+}\Delta_{1,-}}\right)}_{\equiv Z_1}v_2\label{eq:reflecting-left-nonuniform}
+\end{align}
+So from \cref{eq:reflecting-left-nonuniform} the top left corner of $A$ matrix is now $\left((1 + \xi \Delta_{1,+})X_1 + Y_1\right)$.  Note that this nests the typical reflecting barrier since if the scaling is $e^{0} = 1$, then the corner, is $X_1 + Y_1$, matches the standard reflecting barrier without rescaling.
+
+\paragraph{Boundary Value at $\bar{z}$}
+If the boundary value is $\xi v(\bar{z},t) + \D[z]\tilde{\bar{z}}(0,t )= 0$, use the forward difference approximation $v'(z_i) \approx \frac{v_{i+1}-v_{i}}{\Delta_{i,+}}$.  Then substituting into the boundary condition we get
+\begin{align}
+0 = \xi v(\bar{z},t) + \D[z]v(\bar{z},t ) &\approx \xi v_I + \frac{v_{I+1}-v_I}{\Delta_{I,+}}\\
+\intertext{Rearrange and solve for $v_0$ and use $\Delta_{I,+} = \Delta_{I,-}$,}
+v_{I+1} &= (1 - \xi \Delta_{I,-}) v_I\label{eq:rescaled-bc-sub-right}\\
+\intertext{Now, take \cref{eq:A-collected-interior-with-nonuniform-grid}, and remember that given a $ v_{I+1}$ the function is well defined under the assumption that $\Delta_{I,-} = \Delta_{I,+}$}
+\mathcal{A}  v(z_I) &\approx X_1  v_{I-1} + Y_1  v_I + Z_1  v_{I+1}
+\intertext{Substitute in \cref{eq:rescaled-bc-sub-right} to get}
+\mathcal{A}  v(z_I) &\approx X_I  v_{I-1} + \left(Y_I + (1 - \xi \Delta_{I,-})Z_I\right)  v_I\label{eq:reflecting-right-nonuniform}
+\end{align}
+So from \cref{eq:reflecting-right-nonuniform} the bottom right corner of $A$ matrix is now $\left(Y_I + (1 - \xi \Delta_{I,-})Z_I\right)$.  Note that this nests the typical reflecting barrier since if the scaling is $e^{0} = 1$, then the corner, is $X_1 + Y_1$, matches the standard reflecting barrier without rescaling.
+
+%Can remove if we think the above is correct
+% \paragraph{Boundary Value at $\bar{z}$:}
+% As $i=I$, given the ``ghost node'' $z_{I+1}$, and the assumption  $\Delta_{I,+} = \Delta_{I,-}$, from \cref{eq:A-collected-interior-with-nonuniform-grid}:
+% \begin{align}
+% \mathcal{A}   v(x_I)&\approx \left(-\frac{\mu_I^{-}}{\Delta_{I,-}} +\frac{\sigma_I^2}{2 \Delta_{I,-}^2}\right) v_{I-1} + \left(\frac{\mu_I^{-} - \mu_I^{+}}{\Delta_{I,-}}-\frac{\sigma_I^2}{\Delta_{I,-}^2}\right) v_I + \left(\frac{\mu_I^{+}}{\Delta_{I,-}} + \frac{\sigma_I^2}{2 \Delta_{I,-}^2}\right) v_{I+1}\\
+% \intertext{For a reflecting barrier, the boundary value $v'(\bar{z}) \approx \frac{ v_{I+1}- v_I}{\Delta_{I,+}}+ v_{I} = 0, \implies  v_{I+1} = (1-\Delta_{I,+}) v_I$,}
+% &\approx \underbrace{\left(-\frac{\mu_I^{-}}{\Delta_{I,-}} +\frac{\sigma_I^2}{\Delta_{I,-}(\Delta_{I,+}+\Delta_{I,-})}\right)}_{\equiv X_I}  v_{I-1}\nonumber\\
+% &+ \left(\underbrace{\left(\frac{\mu_I^{-}}{\Delta_{I,-}} - \frac{\mu_I^{+}}{\Delta_{I,+}}-\frac{\sigma_I^2}{\Delta_{I,-}\Delta_{I,+}}\right)}_{\equiv Y_I} + \underbrace{\left(\frac{\mu_I^{+}}{\Delta_{I,+}} + \frac{\sigma_I^2}{\Delta_{I,+}(\Delta_{I,+}+\Delta_{I,-})}\right)}_{\equiv Z_I}(1-\Delta_{I,+}) \right)  v_I \label{eq:reflecting-right-nonuniform}
+% \end{align}
+
+\paragraph{Discretization Operator:} Apply the boundary conditions at the corner of discretization matrix:
+
+\begin{align}
+A &\equiv \begin{bmatrix}
+X_1^n(1+\xi\Delta_{1,+})+Y_1^n & Z_1^n & 0 & \ldots & \ldots & \ldots & 0\\
+X^n_2 & Y^n_2 & Z^n_2 & 0 & 0 & \ldots & 0\\
+\vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots\\
+0 & 0 & 0 & \ldots & X^n_{I-1} & Y^n_{I-1} & Z^n_{I-1}\\
+0 & \ldots & \ldots & \ldots & 0 & X_I^n & Y_I^n+Z_I^n(1-\xi\Delta_{I,-})
+\end{bmatrix}\in\R^{I\times I}\label{eq:A-n}
+\end{align}
+
 \section{Derivations for Simple Model}\label{sec:simple-derivation}
 \subsection{Equations Prior to Rescaling}
 
-Copying from BPT2 (but renaming the $v$ function to $\hat{v}$ here), assume an exogenously given $\hat{\pi}(z,t)$ and $x(t)$ function.  We will only look at examples where $F(z) = 1 - e^{-\theta z}$ for all $t$.
+From the technical appendix of Benhabib, Perla, and Tonetti (2019) (but renaming the $v$ function to $\hat{v}$ here), assume an exogenously given $\hat{\pi}(z,t)$ and $x(t)$ function.  We will only look at examples where $F(z) = 1 - e^{-\theta z}$ for all $t$.
 \begin{align}
 (r - g(t)) \hat{v}(z,t) &= \hat{\pi}(z,t) + (\mu- g(t)) \D[z] \hat{v}(z,t) + \frac{\upsilon^2}{2} \D[zz] \hat{v}(z,t) + \D[t]\hat{v}(z,t)\label{eq:bellman-GBM-dynamic}	\\
 \hat{v}(0,t) &= \int_{0}^{\infty} \hat{v}(z,t) F'(z)\diff z - x(t)\label{eq:vm-GBM-dynamic}\\
@@ -487,119 +606,6 @@ Calculate the welfare at the steady state before the shock (which assumes a $M(0
 Then the $M(0)$ should be greater than $1$, and it is the inverse of the proportion of consumption the would be willing to give up to change regimes.
 
 
-\section{Discretization}\label{sec:discretization}
-\subsection{Discretizing the State Space}\label{eq:discretization}
-This will discretize space with backward differences in the first derivative, and central in space for the 2nd derivative.\footnote{Under a $g(t) > \gamma$ assumption (which may be a general requirement on parameter restrictions), the drift is negative, and the correct ``upwind'' finite difference scheme is always backwards.}  After discretizing the spatial dimension, we have a system of ODEs in time - which are solved using various time-stepping algorithms.
-
-\begin{itemize}
-	\item Define a  grid $\set{z_i}_{i=1}^I$ with $z_1 = 0$ and $z_I = \bar{z}$ is a ``large'' number (keeping in mind that the effective number is $e^{\bar{z}}$).  After discretizing, we will denote the grid with the variable name, i.e. $z \equiv \set{z_i}_{i=1}^I$.
-	\item Denote the distance between the grid points as the \textit{backwards} difference
-	\begin{align}
-			\Delta_{i,-} &\equiv z_i - z_{i-1},\, \text{for } i = 2,\ldots I\\
-			\Delta_{i,+} &\equiv z_{i+1} - z_i,\, \text{for } i = 1,\ldots I-1
-	\end{align}
-	\item Assume $\Delta_{1, -} = \Delta_{1, +}$ and $\Delta_{I, +} = \Delta_{I, -}$, due to ghost points, $z_0$ and $z_{I+1}$ on both boundaries. (i.e., the distance to the ghost nodes are the same as the distance to the closest nodes).  Then define the vector of backwards and forwards first differences as
-	\begin{align}
-		\Delta_{-} &\equiv \begin{bmatrix} z_2 - z_1 \\
-			\text{diff}(z)
-		\end{bmatrix}\\
-		\Delta_{+} &\equiv \begin{bmatrix} \text{diff}(z)\\
-			z_I - z_{I-1}
-		\end{bmatrix}
-	\end{align}
-	\item The grid on time $t \in [0,T]$ may be adaptive, and we will let the ODE solver handle the grid.
-	\item Assume a grid of $I$ discrete points in $z$ and $N$ discrete points in time, then denote the value as
-	\begin{align}
-		v(t) &\equiv \set{v(z_i, t)}_{i=1}^I\in\R^I
-	\end{align}
-\item Given the exogenous $\hat{\pi}(z,t)$ functions, the discretized equivalents is $\hat{\pi}(t) \in \R^I$.
-\end{itemize}
-
-\subsection{Discretization Operators}\label{sec:discretization-operators}
-Summarizing the discretized differential operators subject to the boundary conditions.  Let $L_1^{-}$ be the discretized backwards first differences, subject to \cref{eq:new-BC1,eq:new-BC2} and $L_2$ be the discretized central differences subject to \cref{eq:new-BC1,eq:new-BC2}.
-
-Then you can show that the following
-
-\begin{align}
-L_1^{-} &\equiv \begin{bmatrix} TODO \end{bmatrix}\\
-	L_2 &\equiv \begin{bmatrix}  TODO \end{bmatrix}
-\end{align}
-
-\subsection{Spatial Discretization}\label{sec:spatial-discretization}
-
-
-\textbf{TODO:} This section should be replaced with the operator composition approach.  Note that the boundary conditions are homogenous, which is why the composition works wit.
-
-\paragraph{Interior of $L$:}
-To better understand the construction of $A$ and $b$, look at individual rows of $A$ with the ODE.\footnote{Note that the first derivative is not using central differences.  This is to ensure it is upwind, and hence that this is a monotone sequence, even for vanishing $\sigma$.
-
-\begin{align}
-\D[z]v(z_i, t_n) &\approx \frac{v_i^n - v_{i-1}^n}{\Delta_{i,-}}\label{eq:D-v-z}\\
-\intertext{And use non-uniform central differences for the 2nd derivative}
-\D[zz]v(z_i, t_n) &\approx \frac{\Delta_{i,-}v^n_{i+1} - (\Delta_{i,-}+\Delta_{i,+})v^n_i+\Delta_{i,+}v^n_{i-1}}{\frac1{2}(\Delta_{i,+}+\Delta_{i,-})\Delta_{i,-}\Delta_{i,+}}\label{eq:D-v-zz}
-\end{align}
-If the $z$ grid is uniform, the central differences should end up as just
-\begin{align}
-	\D[zz]v(z_i, t_n) &\approx \frac{v_{i+1}^n - 2 v_i^n + v_{i-1}^n}{\Delta^2}\label{eq:D-v-zz-uniform}
-\end{align}
-}
-
-In the interior ($1 < i < I$), the discretization of finite difference operator is with drift $\mu_i$ split into upwind components is:
-\begin{align}
-\mathcal{A} v(z_i)
-&= \underbrace{\left(-\frac{\mu_i^{-}}{\Delta_{i,-}} +\frac{\sigma_i^2}{\Delta_{i,-}(\Delta_{i,+}+\Delta_{i,-})}\right)}_{\equiv X_i}v_{i-1} + \underbrace{\left(\frac{\mu_i^{-}}{\Delta_{i,-}} - \frac{\mu_i^{+}}{\Delta_{i,+}}-\frac{\sigma_i^2}{\Delta_{i,-}\Delta_{i,+}}\right)}_{\equiv Y_i}v_i +\nonumber\\ &\underbrace{\left(\frac{\mu_i^{+}}{\Delta_{i,+}} + \frac{\sigma_i^2}{\Delta_{i,+}(\Delta_{i,+}+\Delta_{i,-})}\right)}_{\equiv Z_i}v_{i+1}\label{eq:A-collected-interior-with-nonuniform-grid}
-\end{align}
-
-\paragraph{Boundary Value at $x=0$:}
-If the boundary value is $\xi v(0,t) + \D[z]v(0,t )= 0$, use the backward difference approximation $v'(z_i) \approx \frac{v_i-v_{i-1}}{\Delta_{i,-}}$.  Then substituting into the boundary condition we get
-\begin{align}
-0 = \xi v(0,t) + \D[z]v(0,t ) &\approx \xi v_1 + \frac{v_1-v_0}{\Delta_{1,-}}\\
-\intertext{Rearrange, use $\Delta_{1,-} = \Delta_{1,+}$, and solve for $v_0$,}
-v_0 &= (1 + \xi \Delta_{1,+})v_1\label{eq:rescaled-bc-sub}\\
-\intertext{Now, take \cref{eq:A-collected-interior-with-nonuniform-grid}, and remember that given a $v_0$ the function is well defined under the assumption that $\Delta_{1,-} = \Delta_{1,+}$}
-\mathcal{A} v(z_1) &\approx X_1 v_0 + Y_1 v_1 + Z_1 v_2
-\intertext{Substitute in \cref{eq:rescaled-bc-sub} to get}
-\mathcal{A} v(z_1) &\approx \left((1 + \xi \Delta_{1,+})X_1 + Y_1\right) v_1 + Z_1 v_2\label{eq:reflecting-left-nonuniform}
-%\intertext{Substitute this into \cref{eq:A-collected-with-nonuniform-grid-left}}
-% &\approx \left(\underbrace{\left(\frac{-\mu_1^{-}}{\Delta_{1,-}} +\frac{\sigma_1^2}{\Delta_{1,-}(\Delta_{1,+}+\Delta_{1,-})}\right)}_{\equiv X_1}(1+\Delta_{1,-}) + \underbrace{\left(\mu_1^{-} - \frac{\mu_1^{+}}{\Delta_{1,+}}-\frac{\sigma_1^2}{\Delta_{1,+}\Delta_{1,-}}\right)}_{\equiv Y_1}\right)v_1 + \nonumber\\
-% & \underbrace{\left(\frac{\mu_1^{+}}{\Delta_{1,+}} + \frac{\sigma_1^2}{2 \Delta_{1,+}\Delta_{1,-}}\right)}_{\equiv Z_1}v_2\label{eq:reflecting-left-nonuniform}
-\end{align}
-So from \cref{eq:reflecting-left-nonuniform} the top left corner of $A$ matrix is now $\left((1 + \xi \Delta_{1,+})X_1 + Y_1\right)$.  Note that this nests the typical reflecting barrier since if the scaling is $e^{0} = 1$, then the corner, is $X_1 + Y_1$, matches the standard reflecting barrier without rescaling.
-
-\paragraph{Boundary Value at $\bar{z}$}
-If the boundary value is $\xi v(\bar{z},t) + \D[z]\tilde{\bar{z}}(0,t )= 0$, use the forward difference approximation $v'(z_i) \approx \frac{v_{i+1}-v_{i}}{\Delta_{i,+}}$.  Then substituting into the boundary condition we get
-\begin{align}
-0 = \xi v(\bar{z},t) + \D[z]v(\bar{z},t ) &\approx \xi v_I + \frac{v_{I+1}-v_I}{\Delta_{I,+}}\\
-\intertext{Rearrange and solve for $v_0$ and use $\Delta_{I,+} = \Delta_{I,-}$,}
- v_{I+1} &= (1 - \xi \Delta_{I,-}) v_I\label{eq:rescaled-bc-sub-right}\\
-\intertext{Now, take \cref{eq:A-collected-interior-with-nonuniform-grid}, and remember that given a $ v_{I+1}$ the function is well defined under the assumption that $\Delta_{I,-} = \Delta_{I,+}$}
-\mathcal{A}  v(z_I) &\approx X_1  v_{I-1} + Y_1  v_I + Z_1  v_{I+1}
-\intertext{Substitute in \cref{eq:rescaled-bc-sub-right} to get}
-\mathcal{A}  v(z_I) &\approx X_I  v_{I-1} + \left(Y_I + (1 - \xi \Delta_{I,-})Z_I\right)  v_I\label{eq:reflecting-right-nonuniform}
-\end{align}
-So from \cref{eq:reflecting-right-nonuniform} the bottom right corner of $A$ matrix is now $\left(Y_I + (1 - \xi \Delta_{I,-})Z_I\right)$.  Note that this nests the typical reflecting barrier since if the scaling is $e^{0} = 1$, then the corner, is $X_1 + Y_1$, matches the standard reflecting barrier without rescaling.
-
-%Can remove if we think the above is correct
-% \paragraph{Boundary Value at $\bar{z}$:}
-% As $i=I$, given the ``ghost node'' $z_{I+1}$, and the assumption  $\Delta_{I,+} = \Delta_{I,-}$, from \cref{eq:A-collected-interior-with-nonuniform-grid}:
-% \begin{align}
-% \mathcal{A}   v(x_I)&\approx \left(-\frac{\mu_I^{-}}{\Delta_{I,-}} +\frac{\sigma_I^2}{2 \Delta_{I,-}^2}\right) v_{I-1} + \left(\frac{\mu_I^{-} - \mu_I^{+}}{\Delta_{I,-}}-\frac{\sigma_I^2}{\Delta_{I,-}^2}\right) v_I + \left(\frac{\mu_I^{+}}{\Delta_{I,-}} + \frac{\sigma_I^2}{2 \Delta_{I,-}^2}\right) v_{I+1}\\
-% \intertext{For a reflecting barrier, the boundary value $v'(\bar{z}) \approx \frac{ v_{I+1}- v_I}{\Delta_{I,+}}+ v_{I} = 0, \implies  v_{I+1} = (1-\Delta_{I,+}) v_I$,}
-% &\approx \underbrace{\left(-\frac{\mu_I^{-}}{\Delta_{I,-}} +\frac{\sigma_I^2}{\Delta_{I,-}(\Delta_{I,+}+\Delta_{I,-})}\right)}_{\equiv X_I}  v_{I-1}\nonumber\\
-% &+ \left(\underbrace{\left(\frac{\mu_I^{-}}{\Delta_{I,-}} - \frac{\mu_I^{+}}{\Delta_{I,+}}-\frac{\sigma_I^2}{\Delta_{I,-}\Delta_{I,+}}\right)}_{\equiv Y_I} + \underbrace{\left(\frac{\mu_I^{+}}{\Delta_{I,+}} + \frac{\sigma_I^2}{\Delta_{I,+}(\Delta_{I,+}+\Delta_{I,-})}\right)}_{\equiv Z_I}(1-\Delta_{I,+}) \right)  v_I \label{eq:reflecting-right-nonuniform}
-% \end{align}
-
-\paragraph{Discretization Operator:} Apply the boundary conditions at the corner of discretization matrix:
-
-\begin{align}
-		A &\equiv \begin{bmatrix}
-	X_1^n(1+\xi\Delta_{1,+})+Y_1^n & Z_1^n & 0 & \ldots & \ldots & \ldots & 0\\
-	X^n_2 & Y^n_2 & Z^n_2 & 0 & 0 & \ldots & 0\\
-	\vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots\\
-	0 & 0 & 0 & \ldots & X^n_{I-1} & Y^n_{I-1} & Z^n_{I-1}\\
-	0 & \ldots & \ldots & \ldots & 0 & X_I^n & Y_I^n+Z_I^n(1-\xi\Delta_{I,-})
-\end{bmatrix}\in\R^{I\times I}\label{eq:A-n}
-\end{align}
 
 
 \section{Computation of equilibrium $\Omega(t)$ and $E(t)$}
