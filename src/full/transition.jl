@@ -4,34 +4,6 @@
   The first set of functions are caller functions, which users would interact with. Then come the auxiliary functions used by the callers.
 =#
 
-# Continuation solver. Essentially traces out a smooth path from some d_T to d_0, using the result from one step as the x0 for the next.
-# With default parameters we get: [-1.1965566608914664,-0.7506441878495663,-0.6160629809004126,-0.4490604063250066,-0.3457782022324279,-0.26611899012195817,-0.1703597837124977,-0.12538756277279978,-0.10765936098467942,-0.057163395444530966,-0.05297636889833756,-0.032260206198113685,-0.028143386570548785,-0.04434566417370368]
-
-#
-function solve_continuation(d_0, d_T; step = 0.005, params = parameter_defaults(), settings = settings_defaults(), solver = solve_full_model, verbose = false, df = none)
-  params_0 = merge(params, (d = d_T,)) # parameters to be used at t = 0
-  params_T = merge(params, (d = d_T,)) # parameters to be used at t = T
-  z_grid = settings.z
-  stationary_sol_0 = stationary_numerical(params_0, z_grid) # solution at t = 0
-  stationary_sol_T = stationary_numerical(params_T, z_grid) # solution at t = T
-  Ω_0 = stationary_sol_0.Ω;
-  settings = merge(settings, (params_T = params_T, stationary_sol_T = stationary_sol_T, Ω_0 = Ω_0, transition_x0 = settings.continuation_x0));
-  tempd_0 = params_0.d
-  result = 0 # to be overwritten by loop
-   while tempd_0 <= d_0
-    tempd_0 += step
-    params_0 = merge(params, (d = tempd_0,))
-    Ω_0 = stationary_numerical(params_0, z_grid).Ω
-    settings = merge(settings, (Ω_0 = Ω_0,))
-    result = solver(settings)
-    if verbose == true
-      push!(df, (g = result.solution.results.g, entry_residual = result.solution.results.entry_residual))
-    end
-    settings = merge(settings, (transition_x0 = result.E_nodes,)) # this is agnostic to the solver
-  end
-  return settings, result
-end
-
 # Global solver.
 function solve_full_model_global(settings; impose_E_monotonicity_constraints = true)
   if (settings.transition_iterations < 1)
@@ -70,15 +42,6 @@ function solve_full_model(settings; impose_E_monotonicity_constraints = true)
           E_nodes = result)
 end
 
-function solve_full_model_dfols(settings; user_params = nothing)
-  if (settings.transition_iterations == 0)
-    result = (x = settings.transition_x0,) # so that result.x is always defined
-  else
-    result = DFOLS.solve(x -> residuals_given_E_nodes_interior(x, settings), settings.transition_x0, maxfun = settings.transition_iterations, user_params = user_params)
-  end
-  return (solution = solve_model_from_E_nodes(result.x, settings; detailed_solution = true), E_nodes = result.x, solobj = result)
-end
-
 #=
   Auxiliary functions. Organized from most fundamental to least fundamental.
 =#
@@ -104,7 +67,6 @@ function solve_model_from_E_nodes(E_nodes_interior, settings; detailed_solution 
   return solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed_solution = detailed_solution)
 end
 
-# Call the above and then get the residual. Entry point for DFOLS solver.
 function residuals_given_E_nodes_interior(E_nodes_interior, settings)
   solved = try solve_model_from_E_nodes(E_nodes_interior, settings).results catch; return fill(10e20, settings.entry_residuals_nodes_count) end
   entry_residual_interpolated = LinearInterpolation(solved.t, solved.entry_residual)
