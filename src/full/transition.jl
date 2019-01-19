@@ -20,7 +20,7 @@ function solve_full_model_global(settings; impose_E_monotonicity_constraints = t
   return (solution = solve_model_from_E_nodes(E_nodes_found, settings; detailed_solution = true), E_nodes = E_nodes_found)
 end
 
-function solve_full_model(settings; impose_E_monotonicity_constraints = true)
+function solve_full_model(settings; impose_E_monotonicity_constraints = true, write_csv = false, csvpath = None)
    # constraint for increasing E nodes
   function constraints_increasing_E!(h, x, jacobian_t)
     M = length(x)
@@ -38,8 +38,14 @@ function solve_full_model(settings; impose_E_monotonicity_constraints = true)
                     constraints_fg! = impose_E_monotonicity_constraints ? constraints_increasing_E! : nothing,
                     algorithm = impose_E_monotonicity_constraints ? :LD_SLSQP : :LD_LBFGS,
                     iterations = settings.transition_iterations)
-  return (solution = solve_model_from_E_nodes(result, settings; detailed_solution = true),
-          E_nodes = result)
+    solution = solve_model_from_E_nodes(result, settings; detailed_solution = true)
+
+    # output caching
+    if write_csv
+      CSV.write(csvpath, solution.results)
+    end
+
+  return (solution = solution, E_nodes = result)
 end
 
 #=
