@@ -41,7 +41,7 @@ We start with an artificially simple version of the model with transition dynami
 
 A key simplification maintained in the both this simple and the full PTW transition dynamics: in the transition dynamics experiments we are looking at, the normalized distribution $F(z)$ will remain constant over all time.  Hence, we do not need to jointly solve the KFE as we will be at the stationary level (post-normalization).  This is a consequence of the PDF becomes stationary (after normalization) for this model, regardless of other dynamics and is \textbf{not} an assumption. % However a major simplification for the transition dynamics case compared to many heterogeneous agent models.  %In particular, we will only look at examples where $F(z) = 1 - e^{-\theta z}$ for all $t$.
 
-\subsection{Summary of Equations}
+\subsection{Summary of Equations}\label{sec:summary-simple}
 We follow the general notation of the main paper wherever possible.  This model is the geometric Brownian motion (GBM) model in Benhabib, Perla, and Tonetti (2019).
 
 Let $Z$ be productivity, where $Z(t) \geq M(t)$.  Let $V(Z,t)$ is the value function prior to normalization, $M(t)$ the endogenous threshold, $\Pi(Z,t)$ the profits, and $X(t)$ the adoption cost.  Then define the normalization that $z \equiv \log(Z/M(t))$, $v(z,t) \equiv \frac{e^{-z}}{M(t)}V(M(t)e^z, t))$, $\pi(z,t) \equiv \frac{e^{-z}}{M(t)}\Pi(M(t)e^z, t))$, and $x(t) \equiv X(t)/M(t)$.  \cref{sec:simple-derivation} show the rescaled system of equations is
@@ -55,7 +55,7 @@ A(t) &\equiv \left(r - \mu - \frac{\upsilon^2}{2}\right) - (\mu+ \upsilon^2 - g(
 F(z) &= 1 - e^{-\theta z}
 \end{align}
 
-\subsection{Steady State}\label{sec:simple-steady-state}
+\subsection{Analytic Steady State}\label{sec:simple-steady-state}
 For the exogenous $\pi(z,t)$ and $x(t)$ we require that at some $T$ it becomes stationary and
 \begin{align}
 x(t) &= \zeta,\quad \text{ for all }t \geq T\label{eq:terminal-x}\\
@@ -74,9 +74,24 @@ v(z,T) &= \frac1{r-\mu- \upsilon^2/2}\left(1 + \frac1{\nu} e^{-(\nu + 1) z}\righ
 
 Note: since $v(z,T)$ has been rescaled by $e^{-z}$ above, it is now a \textbf{decreasing} function for at least some of $z$.  This will lead to appealing numerical properties when solving the PDE for $v(t,z)$ since it becomes asymptoptically constant as $z \to \infty$ for any $t$
 
+
+\subsection{Summary of Equations For Numerical Solution}\label{sec:summary-simple-numerical}
+To solve the model numerically, we need to bound the state space by adding an artificial upper bound, $\bar{z}$.  With this and using the derivation in \cref{sec:simple-derivation}, the equations of \cref{sec:summary-simple} become,
+
+\begin{align}
+\D[t]v(z,t) &= A(t)v(z,t) - \pi(z,t)\label{eq:simple-summary1-numerical}\\
+v(0,t) &= \int_{0}^{\bar{z}}  v(z,t) \left(e^z \frac{F'(z)}{F(\bar{z})}\right) \diff z - x(t)\label{eq:simple-summary2-numerical}\\
+\D[z]v(0,t) + v(0,t) &= 0\label{eq:simple-summary3-numerical}\\
+\D[z]v(\bar{z},t) + v(\bar{z},t) &= 0\label{eq:simple-summary4-numerical}\\
+\intertext{With the same operator defined on $z \in [0,\bar{z}]$}
+A(t) &\equiv \left(r - \mu - \frac{\upsilon^2}{2}\right) - (\mu+ \upsilon^2 - g(t)) \D[z] - \frac{\upsilon^2}{2} \D[zz]\label{eq:simple-summary5-numerical}
+\end{align}
+
+A solution to this equilibrium is a $g(t)$ and $v(z,t)$ fulfilling this system of equations
+
 \subsection{Spatial Discretization with Upwind Finite-Differences}
 
-In order to solve for the dynamics of $v(t,z)$ and $g(t)$, we will discretize the PDE and algebraic equations from \cref{eq:simple-summary1,eq:simple-summary2,eq:simple-summary3,eq:simple-summary4} into a system of ODEs and algebraic equations.  A benefit of this approach is that we can solve the steady state version of the discretized system of ODEs numerically and compare it to the \cref{sec:simple-steady-state} to determine the degree of numerical error.
+In order to solve for the dynamics of $v(t,z)$ and $g(t)$, we will discretize the PDE and algebraic equations from \cref{eq:simple-summary1-numerical,eq:simple-summary2-numerical,eq:simple-summary3-numerical,eq:simple-summary4-numerical} into a system of ODEs and algebraic equations.\footnote{As a test, we solve the steady state version of the discretized system of ODEs numerically and compare it to the \cref{sec:simple-steady-state} to determine the degree of numerical error and stability of the methods.}
 
 Define a  grid $\set{z_i}_{i=1}^I$ with $z_1 = 0$ and $z_I = \bar{z}$ is a ``large'' number (keeping in mind that the effective number is $e^{\bar{z}}$).  After discretizing, we will denote the grid with the variable name, i.e. $z \equiv \set{z_i}_{i=1}^I$.  Given the exogenous $\pi(z,t)$ functions, the discretized equivalents is $\pi(t) \in \R^I$.
 
