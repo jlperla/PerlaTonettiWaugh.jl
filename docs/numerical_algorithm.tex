@@ -39,29 +39,34 @@ breaklinks]
 \section{Simplified Growth Model with Transition Dynamics}
 We start with an artificially simple version of the model with transition dynamics.  In the more complicated case of this paper, the $\pi(z,t), r(t), x(t)$ will come from calculations rather than being given exogenously, but the basic structure is otherwise the same.
 
-A key simplification maintained in the both this simple and the full PTW transition dynamics: in the transition dynamics experiments we are looking at, the normalized distribution $F(z)$ will remain constant over all time.  Hence, we do not need to jointly solve the KFE as we will be at the stationary level (post-normalization).  This is a consequence of the PDF becomes stationary (after normalization) for this model, regardless of other dynamics and is \textbf{not} an assumption. % However a major simplification for the transition dynamics case compared to many heterogeneous agent models.  %In particular, we will only look at examples where $F(z) = 1 - e^{-\theta z}$ for all $t$.
+A key simplification maintained in the both this simple and the full model: in the transition dynamics experiments we are looking at, the normalized distribution $F(z)$ will remain constant over all time.  Hence, we do not need to jointly solve the KFE as we will be at the stationary level (post-normalization).  This is a consequence of the PDF becomes stationary (after normalization) for this model and is \textbf{not} an assumption. % However a major simplification for the transition dynamics case compared to many heterogeneous agent models.  %In particular, we will only look at examples where $F(z) = 1 - e^{-\theta z}$ for all $t$.
 
 \subsection{Summary of Equations}\label{sec:summary-simple}
-We follow the general notation of the main paper wherever possible.  This model is the geometric Brownian motion (GBM) model in Benhabib, Perla, and Tonetti (2019).
+We follow the general notation of the main paper wherever possible.  This model is the geometric Brownian motion (GBM) model in the technical appendix of Benhabib, Perla, and Tonetti (2019).
 
-Let $Z$ be productivity, where $Z(t) \geq M(t)$.  Let $V(Z,t)$ is the value function prior to normalization, $M(t)$ the endogenous threshold, $\Pi(Z,t)$ the profits, and $X(t)$ the adoption cost.  Then define the normalization that $z \equiv \log(Z/M(t))$, $v(z,t) \equiv \frac{e^{-z}}{M(t)}V(M(t)e^z, t))$, $\pi(z,t) \equiv \frac{e^{-z}}{M(t)}\Pi(M(t)e^z, t))$, and $x(t) \equiv X(t)/M(t)$.  \cref{sec:simple-derivation} show the rescaled system of equations is
+Let $Z$ be productivity, where $Z(t) \geq M(t)$.  Let $V(Z,t)$ is the value function prior to normalization, $M(t)$ the endogenous threshold, $\Pi(Z,t)$ the profits, and $X(t)$ the adoption cost.  The $\Pi(Z,t)$, $r$, and $X(t)$ are given exogenously in this simplified version, and endogenized with monopolistic competition in the full model.
+
+Define the normalization that $z \equiv \log(Z/M(t))$, $v(z,t) \equiv \frac{e^{-z}}{M(t)}V(M(t)e^z, t))$, $\pi(z,t) \equiv \frac{e^{-z}}{M(t)}\Pi(M(t)e^z, t))$, and $x(t) \equiv X(t)/M(t)$.  \cref{sec:simple-derivation} show the rescaled system of equations is
 \begin{align}
 \D[t]v(z,t) &= A(t)v(z,t) - \pi(z,t)\label{eq:simple-summary1}\\
 v(0,t) &= \int_{0}^{\infty}  v(z,t) \left(e^z F'(z)\right) \diff z - x(t)\label{eq:simple-summary2}\\
 \D[z]v(0,t) + v(0,t) &= 0\label{eq:simple-summary3}\\
-\intertext{Given the operator,}
+\intertext{Given the differential operator,}
 A(t) &\equiv \left(r - \mu - \frac{\upsilon^2}{2}\right) - (\mu+ \upsilon^2 - g(t)) \D[z] - \frac{\upsilon^2}{2} \D[zz]\label{eq:simple-summary4}\\
 \intertext{And with the normalized BGP distribution as}
 F(z) &= 1 - e^{-\theta z}
 \end{align}
 
 \subsection{Analytic Steady State}\label{sec:simple-steady-state}
-For the exogenous $\pi(z,t)$ and $x(t)$ we require that at some $T$ it becomes stationary and
+For the exogenous $\pi(z,t)$ and $x(t)$ we require that at some $T < \infty$ it becomes stationary.  Hence we will assume with little loss of generality that,\footnote{Note that the $\pi(z,T) = 1$ says that pre-normalized profits are $\Pi(Z,T) \propto e^Z$.  With different functional forms of the profits, we would rescale by a different power in the exponential--such as the $e^{-\xi z}$ in the full model.}
 \begin{align}
 x(t) &= \zeta,\quad \text{ for all }t \geq T\label{eq:terminal-x}\\
 \pi(z,t) &= 1,\quad \text{ for all }t \geq T\label{eq:terminal-pi}\\
 f(z,t) &= \theta e^{-\theta z},\quad \text{ for all }t \label{eq:f-stationary-summary}
 \end{align}
+
+
+
 
 \noindent Benhabib, Perla, and Tonetti (2019) gives us a closed-form solution for this balanced growth path (i.e steady state when normalized)
 
@@ -93,26 +98,51 @@ A solution to this equilibrium is a $g(t)$ and $v(z,t)$ fulfilling this system o
 
 In order to solve for the dynamics of $v(t,z)$ and $g(t)$, we will discretize the PDE and algebraic equations from \cref{eq:simple-summary1-numerical,eq:simple-summary2-numerical,eq:simple-summary3-numerical,eq:simple-summary4-numerical} into a system of ODEs and algebraic equations.\footnote{As a test, we solve the steady state version of the discretized system of ODEs numerically and compare it to the \cref{sec:simple-steady-state} to determine the degree of numerical error and stability of the methods.}
 
+\paragraph{Grid}
+
 Define a  grid $\set{z_i}_{i=1}^I$ with $z_1 = 0$ and $z_I = \bar{z}$ is a ``large'' number (keeping in mind that the effective number is $e^{\bar{z}}$).  After discretizing, we will denote the grid with the variable name, i.e. $z \equiv \set{z_i}_{i=1}^I$.  Given the exogenous $\pi(z,t)$ functions, the discretized equivalents is $\pi(t) \in \R^I$.
 
-Assume upwind finite difference discretization of the differential operators subject to the homogenous boundary values, such that \cref{eq:new-BC1,eq:new-BC2} hold, which creates $L^{-}_1$ and $L_2$ from \cref{sec:discretization-operators}.\footnote{Here, we will check that $(\mu+ \sigma^2 - g(t)) < 0$ so that $L^{-}_1$ is backwards differences, and consequently the correct upwind direction.}  The discretization of $A(t)$ subject to the boundary conditions is then (in the interior)
+\paragraph{Discretized Operator}
+
+To discretize the system, we use upwind finite differences.  In particular, we need to discretize the differential operator in \cref{eq:simple-summary5-numerical} subject to the \cref{eq:simple-summary3-numerical,eq:simple-summary4-numerical} boundary conditions.  Crucially, since these boundary conditions are homogeneous, we can decompose the linear $A(t)$ operator into additive parts where: the $\D[z]$ is discretized as $L^{-}_1$ using backwards differences, and the $\D[zz]$ is discretized as $L_2$ using central difference.\footnote{Here, we will check that $(\mu+ \sigma^2 - g(t)) < 0$ so that $L^{-}_1$ is backwards differences, and consequently the correct upwind direction.}   Furthermore, the $L^{-}_1$ and $L_2$ linear operators \textit{impose the boundary condition for any vector} they operator on.\footenote{See \url{https://github.com/JuliaDiffEq/PDERoadmap} for more on the theory of discretizing operators with affine boundary conditions.}
+
+Using the derivations in \cref{sec:discretization-operators}, the discretization of $A(t)$ subject to the boundary conditions is then the $I \times I$ matrix
 \begin{align}
-A(t) &\equiv \left(r - \mu - \frac{\upsilon^2}{2}\right) I - (\mu + \upsilon^2 - g(t)) L^{-}_1 - \frac{\upsilon^2}{2} L_2\label{eq:A-def-simple}
+A(t) &\equiv \left(r - \mu - \frac{\upsilon^2}{2}\right) \mathbb{I} - (\mu + \upsilon^2 - g(t)) L^{-}_1 - \frac{\upsilon^2}{2} L_2\label{eq:A-def-simple}
 \end{align}
-and the PDE in \cref{eq:simple-summary1} becomes the system of ODEs
+where $\mathbb{I}$ is the identity matrix.
+
+\paragraph{Quadrature}
+In order to discretize \cref{eq:simple-summary2-numerical}, we need to calculate the integral using quadrature. 
+
+Given the irregular grid, use the weights for the non-uniform trapezoidal rule is calculated with the $\Delta_{-}$ and $\Delta_{+}$ backwards and forward diffs (respectively) for the $z$ grid (with $\Delta_{1,-} = 0$ and $\Delta_{I,+} = 0$ set for the ghost nodes),
+\begin{align}
+\bar{\omega}&\equiv \frac1{2}(\Delta_{-} + \Delta_{+})
+\end{align}
+
+Then, in \cref{sec:quadrature}, we can combine both the quadrature nodes and all non-$v$ values at the nodes (i.e.$e^z$ and the $F'(z)$) with $\bar{\omega}$ so that
+\begin{align}
+\omega_i &\equiv \bar{\omega} \frac{\theta e^{(1 - \theta)z_i}}{1 - e^{-\theta \bar{z}}}
+\end{align}
+
+\subsection{Discretized Model as an DAE}
+Let $v_1(t)$ be the $1$st element in the $v(t)$ vector, corresponding to $v(0,t)$.  Then, the value matching condition in 
+
+	v_1(t) &= \omega \cdot v(t) - x(t)\label{eq:discretized-simple-vm}\\
+
+
+The PDE in \cref{eq:simple-summary1} becomes the system of ODEs
 \begin{align}
 	v'(t) &= A(t) v(t) - \pi(t)\label{eq:discretized-simple}\\
 	\intertext{Let $v_1(t)$ be the $1$st element in the $v(t)$ vector, corresponding to $v(0,t)$.  Then, the value matching condition is}
 	v_1(t) &= \omega \cdot v(t) - x(t)\label{eq:discretized-simple-vm}\\
-	\intertext{Where,}
-	\omega_i &\equiv \bar{\omega} \frac{\theta e^{(1 - \theta)z_i}}{1 - e^{-\theta \bar{z}}}
-	\intertext{And the weights for the non-uniform trapezoidal rule is calculated with the $\Delta_{-}$ and $\Delta_{+}$ backwards and forward diffs (respectively) for the $z$ grid (with $\Delta_{1,-} = 0$ and $\Delta_{I,+} = 0$ set for the ghost nodes),}
-\bar{\omega}&\equiv \frac1{2}(\Delta_{-} + \Delta_{+})
+
 \end{align}
 
-Where the $\omega$ come from \cref{sec:quadrature} and combines quadrature nodes with $e^z$ and the $F'(z)$, and $\bar{\omega}$ are the irregular Simpson's rule weights.
 
 To find the stationary solution at $T$, solve the system of equations $A(T) v(T) = \pi(T)$ and $v_1(T) = \omega \cdot v(T) - x(T)$ for the $v(T)$ and $g$ with a nonlinear solver.\footnote{Or by fixing a $g$, solving the linear \cref{eq:discretized-simple} and then picking the $g$ to equate \cref{eq:discretized-simple-vm} }  You can also compare to the analytic solution in \cref{eq:simple-summary1}.
+
+
 
 \section{Full Growth Model with Transition Dynamics}
 Assume $\delta > 0$.  This trade liberalization experiment will involve a one-time unanticipated decrease in $d$ as the trade liberalization.  We will calculate the two steady states and examine the transition dynamics.
