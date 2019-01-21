@@ -3,11 +3,11 @@ function stationary_algebraic_simple(params)
     # Unpack parameters.
     @unpack μ, υ, θ, r, ζ = params
     # Calculate g.
-    g = μ + (1-(θ-1)*ζ*(r-μ))/((θ-1)^2 * ζ) + υ^2/2 * (θ*(θ*(θ-1)*(r-μ-υ^2/2)*ζ-2)+1)/((θ-1)*((θ-1)*(r-μ-υ^2/2)*ζ-1)); # (eq:8)
+    g = μ + (1-(θ-1)*ζ*(r-μ))/((θ-1)^2 * ζ) + υ^2/2 * (θ*(θ*(θ-1)*(r-μ-υ^2/2)*ζ-2)+1)/((θ-1)*((θ-1)*(r-μ-υ^2/2)*ζ-1)); # (9)
     # Calculate ν
-    ν = (μ-g)/υ^2 + √(((g-μ)/υ^2)^2 + (r-g)/(υ^2/2)); # (eq:10)
+    ν = (μ-g)/υ^2 + √(((g-μ)/υ^2)^2 + (r-g)/(υ^2/2)); # (11)
     # Calculate a generic v.
-    v(z) = 1/(r - μ - υ^2/2) * (1 + 1/ν * exp(-(ν+1)*z)); # (eq:9). Note that these values are in the transformed space.
+    v(z) = 1/(r - μ - υ^2/2) * (1 + 1/ν * exp(-(ν+1)*z)); # (10). Note that these values are in the transformed space.
     # Validate parameters.
     # Return.
     return (g = g, ν = ν, v = v)
@@ -25,9 +25,9 @@ function stationary_numerical_simple(params, z)
     function stationary_numerical_given_g(in)
         g = in[1]
         # Construct the aggregate operator.
-        L = (r - g - ξ*(μ - g) - ξ^2 * υ^2/2)*I - (μ + ξ*υ^2 - g)*L_1_minus - (υ^2/2)*L_2 # (eq:A.9)
+        L = (r - g - ξ*(μ - g) - ξ^2 * υ^2/2)*I - (μ + ξ*υ^2 - g)*L_1_minus - (υ^2/2)*L_2 # (B.9)
         v = L \ π_tilde.(z) # discretized system of ODE for v, where v'(T) = 0
-        diff = v[1] + ζ - dot(ω, v) # value matching condition (eq:A.20)
+        diff = v[1] + ζ - dot(ω, v) # value matching condition (B.20)
         return diff
     end
     # Find and validate the root.
