@@ -127,7 +127,7 @@ To calculate these, use $\Delta_{-}$ and $\Delta_{+}$ backwards and forward diff
 
 Then, in \cref{sec:quadrature}, we can combine both the quadrature nodes and all non-$v$ values at the nodes (i.e.$e^z$ and the $F'(z)$) with $\bar{\omega}$ so that
 \begin{align}
-\omega_i &\equiv \bar{\omega} \frac{\theta e^{(1 - \theta)z_i}}{1 - e^{-\theta \bar{z}}}
+\omega_i &\equiv \bar{\omega}_i \frac{\theta e^{(1 - \theta)z_i}}{1 - e^{-\theta \bar{z}}}
 \end{align}
 
 \noindent Using this definition, the integral is approximated by a linear operator $\omega\in\R^M$
@@ -172,10 +172,11 @@ The fundamental differences between solving a full model of transition dynamics 
 	\item The $\pi(z,t)$ and $x(t)$ come from static equilibrium conditions given the trade-structure of the paper and the number of active local varieties, $\Omega(t)$, rather than being given exogenously
 	\item The interest rate $r(t)$ is no longer given exogenously, but needs to be found in equilibrium.  Luckily, this is forward looking and can be solved in the current structure with only minor changes since the transition dynamics are being solved backwards
 	\item The number of varieties $\Omega(t)$ is endogenously determined for trade shocks, and may change slowly according to profit maximizing and income smoothing incentives.
+	\item There is an additional algebraic equation for the export threshold, $\hat{z}(t)$
 \end{itemize}
 
 \paragraph{General Algorithm}
-Of these, the only significant change is that the $\Omega(t)$ must be solved separately since the entry decision is dynamic.  Furthermore, since it begins with a stock $\Omega(0)$, and is forward looking, we cannot simply add it as a further algebraic equation.  To solve the equilibrium, we
+Of these, the only significant change is that the $\Omega(t)$ must be solved separately since the entry decision is dynamic, forward-looking, and begins with a stock $\Omega(0)$.  Therefore, we cannot simply add it as a further algebraic equation or use the trick of only using forward-differences while working backwards in time.  To solve the equilibrium,
 \begin{enumerate}
 	\item Guess a path for $\Omega(t)$ where we know $\Omega(0)$ and can calculate $\Omega(T)$ from the steady-state.
 	\item Solve the underlying DAE using the ``exogenous'' $\Omega(t)$ using the same algorithm as the simple model.  The $\pi(t,z)$ is calculated from static equilibrium conditions and the exogenous $\Omega(t)$ in the solution.
@@ -185,19 +186,37 @@ Of these, the only significant change is that the $\Omega(t)$ must be solved sep
 
 \paragraph{Transition Dynamics Experiment}
 
-Assume $\delta > 0$.  This trade liberalization experiment will involve a one-time unanticipated decrease in $d$ as the trade liberalization.  We will calculate the two steady states and examine the transition dynamics.
+Assume $\delta > 0$. The experiment is to examine a one-time unanticipated \textit{decrease} in $d$ as the trade liberalization.  We calculate the two steady states and examine the transition dynamics.
 
-In order to solve the dynamic problem in, we need to calculate $\tilde{\rho}(t), \pi_{\min}(t),\hat{z}(t),$ etc  as a function of $g(t), \Omega(t),$ and parameters.  As a simplification, we will assume that the cost of adoption is in labor, i.e. $\eta = 0$, so that $x(t) = \zeta$ for all $t$ from (PTW H.11)\footnote{Otherwise, there is an addition system of implicit equations to solve.}  %We also assume $\log$ utility, so that $\gamma = 1$.
+In order to solve the dynamic problem in, we need to calculate $\tilde{\rho}(t), \pi_{\min}(t),\hat{z}(t),$ etc  as a function of $g(t), \Omega(t),$ and parameters.  As a simplification, we will assume that the cost of adoption is in labor, i.e. $\eta = 0$, so that $x(t) = \zeta$ for all $t$ from (PTW H.11)\footnote{Otherwise, there is an addition system of implicit equations to solve.}  The other simplification will be to assume $\log$ utility, so that $\gamma = 1$, resulting in a slightly more manageable calculation of interest rates.
 
 \subsection{Number of Varieties and Entry in Transition}
 
 Define $E(t)$ such that the \textbf{gross} entry flow is $E(t)\Omega(t)$.  Since the \textbf{gross} exit flow is $\delta \Omega(t)$, then the differential equation for $\Omega(t)$ comes from the net flows,
-\begin{align} \label{eq:E-defined-by-Omega}
-	\D[t] \Omega(t) &= \left(E(t) - \delta \right)\Omega(t)\\
-\intertext{Rearrange,}
-E(t) &\equiv \delta + \D[t]\log \Omega(t)
+\begin{align} 
+	\D[t] \Omega(t) &= \left(E(t) - \delta \right)\Omega(t)\label{eq:E-defined-by-Omega}\\
+	\intertext{Rearrange,}
+	E(t) &\equiv \delta + \D[t]\log \Omega(t)
 \end{align}
-Therefore, in the steady-state we must have $E(t) = \delta$.
+Which shows that in the steady-state, the entry must simply replace exogenous exit, $E(t) = \delta$.
+
+When making a guess for the varieties over the transition path, in principle we could have chosen either the $\Omega(t)$ or the $E(t)$ (for $t \in [0,T]$) and converted between them using \cref{eq:E-defined-by-Omega}.
+
+In practice, though, the model does not solve effectively with guesses on $\Omega(t)$ since small changes in the guess can lead to large deviations in $E(t)$, which enter the growth calculations directly.
+
+
+\subsection{Static Calculations and Definitions}
+First, we will summarize results from the static equilibrium in the model.  Fixing a $E(t), g(t), \hat{z}(t),$ $\Omega(t)$, and $\tilde{L}(t+\epsilon)$ for some small $\epsilon$, we can calculate the following within a period.\footnote{See \cref{sec:derive-interest-rates} for a derivation of the interest rates, \cref{sec:full-rescaling} for a derivation of the normalized profits, and (PTW.H.2, H.7, H.8, )}.\footnote{Note: the $\hat{z}(t)$ \textbf{has no log} taken of it, unlike the $z$.  Hence, to see if a firm exports, we need to check if $z \geq \log(\hat{z}(t))$.  Furthermore, it means that the $\hat{z}$ has a minimum value of $1$.}  
+\begin{align}
+	S(t) &\equiv \theta \left( g(t) - \mu - \theta\frac{\upsilon^2}{2}\right)\\
+	1 - \tilde{L}(t) &\equiv 1 - \Omega(t)\left((N -1)\hat{z}^{-\theta}\kappa + \zeta \left(S(t) + E(t)/\chi \right)\right)\\
+	\bar{z}(t)^{\sigma - 1}&\equiv \Omega(t)
+\frac{\theta}{1+\theta - \sigma}\left(1 + (N-1)d^{1-\sigma}\hat{z}^{\sigma - 1 -\theta} \right)\\
+	\bar{\pi}_{\min}(t) &\equiv \frac{1-\tilde{L}(t)}{(\sigma-1)\bar{z}(t)^{\sigma-1}}\\
+	\pi(z,t) &\equiv \bar{\pi}_{\min}(t)\left(1 + (N-1)d^{1-\sigma}\indicator{z \geq \log(\hat{z}(t))}\right) - (N-1)\kappa e^{-(\sigma - 1)z}\indicator{z \geq \log(\hat{z}(t))}\\
+	\tilde{\rho}(t) &\equiv \rho+ \delta + \D[t]\log\left(1 - \tilde{L}(t)\right) - (\sigma - 1)\left(\mu - g(t) + (\sigma - 1)\frac{\upsilon^2}{2} \right)
+\end{align}
+To calculate the $\D[t]\log\left(1 - \tilde{L}(t)\right)$ you need to store the ``future'' $\left(1 - \tilde{L}(t)\right)$ and $t$ values in the last adaptive timestep, and then use forward first-differences with it based on the current value
 
 \subsection{Differential Equations}\label{sec:full-ODE}
 The dynamic set of differential equations (rescaled) is derived in \cref{sec:full-model-derivations}.
@@ -224,7 +243,7 @@ Discretize this and implement the boundary conditions in the discretized operato
 	v'(t) &= A(t) v(t) - \pi(t)
 \end{align}
 
-The three variables required in the DAE are $g(t), \hat{z}(t),$ and $\Omega(t)$.\footnote{Note: the $\hat{z}(t)$ \textbf{has no log} taken of it, unlike the $z$.  Hence, to see if a firm exports, we need to check if $z \geq \log(\hat{z}(t))$.  Furthermore, it means that the $\hat{z}$ has a minimum value of $1$.}  The \cref{eq:normalized-vm-summary-rescaled} value matching equation uses the same discretization approach as in the simple example (combining everything into the weights $\omega$, with the truncated exponential distribution, etc.) to discretize as
+The three variables required in the DAE are $g(t), \hat{z}(t),$ and $\Omega(t)$.The \cref{eq:normalized-vm-summary-rescaled} value matching equation uses the same discretization approach as in the simple example (combining everything into the weights $\omega$, with the truncated exponential distribution, etc.) to discretize as
 \begin{align}
 	0 &= v_1(t) - \omega \cdot v(t) + \zeta
 \end{align}
@@ -240,18 +259,6 @@ From \cref{sec:free-entry}, we see that
 \end{align}
 
 
-\subsection{Static Calculations and Definitions}
-Given the current $g$ and $\hat{z}$, the following definitions calculated at every time period, in the following rough order within the function.\footnote{See \cref{sec:derive-interest-rates} for a derivation of the interest rates, \cref{sec:full-rescaling} for a derivation of the normalized profits, and (PTW.H.2, H.7, H.8, )}.
-\begin{align}
-	S(t) &\equiv \theta \left( g(t) - \mu - \theta\frac{\upsilon^2}{2}\right)\\
-	1 - \tilde{L}(t) &\equiv 1 - \Omega(t)\left((N -1)\hat{z}^{-\theta}\kappa + \zeta \left(S(t) + E(t)/\chi \right)\right)\\
-	\bar{z}(t)^{\sigma - 1}&\equiv \Omega(t)
-\frac{\theta}{1+\theta - \sigma}\left(1 + (N-1)d^{1-\sigma}\hat{z}^{\sigma - 1 -\theta} \right)\\
-	\bar{\pi}_{\min}(t) &\equiv \frac{1-\tilde{L}(t)}{(\sigma-1)\bar{z}(t)^{\sigma-1}}\\
-	\pi(z,t) &\equiv \bar{\pi}_{\min}(t)\left(1 + (N-1)d^{1-\sigma}\indicator{z \geq \log(\hat{z}(t))}\right) - (N-1)\kappa e^{-(\sigma - 1)z}\indicator{z \geq \log(\hat{z}(t))}\\
-	\tilde{\rho}(t) &\equiv \rho+ \delta + \D[t]\log\left(1 - \tilde{L}(t)\right) - (\sigma - 1)\left(\mu - g(t) + (\sigma - 1)\frac{\upsilon^2}{2} \right)
-\end{align}
-To calculate the $\D[t]\log\left(1 - \tilde{L}(t)\right)$ you need to store the ``future'' $\left(1 - \tilde{L}(t)\right)$ and $t$ values in the last adaptive timestep, and then use forward first-differences with it based on the current value
 
 
 \paragraph{Final Calculations}
