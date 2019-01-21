@@ -25,8 +25,8 @@ function stationary_numerical_simple(params, z)
     function stationary_numerical_given_g(in)
         g = in[1]
         # Construct the aggregate operator.
-        L = (r - g - ξ*(μ - g) - ξ^2 * υ^2/2)*I - (μ + ξ*υ^2 - g)*L_1_minus - (υ^2/2)*L_2 # (B.9)
-        v = L \ π_tilde.(z) # discretized system of ODE for v, where v'(T) = 0
+        A = (r - g - ξ*(μ - g) - ξ^2 * υ^2/2)*I - (μ + ξ*υ^2 - g)*L_1_minus - (υ^2/2)*L_2 # (B.9)
+        v = A \ π_tilde.(z) # discretized system of ODE for v, where v'(T) = 0
         diff = v[1] + ζ - dot(ω, v) # value matching condition (B.20)
         return diff
     end
@@ -35,7 +35,7 @@ function stationary_numerical_simple(params, z)
     g_T = sol[1]
     @assert(μ + υ^2/2 - g_T < 0) # Negative drift condition.
     # Use the g_T to recreate L_T and v_T.
-    L_T = (r - g_T - ξ*(μ - g_T) - ξ^2 * υ^2/2)*I - (μ + ξ*υ^2 - g_T)*L_1_minus - υ^2/2 * L_2
-    v_T = L_T \ π_tilde.(z)
+    A_T = (r - g_T - ξ*(μ - g_T) - ξ^2 * υ^2/2)*I - (μ + ξ*υ^2 - g_T)*L_1_minus - υ^2/2 * L_2
+    v_T = A_T \ π_tilde.(z)
     return (g = g_T, v = v_T)
 end
