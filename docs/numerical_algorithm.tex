@@ -306,13 +306,26 @@ This will discretize space with backward differences in the first derivative, an
 \end{itemize}
 
 \subsection{Discretization Operators}\label{sec:discretization-operators}
-Summarizing the discretized differential operators subject to the boundary conditions.  Let $L_1^{-}$ be the discretized backwards first differences, subject to \cref{eq:new-BC1,eq:new-BC2} and $L_2$ be the discretized central differences subject to \cref{eq:new-BC1,eq:new-BC2}.
+Summarizing the discretized differential operators subject to the boundary conditions.  Let $L_1^{-}$ be the discretized backwards first differences and $L_2$ be the discretized central differences subject to the Neumann boundary conditions in \cref{eq:new-BC1,eq:new-BC2}. 
 
-Then you can show that the following
+Then, the corresponding $L_1^{-}$ and $L_2$ matrices are defined as
+
 
 \begin{align}
-L_1^{-} &\equiv \begin{bmatrix} TODO \end{bmatrix}\\
-L_2 &\equiv \begin{bmatrix}  TODO \end{bmatrix}
+L_1^{-} &\equiv \frac{1}{\Delta}\begin{bmatrix}
+1 - (1 + \xi \Delta) &0&0&\dots&0&0&0\\
+-1&1&0&\dots&0&0&0\\
+\vdots&\vdots&\vdots&\ddots&\vdots&\vdots&\vdots\\
+0&0&0&\dots&-1&1&0\\
+0&0&0&\cdots&0&-1&1
+\end{bmatrix}_{M\times M}\label{eq:L-1} \\
+L_2 &\equiv \frac{1}{\Delta^2}\begin{bmatrix}
+-2 + (1 + \xi\Delta) &1&0&\dots&0&0&0\\
+1&-2&1&\dots&0&0&0\\
+\vdots&\vdots&\vdots&\ddots&\vdots&\vdots&\vdots\\
+0&0&0&\dots&1&-2&1\\
+0&0&0&\cdots&0&1&-2 + (1- \xi\Delta)
+\end{bmatrix}_{M\times M}\label{eq:L-2}
 \end{align}
 
 \subsection{Spatial Discretization}\label{sec:spatial-discretization}
