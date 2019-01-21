@@ -5,8 +5,8 @@ function f!_simple(resid,du,u,p,t)
     v_t = u[1:M]
     g_t = u[M+1]
     A = (r(t) - g_t - ξ*(μ - g_t) - ξ^2 * υ^2/2)*I - (μ - g_t + υ^2*ξ)*L_1 - υ^2/2 * L_2 # (B.9)
-    resid[1:M] .= A * v_t - π_tilde.(t, z) # (12)
-    resid[1:M] .-= du[1:M] # discretized system of ODE for v (12)
+    resid[1:M] .= A * v_t - π_tilde.(t, z) # (22)
+    resid[1:M] .-= du[1:M] # discretized system of ODE for v (22)
     resid[M+1] = v_t[1] + x(t) - dot(ω, v_t) # value matching condition (13) and (B.20)
 end
 

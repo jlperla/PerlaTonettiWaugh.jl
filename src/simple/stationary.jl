@@ -26,7 +26,7 @@ function stationary_numerical_simple(params, z)
         g = in[1]
         # Construct the aggregate operator.
         A = (r - g - ξ*(μ - g) - ξ^2 * υ^2/2)*I - (μ + ξ*υ^2 - g)*L_1_minus - (υ^2/2)*L_2 # (B.9)
-        v = A \ π_tilde.(z) # discretized system of ODE for v, where v'(T) = 0
+        v = A \ π_tilde.(z) # discretized system of ODE for v, where v'(T) = 0 (24)
         diff = v[1] + ζ - dot(ω, v) # value matching condition (B.20)
         return diff
     end
