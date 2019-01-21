@@ -164,9 +164,27 @@ The basic algorithm for this, which we have not seen in the literature, is to di
 	\item Solve the model.  To give a sense of the scale here, we have a system of roughly 2000-3000 ODEs for the full model, along with the single algebraic equation for the value matching condition.  For a DAE solver, this is at most a medium-sized problem.
 \end{itemize}
 
-This approach to solving transition dynamics seems to be generally applicable:\footnote{In fact, we suspect that this approach to be extremely fast and robust for most models.  Part of the difficulty in solving our setup is that models with endogenously determined growth rates always have peculiarities which lead extra sensitivity in numerical solutions.} (1) use a spatial discretization to turn the PDEs into a system of ODEs; (2) add any equilibrium constraints on the value functions or distributions as algebraic equations, using quadrature to convert any integrals into linear operators; (3) stack both to create a DAE system, and then use a high-performance solver.
+This approach to solving transition dynamics seems to be generally applicable:\footnote{In fact, we suspect that this approach to be extremely fast and robust for most models.  Part of the difficulty in solving our setup is that models with endogenously determined growth rates always have peculiarities which lead extra sensitivity in numerical solutions.} (1) use a spatial discretization to turn the PDEs into a system of ODEs; (2) add any equilibrium constraints on the value functions or distributions as algebraic equations, using quadrature to convert any integrals into linear operators; (3) stack both to create a DAE system, and then use a high-performance solver.  A more general piece of advice for these is for economists to exploit high-performance ODE solvers with flexibility for various time-stepping methods rather than building their own.
 
 \section{Full Growth Model with Transition Dynamics}
+The fundamental differences between solving a full model of transition dynamics and that in the simple model are the following:
+\begin{itemize}
+	\item The $\pi(z,t)$ and $x(t)$ come from static equilibrium conditions given the trade-structure of the paper and the number of active local varieties, $\Omega(t)$, rather than being given exogenously
+	\item The interest rate $r(t)$ is no longer given exogenously, but needs to be found in equilibrium.  Luckily, this is forward looking and can be solved in the current structure with only minor changes since the transition dynamics are being solved backwards
+	\item The number of varieties $\Omega(t)$ is endogenously determined for trade shocks, and may change slowly according to profit maximizing and income smoothing incentives.
+\end{itemize}
+
+\paragraph{General Algorithm}
+Of these, the only significant change is that the $\Omega(t)$ must be solved separately since the entry decision is dynamic.  Furthermore, since it begins with a stock $\Omega(0)$, and is forward looking, we cannot simply add it as a further algebraic equation.  To solve the equilibrium, we
+\begin{enumerate}
+	\item Guess a path for $\Omega(t)$ where we know $\Omega(0)$ and can calculate $\Omega(T)$ from the steady-state.
+	\item Solve the underlying DAE using the ``exogenous'' $\Omega(t)$ using the same algorithm as the simple model.  The $\pi(t,z)$ is calculated from static equilibrium conditions and the exogenous $\Omega(t)$ in the solution.
+	\item Calculate the residuals of the entry decision to determine the optimality of $\Omega(t)$
+	\item Update the guess on $\Omega(t)$ until the residuals are minimized
+\end{enumerate}
+
+\paragraph{Transition Dynamics Experiment}
+
 Assume $\delta > 0$.  This trade liberalization experiment will involve a one-time unanticipated decrease in $d$ as the trade liberalization.  We will calculate the two steady states and examine the transition dynamics.
 
 In order to solve the dynamic problem in, we need to calculate $\tilde{\rho}(t), \pi_{\min}(t),\hat{z}(t),$ etc  as a function of $g(t), \Omega(t),$ and parameters.  As a simplification, we will assume that the cost of adoption is in labor, i.e. $\eta = 0$, so that $x(t) = \zeta$ for all $t$ from (PTW H.11)\footnote{Otherwise, there is an addition system of implicit equations to solve.}  %We also assume $\log$ utility, so that $\gamma = 1$.
