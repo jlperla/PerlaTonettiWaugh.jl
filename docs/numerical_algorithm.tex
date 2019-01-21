@@ -104,7 +104,7 @@ Define a  grid $\set{z_i}_{i=1}^I$ with $z_1 = 0$ and $z_I = \bar{z}$ is a ``lar
 
 \paragraph{Discretized Operator}
 
-To discretize the system, we use upwind finite differences.  In particular, we need to discretize the differential operator in \cref{eq:simple-summary5-numerical} subject to the \cref{eq:simple-summary3-numerical,eq:simple-summary4-numerical} boundary conditions.  Crucially, since these boundary conditions are homogeneous, we can decompose the linear $A(t)$ operator into additive parts where: the $\D[z]$ is discretized as $L^{-}_1$ using backwards differences, and the $\D[zz]$ is discretized as $L_2$ using central difference.\footnote{Here, we will check that $(\mu+ \sigma^2 - g(t)) < 0$ so that $L^{-}_1$ is backwards differences, and consequently the correct upwind direction.}   Furthermore, the $L^{-}_1$ and $L_2$ linear operators \textit{impose the boundary condition for any vector} they operator on.\footenote{See \url{https://github.com/JuliaDiffEq/PDERoadmap} for more on the theory of discretizing operators with affine boundary conditions.}
+To discretize the system, we use upwind finite differences.  In particular, we need to discretize the differential operator in \cref{eq:simple-summary5-numerical} subject to the \cref{eq:simple-summary3-numerical,eq:simple-summary4-numerical} boundary conditions.  Crucially, since these boundary conditions are homogeneous, we can decompose the linear $A(t)$ operator into additive parts where: the $\D[z]$ is discretized as $L^{-}_1$ using backwards differences, and the $\D[zz]$ is discretized as $L_2$ using central difference.\footnote{Here, we will check that $(\mu+ \sigma^2 - g(t)) < 0$ so that $L^{-}_1$ is backwards differences, and consequently the correct upwind direction.}   Furthermore, the $L^{-}_1$ and $L_2$ linear operators \textit{impose the boundary condition for any vector} they operator on.\footnote{See \url{https://github.com/JuliaDiffEq/PDERoadmap} for more on the theory of discretizing operators with affine boundary conditions.}
 
 Using the derivations in \cref{sec:discretization-operators}, the discretization of $A(t)$ subject to the boundary conditions is then the $I \times I$ matrix
 \begin{align}
@@ -113,9 +113,9 @@ A(t) &\equiv \left(r - \mu - \frac{\upsilon^2}{2}\right) \mathbb{I} - (\mu + \up
 where $\mathbb{I}$ is the identity matrix.
 
 \paragraph{Quadrature}
-In order to discretize \cref{eq:simple-summary2-numerical}, we need to calculate the integral using quadrature. 
+In order to discretize \cref{eq:simple-summary2-numerical}, we need to calculate the integral using quadrature.  Since the grid points are already given (i.e. we can't choose guassian quadrature nodes), we will use the weights for the non-uniform trapezoidal rule.
 
-Given the irregular grid, use the weights for the non-uniform trapezoidal rule is calculated with the $\Delta_{-}$ and $\Delta_{+}$ backwards and forward diffs (respectively) for the $z$ grid (with $\Delta_{1,-} = 0$ and $\Delta_{I,+} = 0$ set for the ghost nodes),
+To calculate these, use $\Delta_{-}$ and $\Delta_{+}$ backwards and forward diffs (respectively) for the $z$ grid (with $\Delta_{1,-} = 0$ and $\Delta_{I,+} = 0$ set for the ghost nodes),
 \begin{align}
 \bar{\omega}&\equiv \frac1{2}(\Delta_{-} + \Delta_{+})
 \end{align}
@@ -125,23 +125,34 @@ Then, in \cref{sec:quadrature}, we can combine both the quadrature nodes and all
 \omega_i &\equiv \bar{\omega} \frac{\theta e^{(1 - \theta)z_i}}{1 - e^{-\theta \bar{z}}}
 \end{align}
 
+With this, the integral
+\begin{align}
+ \int_{0}^{\bar{z}}  v(z,t) \left(e^z \frac{F'(z)}{F(\bar{z})}\right) \diff z &\approx \omega \cdot v(t)
+\end{align}
+
 \subsection{Discretized Model as an DAE}
-Let $v_1(t)$ be the $1$st element in the $v(t)$ vector, corresponding to $v(0,t)$.  Then, the value matching condition in 
-
-	v_1(t) &= \omega \cdot v(t) - x(t)\label{eq:discretized-simple-vm}\\
-
-
-The PDE in \cref{eq:simple-summary1} becomes the system of ODEs
+Let $v_1(t)$ be the $1$st element in the $v(t)$ vector, corresponding to $v(0,t)$.  Then, the value matching condition in \cref{eq:simple-summary2-numerical,eq:simple-summary1-numerical} becomes 
 \begin{align}
 	v'(t) &= A(t) v(t) - \pi(t)\label{eq:discretized-simple}\\
-	\intertext{Let $v_1(t)$ be the $1$st element in the $v(t)$ vector, corresponding to $v(0,t)$.  Then, the value matching condition is}
-	v_1(t) &= \omega \cdot v(t) - x(t)\label{eq:discretized-simple-vm}\\
-
+	0 &= v_1(t) - \omega \cdot v(t) + x(t)\label{eq:discretized-simple-vm}
 \end{align}
 
 
-To find the stationary solution at $T$, solve the system of equations $A(T) v(T) = \pi(T)$ and $v_1(T) = \omega \cdot v(T) - x(T)$ for the $v(T)$ and $g$ with a nonlinear solver.\footnote{Or by fixing a $g$, solving the linear \cref{eq:discretized-simple} and then picking the $g$ to equate \cref{eq:discretized-simple-vm} }  You can also compare to the analytic solution in \cref{eq:simple-summary1}.
+To find the stationary solution at $T$,  $v'(T) = 0$, we can solve the nonlinear system of equations
+\begin{align}
+	0 &= A(T; g) v(T) - \pi(T)\label{eq:discretized-simple-stationary}\\
+	0 &= v_1(T) - \omega \cdot v(T) + x(T)\label{eq:discretized-simple-vm-stationary}
+\end{align}
+This can be solved by using a nonlinear solver for $v(T)$ and $g$, or by fixing $g$, solving the linear \cref{eq:discretized-simple-stationary} for $v(T)$ and then checking \cref{eq:discretized-simple-vm-stationary} for convergence of the $g$.
 
+\subsection{Solving the Transition Dynamics with the DAE}
+
+In order to solve for the transition dynamics of $x(t)$ and $\pi(z,t)$ functions:
+\begin{itemize}
+	\item Solve for the time $T$ steady state as $v(z,T)$ and $g(T)$ as the \textit{initial condition}, for working backwards in time.
+	\item Setup a function for the \cref{eq:discretized-simple,eq:discretized-simple-vm} tagging the last equation as an algebraic one.
+	\item Use a DAE solver (e.g. \url{http://docs.juliadiffeq.org/latest/tutorials/dae_example.html})
+\end{itemize}
 
 
 \section{Full Growth Model with Transition Dynamics}
