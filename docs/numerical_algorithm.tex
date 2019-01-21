@@ -159,7 +159,7 @@ The basic algorithm for this, which we have not seen in the literature, is to di
 \begin{itemize}
 	\item Choose an appropriate $z$ grid, with a large number of points close to $0$ as well as near the $\bar{z}$.\footnote{There is a degree of sensitivity in this model for the particular choice of $\bar{z}$ and the grid points for several reasons: (a) the imposition of the \cref{eq:simple-summary3-numerical} condition on $\D[z]v(0,t)$  is analytically the correct boundary condition for the optimal stopping problem for the imitation threshold--it comes from the smooth-pasting condition--but is sensitive to the precise curvature.  For this reason, the discretization needs to give it enough precision or the $g(t)$ can get distorted; (b) the majority of the curvature is close to the $z=0$ barrier, after which the function rapidly becomes constant; (c) the artificial boundary at $\bar{z}$ introduces a lot of curvature right near the end.  If there are not enough grid points close to the $\bar{z}$, then the local curvature near $v(\bar{z},t)$ effects a larger part of the whole distribution; and (d) since the expectation in \cref{eq:discretized-simple-vm} is taken over a heavy-tailed distribution, and is essential for solving the endogenous $g(t)$, truncations can have a significant bias if $\bar{z}$ is too small.  In particular, if you change the $\theta$ radically or conditions which lead to large changes in $g(t)$, you should verify that the analytical and numerical steady states do not become too different.}
 	\item Identify an industrial-strength DAE solver (e.g. \url{http://docs.juliadiffeq.org/latest/tutorials/dae_example.html}).  For these, you give a an operator in the form of a stacked system of ODEs and algebraic equations, and then flag the algebraic ones for the solver.
-	\item Find for the time $T$ steady state as $v(z,T)$ and $g(T)$ from \cref{eq:discretized-simple-stationary,eq:discretized-simple-vm-stationary} as the \textit{initial condition}, for working backwards in time.\footnote{While we have an analytical solution in this specific case, it is better to use the numerical solution for the steady-state since it the direct steady-state of the DAE for a given grid.} 
+	\item Find for the time $T$ steady state as $v(z,T)$ and $g(T)$ from \cref{eq:discretized-simple-stationary,eq:discretized-simple-vm-stationary} as the \textit{initial condition}, for working backwards in time.\footnote{While we have an analytical solution in this specific case, it is better to use the numerical solution for the steady-state since it the direct steady-state of the DAE for a given grid.}
 	\item Setup a function for the \cref{eq:discretized-simple,eq:discretized-simple-vm} tagging the last equation as an algebraic one.
 	\item Solve the model.  To give a sense of the scale here, we have a system of roughly 2000-3000 ODEs for the full model, along with the single algebraic equation for the value matching condition.  For a DAE solver, this is at most a medium-sized problem.
 \end{itemize}
@@ -193,7 +193,7 @@ In order to solve the dynamic problem in, we need to calculate $\tilde{\rho}(t),
 \subsection{Number of Varieties and Entry in Transition}
 
 Define $E(t)$ such that the \textbf{gross} entry flow is $E(t)\Omega(t)$.  Since the \textbf{gross} exit flow is $\delta \Omega(t)$, then the differential equation for $\Omega(t)$ comes from the net flows,
-\begin{align} 
+\begin{align}
 	\D[t] \Omega(t) &= \left(E(t) - \delta \right)\Omega(t)\label{eq:E-defined-by-Omega}\\
 	\intertext{Rearrange,}
 	E(t) &\equiv \delta + \D[t]\log \Omega(t)
@@ -206,7 +206,7 @@ In practice, though, the model does not solve effectively with guesses on $\Omeg
 
 
 \subsection{Static Calculations and Definitions}
-First, we will summarize results from the static equilibrium in the model.  Fixing a $E(t), g(t), \hat{z}(t),$ $\Omega(t)$, and $\tilde{L}(t+\epsilon)$ for some small $\epsilon$, we can calculate the following within a period.\footnote{See \cref{sec:derive-interest-rates} for a derivation of the interest rates, \cref{sec:full-rescaling} for a derivation of the normalized profits, and (PTW.H.2, H.7, H.8, )}.\footnote{Note: the $\hat{z}(t)$ \textbf{has no log} taken of it, unlike the $z$.  Hence, to see if a firm exports, we need to check if $z \geq \log(\hat{z}(t))$.  Furthermore, it means that the $\hat{z}$ has a minimum value of $1$.}  
+First, we will summarize results from the static equilibrium in the model.  Fixing a $E(t), g(t), \hat{z}(t),$ $\Omega(t)$, and $\tilde{L}(t+\epsilon)$ for some small $\epsilon$, we can calculate the following within a period.\footnote{See \cref{sec:derive-interest-rates} for a derivation of the interest rates, \cref{sec:full-rescaling} for a derivation of the normalized profits, and (PTW.H.2, H.7, H.8, )}.\footnote{Note: the $\hat{z}(t)$ \textbf{has no log} taken of it, unlike the $z$.  Hence, to see if a firm exports, we need to check if $z \geq \log(\hat{z}(t))$.  Furthermore, it means that the $\hat{z}$ has a minimum value of $1$.}
 \begin{align}
 	S(t) &\equiv \theta \left( g(t) - \mu - \theta\frac{\upsilon^2}{2}\right)\\
 	1 - \tilde{L}(t) &\equiv 1 - \Omega(t)\left((N -1)\hat{z}^{-\theta}\kappa + \zeta \left(S(t) + E(t)/\chi \right)\right)\\
@@ -305,7 +305,7 @@ This will discretize space with backward differences in the first derivative, an
 	\end{bmatrix}
 	\end{align}
 	\item The grid on time $t \in [0,T]$ may be adaptive, and we will let the ODE solver handle the grid in order to use optimal time-stepping algorithms.
-	\item Denote time-varying functions on the grid as a vector without the spatial dimension, i.e. 
+	\item Denote time-varying functions on the grid as a vector without the spatial dimension, i.e.
 	\begin{align}
 	v(t) &\equiv \set{v(z_i, t)}_{i=1}^I\in\R^I\\
 	\hat{\pi}(t) &\equiv	\hat{\pi}(z,t) \in \R^I
@@ -329,7 +329,7 @@ L_2 &\equiv \begin{bmatrix}  TODO \end{bmatrix}
 
 \paragraph{Interior of $L$:}
 To better understand the construction of $A$ and $b$, look at individual rows of $A$ with the ODE.\footnote{Note that the first derivative is not using central differences.  This is to ensure it is upwind, and hence that this is a monotone sequence, even for vanishing $\sigma$.
-	
+
 	\begin{align}
 	\D[z]v(z_i, t_n) &\approx \frac{v_i^n - v_{i-1}^n}{\Delta_{i,-}}\label{eq:D-v-z}\\
 	\intertext{And use non-uniform central differences for the 2nd derivative}
@@ -429,6 +429,12 @@ Define $\pi(z,t) = e^{-\xi z}\hat{\pi}(z,t)$ so that if $\hat{\pi}(z,t) = e^{\xi
 	\left(r - g(t)- \xi(\mu-g(t)) - \frac{\upsilon^2}{2}\xi^2\right)  v(z,t) &= \pi(z,t) + (\mu+ \upsilon^2\xi - g(t)) \D[z]v(z,t) \nonumber \\ &+ \frac{\upsilon^2}{2} \D[zz]v(z,t) + \D[t]v(z,t)  \label{eq:bellman-GBM-dynamic-normalized}
 \end{align}
 
+Note that this can be rewritten to give us a rescaled variant of \cref{eq:simple-summary5-numerical}:
+
+\begin{align}
+	A(t) &= \left(r - g(t)- \xi(\mu-g(t)) - \frac{\upsilon^2}{2}\xi^2\right)I - (\mu+ \upsilon^2\xi - g(t)) L_1^{-} - \frac{\upsilon^2}{2} L_1^{+}
+\end{align}
+
 Now, substitute into the boundary conditions \cref{eq:sp-GBM-dynamic,eq:reflecting-GBM-dynamic} to find,
 \begin{align}
 	\xi v(0,t) + \D[z]v(0,t ) &= 0\label{eq:new-BC1}\\
@@ -488,7 +494,7 @@ Note that we have the following static calculations from the main paper (eqns H.
 	\begin{cases}
 	\frac{\rho (\log(c) + gt ) + g}{\rho^2}, & \gamma = 1 \\
 	\frac{1}{1-\gamma} \frac{c^{1 - \gamma}}{\rho + (\gamma - 1)g} & \text{otherwise}
-	\end{cases} 
+	\end{cases}
 \end{align}
 
 This gives us a system of three nonlinear equations to solve:
@@ -657,7 +663,7 @@ Before proceeding, define the following intermediate objects (see Appendix H of 
 \begin{align}
 	y &= (1 - \tilde{L})\bar{z} \\
 	\lambda_{ii} &= \frac{1}{1 + (N-1)\hat{z}^{\sigma - 1 - \theta}d^{1-\sigma}} \\
-	c &= (1 - \tilde{L})\bar{z} 
+	c &= (1 - \tilde{L})\bar{z}
 \end{align}
 
 
