@@ -18,42 +18,13 @@ end
 
 @test @inferred test_ω() == test_ω()
 
-# DYNAMIC OBJECTS
-# simpleODE
-function test_simpleODE()
-    params = (μ = 0.0, υ = 0.1, θ = 2.1, r = x -> 1., x = n -> 1., ξ = 1., π_tilde = (t, z) -> 1.) # Arbitrary parameter set
-    settings = (z = 0.:0.1:3., T = 10., g = x -> 0.02)
-    simpleODE(params, settings)
-end
-
-println("Benchmarking simpleODE constructor")
-@btime test_simpleODE()
-
+# MODEL OBJECTS
 # simpleDAE
 function test_simpleDAE()
     params = (μ = 0.0, υ = 0.1, θ = 2.1, r = x -> 1., x = n -> 1., ξ = 1., π_tilde = (t, z) -> 1.) # Arbitrary parameter set
     settings = (z = 0.:0.1:3., T = 10., g = x -> 0.02)
-    simpleDAE(params, settings)
+    simpleDAE(params, settings) # non-inferrable because of the constructor call
 end
 
 println("Benchmarking simpleDAE constructor")
 @btime test_simpleDAE()
-
-# RESIDUALS CALCULATION
-function test_residuals()
-    params = (μ = 0.0, υ = 0.1, θ = 2.1, r = x -> 1., x = n -> 1., ξ = 1., π_tilde = (t, z) -> 1.) # Arbitrary parameter set
-    settings = (z = 0.:0.1:3., T = 10, g = x -> 0.02, ode_solve_algorithm = CVODE_BDF(), t_grid = range(0., stop = 10, length = length(0.:0.1:3.)))
-    obj1 = calculate_residuals(params, settings)
-
-    # Vary the parameters a bit
-    params = (μ = 0.0, υ = 0.1, θ = 2.1, r = x -> 1. + 0.1*x, x = n -> 1, ξ = 1., π_tilde = (t, z) -> 1.) # Arbitrary parameter set
-    settings = (z = 0.:0.1:3., T = 10, g = x -> 0.02, ode_solve_algorithm = CVODE_BDF(), t_grid = range(0., stop = 10, length = length(0.:0.1:3.)))
-    obj2 = calculate_residuals(params, settings) # calls second method
-
-    return obj1, obj2
-end
-
-@test @inferred test_residuals() == test_residuals()
-
-println("Benchmarking simple residuals solver")
-@btime test_residuals()

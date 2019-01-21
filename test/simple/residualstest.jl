@@ -52,8 +52,6 @@
                         t_grid = range(0.0, stop = T_val, length = length(z_grid)))
 
 # Test the stationary residual is close to zero.
-    residuals, v_ts, g_ts = calculate_residuals(params_func_, settings())
-    @test norm(residuals) ≈ 0 atol = 1e-5
     # even by solving with DAE
     ω = ω_weights(z_grid, θ_val, ξ_val)
     daeprob = simpleDAE(params_func_, settings())
