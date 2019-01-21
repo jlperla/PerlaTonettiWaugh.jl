@@ -32,7 +32,7 @@ breaklinks]
 \newcommand{\condexpec}[3][]{\ensuremath{\mathbb{E}_{#1}\left[{#2} \; \middle| \; {#3} \right]}}
 \newcommand{\expec}[2][]{\ensuremath{\mathbb{E}_{{#1}}\left[ {#2} \right]}}
 \begin{document}
-\title{Equilibrium Technology Diffusion, Trade, and Growth\\Online Computational Appendix\thanks{Thanks to Ben Moll for advice on numerical methods and his excellent lecture notes.  Superb research assistance was provided by Chiyoung Ahn, Sev Hou, Arnav Sood, and Dongxiao Zhang.}}
+\title{Equilibrium Technology Diffusion, Trade, and Growth\\Online Computational Appendix\thanks{Thanks to Ben Moll for advice on numerical methods and his superb lecture notes.  Excellent research assistance was provided by Chiyoung Ahn, Sev Hou, Arnav Sood, and Dongxiao Zhang.}}
 \author{Jesse Perla \and Christopher Tonetti \and Michael E. Waugh}
 \maketitle
 
@@ -100,17 +100,17 @@ In order to solve for the dynamics of $v(t,z)$ and $g(t)$, we will discretize th
 
 \paragraph{Grid}
 
-Define a  grid $\set{z_i}_{i=1}^I$ with $z_1 = 0$ and $z_I = \bar{z}$ is a ``large'' number (keeping in mind that the effective number is $e^{\bar{z}}$).  After discretizing, we will denote the grid with the variable name, i.e. $z(t) \equiv \set{z_i(t)}_{i=1}^I$.  Given the exogenous $\pi(z,t)$ functions, the discretized equivalents is $\pi(t) \in \R^I$.
+Define a  grid $\set{z_i}_{i=1}^M$ with $z_1 = 0$ and $z_I = \bar{z}$ is a ``large'' number (keeping in mind that the effective number is $e^{\bar{z}}$).  After discretizing, we will denote the grid with the variable name, i.e. $z(t) \equiv \set{z_i(t)}_{i=1}^M$.  Given the exogenous $\pi(z,t)$ functions, the discretized equivalents is $\pi(t) \in \R^M$.
 
 \paragraph{Discretized Operator}
 
 To discretize the system, we use upwind finite differences.  In particular, we need to discretize the differential operator in \cref{eq:simple-summary5-numerical} subject to the \cref{eq:simple-summary3-numerical,eq:simple-summary4-numerical} boundary conditions.  Crucially, since these boundary conditions are homogeneous, we can decompose the linear $A(t)$ operator into additive parts where: the $\D[z]$ is discretized as $L^{-}_1$ using backwards differences, and the $\D[zz]$ is discretized as $L_2$ using central difference.   Furthermore, the $L^{-}_1$ and $L_2$ linear operators \textit{impose the boundary condition for any vector} they operator on.\footnote{See \url{https://github.com/JuliaDiffEq/PDERoadmap} for more on the theory of discretizing operators with affine boundary conditions.}
 
-Using the derivations in \cref{sec:discretization-operators}, the discretization of $A(t)$ subject to the boundary conditions is then the $I \times I$ matrix
+Using the derivations in \cref{sec:discretization-operators}, the discretization of $A(t)$ subject to the boundary conditions is then the $M \times M$ matrix
 \begin{align}
-A(t) &\equiv \left(r - \mu - \frac{\upsilon^2}{2}\right) \mathbb{I} - (\mu + \upsilon^2 - g(t)) L^{-}_1 - \frac{\upsilon^2}{2} L_2\label{eq:A-def-simple}
+A(t) &\equiv \left(r - \mu - \frac{\upsilon^2}{2}\right) I - (\mu + \upsilon^2 - g(t)) L^{-}_1 - \frac{\upsilon^2}{2} L_2\label{eq:A-def-simple}
 \end{align}
-where $\mathbb{I}$ is the identity matrix.
+where $I$ is the identity matrix.
 
 In order to check that the  $L^{-}_1$ backwards differences is the correct upwind direction, it is best to verify that\footnote{In the steady-state, this equation will be fulfilled for any non-degenerate solutions, but it is best to check this result at a few points in the transition path for off-equilibrium steps in the numerical algorithm.}
 \begin{equation}
@@ -120,7 +120,7 @@ In order to check that the  $L^{-}_1$ backwards differences is the correct upwin
 \paragraph{Quadrature}
 In order to discretize \cref{eq:simple-summary2-numerical}, we need to calculate the integral using quadrature.  Since the grid points are already given (i.e. we can't choose Gaussian quadrature nodes), we will use the weights for the non-uniform trapezoidal rule.
 
-To calculate these, use $\Delta_{-}$ and $\Delta_{+}$ backwards and forward diffs (respectively) for the $z$ grid (with $\Delta_{1,-} = 0$ and $\Delta_{I,+} = 0$ set for the ghost nodes),
+To calculate these, use $\Delta_{-}$ and $\Delta_{+}$ backwards and forward diffs (respectively) for the $z$ grid (with $\Delta_{1,-} = 0$ and $\Delta_{M,+} = 0$ set for the ghost nodes),
 \begin{align}
 \bar{\omega}&\equiv \frac1{2}(\Delta_{-} + \Delta_{+})
 \end{align}
@@ -130,7 +130,7 @@ Then, in \cref{sec:quadrature}, we can combine both the quadrature nodes and all
 \omega_i &\equiv \bar{\omega} \frac{\theta e^{(1 - \theta)z_i}}{1 - e^{-\theta \bar{z}}}
 \end{align}
 
-\noindent Using this definition, the integral is approximated by a linear operator $\omega\in\R^I$
+\noindent Using this definition, the integral is approximated by a linear operator $\omega\in\R^M$
 \begin{align}
  \int_{0}^{\bar{z}}  v(z,t) \left(e^z \frac{F'(z)}{F(\bar{z})}\right) \diff z &\approx \omega \cdot v(t)
 \end{align}
