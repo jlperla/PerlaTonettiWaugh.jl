@@ -3,9 +3,9 @@
     # Setup (unpack arguments, reset residual, grab E and Ω evaluations, etc.)
       @unpack ζ, Ω, E, static_equilibrium, T, results, ρ, δ, σ, μ, υ, L_1, L_2, ω, κ, d = p
       residual .= 0
-      M = length(residual) - 2
-      g = u[M+1]
-      z_hat = u[M+2]
+      P = length(residual) - 2
+      g = u[P+1]
+      z_hat = u[P+2]
       x = ζ
       Ω_t = Ω(t)
       E_t = E(t)
@@ -21,13 +21,13 @@
     #=  Reset the residuals to slack in the DAE conditions.
         Note that (eqn:19, eqn:33) yield A_t = (ρ + δ + L_tilde_log_derivative - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2))*I - (μ - g + (σ-1)*υ^2)*L_1 - (υ^2/2)*L_2 and we're decomposing this.
     =#
-      residual[1:M] = (ρ + δ + L_tilde_log_derivative - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2))*u[1:M]
-      residual[1:M] .-= (μ - g + (σ-1)*υ^2)*L_1*u[1:M]
-      residual[1:M] .-= (υ^2/2)*L_2*u[1:M]
-      residual[1:M] .-= du[1:M]
-      residual[1:M] .-= π_tilde # discretized system of ODE for v, where v'(T) = 0 (eq:24)
-      residual[M+1] = u[1] + x - dot(ω, u[1:M]) # residual (eq:25)
-      residual[M+2] = z_hat^(σ-1) - κ * d^(σ-1) / π_min # export threshold (eq:26)
+      residual[1:P] = (ρ + δ + L_tilde_log_derivative - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2))*u[1:P]
+      residual[1:P] .-= (μ - g + (σ-1)*υ^2)*L_1*u[1:P]
+      residual[1:P] .-= (υ^2/2)*L_2*u[1:P]
+      residual[1:P] .-= du[1:P]
+      residual[1:P] .-= π_tilde # discretized system of ODE for v, where v'(T) = 0 (eq:24)
+      residual[P+1] = u[1] + x - dot(ω, u[1:P]) # residual (eq:25)
+      residual[P+2] = z_hat^(σ-1) - κ * d^(σ-1) / π_min # export threshold (eq:26)
   end
 
 # Main method.
@@ -48,7 +48,7 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
       results = DataFrame(t = T, g = g_T, z_hat = z_hat_T, Ω = Ω_T, E = δ, v_0 = v_T[1], L_tilde = L_tilde_T)
 
     # Define intermediate quantitities.
-      M = length(z)
+      P = length(z)
       ω = ω_weights(z, θ, σ-1) # Quadrature weights.
       z, L_1_minus, L_1_plus, L_2 = rescaled_diffusionoperators(z, σ-1) # Operator Discretization.
       L_1 = L_1_minus # L_1 ≡ L_1_minus.
@@ -70,7 +70,7 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
 
     # Set the initial conditions.
       u0 = [v_T; g_T; z_hat_T]
-      du0 = zeros(M+2)
+      du0 = zeros(P+2)
 
     # Create the parameters object
       p = (ζ = ζ, Ω = Ω, E = E, static_equilibrium = static_equilibrium, T = T,
@@ -78,14 +78,14 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
             ω = ω, κ = κ, d = d)
 
     # Bundle all of this into an actual DAE problem.
-      dae_prob = DAEProblem(f!, du0, u0, (T, 0.0), p, differential_vars = [trues(M); false; false])
+      dae_prob = DAEProblem(f!, du0, u0, (T, 0.0), p, differential_vars = [trues(P); false; false])
 
     # Define the callback we'll be using (i.e., for the backward-looking L_tilde derivative)
       function cb_aux(u, t, integrator) # Function we'll be executing
         # Unpack the u
           # t = t
-          g_t = u[M+1]
-          z_hat_t = u[M+2]
+          g_t = u[P+1]
+          z_hat_t = u[P+2]
           Ω_t = Ω(t)
           E_t = E(t)
           v_0_t = u[1]
