@@ -23,18 +23,18 @@
     r_func_varying = t -> (r_val - 1e-02 * (1 - t / T_val)) # Not idiosyncratic, per intro to doc.
     r_func_ = t -> r_val
 
-# π_tilde_func_varying = (t, z) -> r_val .- 1e-02 * (1 .- 0* t / T_val) # Not idiosyncratic, per intro to doc.
-    π_tilde_func_varying = (t, z) -> (1 + 1e-02 * (1 - t / T_val))
-    π_tilde_func_ = (t, z) -> 1 # Potentially idiosyncratic.
+# π_func_varying = (t, z) -> r_val .- 1e-02 * (1 .- 0* t / T_val) # Not idiosyncratic, per intro to doc.
+    π_func_varying = (t, z) -> (1 + 1e-02 * (1 - t / T_val))
+    π_func_ = (t, z) -> 1 # Potentially idiosyncratic.
 
 # Param generators and param NTs.
-    params_ = @with_kw (μ = 0.0, υ = υ_val, θ = θ_val, r = r_val, ζ = ζ_val, ξ = ξ_val, π_tilde = z -> 1)
-    params_func = @with_kw (μ = 0.0, υ = υ_val, θ = θ_val, r = r_func_, x = x_func, ξ = ξ_val, π_tilde = π_tilde_func_)
+    params_ = @with_kw (μ = 0.0, υ = υ_val, θ = θ_val, r = r_val, ζ = ζ_val, ξ = ξ_val, π = z -> 1)
+    params_func = @with_kw (μ = 0.0, υ = υ_val, θ = θ_val, r = r_func_, x = x_func, ξ = ξ_val, π = π_func_)
     params_ = params_()
     params_func_ = params_func()
-    params_func_varying_1 = params_func(π_tilde = π_tilde_func_varying)
+    params_func_varying_1 = params_func(π = π_func_varying)
     params_func_varying_2 = params_func(r = r_func_varying)
-    params_func_varying_3 = params_func(r = r_func_varying, π_tilde = π_tilde_func_varying)
+    params_func_varying_3 = params_func(r = r_func_varying, π = π_func_varying)
 
 # Solutions.
 # Solve for the numerical stationary g_T.
@@ -60,7 +60,7 @@
     @test norm(residuals[end]) ≈ 0 atol = 1e-5
     @test norm(residuals) ≈ 0 atol = 1e-5
 
-# Solve with time-varying r and π_tilde, now with DAE
+# Solve with time-varying r and π, now with DAE
     daeprob = simpleDAE(params_func_varying_1, settings())
     residuals, v_ts, g_ts = calculate_residuals(daeprob, x_func, ω, IDA(), settings().t_grid)
     @test norm(residuals[1]) ≈ 0 atol = 1e-5
