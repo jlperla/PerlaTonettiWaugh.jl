@@ -2,7 +2,7 @@
   # Time and space grid.
     z_min = 0.0
     z_max = 5.0
-    M = 1000
+    P = 1000
     T = 20.0
   # Experiment settings.
     d_0 = 5.0
@@ -14,7 +14,7 @@
     tstops = nothing
 
 # Construct intermediate objects.
-  z = range(z_min, stop = z_max, length = M)
+  z = range(z_min, stop = z_max, length = P)
   settings = (z = z, tstops = tstops, Δ_E = Δ_E)
   params_0 = merge(params, (d = d_0,))
   params_T = merge(params, (d = d_T,))
@@ -121,18 +121,18 @@ end
 
 @testset "Regression Tests for f! at T" begin
   # Instantiate the f! arguments
-    du = zeros(M+2)
+    du = zeros(P+2)
     u = [v_T..., g_T, z_hat_T]
-    resid = zeros(M+2)
+    resid = zeros(P+2)
     t = T
     p = solve_dynamics(params_T, stationary_T, settings, T, Ω, E).p
   # Fill the residuals vector
     f!(resid, du, u, p, t)
   # Tests
     # Accuracy
-      @test mean(resid[1:M]) ≈ 0 atol = 1e-6
-      @test mean(resid[M+1]) ≈ 0 atol = 1e-6
-      @test mean(resid[M+2]) ≈ 0 atol = 1e-6
+      @test mean(resid[1:P]) ≈ 0 atol = 1e-6
+      @test mean(resid[P+1]) ≈ 0 atol = 1e-6
+      @test mean(resid[P+2]) ≈ 0 atol = 1e-6
       @test all(abs.(resid) .<= 1e-6) # Test that we have small residuals across the board.
     # Regression
       @test resid[4] ≈ 0 atol = 1e-6

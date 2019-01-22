@@ -15,7 +15,7 @@ end
 
 # Numerically solve for the stationary solution as a system of equations.
 function stationary_numerical_simple(params, z)
-    M = length(z)
+    P = length(z)
     # Unpack parameters.
     @unpack μ, υ, θ, r, ζ, π = params
     z, L_1_minus, L_1_plus, L_2  = rescaled_diffusionoperators(z, 1) # Discretize the operator
