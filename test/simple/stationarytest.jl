@@ -1,5 +1,5 @@
 # Generate default parameters.
-simple_params = @with_kw (μ = 0.0048, υ = 0.02, θ = 2.1, r = 0.05, ζ = 14.5, ξ = 1.0, π_tilde = x -> 1)
+simple_params = @with_kw (μ = 0.0048, υ = 0.02, θ = 2.1, r = 0.05, ζ = 14.5, ξ = 1.0, π = x -> 1)
 
 # Test them
 results_algebraic = stationary_algebraic_simple(simple_params());
@@ -9,7 +9,7 @@ results_algebraic = stationary_algebraic_simple(simple_params());
 @test results_algebraic.v(2)*exp(2) ≈ 164.54095232228548; # correct for rescaling
 @test results_algebraic.v(5)*exp(5) ≈ 3298.0717492785516;
 
-# Test for one particular grid. 
+# Test for one particular grid.
 z1 = unique([range(0.0, stop = 1.0, length = 500)' range(1.0, stop = 5.0, length = 201)'])
 results_num1 = stationary_numerical_simple(simple_params(), z1)
 @test results_num1.g ≈ 0.02010032283241259 # Invariance
