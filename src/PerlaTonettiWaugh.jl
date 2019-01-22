@@ -26,5 +26,6 @@ export residuals_given_E_nodes_interior
 export solve_full_model_global, solve_full_model
 export consumption_equivalent, display_stationary_sol
 export f!, f!_simple, f_simple, solve_system
+export L_tilde, S, static_equilibrium
 
 end # module
