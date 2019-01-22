@@ -1,9 +1,5 @@
-#=
-    Discretization code with rescaling.
-=#
-# Regular grids.
+# Diffusion operators with regular grids
 function rescaled_diffusionoperators(x::AbstractRange, ξ)
-    # Insert algebra here.
     Δ = step(x)
     M = length(x)
 
@@ -29,20 +25,18 @@ function rescaled_diffusionoperators(x::AbstractRange, ξ)
     return (x, L_1_minus, L_1_plus, L_2)
 end
 
-# Irregular grids.
+# Diffusion operators with irregular grids
 function rescaled_diffusionoperators(x::AbstractArray, ξ)
-    # Insert algebra here.
-    d = diff(x)
+    d = diff(x) # using the first difference as diff from ghost node
     M = length(x)
     Δ_m = zeros(M)
-    Δ_m[1] = d[1] # using the first difference as diff from ghost node
+    Δ_m[1] = d[1] 
     Δ_m[2:end] = d
     Δ_p = zeros(M)
     Δ_p[end] = d[end]
     Δ_p[1:end-1] = d
 
-    # I think l denote X line, u dentoe Z line
-    dl_p1 = zeros(M-1)./Δ_m[2:end] # This is flipped delta vector as the tridiagnal matrix is flipped? not sure
+    dl_p1 = zeros(M-1)./Δ_m[2:end] 
     d_p1 = -1 * ones(M)./Δ_p
     du_p1 = ones(M-1)./Δ_p[1:end-1]
     d_p1[end] = d_p1[end] + du_p1[end] * (1-ξ*Δ_m[end])
