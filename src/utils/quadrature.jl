@@ -10,7 +10,7 @@ function ω_weights(z, α, ξ)
     M = length(z)
     prepend!(Δ, NaN) # To keep the indexing straight. Now, Δ[2] = Δ_2 = z_2 - z_1. And NaN will throw an error if we try to use it.
     z_bar = z[end]
-    f_vec = (α * exp.(z * (ξ - α)))/(1 - exp(-α*z_bar)) # Get the vector of probability masses.
-    interiorWeights = [f_vec[i]/2 * (Δ[i] + Δ[i+1]) for i = 2:M-1] # Turn these into interior trapezoidal weights.
-    return [f_vec[1]/2 * Δ[2]; interiorWeights; f_vec[M]/2 * Δ[M]] # Add the boundary weights.
+    f_vec = (α * exp.(z * (ξ - α)))/(1 - exp(-α*z_bar)) # Get the vector of probability masses. (B.19)
+    interiorWeights = [f_vec[i]/2 * (Δ[i] + Δ[i+1]) for i = 2:M-1] # Turn these into interior trapezoidal weights. (19)
+    return [f_vec[1]/2 * Δ[2]; interiorWeights; f_vec[M]/2 * Δ[M]] # Add the boundary weights. (19, with ghost node definitions)
 end
