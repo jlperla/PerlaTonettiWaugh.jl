@@ -13,14 +13,14 @@ function rescaled_diffusionoperators(x::AbstractRange, ξ)
     d_m1 = ones(M)
     du_m1 = zeros(M-1)
     d_m1[1] = d_m1[1] + dl_m1[1] * (1+ξ*Δ)
-    L_1_minus = Tridiagonal(dl_m1, d_m1, du_m1)/Δ
+    L_1_minus = Tridiagonal(dl_m1, d_m1, du_m1)/Δ # (A.14) in appendix
 
     dl_2 = ones(M-1)
     d_2 = -2 * ones(M)
     d_2[1] = -2 + (1+ξ*Δ)
     d_2[end] = -2 + (1-ξ*Δ)
     du_2 = ones(M-1)
-    L_2 = Tridiagonal(dl_2, d_2, du_2)/(Δ^2)
+    L_2 = Tridiagonal(dl_2, d_2, du_2)/(Δ^2) # (A.15) in appendix
 
     return (x, L_1_minus, L_1_plus, L_2)
 end
