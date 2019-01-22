@@ -2,8 +2,8 @@
 # State grid.
     z_min = 0.0
     z_max = 5.0
-    M = 100
-    z_grid = range(z_min, stop = z_max, length = M) # Since we only care about the grid.
+    P = 100
+    z_grid = range(z_min, stop = z_max, length = P) # Since we only care about the grid.
 
 # Time grid.
     T_val = 100.0
