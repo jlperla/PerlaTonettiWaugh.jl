@@ -114,7 +114,9 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
         gen_z_bar = (Ω_t, z_hat) -> (Ω_t * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ)))^(1/(σ-1)) # (eq:29)
         gen_π_min = (L_tilde_t, z_bar) -> (1 - L_tilde_t) / ((σ-1)*z_bar) # (eq:31)
         gen_entry_residual = (v_0) -> v_0 - ζ*(1-χ)/χ # (eq:25)
-
+        gen_L_tilde_adopt = (Ω, S) -> Ω * ζ * S
+        gen_L_tilde_export = (Ω, z_hat) -> Ω * ((N-1)*z_hat^(-θ))*κ
+        gen_L_tilde_entrycost = (Ω, E) -> Ω * ζ * E / χ
 
       # Add these quantities to the DataFrame.
         results = @transform(results, entry_residual = gen_entry_residual.(:v_0)) # entry_residual column
@@ -136,6 +138,9 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
           results = @transform(results, π_min = gen_π_min.(:L_tilde, :z_bar)) # π_min column.
           results = @transform(results, log_M = log_M.(:t)) # log_M column
           results = @transform(results, U = U.(:t)) # U column
+          results = @transform(results, L_tilde_adopt = gen_L_tilde_adopt.(:Ω, :S))
+          results = @transform(results, L_tilde_export = gen_L_tilde_export.(:Ω, :z_hat))
+          results = @transform(results, L_tilde_entrycost = gen_L_tilde_entrycost.(:Ω, :E))
         end
 
     # Return.

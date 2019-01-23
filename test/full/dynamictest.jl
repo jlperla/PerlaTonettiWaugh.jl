@@ -74,6 +74,8 @@
     @test sol.results[:g][1] ≈ 0.020019475192487802 # g check.
     @test sol.results[:z_hat][1] ≈ 2.771561823423923
     @test sol.results[:z_hat][(end-9)] ≈ 2.77021657056094
+    # Sub-pieces of L_tilde
+    @test sol.results[:L_tilde_adopt] + sol.results[:L_tilde_export] + sol.results[:L_tilde_entrycost] ≈ sol.results[:L_tilde]
 end
 
 @testset "Regression Tests with time-varying Ω" begin
@@ -107,6 +109,8 @@ end
     @test sol.results[:z_bar][3] ≈ 1.6350019300336807 atol = 1e-5
     @test sol.results[:π_min][2] ≈ 0.21425367016810465 atol = 1e-5
     @test sol.results[:entry_residual][12] ≈ 0.0010887433781643363 atol = 1e-5
+    # Sub-pieces of L_tilde
+    @test sol.results[:L_tilde_adopt] + sol.results[:L_tilde_export] + sol.results[:L_tilde_entrycost] ≈ sol.results[:L_tilde]
 end
 
 @testset "Correctness Tests" begin # Here, we compare the DAE output to known correct values, such as MATLAB output or analytical results.
