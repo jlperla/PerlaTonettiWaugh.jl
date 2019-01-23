@@ -32,7 +32,7 @@ breaklinks]
 \newcommand{\condexpec}[3][]{\ensuremath{\mathbb{E}_{#1}\left[{#2} \; \middle| \; {#3} \right]}}
 \newcommand{\expec}[2][]{\ensuremath{\mathbb{E}_{{#1}}\left[ {#2} \right]}}
 \begin{document}
-\title{Equilibrium Technology Diffusion, Trade, and Growth\\Online Computational Appendix\thanks{Thanks to Ben Moll for advice on numerical methods and his superb lecture notes.  Excellent research assistance was provided by Chiyoung Ahn, Sev Hou, Arnav Sood, and Dongxiao Zhang.}}
+\title{Equilibrium Technology Diffusion, Trade, and Growth\\Online Computational Appendix\thanks{Thanks to Ben Moll for advice on numerical methods and his superb lecture notes and Chris Rackauckas for the Julia DiffEq package and expertise,  Excellent research assistance was provided by Chiyoung Ahn, Sev Hou, Arnav Sood, and Dongxiao Zhang.}}
 \author{Jesse Perla \and Christopher Tonetti \and Michael E. Waugh}
 \maketitle
 
@@ -108,7 +108,7 @@ After discretizing, we abuse notation and denote the grid by the variable name, 
 
 \paragraph{Discretized Operator}
 
-To discretize the system, we use upwind finite differences.  In particular, we need to discretize the differential operator in \cref{eq:simple-summary5-numerical} subject to the \cref{eq:simple-summary3-numerical,eq:simple-summary4-numerical} boundary conditions.  Crucially, since these boundary conditions are homogeneous, we can decompose the linear $A(t)$ operator into additive parts where: the $\D[z]$ is discretized as $L^{-}_1$ using backwards differences, and the $\D[zz]$ is discretized as $L_2$ using central difference.   Furthermore, the $L^{-}_1$ and $L_2$ linear operators \textit{impose the boundary condition for any vector} they operator on.\footnote{See \url{https://github.com/JuliaDiffEq/PDERoadmap} for more on the theory of discretizing operators with affine boundary conditions.}
+To discretize the system, we use upwind finite differences.  In particular, we need to discretize the differential operator in \cref{eq:simple-summary5-numerical} subject to the \cref{eq:simple-summary3-numerical,eq:simple-summary4-numerical} boundary conditions.  Crucially, since these boundary conditions are homogeneous, we can decompose the linear $A(t)$ operator into additive parts where: the $\D[z]$ is discretized as $L^{-}_1$ using backwards first differences, and the $\D[zz]$ is discretized as $L_2$ using central second difference.   Furthermore, the $L^{-}_1$ and $L_2$ linear operators \textit{impose the boundary condition for any vector} they operator on.\footnote{See \url{https://github.com/JuliaDiffEq/PDERoadmap} for more on the theory of discretizing operators with affine boundary conditions.}
 
 Using the derivations in \cref{sec:discretization-operators}, the discretization of $A(t)$ subject to the boundary conditions is then the $P \times P$ matrix
 \begin{align}
@@ -220,7 +220,11 @@ First, we will summarize results from the static equilibrium in the model.  Fixi
 	\pi(z,t) &\equiv \bar{\pi}_{\min}(t)\left(1 + (N-1)d^{1-\sigma}\indicator{z \geq \log(\hat{z}(t))}\right) - (N-1)\kappa e^{-(\sigma - 1)z}\indicator{z \geq \log(\hat{z}(t))}\\
 	\tilde{\rho}(t) &\equiv \rho+ \delta + \D[t]\log\left(1 - \tilde{L}(t)\right) - (\sigma - 1)\left(\mu - g(t) + (\sigma - 1)\frac{\upsilon^2}{2} \right)
 \end{align}
-To calculate the $\D[t]\log\left(1 - \tilde{L}(t)\right)$ we need to reference the ``future'' $\tilde{L}(t+\epsilon)$.  Since we are solving the transition dynamics backwards, this can be done using the previous (i.e. future) timestep, and then forward first-differences for a given $\tilde{L}(t)$.
+To calculate the $\D[t]\log\left(1 - \tilde{L}(t)\right)$ we need to reference the ``future'' $\tilde{L}(t+\epsilon)$.  Since the algorithm solves the transition dynamics backwards, this can be done using the previous (i.e. future) timestep, and then forward first-differences for a given $\tilde{L}(t)$.  That is,
+\begin{align}
+	\D[t]\log\left(1 - \tilde{L}(t)\right) &\approx \frac{\log\left(1 - \tilde{L}(t+ \Delta)\right) - \log\left(1 - \tilde{L}(t)\right)}{\Delta}
+\end{align}
+where the $\Delta$ comes whatever the times-stepping algorithm.
 
 \subsection{Differential Equations}\label{sec:full-ODE}
 The dynamic set of differential equations (rescaled) is derived in \cref{sec:full-model-derivations} and is very similar to the simple model.
