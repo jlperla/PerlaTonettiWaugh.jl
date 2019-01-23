@@ -50,14 +50,17 @@ function staticvals(vals, params)
     a = (r - g - (σ - 1)*(μ - g + (σ - 1)*υ^2/2))^(-1) # (eq:B.4)
     b = (1 - a*(r-g))*d^(1-σ)*z_hat^(ν + σ - 1) # (eq:B.5)
     S = θ * (g - μ - θ * υ^2 /2) # (eq:B.2)
-    L_tilde = Ω * ((N-1)*(1-F(z_hat))*κ + (1-η)*ζ*(S + δ/χ)) # (eq:B.7)
+    L_tilde = Ω * ((N-1)*z_hat^(-θ)*κ + (1-η)*ζ*(S + δ/χ)) # (eq:C.7)
+    L_tilde_x = Ω * (N - 1) * z_hat^(-θ) * κ # (C.8)
+    L_tilde_E = ζ/χ * Ω * δ # (C.9)
+    L_tilde_a = ζ * Ω * S # (C.10)
     z_bar = (Ω * (θ/(1 + θ - σ) + (N-1)*(1-F(z_hat))*d^(1-σ)*(z_hat^(-1 + σ)*θ/(1 + θ - σ))))^((σ-1)^(-1)) # (eq:B.8)
     w = σ^(-1)*z_bar # (eq:B.10)
     x = ζ * (1- η + η * Theta / w) # (eq:B.11)
     π_min = (d^(σ-1) * κ)/(z_hat^(σ-1)) # (eq:B.9, inverted)
 
-    return (F = F, r = r, ν = ν, a = a, b = b, S = S, L_tilde = L_tilde, z_bar = z_bar,
-            w = w, x = x, π_min = π_min)
+    return (F = F, r = r, ν = ν, a = a, b = b, S = S, L_tilde = L_tilde, L_tilde_x = L_tilde_x, L_tilde_E = L_tilde_E, L_tilde_a = L_tilde_a,
+            z_bar = z_bar, w = w, x = x, π_min = π_min)
 end
 
 # Default initial values
