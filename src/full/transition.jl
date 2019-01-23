@@ -64,11 +64,11 @@ function solve_model_from_E_nodes(E_nodes_interior, settings; detailed_solution 
   E_hat(t) = E_hat_interpolation(t)
   E_hat_integral = quadgk(E_hat, 0, T)[1]
   # Formulate and solve ODEProblem
-  M = log(Ω_T/Ω_0) / E_hat_integral # when Ω_T = Ω_0, then M = 0 so that E(t) is constant with δ as expected
-  Ω_derivative(Ω,p,t) = M*E_hat(t)*Ω
+  Q = log(Ω_T/Ω_0) / E_hat_integral # when Ω_T = Ω_0, then Q = 0 so that E(t) is constant with δ as expected
+  Ω_derivative(Ω,p,t) = Q*E_hat(t)*Ω
   Ω_solution = DifferentialEquations.solve(ODEProblem(Ω_derivative,Ω_0,(0.0, T)), reltol = 1e-15) # if this fails, error will be thrown
   Ω(t) = t <= T ? Ω_solution(t) : Ω_solution(T)
-  E(t) = M*E_hat(t) + δ
+  E(t) = Q*E_hat(t) + δ
   # solve the dynamics and get the resulting entry_residual vector; if solution is not valid, return Inf
   return solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed_solution = detailed_solution)
 end
