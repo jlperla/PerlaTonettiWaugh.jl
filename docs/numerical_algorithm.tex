@@ -100,7 +100,11 @@ In order to solve for the dynamics of $v(t,z)$ and $g(t)$, we will discretize th
 
 \paragraph{Grid}
 
-Define a  grid $\set{z_i}_{i=1}^P$ with $z_1 = 0$ and $z_P = \bar{z}$ is a ``large'' number (keeping in mind that the effective number is $e^{\bar{z}}$).  After discretizing, we will denote the grid with the variable name, i.e. $z(t) \equiv \set{z_i(t)}_{i=1}^P$.  Given the exogenous $\pi(z,t)$ functions, the discretized equivalents is $\pi(t) \in \R^P$.
+Define an irregular grid $\set{z_i}_{i=1}^P$ with $z_1 = 0$ and $z_P = \bar{z}$ is a ``large'' number (keeping in mind that the effective number is $e^{\bar{z}}$). 
+
+\paragraph{Discretized Functions}
+
+After discretizing, we abuse notation and denote the grid by the variable name, i.e. $z \equiv \set{z_i)}_{i=1}^P$.  We also denote discretized function with the same symbol, but dropping the dependence on $z$, i.e. $\pi(z,t)$ becomes $\pi(t) \in \R^P$, and $v(z,t)$ becomes $v(t) \in \R^P$
 
 \paragraph{Discretized Operator}
 
@@ -108,7 +112,7 @@ To discretize the system, we use upwind finite differences.  In particular, we n
 
 Using the derivations in \cref{sec:discretization-operators}, the discretization of $A(t)$ subject to the boundary conditions is then the $P \times P$ matrix
 \begin{align}
-A(t) &\equiv \left(r - \mu - \frac{\upsilon^2}{2}\right) I - (\mu + \upsilon^2 - g(t)) L^{-}_1 - \frac{\upsilon^2}{2} L_2\label{eq:A-def-simple}
+A(t) &\equiv \left(r - \mu - \frac{\upsilon^2}{2}\right) I - (\mu + \upsilon^2 - g(t)) L^{-}_1 - \frac{\upsilon^2}{2} L_2 \label{eq:A-def-simple}
 \end{align}
 where $I$ is the identity matrix.
 
@@ -143,7 +147,7 @@ Let $v_1(t)$ be the $1$st element in the $v(t)$ vector, corresponding to $v(0,t)
 \end{align}
 
 
-To find the stationary solution at $T$,  $v'(T) = 0$, we can solve the nonlinear system of equations
+\noindent To find the stationary solution at $T$,  $v'(T) = 0$, we can solve the nonlinear system of equations
 \begin{align}
 	0 &= A(T; g) v(T) - \pi(T)\label{eq:discretized-simple-stationary}\\
 	0 &= v_1(T) - \omega \cdot v(T) + x(T)\label{eq:discretized-simple-vm-stationary}
@@ -159,7 +163,7 @@ The basic algorithm for this, which we have not seen in the literature, is to di
 \begin{itemize}
 	\item Choose an appropriate $z$ grid, with a large number of points close to $0$ as well as near the $\bar{z}$.\footnote{There is a degree of sensitivity in this model for the particular choice of $\bar{z}$ and the grid points for several reasons: (a) the imposition of the \cref{eq:simple-summary3-numerical} condition on $\D[z]v(0,t)$  is analytically the correct boundary condition for the optimal stopping problem for the imitation threshold--it comes from the smooth-pasting condition--but is sensitive to the precise curvature.  For this reason, the discretization needs to give it enough precision or the $g(t)$ can get distorted; (b) the majority of the curvature is close to the $z=0$ barrier, after which the function rapidly becomes constant; (c) the artificial boundary at $\bar{z}$ introduces a lot of curvature right near the end.  If there are not enough grid points close to the $\bar{z}$, then the local curvature near $v(\bar{z},t)$ effects a larger part of the whole distribution; and (d) since the expectation in \cref{eq:discretized-simple-vm} is taken over a heavy-tailed distribution, and is essential for solving the endogenous $g(t)$, truncations can have a significant bias if $\bar{z}$ is too small.  In particular, if you change the $\theta$ radically or conditions which lead to large changes in $g(t)$, you should verify that the analytical and numerical steady states do not become too different.}
 	\item Identify an industrial-strength DAE solver (e.g. \url{http://docs.juliadiffeq.org/latest/tutorials/dae_example.html}).  For these, you give a an operator in the form of a stacked system of ODEs and algebraic equations, and then flag the algebraic ones for the solver.
-	\item Find for the time $T$ steady state as $v(z,T)$ and $g(T)$ from \cref{eq:discretized-simple-stationary,eq:discretized-simple-vm-stationary} as the \textit{initial condition}, for working backwards in time.\footnote{While we have an analytical solution in this specific case, it is better to use the numerical solution for the steady-state since it the direct steady-state of the DAE for a given grid.} 
+	\item Find for the time $T$ steady state as $v(T) \in \R^P$ and $g(T) \in R$ from \cref{eq:discretized-simple-stationary,eq:discretized-simple-vm-stationary} as the \textit{initial condition}, for working backwards in time.\footnote{While we have an analytical solution in this specific case, it is better to use the numerical solution for the steady-state since it is the steady-state of the DAE for a given grid.}
 	\item Setup a function for the \cref{eq:discretized-simple,eq:discretized-simple-vm} tagging the last equation as an algebraic one.
 	\item Solve the model.  To give a sense of the scale here, we have a system of roughly 2000-3000 ODEs for the full model, along with the single algebraic equation for the value matching condition.  For a DAE solver, this is at most a medium-sized problem.
 \end{itemize}
@@ -171,7 +175,7 @@ The fundamental differences between solving a full model of transition dynamics 
 \begin{itemize}
 	\item The $\pi(z,t)$ and $x(t)$ come from static equilibrium conditions given the trade-structure of the paper and the number of active local varieties, $\Omega(t)$, rather than being given exogenously
 	\item The interest rate $r(t)$ is no longer given exogenously, but needs to be found in equilibrium.  Luckily, this is forward looking and can be solved in the current structure with only minor changes since the transition dynamics are being solved backwards
-	\item The number of varieties $\Omega(t)$ is endogenously determined for trade shocks, and may change slowly according to profit maximizing and income smoothing incentives.
+	\item The number of varieties $\Omega(t)$ is endogenously determined for trade shocks, and may change slowly according to profit maximizing and income smoothing incentives
 	\item There is an additional algebraic equation for the export threshold, $\hat{z}(t)$
 \end{itemize}
 
@@ -179,7 +183,7 @@ The fundamental differences between solving a full model of transition dynamics 
 Of these, the only significant change is that the $\Omega(t)$ must be solved separately since the entry decision is dynamic, forward-looking, and begins with a stock $\Omega(0)$.  Therefore, we cannot simply add it as a further algebraic equation or use the trick of only using forward-differences while working backwards in time.  To solve the equilibrium,
 \begin{enumerate}
 	\item Guess a path for $\Omega(t)$ where we know $\Omega(0)$ and can calculate $\Omega(T)$ from the steady-state.
-	\item Solve the underlying DAE using the ``exogenous'' $\Omega(t)$ using the same algorithm as the simple model.  The $\pi(t,z)$ is calculated from static equilibrium conditions and the exogenous $\Omega(t)$ in the solution.
+	\item Solve the underlying DAE using the ``exogenous'' $\Omega(t)$ with the same algorithm as the simple model.  The $\pi(t,z)$ is calculated from static equilibrium conditions and the exogenous $\Omega(t)$ in the solution.  An additional algebraic equation is added for the trade export threshold.
 	\item Calculate the residuals of the entry decision to determine the optimality of $\Omega(t)$
 	\item Update the guess on $\Omega(t)$ until the residuals are minimized
 \end{enumerate}
@@ -188,7 +192,7 @@ Of these, the only significant change is that the $\Omega(t)$ must be solved sep
 
 Assume $\delta > 0$. The experiment is to examine a one-time unanticipated \textit{decrease} in $d$ as the trade liberalization.  We calculate the two steady states and examine the transition dynamics.
 
-In order to solve the dynamic problem in, we need to calculate $\tilde{\rho}(t), \pi_{\min}(t),\hat{z}(t),$ etc  as a function of $g(t), \Omega(t),$ and parameters.  As a simplification, we will assume that the cost of adoption is in labor, i.e. $\eta = 0$, so that $x(t) = \zeta$ for all $t$ from (PTW H.11)\footnote{Otherwise, there is an addition system of implicit equations to solve.}  The other simplification will be to assume $\log$ utility, so that $\gamma = 1$, resulting in a slightly more manageable calculation of interest rates.
+In order to solve the dynamic problem in, we need to calculate $\tilde{\rho}(t), \pi_{\min}(t),\hat{z}(t),$ etc  as a function of $g(t), \hat{z}(t), \Omega(t),$ and parameters.  As a simplification, we will assume that the cost of adoption is in labor, i.e. $\eta = 0$, so that $x(t) = \zeta$ for all $t$ from (PTW H.11)\footnote{Otherwise, there is an addition system of implicit equations to solve.}  The other simplification will be to assume $\log$ utility, so that $\gamma = 1$, resulting in a slightly more manageable calculation of interest rates.
 
 \subsection{Number of Varieties and Entry in Transition}
 
@@ -216,10 +220,10 @@ First, we will summarize results from the static equilibrium in the model.  Fixi
 	\pi(z,t) &\equiv \bar{\pi}_{\min}(t)\left(1 + (N-1)d^{1-\sigma}\indicator{z \geq \log(\hat{z}(t))}\right) - (N-1)\kappa e^{-(\sigma - 1)z}\indicator{z \geq \log(\hat{z}(t))}\\
 	\tilde{\rho}(t) &\equiv \rho+ \delta + \D[t]\log\left(1 - \tilde{L}(t)\right) - (\sigma - 1)\left(\mu - g(t) + (\sigma - 1)\frac{\upsilon^2}{2} \right)
 \end{align}
-To calculate the $\D[t]\log\left(1 - \tilde{L}(t)\right)$ you need to store the ``future'' $\left(1 - \tilde{L}(t)\right)$ and $t$ values in the last adaptive timestep, and then use forward first-differences with it based on the current value
+To calculate the $\D[t]\log\left(1 - \tilde{L}(t)\right)$ we need to reference the ``future'' $\tilde{L}(t+\epsilon)$.  Since we are solving the transition dynamics backwards, this can be done using the previous (i.e. future) timestep, and then forward first-differences for a given $\tilde{L}(t)$.
 
 \subsection{Differential Equations}\label{sec:full-ODE}
-The dynamic set of differential equations (rescaled) is derived in \cref{sec:full-model-derivations}.
+The dynamic set of differential equations (rescaled) is derived in \cref{sec:full-model-derivations} and is very similar to the simple model.
 \begin{align}
 %	\tilde{\rho}(t) v(z,t) &= \pi(z,t) + (\mu - g(t) + (\sigma - 1)\upsilon^2)\D[z]v(z,t) + \frac{\upsilon^2}{2}\D[zz]v(z,t) + \D[t]v(z,t)\\
 %	\D[t]v(z,t) &= \left(\tilde{\rho}(t)  - (\mu - g(t) + (\sigma - 1)\upsilon^2)\D[z] - \frac{\upsilon^2}{2}\D[zz]\right)v(z,t) - \pi(z,t) \\
