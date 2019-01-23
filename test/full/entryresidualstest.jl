@@ -6,7 +6,7 @@
         settings = settings_defaults()
         settings = merge(settings, (global_transition_penalty_coefficient = 1.0, ))
         z_grid = settings.z
-        M = length(z_grid)
+        P = length(z_grid)
     
         d_0 = params.d_0
         d_T = params.d_T
@@ -33,7 +33,7 @@
         settings = settings_defaults()
         settings = merge(settings, (global_transition_penalty_coefficient = 1.0, ))
         z_grid = settings.z
-        M = length(z_grid)
+        P = length(z_grid)
     
         d_0 = params.d_0
         d_T = params.d_T

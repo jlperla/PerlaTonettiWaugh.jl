@@ -23,11 +23,11 @@ end
 function solve_full_model(settings; impose_E_monotonicity_constraints = true, write_csv = false, csvpath = None)
    # constraint for increasing E nodes
   function constraints_increasing_E!(h, x, jacobian_t)
-    M = length(x)
+    L = length(x)
     # A is a matrix whose ith row has 1 in ith col and -1 in (i+1)th col
     # so ith element of A*x imposes x[i] <= x[i+1]
     # note that this imposes x[end] <= 0 as well as the last row is [0; 0; ...; 0; 1].
-    A = LinearAlgebra.Tridiagonal(zeros(M-1),ones(M),-ones(M-1))
+    A = LinearAlgebra.Tridiagonal(zeros(L-1),ones(L),-ones(L-1))
     if length(jacobian_t) > 0 # transpose of the Jacobian matrix
         jacobian_t[:] = A'
     end
