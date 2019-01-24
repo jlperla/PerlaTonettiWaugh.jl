@@ -405,10 +405,10 @@ L_2 &\equiv \frac{1}{\Delta^2}\begin{pmatrix}
 \subsubsection{Irregular grids}
 Using the backwards first-order difference, \eqref{eq:new-BC1} can be alternatively represented as
 \begin{align}
-\dfrac{v(0, t) - v(-\Delta_{1, +}, t)}{\Delta_{1, +}} &= - \xi v(0,t)
+\dfrac{v(0, t) - v(-\Delta_{1, -}, t)}{\Delta_{1, -}} &= - \xi v(0,t)
 \end{align}
 
-Using discretized central differences of second orders, \eqref{eq:new-BC1} can be shown as
+Note that we have assumed that $\Delta_{i-1} = \Delta_{i,+}$ and $\Delta_{P,+} = \Delta_{P,-}$ for the ghost notes. Using discretized central differences of second orders, \eqref{eq:new-BC1} can be shown as
 \begin{align}
 \dfrac{v (\Delta_{1, +}, t) - 2 v(0, t) + v(-\Delta_{1, +}, t)}{\Delta_{1, +}^2} &=   \dfrac{v(\Delta_{1, +}, t) - v(0, t)}{\Delta_{1, +}^2} - \dfrac{1}{\Delta_{1, +}}\dfrac{v (0, t) - v(-\Delta_{1, +}, t) }{\Delta_{1, +}}  \\
 &= \dfrac{v(\Delta_{1, +}, t) - v(0, t)}{\Delta_{1, +}^2} + \dfrac{1}{\Delta_{i,+}} \xi v(0, t)  \\ 
@@ -425,7 +425,7 @@ Thus, the corresponding $L_1^{-}$ and $L_2$ matrices are defined as
 
 \begin{align}
 L_1^{-} &\equiv \begin{pmatrix}
-\Delta^{-1}_{1,+} [1 - (1 + \xi \Delta^{-1}_{1,+})] &0&0&\dots&0&0&0\\
+\Delta^{-1}_{1,-} [1 - (1 + \xi \Delta^{-1}_{1,-})] &0&0&\dots&0&0&0\\
 -\Delta_{2,-}^{-1}&\Delta_{2,-}^{-1}&0&\dots&0&0&0\\
 \vdots&\vdots&\vdots&\ddots&\vdots&\vdots&\vdots\\
 0&0&0&\dots&-\Delta_{P-1,-}^{-1}&\Delta_{P-1,-}^{-1}&0\\
