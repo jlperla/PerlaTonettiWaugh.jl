@@ -36,6 +36,8 @@ breaklinks]
 \author{Jesse Perla \and Christopher Tonetti \and Michael E. Waugh}
 \maketitle
 
+This document is a self-contained summary of all of the equations and algorithms used to solve the model and transition dynamics.  Equations in the code have a comment to reference the corresponding equation numbers in this document.  See \url{https://github.com/jlperla/PerlaTonettiWaugh.jl} for the code and instructions for usage.
+
 \section{Simplified Growth Model with Transition Dynamics}
 We start with a simplified version of the model with transition dynamics.  In the more complicated case of this paper, the $\pi(z,t), r(t), x(t)$ will come from equilibrium conditions rather than being given exogenously, but the structure of solving the resulting system of integro-differential-algebraic equations remains the same.
 
@@ -182,7 +184,7 @@ The fundamental differences between solving a full model of transition dynamics 
 \begin{itemize}
 	\item The $\pi(z,t)$ and $x(t)$ come from static equilibrium conditions given the trade-structure of the paper and the number of active local varieties, $\Omega(t)$, rather than being given exogenously
 	\item The interest rate $r(t)$ is no longer given exogenously, but needs to be found in equilibrium.  Luckily, this is forward looking and can be solved in the current structure with only minor changes since the transition dynamics are being solved backwards
-	\item The number of varieties $\Omega(t)$ is endogenously determined based on the endogneous entry decision, and may change slowly according to profit maximizing and income smoothing incentives
+	\item The number of varieties $\Omega(t)$ is endogenously determined based on the endogenous entry decision, and may change slowly according to profit maximizing and income smoothing incentives
 	\item There is an additional algebraic equation for the export threshold, $\hat{z}(t)$
 \end{itemize}
 
@@ -241,7 +243,7 @@ In practice, since the guess $\widehat{E}(0)$ is arbitrary and simply changes th
 \begin{enumerate}
 	\item Choose a grid over the $t \in [0,T]$ space
 	\item Choose a sequence of $\hat{E}(t)$ at all of the interior nodes (i.e. we know $\hat{E}(0) = -1$ and $\hat{E}(T) = 0$)
-	\item Use a linear or cubic-spline interpolator to create a function from thes nodes
+	\item Use a linear or cubic-spline interpolator to create a function from these nodes
 	\item If using a global optimizer which uses monte-carlo methods, we can tell the optimizer to only choose numbers between $-1$ and $0$, and then speed things up a little by reordering them to be increasing.  The latter is possible in this model because we know that the path will be monotone.
 \end{enumerate}}
 
@@ -383,7 +385,7 @@ L_2 &\equiv \frac{1}{\Delta^2}\begin{bmatrix}
 \section{Derivations for Simple Model}\label{sec:simple-derivation}
 \subsection{Equations Prior to Rescaling}
 
-From the technical appendix of Benhabib, Perla, and Tonetti (2019) (but renaming the $v$ function to $\hat{v}$ here), assume an exogenously given $\hat{\pi}(z,t)$ and $x(t)$ function.  We will only look at examples where $F(z) = 1 - e^{-\theta z}$ for all $t$.
+From the technical appendix of Benhabib, Perla, and Tonetti (2019) (but renaming the $v$ function to be $\hat{v}$ here to avoid confusion with our normalization), assume an exogenously given $\hat{\pi}(z,t)$ and $x(t)$ function.  We will only look at examples where $F(z) = 1 - e^{-\theta z}$ for all $t$.
 \begin{align}
 (r - g(t)) \hat{v}(z,t) &= \hat{\pi}(z,t) + (\mu- g(t)) \D[z] \hat{v}(z,t) + \frac{\upsilon^2}{2} \D[zz] \hat{v}(z,t) + \D[t]\hat{v}(z,t)\label{eq:bellman-GBM-dynamic}	\\
 \hat{v}(0,t) &= \int_{0}^{\infty} \hat{v}(z,t) F'(z)\diff z - x(t)\label{eq:vm-GBM-dynamic}\\
@@ -397,7 +399,7 @@ A solution to this problem is a $g(t)$ and $\hat{v}(z,t)$ that fulfills the abov
 
 
 \subsection{Change of Variables to Normalize and Rescale}\label{eq:simple-rescale}
-Solving \cref{eq:bellman-GBM-dynamic} for $\hat{v}(z,t)$ is problematic since the scale goes from approximatively $1$ to $e^{\bar{z}}$, which is very large for a high $\bar{z}$.  To make the solution more stable, we rescale the equation.  Choose some $\xi \geq 0$ for convenience and to ensure stability and let
+Solving \cref{eq:bellman-GBM-dynamic} for $\hat{v}(z,t)$ is problematic since the scale goes from approximately $1$ to $e^{\bar{z}}$, which is very large for a high $\bar{z}$.  To make the solution more stable, we rescale the equation.  Choose some $\xi \geq 0$ for convenience and to ensure stability and let
 \begin{align}
 	v(z,t) &\equiv e^{-\xi z}\hat{v}(z,t) = e^{-\xi z}\frac{V(e^z M(t),t)}{M(t)}\\
 	\intertext{Differentiate and reorganize this expression to yield}
@@ -420,7 +422,7 @@ Finally, in the value matching condition, $\hat{v}(0,t) = e^{0} v(0,t)$ where if
 \begin{align}
 	 v(0,t) &= \int_{0}^{\infty}  v(z,t) \left(e^{\xi z} F'(z)\right) \diff z - x(t)\label{eq:vm-GBM-dynamic-normalized-not-truncated}
 \end{align}
-However, for the numerical approximation with the artificial boundary at $\bar{z}$, we need to use a truncated distribution for $F(z)$.  Since we have take the $F(z)$ with support from $[0,\infty)$, and we truncate at $\bar{z} = \bar{z}$ then the equation in \cref{eq:vm-GBM-dynamic-normalized-not-truncated} to work with is,
+However, for the numerical approximation with the artificial boundary at $\bar{z}$, we need to use a truncated distribution for $F(z)$.  Since the support of $F(z)$ is $[0,\infty)$, and we truncate at $\bar{z} = \bar{z}$ then the equation in \cref{eq:vm-GBM-dynamic-normalized-not-truncated} becomes
 \begin{align}
 	 v(0,t) &= \int_{0}^{\bar{z}}  v(z,t) \left(e^{\xi z} \frac{F'(z)}{F(\bar{z})}\right) \diff z - x(t)\label{eq:vm-GBM-dynamic-normalized}
 \end{align}
@@ -447,7 +449,7 @@ v_1(t) &= \omega \cdot v(t) - x(t)
 
 \subsection{Static Objects and Algebraic Solution}\label{sec:full-algebraic-solution}
 
-Note that we have the following static calculations from the main paper (eqns H.1 - H.11)
+Note that we have the following static calculations from PTW (H.1) to (H.11)
 
 \begin{align}
 	F(z) &= 1 - z^{-\theta} \\
@@ -460,7 +462,9 @@ Note that we have the following static calculations from the main paper (eqns H.
 	\tilde{L}_{\text{x}} &= \Omega (N -1)\hat{z}^{-\theta}\kappa\\
 	\tilde{L}_{\text{E}} &= \frac{\zeta}{\chi}\Omega\delta\\
 	\tilde{L}_{\text{a}} &= \zeta \Omega S\\
-	\bar{z} &= [\Omega(\mathbb{E}[z^{\sigma - 1}] + (N-1)(1 - F(\hat{z}))d^{1 - \sigma}\mathbb{E}[z^{\sigma - 1}|z > \hat{z}])]^{1/(\sigma - 1)} \\
+%	\bar{z} &= [\Omega(\mathbb{E}[z^{\sigma - 1}] + (N-1)(1 - F(\hat{z}))d^{1 - \sigma}\mathbb{E}[z^{\sigma - 1}|z > \hat{z}])]^{1/(\sigma - 1)} \\
+	\bar{z}&\equiv \left[\Omega
+	\frac{\theta}{1+\theta - \sigma}\left(1 + (N-1)d^{1-\sigma}\hat{z}^{\sigma - 1 -\theta} \right)\right]^{1/(\sigma - 1)} \\
 	\hat{z} &= d \left(\frac{\kappa}{\bar{\pi}_{\textup{min}}}\right)^{\frac{1}{\sigma - 1}} \\
 	w &= \frac{1}{\bar{\sigma}}\bar{z} \\
 	x &= \zeta(1 - \eta + \eta \Theta / w) \\
@@ -666,10 +670,10 @@ M(t) &=M(0)\times\begin{cases}
 Before proceeding, define the following intermediate objects (see Appendix H of PTW):
 
 \begin{align}
-	y &= (1 - \tilde{L})\bar{z} \\
-	\lambda_{ii} &= \frac{1}{1 + (N-1)\hat{z}^{\sigma - 1 - \theta}d^{1-\sigma}} \\
-	c &= (1 - \tilde{L})\bar{z} 
+	y &= c = (1 - \tilde{L})\bar{z} \\
+	\lambda_{ii} &= \frac{1}{1 + (N-1)\hat{z}^{\sigma - 1 - \theta}d^{1-\sigma}} 
 \end{align}
+Note that $y = c$ here because we are only solving the special case of all adoption being done with labor (i.e., $\eta = 0$).
 
 
 At the steady state, define $\bar{g}$ and $\bar{c}$ as the growth rate and consumption relative to real wages for $t \geq T$.  The consumer welfare can be calculated as from (PTW 1),
@@ -687,7 +691,7 @@ c(t) &= \left(\frac{\theta}{1-\sigma+\theta}\right)^{\frac{1}{\sigma-1}}\left(1 
 \end{align}
 
 \subsection{Consumption Equivalent}
-Note that we need to consider if $M(0) \neq 1$.  Modifiy \cref{eq:log-M}
+Note that we need to consider if $M(0) \neq 1$.  Modify \cref{eq:log-M}
 \begin{align}
 \log M(t) &= \log M(0) + \int_0^t g(s)\diff s\label{eq:log-M-notone}\\
 \intertext{Hence, modifying \cref{eq:U-def} to get the welfare at time $0$ given a $M(0)$}

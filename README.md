@@ -4,7 +4,7 @@
 
 ## Installation and Use
 
-1. Follow the instructions to [install Julia](https://lectures.quantecon.org/jl/getting_started.html#Installing-Julia-and-Dependencies)
+1. Follow the instructions to [install Julia](https://lectures.quantecon.org/jl/getting_started.html)
 
 2. Install the package, open the Julia REPL (see the documentation above) and then run
 
@@ -12,8 +12,6 @@
 using Pkg
 pkg"dev https://github.com/jlperla/PerlaTonettiWaugh.jl.git"
 ```
-
-Consider dragging and dropping the folder into Github Desktop or GitKraken in order to make changes.
 
 The folder will be installed in `~/.julia/dev/PerlaTonettiWaugh` on mac/linux and in somewhere like `C:\Users\USERNAME\.julia\dev\PerlaTonettiWaugh` on Windows
 
