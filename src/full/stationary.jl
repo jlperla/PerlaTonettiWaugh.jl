@@ -56,7 +56,7 @@ function staticvals(vals, params)
     z_bar = (Ω * (θ/(1 + θ - σ) + (N-1)*(1-F(z_hat))*d^(1-σ)*(z_hat^(-1 + σ)*θ/(1 + θ - σ))))^((σ-1)^(-1)) # (C.11)
     w = σ^(-1)*z_bar # (C,13)
     x = ζ * (1- η + η * Theta / w) # (C.14)
-    π_min = (d^(σ-1) * κ)/(z_hat^(σ-1)) # (C.12, inverted)
+    π_min = (d^(σ-1) * κ)/(z_hat^(σ-1)) # (C.12, inverted to express π_min as a function of parameters and z_hat)
 
     return (F = F, r = r, ν = ν, a = a, b = b, S = S, L_tilde = L_tilde, L_tilde_x = L_tilde_x, L_tilde_E = L_tilde_E, L_tilde_a = L_tilde_a,
             z_bar = z_bar, w = w, x = x, π_min = π_min)
