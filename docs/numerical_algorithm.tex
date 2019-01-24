@@ -324,6 +324,10 @@ This will discretize space with backward differences in the first derivative, an
 	\Delta_{i,-} &\equiv z_i - z_{i-1},\, \text{for } i = 2,\ldots P\\
 	\Delta_{i,+} &\equiv z_{i+1} - z_i,\, \text{for } i = 1,\ldots P-1
 	\end{align}
+	and the corresponding central differences:
+	\begin{align}
+	\Delta_{i} &\equiv z_{i+1} - z_{i-1}, \text{for } i = 2, \ldots P-1
+	\end{align}
 	\item Assume $\Delta_{1, -} = \Delta_{1, +}$ and $\Delta_{P, +} = \Delta_{P, -}$, due to ghost points, $z_0$ and $z_{P+1}$ on both boundaries. (i.e., the distance to the ghost nodes are the same as the distance to the closest nodes).  Then define the vector of backwards and forwards first differences as
 	\begin{align}
 	\Delta_{-} &\equiv \begin{bmatrix} z_2 - z_1 \\
@@ -400,6 +404,25 @@ Similarly, for \eqref{eq:new-BC2}, we have
 \dfrac{v (\bar{z} + \Delta_{P,-}, t) - 2 v(\bar{z} , t) + v(\bar{z} -\Delta_{P,-}, t)}{\Delta_{P,-}^2} &=   \dfrac{v(\bar{z} - \Delta_{P,-}, t) - v(\bar{z}, t)}{\Delta_{P,-}^2} + \dfrac{1}{\Delta_{P,-}}\dfrac{ v(\bar{z}+\Delta_{P,-}, t) - v (\bar{z}, t) }{\Delta_{P,-}}  \\
 &= \dfrac{v(\bar{z} - \Delta_{P,-}, t) - v(\bar{z}, t)}{\Delta_{P,-}^2}  - \dfrac{1}{\Delta_{P,-}} \xi v(\bar{z}, t)  \\ 
 &= \dfrac{1}{\Delta_{P,-}^2}  (- 1 - \Delta_{P,-} \xi) v(\bar{z},t)  + \dfrac{1}{\Delta_{P,-}^2}  v(\bar{z} - \Delta_{P,-}, t)  
+\end{align}
+
+Thus, the corresponding $L_1^{-}$ and $L_2$ matrices are defined as 
+
+\begin{align}
+L_1^{-} &\equiv \begin{bmatrix}
+\Delta^{-1}_{1,+} [1 - (1 + \xi \Delta^{-1}_{1,+})] &0&0&\dots&0&0&0\\
+-\Delta_{2,-}^{-1}&\Delta_{2,-}^{-1}&0&\dots&0&0&0\\
+\vdots&\vdots&\vdots&\ddots&\vdots&\vdots&\vdots\\
+0&0&0&\dots&-\Delta_{P-1,-}^{-1}&\Delta_{P-1,-}^{-1}&0\\
+0&0&0&\cdots&0&-\Delta_{P,-}^{-1}&\Delta_{P,-}^{-1}
+\end{bmatrix}_{P\times P}\label{eq:L-1} \\
+L_2 &\equiv \begin{bmatrix}
+\Delta_{1,+}^{-2}[-2 + (1+\xi \Delta_{1,+})] &\Delta_{1,+}^{-2}&0&\dots&0&0&0 \\
+\Delta_{2,-}^{-1} \Delta_{2}^{-1}&-\Delta_{2,-}^{-1} \Delta_{2,+}^{-1}  & \Delta_{2,+}^{-1} \Delta_{2}^{-1} &\dots&0&0&0\\
+\vdots&\vdots&\vdots&\ddots&\vdots&\vdots&\vdots\\
+0&0&0&\dots&\Delta_{P-1,-}^{-1} \Delta_{P-1}^{-1}&-\Delta_{P-1,-}^{-1} \Delta_{P-1,+}^{-1}  & \Delta_{P-1,+}^{-1} \Delta_{P-1}^{-1}\\
+0&0&0&\cdots&0&\Delta_{P,-}^{-2}&\Delta_{P,-}^{-2} [-2 + (1- \xi\Delta)]
+\end{bmatrix}_{P\times P}\label{eq:L-2}
 \end{align}
 
 \section{Derivations for Simple Model}\label{sec:simple-derivation}
