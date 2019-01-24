@@ -72,8 +72,7 @@ parameter_simple_stationary_defaults = @with_kw (μ = 0.0,
     θ = 2.1,
     r = 0.05,
     ζ = 14.5,
-    ξ = 1.0,
-    π_tilde = (z->1))
+    ξ = 1.0)
 
 parameter_simple_transition_defaults = @with_kw (μ = 0.0,
     υ = 0.1,
@@ -81,5 +80,4 @@ parameter_simple_transition_defaults = @with_kw (μ = 0.0,
     r = t -> (0.05 - 1e-02 * (1 - t / 100.0)),
     ζ = 14.5,
     ξ = 1.0,
-    π_tilde = (t, z) -> (1 + 1e-02 * (1 - t / 100.0)),
     x = t -> ζ)
