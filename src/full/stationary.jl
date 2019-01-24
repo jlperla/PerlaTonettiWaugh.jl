@@ -48,7 +48,7 @@ function staticvals(vals, params)
     ν = (μ-g)/υ^2 + sqrt(((g-μ)/υ^2)^2 + (r-g)/(υ^2/2)) # (C.3)
     a = (r - g - (σ - 1)*(μ - g + (σ - 1)*υ^2/2))^(-1) # (C.4)
     b = (1 - a*(r-g))*d^(1-σ)*z_hat^(ν + σ - 1) # (eq:C.5)
-    S = θ * (g - μ - θ * υ^2 /2) # (eq:C.2)
+    S = θ * (g - μ - θ * υ^2 /2) # (26) or (C.2)
     L_tilde = Ω * ((N-1)*z_hat^(-θ)*κ + (1-η)*ζ*(S + δ/χ)) # (eq:C.7)
     L_tilde_x = Ω * (N - 1) * z_hat^(-θ) * κ # (C.8)
     L_tilde_E = ζ/χ * Ω * δ # (C.9)
@@ -94,10 +94,10 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
         value_matching = v_tilde[1] - dot(v_tilde, ω) + x # (48) and (C.60)
 
         # Free-entry condition.
-        free_entry = v_tilde[1] - x*(1-χ)/χ # (50)
+        free_entry = v_tilde[1] - x*(1-χ)/χ # (50) or (C.48) and (C.60)
 
         # Adoption threshold.
-        adoption_threshold = π_min - (1 - L_tilde)/((σ-1)*z_bar^(σ-1)) #
+        adoption_threshold = π_min - (1 - L_tilde)/((σ-1)*z_bar^(σ-1)) # (C.19)
 
         return [value_matching, free_entry, adoption_threshold]
     end

@@ -26,8 +26,8 @@
       residual[1:P] .-= (υ^2/2)*L_2*u[1:P] # (46)
       residual[1:P] .-= du[1:P]
       residual[1:P] .-= π_tilde # discretized system of ODE for v, where v'(T) = 0 (47)
-      residual[P+1] = u[1] + x - dot(ω, u[1:P]) # value matching residual (48), and (C.60)
-      residual[P+2] = z_hat^(σ-1) - κ * d^(σ-1) / π_min # export threshold (50)
+      residual[P+1] = u[1] + x - dot(ω, u[1:P]) # value matching residual, (48) and (C.60)
+      residual[P+2] = z_hat^(σ-1) - κ * d^(σ-1) / π_min # export threshold (49)
   end
 
 # Main method.
@@ -110,7 +110,7 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
     results = sort!(results)
       # Define the welfare, etc. quantities in terms of quantities in the DataFrame.
         gen_λ_ii = z_hat -> 1 / (1 + (N-1)*z_hat^(σ-1-θ)*d^(1-σ)) # (51)
-        gen_c = (L_tilde, Ω, z_bar, S) -> (1 - L_tilde)*z_bar - η*ζ*Ω*Theta*(S + δ/χ) # (eq:52)
+        gen_c = (L_tilde, Ω, z_bar, S) -> (1 - L_tilde)*z_bar - η*ζ*Ω*Theta*(S + δ/χ) # (52)
         gen_S = S
         gen_z_bar = (Ω_t, z_hat) -> (Ω_t * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ)))^(1/(σ-1)) # (31)
         gen_π_min = (L_tilde_t, z_bar) -> (1 - L_tilde_t) / ((σ-1)*z_bar) # (32)
