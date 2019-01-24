@@ -26,7 +26,7 @@
       residual[1:P] .-= (υ^2/2)*L_2*u[1:P] # (46)
       residual[1:P] .-= du[1:P]
       residual[1:P] .-= π_tilde # discretized system of ODE for v, where v'(T) = 0 (47)
-      residual[P+1] = u[1] + x - dot(ω, u[1:P]) # value matching residual, (48) and (C.60)
+      residual[P+1] = u[1] + x - dot(ω, u[1:P]) # value matching residual, (48) and x(t) = ζ assumption at beginning of Section 2
       residual[P+2] = z_hat^(σ-1) - κ * d^(σ-1) / π_min # export threshold (49)
   end
 
