@@ -16,18 +16,18 @@
       if (t < T)
         t_forward = results[:t][end]
         L_tilde_forward = results[:L_tilde][end]
-        L_tilde_log_derivative = (log(1 - L_tilde_forward) - log(1 - L_tilde_t))/(t_forward - t) # See note under (eq:33)
+        L_tilde_log_derivative = (log(1 - L_tilde_forward) - log(1 - L_tilde_t))/(t_forward - t) # See note under (34)
       end
     #=  Reset the residuals to slack in the DAE conditions.
-        Note that (eqn:19, eqn:33) yield A_t = (ρ + δ + L_tilde_log_derivative - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2))*I - (μ - g + (σ-1)*υ^2)*L_1 - (υ^2/2)*L_2 and we're decomposing this.
+        Note that (C.40) and (46) yield A_t = (ρ + δ + L_tilde_log_derivative - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2))*I - (μ - g + (σ-1)*υ^2)*L_1 - (υ^2/2)*L_2 and we're decomposing this.
     =#
-      residual[1:P] = (ρ + δ + L_tilde_log_derivative - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2))*u[1:P]
-      residual[1:P] .-= (μ - g + (σ-1)*υ^2)*L_1*u[1:P]
-      residual[1:P] .-= (υ^2/2)*L_2*u[1:P]
+      residual[1:P] = (ρ + δ + L_tilde_log_derivative - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2))*u[1:P] # (34)
+      residual[1:P] .-= (μ - g + (σ-1)*υ^2)*L_1*u[1:P] # (46)
+      residual[1:P] .-= (υ^2/2)*L_2*u[1:P] # (46)
       residual[1:P] .-= du[1:P]
-      residual[1:P] .-= π_tilde # discretized system of ODE for v, where v'(T) = 0 (eq:24)
-      residual[P+1] = u[1] + x - dot(ω, u[1:P]) # residual (eq:25)
-      residual[P+2] = z_hat^(σ-1) - κ * d^(σ-1) / π_min # export threshold (eq:26)
+      residual[1:P] .-= π_tilde # discretized system of ODE for v, where v'(T) = 0 (47)
+      residual[P+1] = u[1] + x - dot(ω, u[1:P]) # value matching residual, (48) and x(t) = ζ assumption at beginning of Section 2
+      residual[P+2] = z_hat^(σ-1) - κ * d^(σ-1) / π_min # export threshold (49)
   end
 
 # Main method.
@@ -55,17 +55,17 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
       L_1 = L_1_minus # L_1 ≡ L_1_minus.
 
     # Define the auxiliary functions for the DAE problem.
-      S(g) = θ * (g - μ - θ * υ^2/2) # Compute S given g. (eq:28)
-      L_tilde(S, z_hat, E_t, Ω_t) = Ω_t * ((N-1) * z_hat^(-θ)*κ + ζ*(S + E_t / χ)) # Compute L_tilde. (eq:29)
+      S(g) = θ * (g - μ - θ * υ^2/2) # Compute S given g. (26)
+      L_tilde(S, z_hat, E_t, Ω_t) = Ω_t * ((N-1) * z_hat^(-θ)*κ + ζ*(S + E_t / χ)) # Compute L_tilde. (27)
 
       function static_equilibrium(v_0, g, z_hat, E_t, Ω_t)
         S_t = S(g)
         L_tilde_t = L_tilde(S_t, z_hat, E_t, Ω_t)
-        z_bar = Ω_t * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ)) # (eq:30)
-        π_min = (1 - L_tilde_t) / ((σ-1)*z_bar) # (eq:31)
+        z_bar = Ω_t * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ)) # (31)
+        π_min = (1 - L_tilde_t) / ((σ-1)*z_bar) # (32)
         i_vectorized = z .>= log(z_hat) # Vectorized indicator function
-        π_tilde = π_min * (1.0.+(N-1)*d^(1-σ)*i_vectorized) - (N-1)*κ*exp.(-(σ-1).*z).*i_vectorized # (eq:32)
-        entry_residual = v_0 - ζ * (1-χ) / χ # value matching condition (eq:25)
+        π_tilde = π_min * (1.0.+(N-1)*d^(1-σ)*i_vectorized) - (N-1)*κ*exp.(-(σ-1).*z).*i_vectorized # (33)
+        entry_residual = v_0 - ζ * (1-χ) / χ # value matching condition (45)
         return (S_t = S_t, L_tilde_t = L_tilde_t, z_bar = z_bar, π_min = π_min, π_tilde = π_tilde, entry_residual = entry_residual)
       end
 
@@ -109,15 +109,15 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
     # Post-process the results DataFrame.
     results = sort!(results)
       # Define the welfare, etc. quantities in terms of quantities in the DataFrame.
-        gen_λ_ii = z_hat -> 1 / (1 + (N-1)*z_hat^(σ-1-θ)*d^(1-σ)) # (eq:34)
-        gen_c = (L_tilde, Ω, z_bar, S) -> (1 - L_tilde)*z_bar - η*ζ*Ω*Theta*(S + δ/χ) # (eq:B.54)
+        gen_λ_ii = z_hat -> 1 / (1 + (N-1)*z_hat^(σ-1-θ)*d^(1-σ)) # (51)
+        gen_c = (L_tilde, Ω, z_bar, S) -> (1 - L_tilde)*z_bar - η*ζ*Ω*Theta*(S + δ/χ) # (52)
         gen_S = S
-        gen_z_bar = (Ω_t, z_hat) -> (Ω_t * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ)))^(1/(σ-1)) # (eq:29)
-        gen_π_min = (L_tilde_t, z_bar) -> (1 - L_tilde_t) / ((σ-1)*z_bar) # (eq:31)
-        gen_entry_residual = (v_0) -> v_0 - ζ*(1-χ)/χ # (eq:25)
-        gen_L_tilde_adopt = (Ω, S) -> Ω * ζ * S
-        gen_L_tilde_export = (Ω, z_hat) -> Ω * ((N-1)*z_hat^(-θ))*κ
-        gen_L_tilde_entrycost = (Ω, E) -> Ω * ζ * E / χ
+        gen_z_bar = (Ω_t, z_hat) -> (Ω_t * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ)))^(1/(σ-1)) # (31)
+        gen_π_min = (L_tilde_t, z_bar) -> (1 - L_tilde_t) / ((σ-1)*z_bar) # (32)
+        gen_entry_residual = (v_0) -> v_0 - ζ*(1-χ)/χ # (45)
+        gen_L_tilde_adopt = (Ω, S) -> Ω * ζ * S # (30)
+        gen_L_tilde_export = (Ω, z_hat) -> Ω * ((N-1)*z_hat^(-θ))*κ # (28)
+        gen_L_tilde_entrycost = (Ω, E) -> Ω * ζ * E / χ # (29)
 
       # Add these quantities to the DataFrame.
         results = @transform(results, entry_residual = gen_entry_residual.(:v_0)) # entry_residual column
