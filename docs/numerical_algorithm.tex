@@ -408,7 +408,7 @@ Using the backwards first-order difference, \eqref{eq:new-BC1} can be alternativ
 \dfrac{v(0, t) - v(-\Delta_{1, -}, t)}{\Delta_{1, -}} &= - \xi v(0,t)
 \end{align}
 
-Note that we have assumed that $\Delta_{i-1} = \Delta_{i,+}$ and $\Delta_{P,+} = \Delta_{P,-}$ for the ghost notes. Using discretized central differences of second orders, \eqref{eq:new-BC1} can be shown as
+Note that we have assumed that $\Delta_{1,-} = \Delta_{1,+}$ and $\Delta_{P,+} = \Delta_{P,-}$ for the ghost notes. Using discretized central differences of second orders, \eqref{eq:new-BC1} can be shown as
 \begin{align}
 \dfrac{v (\Delta_{1, +}, t) - 2 v(0, t) + v(-\Delta_{1, +}, t)}{\Delta_{1, +}^2} &=   \dfrac{v(\Delta_{1, +}, t) - v(0, t)}{\Delta_{1, +}^2} - \dfrac{1}{\Delta_{1, +}}\dfrac{v (0, t) - v(-\Delta_{1, +}, t) }{\Delta_{1, +}}  \\
 &= \dfrac{v(\Delta_{1, +}, t) - v(0, t)}{\Delta_{1, +}^2} + \dfrac{1}{\Delta_{i,+}} \xi v(0, t)  \\ 
