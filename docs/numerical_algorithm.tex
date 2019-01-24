@@ -31,6 +31,11 @@ breaklinks]
 \newcommand{\indicator}[1]{\ensuremath{\mathds{1}\left\{{#1}\right\}}}
 \newcommand{\condexpec}[3][]{\ensuremath{\mathbb{E}_{#1}\left[{#2} \; \middle| \; {#3} \right]}}
 \newcommand{\expec}[2][]{\ensuremath{\mathbb{E}_{{#1}}\left[ {#2} \right]}}
+
+\newenvironment{psmallmatrix}
+{\left(\begin{smallmatrix}}
+	{\end{smallmatrix}\right)}
+
 \begin{document}
 \title{Equilibrium Technology Diffusion, Trade, and Growth\\Online Computational Appendix\thanks{Thanks to Ben Moll for advice on numerical methods and his superb lecture notes and Chris Rackauckas for the Julia DiffEq package and expertise,  Excellent research assistance was provided by Chiyoung Ahn, Sev Hou, Arnav Sood, and Dongxiao Zhang.}}
 \author{Jesse Perla \and Christopher Tonetti \and Michael E. Waugh}
@@ -378,20 +383,20 @@ Similarly, for \eqref{eq:new-BC2}, we have
 Thus, the corresponding $L_1^{-}$ and $L_2$ matrices are defined as 
 
 \begin{align}
-L_1^{-} &\equiv \frac{1}{\Delta}\begin{bmatrix}
+L_1^{-} &\equiv \frac{1}{\Delta}\begin{pmatrix}
 1 - (1 + \xi \Delta) &0&0&\dots&0&0&0\\
 -1&1&0&\dots&0&0&0\\
 \vdots&\vdots&\vdots&\ddots&\vdots&\vdots&\vdots\\
 0&0&0&\dots&-1&1&0\\
 0&0&0&\cdots&0&-1&1
-\end{bmatrix}_{P\times P}\label{eq:L-1-regular} \\
-L_2 &\equiv \frac{1}{\Delta^2}\begin{bmatrix}
+\end{pmatrix}_{P\times P}\label{eq:L-1-regular} \\
+L_2 &\equiv \frac{1}{\Delta^2}\begin{pmatrix}
 -2 + (1 + \xi\Delta) &1&0&\dots&0&0&0\\
 1&-2&1&\dots&0&0&0\\
 \vdots&\vdots&\vdots&\ddots&\vdots&\vdots&\vdots\\
 0&0&0&\dots&1&-2&1\\
 0&0&0&\cdots&0&1&-2 + (1- \xi\Delta)
-\end{bmatrix}_{P\times P}\label{eq:L-2-regular}
+\end{pmatrix}_{P\times P}\label{eq:L-2-regular}
 \end{align}
 
 \subsubsection{Irregular grids}
@@ -416,20 +421,20 @@ Similarly, for \eqref{eq:new-BC2}, we have
 Thus, the corresponding $L_1^{-}$ and $L_2$ matrices are defined as 
 
 \begin{align}
-L_1^{-} &\equiv \begin{bmatrix}
+L_1^{-} &\equiv \begin{pmatrix}
 \Delta^{-1}_{1,+} [1 - (1 + \xi \Delta^{-1}_{1,+})] &0&0&\dots&0&0&0\\
 -\Delta_{2,-}^{-1}&\Delta_{2,-}^{-1}&0&\dots&0&0&0\\
 \vdots&\vdots&\vdots&\ddots&\vdots&\vdots&\vdots\\
 0&0&0&\dots&-\Delta_{P-1,-}^{-1}&\Delta_{P-1,-}^{-1}&0\\
 0&0&0&\cdots&0&-\Delta_{P,-}^{-1}&\Delta_{P,-}^{-1}
-\end{bmatrix}_{P\times P}\label{eq:L-1} \\
-L_2 &\equiv \begin{bmatrix}
+\end{pmatrix}_{P\times P}\label{eq:L-1} \\
+L_2 &\equiv \begin{psmallmatrix}
 \Delta_{1,+}^{-2}[-2 + (1+\xi \Delta_{1,+})] &\Delta_{1,+}^{-2}&0&\dots&0&0&0 \\
 2\Delta_{2,-}^{-1} \Delta_{2}^{-1}&-2\Delta_{2,-}^{-1} \Delta_{2,+}^{-1}  & 2\Delta_{2,+}^{-1} \Delta_{2}^{-1} &\dots&0&0&0\\
 \vdots&\vdots&\vdots&\ddots&\vdots&\vdots&\vdots\\
 0&0&0&\dots&2\Delta_{P-1,-}^{-1} \Delta_{P-1}^{-1}&-2\Delta_{P-1,-}^{-1} \Delta_{P-1,+}^{-1}  & 2 \Delta_{P-1,+}^{-1} \Delta_{P-1}^{-1}\\
 0&0&0&\cdots&0&\Delta_{P,-}^{-2}&\Delta_{P,-}^{-2} [-2 + (1- \xi\Delta)]
-\end{bmatrix}_{P\times P}\label{eq:L-2}
+\end{psmallmatrix}_{P\times P}\label{eq:L-2}
 \end{align}
 
 \section{Derivations for Simple Model}\label{sec:simple-derivation}
