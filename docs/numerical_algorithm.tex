@@ -396,7 +396,7 @@ Using the backwards first-order difference, \eqref{eq:new-BC1} can be alternativ
 Using discretized central differences of second orders, \eqref{eq:new-BC1} can be shown as
 \begin{align}
 \dfrac{v (\Delta_{1, +}, t) - 2 v(0, t) + v(-\Delta_{1, +}, t)}{\Delta_{1, +}^2} &=   \dfrac{v(\Delta_{1, +}, t) - v(0, t)}{\Delta_{1, +}^2} - \dfrac{1}{\Delta_{1, +}}\dfrac{v (0, t) - v(-\Delta_{1, +}, t) }{\Delta_{1, +}}  \\
-&= \dfrac{v(\Delta_{1, +}, t) - v(0, t)}{\Delta_{1, +}^2} + \dfrac{1}{\Delta} \xi v(0, t)  \\ 
+&= \dfrac{v(\Delta_{1, +}, t) - v(0, t)}{\Delta_{1, +}^2} + \dfrac{1}{\Delta_{i,+}} \xi v(0, t)  \\ 
 &= \dfrac{1}{\Delta_{1, +}^2}  (- 1 + \Delta_{1, +} \xi) v(0,t)  + \dfrac{1}{\Delta_{1, +}^2}  v(\Delta_{1, +}, t)  
 \end{align}
 Similarly, for \eqref{eq:new-BC2}, we have
