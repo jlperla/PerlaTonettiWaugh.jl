@@ -83,8 +83,8 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
         ρ_tilde = r_tilde - (σ - 1)*(μ - g + (σ-1)*(υ^2/2)) # (C.40)
         A_T = (ρ_tilde * I - (μ - g + (σ-1)*υ^2)*L_1_minus - υ^2/2 * L_2) # (46)
         i = z -> z >= log(z_hat) ? 1 : 0 # indicator function for next equation.
-        π_tilde = z -> π_min * (1 + (N-1)*d^(1-σ)*i(z)) - (N-1)*κ*exp(-(σ-1)*z)*i(z) # (33)
-        v_tilde = A_T \ π_tilde.(z) # discretized system of ODE for v, where v'(T) = 0 (47)
+        π = z -> π_min * (1 + (N-1)*d^(1-σ)*i(z)) - (N-1)*κ*exp(-(σ-1)*z)*i(z) # (33)
+        v_tilde = A_T \ π.(z) # discretized system of ODE for v, where v'(T) = 0 (47)
 
         #=
             System of equations to be solved.
@@ -112,8 +112,8 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
     ρ_tilde = r_tilde - (σ - 1)*(μ - g_T + (σ-1)*(υ^2/2)) # (C.40)
     A_T = (ρ_tilde * I - (μ-g_T + (σ-1)*υ^2)*L_1_minus - υ^2/2 * L_2) # (46)
     i = z -> z >= log(z_hat_T) ? 1 : 0 # indicator function for next equation.
-    π_tilde = z -> π_min * (1 + (N-1)*d^(1-σ)*i(z)) - (N-1)*κ*exp(-(σ-1)*z)*i(z) # (33)
-    v_tilde = A_T \ π_tilde.(z) # discretized system of ODE for v, where v'(T) = 0 (47)
+    π = z -> π_min * (1 + (N-1)*d^(1-σ)*i(z)) - (N-1)*κ*exp(-(σ-1)*z)*i(z) # (33)
+    v_tilde = A_T \ π.(z) # discretized system of ODE for v, where v'(T) = 0 (47)
 
     return merge(staticvalues, merge((g = g_T, z_hat = z_hat_T, Ω = Ω_T, v_tilde = v_tilde), welfare([g_T; z_hat_T; Ω_T], params, staticvalues)))
 end
