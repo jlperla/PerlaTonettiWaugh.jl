@@ -37,9 +37,9 @@ breaklinks]
 \maketitle
 
 \section{Simplified Growth Model with Transition Dynamics}
-We start with an simplified version of the model with transition dynamics.  In the more complicated case of this paper, the $\pi(z,t), r(t), x(t)$ will come from equilibrium conditions rather than being given exogenously, but the structure of solving the resulting system of integro-differential-algebraic equations remains the same.
+We start with a simplified version of the model with transition dynamics.  In the more complicated case of this paper, the $\pi(z,t), r(t), x(t)$ will come from equilibrium conditions rather than being given exogenously, but the structure of solving the resulting system of integro-differential-algebraic equations remains the same.
 
-There is a useful simplifying result in the both this simple and the full model: in the transition dynamics experiments we are looking at, the normalized distribution $F(z)$ will remain constant over all time.  Hence, we do not need to jointly solve the KFE as we will be at the stationary level (post-normalization).  This is a consequence of the PDF becomes stationary (after normalization) for this model and is \textbf{not} an assumption.
+There is a useful simplifying result in both this simple and the full model: in the transition dynamics experiments we are looking at, the normalized distribution $F(z)$ will remain constant over time.  Hence, we do not need to jointly solve the KFE as we will be at the stationary level (post-normalization).  This is a consequence of the PDF remaining stationary (after normalization) under the transition dynamics we examine, and is \textbf{not} an assumption.
 
 \subsection{Summary of Equations}\label{sec:summary-simple}
 We follow the notation of the main paper wherever possible.  This model is the geometric Brownian motion (GBM) model in the technical appendix of Benhabib, Perla, and Tonetti (2019).
@@ -77,7 +77,7 @@ v(z,T) &= \frac1{r-\mu- \upsilon^2/2}\left(1 + \frac1{\nu} e^{-(\nu + 1) z}\righ
 \nu &\equiv  \frac{\mu- g}{\upsilon^2} + \sqrt{\left(\frac{g-\mu}{\upsilon^2} \right)^{2} + \frac{r-g}{\upsilon^2/2}}. \label{eq:nu-gbm}
 \end{align}
 
-Note: since $v(z,T)$ has been rescaled by $e^{-z}$ above, it is now a \textbf{decreasing} function in $z$.  This will lead to appealing numerical properties when solving the PDE for $v(t,z)$ since it becomes asymptoptically constant as $z \to \infty$ for any $t$
+Note: since $v(z,T)$ has been rescaled by $e^{-z}$ above, it is now a \textbf{decreasing} function in $z$.  This will lead to appealing numerical properties when solving the PDE for $v(t,z)$ since it becomes asymptoptically constant as $z \to \infty$ for any $t$.
 
 
 \subsection{Summary of Equations For Numerical Solution}\label{sec:summary-simple-numerical}
@@ -122,11 +122,11 @@ In order to check that the  $L^{-}_1$ backwards differences is the correct upwin
 \end{equation}
 
 \paragraph{Quadrature}
-In order to discretize \cref{eq:simple-summary2-numerical}, we need to calculate the integral using quadrature.  Since the grid points are already given (i.e. we can't choose Gaussian quadrature nodes), we will use the weights for the non-uniform trapezoidal rule.
+In order to discretize \cref{eq:simple-summary2-numerical}, we need to calculate the integral using quadrature.  Since the grid points are already given (i.e. we can't choose Gaussian quadrature nodes), we use the weights for the non-uniform trapezoidal rule.
 
 To calculate these, use $\Delta_{-}$ and $\Delta_{+}$ backwards and forward diffs (respectively) for the $z$ grid (with $\Delta_{1,-} = 0$ and $\Delta_{P,+} = 0$ set for the ghost nodes),
 \begin{align}
-\bar{\omega}&\equiv \frac1{2}(\Delta_{-} + \Delta_{+})
+\bar{\omega}&\equiv \frac1{2}(\Delta_{-} + \Delta_{+})\in \R^P
 \end{align}
 
 Then, in \cref{sec:quadrature}, we can combine both the quadrature nodes and all non-$v$ values at the nodes (i.e.$e^z$ and the $F'(z)$) with $\bar{\omega}$ so that
@@ -140,7 +140,7 @@ Then, in \cref{sec:quadrature}, we can combine both the quadrature nodes and all
 \end{align}
 
 \subsection{Discretized Model as an DAE}
-Let $v_1(t)$ be the $1$st element in the $v(t)$ vector, corresponding to $v(0,t)$.  Then, the value matching condition in \cref{eq:simple-summary2-numerical,eq:simple-summary1-numerical} along with the system of ODEs becomes the differential-algebraic equation (DAE)
+Let $v_1(t)$ be the $1$st element in the $v(t)$ vector, corresponding to $v(0,t)$.  Then, the value matching condition in \cref{eq:simple-summary2-numerical,eq:simple-summary1-numerical} along with the system of ODEs becomes the system of differential-algebraic equations (DAE)
 \begin{align}
 	v'(t) &= A(t) v(t) - \pi(t)\label{eq:discretized-simple}\\
 	0 &= v_1(t) - \omega \cdot v(t) + x(t)\label{eq:discretized-simple-vm}
@@ -158,24 +158,31 @@ Where the $ A(T; g)$ is to reinforce that it is the only component which is a fu
 
 Transition dynamics can be solved for any exogenous $x(t)$ and $\pi(z,t)$ functions defined on $t \in [0,\infty)$ where they remain constant after $T$.
 
-The basic algorithm for this, which we have not seen in the literature, is to directly solve the system \cref{eq:discretized-simple,eq:discretized-simple-vm} as a DAE.\footnote{ We experimented extensively with the more typical method in the economics literature of guessing a path for $g(t)$, solving the discretized system as an ODE in \cref{eq:discretized-simple}, and then minimizing residuals of \cref{eq:discretized-simple-vm}.  For various reasons, this approach ended up being much slower and less stable for this particular problem, which led to the DAE solution.  While we were able to get solutions using this approach for the simple solution, it failed to effectively solve the full model dynamics in any reasonable time.}
+The basic algorithm for this, which we have not seen in the literature, is to directly solve the system \cref{eq:discretized-simple,eq:discretized-simple-vm} as a DAE.\footnote{ We experimented extensively with the more typical method in the economics literature of guessing a path for $g(t)$, solving the discretized system as an ODE in \cref{eq:discretized-simple}, and then minimizing residuals of \cref{eq:discretized-simple-vm}.  For various reasons, this approach ended up being much slower and less stable for this particular problem, which led to the DAE solution.  While we were able to get solutions using this approach for the simple solution, it failed to effectively solve the full model dynamics robustly.}
 
 \begin{itemize}
 	\item Choose an appropriate $z$ grid, with a large number of points close to $0$ as well as near the $\bar{z}$.\footnote{There is a degree of sensitivity in this model for the particular choice of $\bar{z}$ and the grid points for several reasons: (a) the imposition of the \cref{eq:simple-summary3-numerical} condition on $\D[z]v(0,t)$  is analytically the correct boundary condition for the optimal stopping problem for the imitation threshold--it comes from the smooth-pasting condition--but is sensitive to the precise curvature.  For this reason, the discretization needs to give it enough precision or the $g(t)$ can get distorted; (b) the majority of the curvature is close to the $z=0$ barrier, after which the function rapidly becomes constant; (c) the artificial boundary at $\bar{z}$ introduces a lot of curvature right near the end.  If there are not enough grid points close to the $\bar{z}$, then the local curvature near $v(\bar{z},t)$ effects a larger part of the whole distribution; and (d) since the expectation in \cref{eq:discretized-simple-vm} is taken over a heavy-tailed distribution, and is essential for solving the endogenous $g(t)$, truncations can have a significant bias if $\bar{z}$ is too small.  In particular, if you change the $\theta$ radically or conditions which lead to large changes in $g(t)$, you should verify that the analytical and numerical steady states do not become too different.}
 	\item Identify an industrial-strength DAE solver (e.g. \url{http://docs.juliadiffeq.org/latest/tutorials/dae_example.html}).  For these, you give a an operator in the form of a stacked system of ODEs and algebraic equations, and then flag the algebraic ones for the solver.
-	\item Find for the time $T$ steady state as $v(T) \in \R^P$ and $g(T) \in R$ from \cref{eq:discretized-simple-stationary,eq:discretized-simple-vm-stationary} as the \textit{initial condition}, for working backwards in time.\footnote{While we have an analytical solution in this specific case, it is better to use the numerical solution for the steady-state since it is the steady-state of the DAE for a given grid.}
+	\item Find the time $T$ steady state as $v(T) \in \R^P$ and $g(T) \in R$ from \cref{eq:discretized-simple-stationary,eq:discretized-simple-vm-stationary} as the \textit{initial condition}, for working backwards in time.\footnote{While we have an analytical solution in this specific case, it is better to use the numerical solution for the steady-state since it is the steady-state of the DAE for a given grid.}
 	\item Setup a function for the \cref{eq:discretized-simple,eq:discretized-simple-vm} tagging the last equation as an algebraic one.
-	\item Solve the model.  To give a sense of the scale here, we have a system of roughly 2000-3000 ODEs for the full model, along with the single algebraic equation for the value matching condition.  For a DAE solver, this is at most a medium-sized problem.
+	\item Solve the system, which is at most a medium-sized problem for a serious DAE solver
 \end{itemize}
 
-This approach to solving transition dynamics seems to be generally applicable:\footnote{In fact, we suspect that this approach to be extremely fast and robust for most models.  Part of the difficulty in solving our setup is that models with endogenously determined growth rates always have peculiarities which lead extra sensitivity in numerical solutions.} (1) use a spatial discretization to turn the PDEs into a system of ODEs; (2) add any equilibrium constraints on the value functions or distributions as algebraic equations, using quadrature to convert any integrals into linear operators; (3) stack both to create a DAE system, and then use a high-performance solver.  A more general piece of advice for these is for economists to exploit high-performance ODE solvers with flexibility for various time-stepping methods rather than building their own.
+\noindent To give a sense of the scale and speed in solving the DAE
+\begin{itemize}
+	\item The simple model solves a system of about 100 ODEs and algebraic equations in less than $70\mu$s.  The number of nodes of $z$ is relatively low because the normalization of $v(z,t)$ leads to a fairly value function for most of the domain.
+	\item For the full model, we need about 1000 ODEs to capture extra curvature from the export decision, which is solved in less than $500ms$.  Most of the extra time is due to the complexity of static equilibrium conditions.
+\end{itemize}
+
+
+This approach to solving transition dynamics seems to be generally applicable:\footnote{In fact, we suspect that this approach to be extremely fast and robust for most models.  Part of the difficulty in solving our setup is that models with endogenously determined growth rates always have peculiarities which lead extra sensitivity in numerical solutions.} (1) use a spatial discretization to turn the PDEs into a system of ODEs; (2) add any equilibrium constraints on the value functions or distributions as algebraic equations, using quadrature to convert any integrals into linear operators; (3) stack both to create a DAE system, and then use a high-performance solver.  A more general piece of advice for these is for economists to exploit high-performance ODE solvers with flexibility for various time-stepping methods rather discretizing the time dimension on their own.
 
 \section{Full Growth Model with Transition Dynamics}
 The fundamental differences between solving a full model of transition dynamics and that in the simple model are the following:
 \begin{itemize}
 	\item The $\pi(z,t)$ and $x(t)$ come from static equilibrium conditions given the trade-structure of the paper and the number of active local varieties, $\Omega(t)$, rather than being given exogenously
 	\item The interest rate $r(t)$ is no longer given exogenously, but needs to be found in equilibrium.  Luckily, this is forward looking and can be solved in the current structure with only minor changes since the transition dynamics are being solved backwards
-	\item The number of varieties $\Omega(t)$ is endogenously determined for trade shocks, and may change slowly according to profit maximizing and income smoothing incentives
+	\item The number of varieties $\Omega(t)$ is endogenously determined based on the endogneous entry decision, and may change slowly according to profit maximizing and income smoothing incentives
 	\item There is an additional algebraic equation for the export threshold, $\hat{z}(t)$
 \end{itemize}
 
@@ -184,8 +191,8 @@ Of these, the only significant change is that the $\Omega(t)$ must be solved sep
 \begin{enumerate}
 	\item Guess a path for $\Omega(t)$ where we know $\Omega(0)$ and can calculate $\Omega(T)$ from the steady-state.
 	\item Solve the underlying DAE using the ``exogenous'' $\Omega(t)$ with the same algorithm as the simple model.  The $\pi(t,z)$ is calculated from static equilibrium conditions and the exogenous $\Omega(t)$ in the solution.  An additional algebraic equation is added for the trade export threshold.
-	\item Calculate the residuals of the entry decision to determine the optimality of $\Omega(t)$
-	\item Update the guess on $\Omega(t)$ until the residuals are minimized
+	\item Calculate the residuals of the free-entry decision to determine the optimality of $\Omega(t)$
+	\item Update the guess on $\Omega(t)$ until the residuals are minimized. Solving the full dynamics for a given $\Omega(t)$ takes about $500ms$, and the number of iterations required depends on how close the $\Omega(t)$ guess was.
 \end{enumerate}
 
 \paragraph{Transition Dynamics Experiment}
@@ -194,39 +201,52 @@ Assume $\delta > 0$. The experiment is to examine a one-time unanticipated \text
 
 In order to solve the dynamic problem in, we need to calculate $\tilde{\rho}(t), \pi_{\min}(t),\hat{z}(t),$ etc  as a function of $g(t), \hat{z}(t), \Omega(t),$ and parameters.  As a simplification, we will assume that the cost of adoption is in labor, i.e. $\eta = 0$, so that $x(t) = \zeta$ for all $t$ from (PTW H.11)\footnote{Otherwise, there is an addition system of implicit equations to solve.}  The other simplification will be to assume $\log$ utility, so that $\gamma = 1$, resulting in a slightly more manageable calculation of interest rates.
 
-\subsection{Number of Varieties and Entry in Transition}
-
-Define $E(t)$ such that the \textbf{gross} entry flow is $E(t)\Omega(t)$.  Since the \textbf{gross} exit flow is $\delta \Omega(t)$, then the differential equation for $\Omega(t)$ comes from the net flows,
-\begin{align} 
-	\D[t] \Omega(t) &= \left(E(t) - \delta \right)\Omega(t)\label{eq:E-defined-by-Omega}\\
-	\intertext{Rearrange,}
-	E(t) &\equiv \delta + \D[t]\log \Omega(t)
-\end{align}
-Which shows that in the steady-state, the entry must simply replace exogenous exit, $E(t) = \delta$.
-
-When making a guess for the varieties over the transition path, in principle we could have chosen either the $\Omega(t)$ or the $E(t)$ (for $t \in [0,T]$) and converted between them using \cref{eq:E-defined-by-Omega}.
-
-In practice, though, the model does not solve effectively with guesses on $\Omega(t)$ since small changes in the guess can lead to large deviations in $E(t)$, which enter the growth calculations directly.
-
 
 \subsection{Static Calculations and Definitions}
-First, we will summarize results from the static equilibrium in the model.  Fixing a $E(t), g(t), \hat{z}(t),$ $\Omega(t)$, and $\tilde{L}(t+\epsilon)$ for some small $\epsilon$, we can calculate the following within a period.\footnote{See \cref{sec:derive-interest-rates} for a derivation of the interest rates, \cref{sec:full-rescaling} for a derivation of the normalized profits, and (PTW.H.2, H.7, H.8, )}.\footnote{Note: the $\hat{z}(t)$ \textbf{has no log} taken of it, unlike the $z$.  Hence, to see if a firm exports, we need to check if $z \geq \log(\hat{z}(t))$.  Furthermore, it means that the $\hat{z}$ has a minimum value of $1$.}  
+Let $E(t)\Omega(t)$ be the associated gross entry flow at time $t$ and $\Omega(t)$ the number of varieties.  Then further fix $g(t), \hat{z}(t),$ and  $\tilde{L}(t+\Delta_t)$ for some small $\Delta_t$ and calculate the static equilibrium conditions.\footnote{See \cref{sec:derive-interest-rates} for a derivation of the interest rates, \cref{sec:full-rescaling} for a derivation of the normalized profits, and (PTW.H.2, H.7, H.8, )}${}^{,}$\footnote{Note: the $\hat{z}(t)$ \textbf{has no log} taken of it, unlike the $z$.  Hence, to see if a firm exports, we need to check if $z \geq \log(\hat{z}(t))$.  Furthermore, it means that the $\hat{z}$ has a minimum value of $1$.}
 \begin{align}
 	S(t) &\equiv \theta \left( g(t) - \mu - \theta\frac{\upsilon^2}{2}\right)\\
 	1 - \tilde{L}(t) &\equiv 1 - \Omega(t)\left((N -1)\hat{z}^{-\theta}\kappa + \zeta \left(S(t) + E(t)/\chi \right)\right)\\
+	\tilde{L}_{\text{x}}(t) &= \Omega(t) (N -1)\hat{z}^{-\theta}\kappa\\
+	\tilde{L}_{\text{E}}(t) &= \frac{\zeta}{\chi}\Omega(t) E(t)\\
+	\tilde{L}_{\text{a}}(t) &= \zeta \Omega(t) S(t)\\
 	\bar{z}(t)^{\sigma - 1}&\equiv \Omega(t)
 \frac{\theta}{1+\theta - \sigma}\left(1 + (N-1)d^{1-\sigma}\hat{z}^{\sigma - 1 -\theta} \right)\\
 	\bar{\pi}_{\min}(t) &\equiv \frac{1-\tilde{L}(t)}{(\sigma-1)\bar{z}(t)^{\sigma-1}}\\
 	\pi(z,t) &\equiv \bar{\pi}_{\min}(t)\left(1 + (N-1)d^{1-\sigma}\indicator{z \geq \log(\hat{z}(t))}\right) - (N-1)\kappa e^{-(\sigma - 1)z}\indicator{z \geq \log(\hat{z}(t))}\\
 	\tilde{\rho}(t) &\equiv \rho+ \delta + \D[t]\log\left(1 - \tilde{L}(t)\right) - (\sigma - 1)\left(\mu - g(t) + (\sigma - 1)\frac{\upsilon^2}{2} \right)
 \end{align}
-To calculate the $\D[t]\log\left(1 - \tilde{L}(t)\right)$ we need to reference the ``future'' $\tilde{L}(t+\epsilon)$.  Since the algorithm solves the transition dynamics backwards, this can be done using the previous (i.e. future) timestep, and then forward first-differences for a given $\tilde{L}(t)$.  That is,
+To calculate the $\D[t]\log\left(1 - \tilde{L}(t)\right)$ we need to reference the ``future'' $\tilde{L}(t+\Delta_t)$.  Since the algorithm solves the transition dynamics backwards, this can be done using the previous (i.e. future) timestep, and then forward first-differences for a given $\tilde{L}(t)$.  That is,
 \begin{align}
-	\D[t]\log\left(1 - \tilde{L}(t)\right) &\approx \frac{\log\left(1 - \tilde{L}(t+ \Delta)\right) - \log\left(1 - \tilde{L}(t)\right)}{\Delta}
+	\D[t]\log\left(1 - \tilde{L}(t)\right) &\approx \frac{\log\left(1 - \tilde{L}(t+\Delta_t)\right) - \log\left(1 - \tilde{L}(t)\right)}{\Delta_t}
 \end{align}
-where the $\Delta$ comes whatever the times-stepping algorithm.
+where the $\Delta_t$ is that periods step-size in the time-stepping algorithm of the ODE solver.
 
-\subsection{Differential Equations}\label{sec:full-ODE}
+
+\subsection{Number of Varieties and Entry in Transition}
+
+
+When making a guess for the varieties over the transition path, in principle we could have chosen either the $\Omega(t)$ or the $E(t)$ (for $t \in [0,T]$) and converted between them using \cref{eq:E-defined-by-Omega}.\footnote{In practice, though, the model does not solve effectively with guesses on $\Omega(t)$ since small changes in the guess can lead to large deviations in $E(t)$, which enter the growth calculations directly.}  An admissible guess for $E(t)$ on $t \in [0,T]$ is one where $E(T) = \delta$ and where $\Omega(T) = \Omega_T$ from the new steady state.  Since choosing a guess on an $E(t)$ which fulfills these conditions is difficult, we instead do the change of variables to guess a $\widehat{E}(t)$ such that $\widehat{E}(T) = 0$, and $\widehat{E}(0)$ is \textit{indeterminate}.  See \cref{sec:Omega-E} for the detailed derivation.
+
+Given the guess on $\widehat{E}(t)$, and assuming that $\widehat{E}(t)$ is not $0$ throughout, first calculate the scaling constant\footnote{In the case of checking if the model solves transition dynamics without solutions (i.e. when $E(t) = \delta$ is the solution), this assumption is not an issue due to the indeterminancy.  As long as there is any guess other than flat, $Q = 0$ comes out as the scaling factor, which solves the solution perfectly.}
+
+\begin{align}
+	Q &= \log \left(\dfrac{\Omega_T}{\Omega_0}\right)\left(\int_0^T \widehat E(t) dt \right)^{-1}\\
+	\intertext{Then map to the $E(t)$ and $\Omega(t)$ with the following equation and differential equation}
+	E(t) &= Q \widehat{E}(t) + \delta\\
+	\D[t] \Omega(t) &= Q \widehat{E}(t) \Omega(t)
+\end{align}
+
+In practice, since the guess $\widehat{E}(0)$ is arbitrary and simply changes the scale of $Q$ used to map to $E(t)$, it will be helpful to set it to a single number between iterations.  Here we maintain $\widehat{E}(0) = - 1$ at each iteration.\footnote{The convergence from an arbitrary $\hat{E}(t)$ guess to the equilibrium solution is relatively slow, and we use a brute-force approach to try to find the best options.
+\begin{enumerate}
+	\item Choose a grid over the $t \in [0,T]$ space
+	\item Choose a sequence of $\hat{E}(t)$ at all of the interior nodes (i.e. we know $\hat{E}(0) = -1$ and $\hat{E}(T) = 0$)
+	\item Use a linear or cubic-spline interpolator to create a function from thes nodes
+	\item If using a global optimizer which uses monte-carlo methods, we can tell the optimizer to only choose numbers between $-1$ and $0$, and then speed things up a little by reordering them to be increasing.  The latter is possible in this model because we know that the path will be monotone.
+\end{enumerate}}
+
+
+\subsection{DAE for the Full Solution}\label{sec:full-ODE}
 The dynamic set of differential equations (rescaled) is derived in \cref{sec:full-model-derivations} and is very similar to the simple model.
 \begin{align}
 %	\tilde{\rho}(t) v(z,t) &= \pi(z,t) + (\mu - g(t) + (\sigma - 1)\upsilon^2)\D[z]v(z,t) + \frac{\upsilon^2}{2}\D[zz]v(z,t) + \D[t]v(z,t)\\
@@ -236,13 +256,17 @@ The dynamic set of differential equations (rescaled) is derived in \cref{sec:ful
 	v(0,t) &= \int_{0}^{\bar{z}}v(z,t) \frac{e^{\sigma - 1}F'(z)}{F(\bar{z})} \diff z - \zeta\\
 	0 &= (\sigma - 1)v(0,t) + \D[z]v(0,t)\\
 	0 &= (\sigma - 1)v(\bar{z},t) + \D[z]v(\bar{z},t)
+	\intertext{With the export threshold}
+	0&=\hat{z}(t)^{\sigma-1}-  \kappa d^{\sigma - 1} \bar{\pi}_{\min}(t)^{-1}
+	\intertext{And free-entry condition}
+	0 &= v(0,t)- \zeta \frac{1-\chi}{\chi},\quad\text{ if } E(t) > 0
 \end{align}
 
 
 
 
 \subsection{Dynamic Equations and Discretization}
-To discretize \cref{sec:full-ODE}, define the interior operator, in a way similar to \cref{eq:A-def-simple}
+To discretize \cref{sec:full-ODE}, define the operator, in a way similar to \cref{eq:A-def-simple}
 \begin{align}
 	A(t) &\equiv \tilde{\rho}(t) I - (\mu - g(t) + (\sigma - 1)\upsilon^2) L^{-}_1 - \frac{\upsilon^2}{2} L_2\label{eq:A-def-full}
 	\end{align}
@@ -251,32 +275,29 @@ Discretize this and implement the boundary conditions in the discretized operato
 	v'(t) &= A(t) v(t) - \pi(t)
 \end{align}
 
-The three variables required in the DAE are $g(t), \hat{z}(t),$ and $\Omega(t)$.The \cref{eq:normalized-vm-summary-rescaled} value matching equation uses the same discretization approach as in the simple example (combining everything into the weights $\omega$, with the truncated exponential distribution, etc.) to discretize as
+The three variables required in the DAE are $g(t), \hat{z}(t),$ and $\Omega(t)$. The \cref{eq:normalized-vm-summary-rescaled} value matching equation uses the same discretization approach as in the simple example (combining everything into the weights $\omega$, with the truncated exponential distribution, etc.) to discretize as
 \begin{align}
 	0 &= v_1(t) - \omega \cdot v(t) + \zeta
-\end{align}
-
-The export threshold equation is
-\begin{align}
-	0&=\hat{z}^{\sigma-1}-  \kappa d^{\sigma - 1} \bar{\pi}_{\min}(t)^{-1}
-\end{align}
-
-From \cref{sec:free-entry}, we see that
-\begin{align}
-	v_1(t) -  \zeta \frac{1-\chi}{\chi} &\leq 0,\, = \text{ if } E(t) > 0
+	\intertext{The export threshold equation is}
+	0&=\hat{z}(t)^{\sigma-1}-  \kappa d^{\sigma - 1} \bar{\pi}_{\min}(t)^{-1}
+	\intertext{From \cref{sec:free-entry}, we see that the free-entry condition is}
+	v_1(t) -  \zeta \frac{1-\chi}{\chi} &\leq 0,\, = 0 \text{ if } E(t) > 0
 \end{align}
 
 
 
 
 \paragraph{Final Calculations}
-Some additional calculations useful for analyzing the model, but not required for the calculation are
+Some additional calculations useful for analyzing the model, but not required for the intermediate calculations
 \begin{align}
 	\lambda_{ii}(t) &= \frac{1}{1 + (N-1)\hat{z}(t)^{\sigma-1-\theta}d^{1-\sigma}}\label{eq:lambda-ii-t-summary}\\
 c &= (1 - \tilde{L})\bar{z} \label{eq:c-summary}\\
 \log M(t) &= \int_0^t g(s)\diff s\label{eq:log-M-summary}\\
-U(t) &= \int_0^{T-t}e^{-\rho \tau}\left(\log M(t+\tau)+\log c(t+\tau)\right)\diff \tau + \frac{e^{-\rho( T-t)}}{\rho^2}\left((1+\rho( T-t))g(T) + \rho\left(\log c(T) + \log M(T) \right) \right)\label{eq:U-dynamics-summary}
+U(t) &= \int_0^{T-t}e^{-\rho \tau}\left(\log M(t+\tau)+\log c(t+\tau)\right)\diff \tau + \frac{e^{-\rho( T-t)}}{\rho^2}\left((1+\rho( T-t))g(T) + \rho\left(\log c(T) + \log M(T) \right) \right)\label{eq:U-dynamics-summary}\\
+\intertext{And the calculation of the consumption equivalent ratio to compare the $U(0)$ from above to an alternative $U^{\text{old}}(0))$}
+M_{\text{CI}} &= \exp \left(\rho(U(0) - U^{\text{old}}(0))\right)
 \end{align}
+In the above cases, given the interpolated solutions of the problem, we can use any quadrature scheme to calculate the integrals.
 
 
 \newpage
@@ -325,7 +346,7 @@ Summarizing the discretized differential operators subject to the boundary condi
 
 In particular, using the backwards first-order difference, \eqref{eq:new-BC1} can be alternatively represented as
 \begin{align}
-\dfrac{v(0, t) - v(\Delta, t)}{\Delta} &= - \xi v(0,t)
+\dfrac{v(0, t) - v(-\Delta, t)}{\Delta} &= - \xi v(0,t)
 \end{align}
 Similarly, using discretized central differences of second orders, \eqref{eq:new-BC1} can be shown as
 \begin{align}
@@ -415,12 +436,8 @@ With the discretized grid, the integral in \cref{eq:vm-GBM-dynamic-normalized} w
 \intertext{If we set $\Delta_{1,-} = 0$ and $\Delta_{P,+} = 0$ then, (Note different than other use of ghost nodes in derivatives, though not sure they enter equations in those other cases)}
 \int_{z_1}^{z_P} q(z)\diff z &\approx \bar{\omega}\cdot q\\
 \intertext{where,}
-\bar{\omega}&\equiv \frac1{2}(\Delta_{-} + \Delta_{+})
-\end{align}
-
-
-Moving to the specific integral in \cref{eq:vm-GBM-dynamic-normalized}, define the $\omega$ weights to combine the $\bar{\omega}$ and the $\left(e^{\xi z} \frac{F'(z)}{F(\bar{z})}\right)$ term so that
-\begin{align}
+\bar{\omega}&\equiv \frac1{2}(\Delta_{-} + \Delta_{+})\\
+\intertext{Moving to the specific integral in \cref{eq:vm-GBM-dynamic-normalized}, define the $\omega$ weights to combine the $\bar{\omega}$ and the $\left(e^{\xi z} \frac{F'(z)}{F(\bar{z})}\right)$ term so that}
 \omega_i &\equiv \bar{\omega}_i e^{\xi z_i}\frac{F'(z_i)}{F(\bar{z})}\\
 \intertext{Then with the discretized vector $v(t) \in \R^P$, the integral in \cref{eq:vm-GBM-dynamic-normalized} becomes,}
 v_1(t) &= \omega \cdot v(t) - x(t)
@@ -439,7 +456,10 @@ Note that we have the following static calculations from the main paper (eqns H.
 	a &= \frac{1}{r - g - (\sigma - 1)(\mu - g  + (\sigma - 1)\upsilon^2/2)} \\
 	b &= (1 - a(r-g))d^{1-\sigma}\hat{z}^{\nu + \sigma -1} \\
 	r &= \rho + \gamma g + \delta \\
-	\tilde{L} &= \Omega [(N-1)(1 - F(\hat{z}))\kappa + (1-\eta)\zeta(S + \delta/\chi)] \\
+	\tilde{L} &= \Omega [(N-1)\hat{z}^{-\theta}\kappa + (1-\eta)\zeta(S + \delta/\chi)] \\
+	\tilde{L}_{\text{x}} &= \Omega (N -1)\hat{z}^{-\theta}\kappa\\
+	\tilde{L}_{\text{E}} &= \frac{\zeta}{\chi}\Omega\delta\\
+	\tilde{L}_{\text{a}} &= \zeta \Omega S\\
 	\bar{z} &= [\Omega(\mathbb{E}[z^{\sigma - 1}] + (N-1)(1 - F(\hat{z}))d^{1 - \sigma}\mathbb{E}[z^{\sigma - 1}|z > \hat{z}])]^{1/(\sigma - 1)} \\
 	\hat{z} &= d \left(\frac{\kappa}{\bar{\pi}_{\textup{min}}}\right)^{\frac{1}{\sigma - 1}} \\
 	w &= \frac{1}{\bar{\sigma}}\bar{z} \\
@@ -534,6 +554,36 @@ v(0,t) &= \theta \int_{0}^{\infty} v(z,t) e^{(-\theta + \sigma - 1)z} \diff z - 
 %\end{align}
 
 
+\subsection{Computation of equilibrium $\Omega(t)$ and $E(t)$}\label{sec:Omega-E}
+
+
+Recall that $E(t)$ is the \textbf{gross} entry flow is $E(t)\Omega(t)$.  Since the \textbf{gross} exit flow is $\delta \Omega(t)$, then the differential equation for $\Omega(t)$ comes from the net flows,
+\begin{align} 
+	\D[t] \Omega(t) &= \left(E(t) - \delta \right)\Omega(t)\label{eq:E-defined-by-Omega}
+%	\intertext{Rearrange,}
+%	E(t) &\equiv \delta + \D[t]\log \Omega(t)
+\end{align}
+Which shows that in the steady-state, the entry must simply replace exogenous exit, $E(t) = \delta$ for $t \geq T$.
+
+First, note that $\Omega(t)$ is defined by the solution of the differential equation $	\D[t] \Omega(t) = \left(E(t) - \delta \right)\Omega(t)$ from \cref{eq:E-defined-by-Omega} with boundary conditions of $\Omega(0) = \Omega_0$ and $\Omega(T) = \Omega_T$ where $\Omega_0$ and $\Omega_T$ are the stationary solutions for $\Omega(t)$ at $t = 0$ and $t = T$ respectively. Hence, it suffices to find the equilibrium $E(t)$. On the other hand, note that in steady-state we must have $E(t) = \delta$. Thus, the search space for $E(t)$ is a differentiable $E(t)$ such that $E(T) = \delta$. In actual computation, we use cubic splines with nodes that are uniformly distributed across $[0,T]$.
+
+To find the equilibrium $E(t)$, we first find $\widehat E(t)$ with an arbitrary endpoint on $[0,T]$ and rescale $\widehat E(t)$ by $Q$
+\begin{align}\label{eq:E-normalized-defn}
+	Q \widehat E(t) = E(t) - \delta
+\end{align}
+such that $Q \widehat E(T) = \delta$. Substituting \cref{eq:E-normalized-defn} in \cref{eq:E-defined-by-Omega}, we have
+\begin{align}
+\D[t] \Omega(t) = Q \widehat{E}(t) \Omega(t)
+\end{align}
+solving for $\Omega(t)$, we have
+\begin{align}
+\Omega_T = \Omega_0 \exp \left(Q \int_0^T \widehat{E}(t) dt\right)
+\end{align}
+which yields
+\begin{align}
+Q = \log \left(\dfrac{\Omega_T}{\Omega_0}\right)\left(\int_0^T \widehat E(t) dt \right)^{-1}
+\end{align}
+providing the analytic solution for $E(t)$ and $\Omega(t)$ given $\widehat{E} (t)$ with arbitrary endpoints.
 
 \subsection{Free-entry Condition}\label{sec:free-entry}
 To determine the $E(t)$ function, we need the free entry complementarity condition to hold.  Note that (PTW D.19) actually holds for any $t$ as well, and does not require the stationary solution.  From (PTW D.19) and using $v(t,0) = \hat{v}(t,0)$, we see that if $E(t) > 0$ that,
@@ -660,27 +710,6 @@ Then the $M(0)$ should be greater than $1$, and it is the inverse of the proport
 
 
 
-
-\section{Computation of equilibrium $\Omega(t)$ and $E(t)$}
-First, note that $\Omega(t)$ is defined by the solution of the differential equation $	\D[t] \Omega(t) = \left(E(t) - \delta \right)\Omega(t)$ from \cref{eq:E-defined-by-Omega} with boundary conditions of $\Omega(0) = \Omega_0$ and $\Omega(T) = \Omega_T$ where $\Omega_0$ and $\Omega_T$ are the stationary solutions for $\Omega(t)$ at $t = 0$ and $t = T$ respectively. Hence, it suffices to find the equilibrium $E(t)$. On the other hand, note that in steady-state we must have $E(t) = \delta$. Thus, the search space for $E(t)$ is a differentiable $E(t)$ such that $E(T) = \delta$. In actual computation, we use cubic splines with nodes that are uniformly distributed across $[0,T]$.
-
-To find the equilibrium $E(t)$, we first find $\widehat E(t)$ with an arbitrary endpoint on $[0,T]$ and rescale $\widehat E(t)$ by $M$
-\begin{align}\label{eq:E-normalized-defn}
-	M \widehat E(t) = E(t) - \delta
-\end{align}
-such that $M \widehat E(T) = \delta$. Substituting \cref{eq:E-normalized-defn} in \cref{eq:E-defined-by-Omega}, we have
-\begin{align}
-\D[t] \Omega(t) = M \widehat{E}(t) \Omega(t)
-\end{align}
-solving for $\Omega(t)$, we have
-\begin{align}
-\Omega_T = \Omega_0 \exp \left(M \int_0^T \widehat{E}(t) dt\right)
-\end{align}
-which yields
-\begin{align}
-M = \log \left(\dfrac{\Omega_T}{\Omega_0}\right)\left(\int_0^T \widehat E(t) dt \right)^{-1}
-\end{align}
-providing the analytic solution for $E(t)$ and $\Omega(t)$ given $\widehat{E} (t)$ with arbitrary endpoints.
 
 
 \end{document}

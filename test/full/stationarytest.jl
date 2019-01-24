@@ -53,6 +53,7 @@
         # Test.
         @test value_matching < 1e-8
         @test free_entry < 1e-8
+        @test sol.L_tilde ≈ sol.L_tilde_a + sol.L_tilde_E + sol.L_tilde_x
     end
 end
 
@@ -91,5 +92,6 @@ end
         # Test.
         @test value_matching < 1e-8
         @test free_entry < 1e-8
+        @test sol.L_tilde ≈ sol.L_tilde_a + sol.L_tilde_E + sol.L_tilde_x
     end
 end

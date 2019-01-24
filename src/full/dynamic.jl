@@ -42,7 +42,8 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
       Ω_T = stationary_sol_T.Ω # -- Stationary
 
     # Validate arguments
-      @assert params_T.γ ≈ 1 # γ has to be close 1 to have consistent results with the stationary solutions
+      @assert γ ≈ 1 # γ has to be close 1 to have consistent results with the stationary solutions
+      @assert η == 0
 
     # Define the results data frame we'll be using and push the stationary onto it.
       results = DataFrame(t = T, g = g_T, z_hat = z_hat_T, Ω = Ω_T, E = δ, v_0 = v_T[1], L_tilde = L_tilde_T)
@@ -138,9 +139,9 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
           results = @transform(results, π_min = gen_π_min.(:L_tilde, :z_bar)) # π_min column.
           results = @transform(results, log_M = log_M.(:t)) # log_M column
           results = @transform(results, U = U.(:t)) # U column
-          results = @transform(results, L_tilde_adopt = gen_L_tilde_adopt.(:Ω, :S))
-          results = @transform(results, L_tilde_export = gen_L_tilde_export.(:Ω, :z_hat))
-          results = @transform(results, L_tilde_entrycost = gen_L_tilde_entrycost.(:Ω, :E))
+          results = @transform(results, L_tilde_a = gen_L_tilde_adopt.(:Ω, :S))
+          results = @transform(results, L_tilde_x = gen_L_tilde_export.(:Ω, :z_hat))
+          results = @transform(results, L_tilde_E = gen_L_tilde_entrycost.(:Ω, :E))
         end
 
     # Return.
