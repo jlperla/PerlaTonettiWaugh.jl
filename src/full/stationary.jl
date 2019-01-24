@@ -56,7 +56,7 @@ function staticvals(vals, params)
     z_bar = (Ω * (θ/(1 + θ - σ) + (N-1)*(1-F(z_hat))*d^(1-σ)*(z_hat^(-1 + σ)*θ/(1 + θ - σ))))^((σ-1)^(-1)) # (C.11)
     w = σ^(-1)*z_bar # (C,13)
     x = ζ * (1- η + η * Theta / w) # (C.14)
-    π_min = (d^(σ-1) * κ)/(z_hat^(σ-1)) # (C.12, inverted to express π_min in terms of z_hat))
+    π_min = (d^(σ-1) * κ)/(z_hat^(σ-1)) # (C.12, inverted)
 
     return (F = F, r = r, ν = ν, a = a, b = b, S = S, L_tilde = L_tilde, L_tilde_x = L_tilde_x, L_tilde_E = L_tilde_E, L_tilde_a = L_tilde_a,
             z_bar = z_bar, w = w, x = x, π_min = π_min)
@@ -97,7 +97,7 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
         free_entry = v_tilde[1] - x*(1-χ)/χ # (50) or (C.48) and (C.60)
 
         # Adoption threshold.
-        adoption_threshold = π_min - (1 - L_tilde)/((σ-1)*z_bar^(σ-1)) # (49)
+        adoption_threshold = π_min - (1 - L_tilde)/((σ-1)*z_bar^(σ-1)) # (C.19)
 
         return [value_matching, free_entry, adoption_threshold]
     end
