@@ -10,7 +10,7 @@
       Ω_t = Ω(t)
       E_t = E(t)
     # Get static equilibrium values
-      @unpack S_t, L_tilde_t, z_bar, π_min, π_tilde = static_equilibrium(u[1], g, z_hat, E_t, Ω_t)
+      @unpack S_t, L_tilde_t, z_bar, π_min, π = static_equilibrium(u[1], g, z_hat, E_t, Ω_t)
     # Grab the L_tilde derivative.
       L_tilde_log_derivative = 0.0 # Default to Float literal.
       if (t < T)
@@ -25,7 +25,7 @@
       residual[1:P] .-= (μ - g + (σ-1)*υ^2)*L_1*u[1:P] # (46)
       residual[1:P] .-= (υ^2/2)*L_2*u[1:P] # (46)
       residual[1:P] .-= du[1:P]
-      residual[1:P] .-= π_tilde # discretized system of ODE for v, where v'(T) = 0 (47)
+      residual[1:P] .-= π # discretized system of ODE for v, where v'(T) = 0 (47)
       residual[P+1] = u[1] + x - dot(ω, u[1:P]) # value matching residual, (48) and x(t) = ζ assumption at beginning of Section 2
       residual[P+2] = z_hat^(σ-1) - κ * d^(σ-1) / π_min # export threshold (49)
   end
@@ -64,9 +64,9 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
         z_bar = Ω_t * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ)) # (31)
         π_min = (1 - L_tilde_t) / ((σ-1)*z_bar) # (32)
         i_vectorized = z .>= log(z_hat) # Vectorized indicator function
-        π_tilde = π_min * (1.0.+(N-1)*d^(1-σ)*i_vectorized) - (N-1)*κ*exp.(-(σ-1).*z).*i_vectorized # (33)
+        π = π_min * (1.0.+(N-1)*d^(1-σ)*i_vectorized) - (N-1)*κ*exp.(-(σ-1).*z).*i_vectorized # (33)
         entry_residual = v_0 - ζ * (1-χ) / χ # value matching condition (45)
-        return (S_t = S_t, L_tilde_t = L_tilde_t, z_bar = z_bar, π_min = π_min, π_tilde = π_tilde, entry_residual = entry_residual)
+        return (S_t = S_t, L_tilde_t = L_tilde_t, z_bar = z_bar, π_min = π_min, π = π, entry_residual = entry_residual)
       end
 
     # Set the initial conditions.
