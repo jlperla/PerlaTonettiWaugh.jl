@@ -294,7 +294,7 @@ The three algebraic variables required in the DAE are $g(t), \hat{z}(t),$ and $\
 Some additional calculations useful for analyzing the model, but not required for the intermediate calculations
 \begin{align}
 	\lambda_{ii}(t) &= \frac{1}{1 + (N-1)\hat{z}(t)^{\sigma-1-\theta}d^{1-\sigma}}\label{eq:lambda-ii-t-summary}\\
-c &= (1 - \tilde{L})\bar{z} \label{eq:c-summary}\\
+c(t) &= (1 - \tilde{L}(t))\bar{z}(t) \label{eq:c-summary}\\
 \log M(t) &= \int_0^t g(s)\diff s\label{eq:log-M-summary}\\
 U(t) &= \int_0^{T-t}e^{-\rho \tau}\left(\log M(t+\tau)+\log c(t+\tau)\right)\diff \tau + \frac{e^{-\rho( T-t)}}{\rho^2}\left((1+\rho( T-t))g(T) + \rho\left(\log c(T) + \log M(T) \right) \right)\label{eq:U-dynamics-summary}\\
 \intertext{And the calculation of the consumption equivalent ratio to compare the $U(0)$ from above to an alternative $U^{\text{old}}(0))$}
