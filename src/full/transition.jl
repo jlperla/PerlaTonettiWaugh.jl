@@ -11,8 +11,8 @@ function solve_full_model_global(settings; impose_E_monotonicity_constraints = t
     return (solution = solve_model_from_E_nodes(E_nodes_interior, settings; detailed_solution = true), E_nodes = E_nodes_interior)
   end
   ranges = map(i->(settings.transition_lb[i], settings.transition_ub[i]), 1:length(settings.transition_x0))
-  ssr(residuals) = sum(residuals .* residuals)
-  result = bboptimize(x -> ssr(residuals_given_E_nodes_interior(impose_E_monotonicity_constraints ? sort(x) : x, settings));
+  ssr(residuals) = sum(residuals.^2)
+  result = bboptimize(x -> ssr(weighted_residuals_given_E_nodes_interior(impose_E_monotonicity_constraints ? sort(x) : x, settings));
                       SearchRange = ranges, NumDimensions = length(ranges), MaxSteps = settings.transition_iterations)
   E_nodes_found = best_candidate(result)
   E_nodes_found = impose_E_monotonicity_constraints ? sort(E_nodes_found) : E_nodes_found
@@ -33,7 +33,7 @@ function solve_full_model(settings; impose_E_monotonicity_constraints = true, wr
     end
     h[:] = A*x
   end
-   result = solve_system(x -> residuals_given_E_nodes_interior(x, settings), settings.transition_x0;
+   result = solve_system(x -> weighted_residuals_given_E_nodes_interior(x, settings), settings.transition_x0;
                     lb = nothing, ub = fill(0.0, length(settings.transition_x0)),
                     constraints_fg! = impose_E_monotonicity_constraints ? constraints_increasing_E! : nothing,
                     algorithm = impose_E_monotonicity_constraints ? :LD_SLSQP : :LD_LBFGS,
@@ -73,9 +73,11 @@ function solve_model_from_E_nodes(E_nodes_interior, settings; detailed_solution 
   return solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed_solution = detailed_solution)
 end
 
-function residuals_given_E_nodes_interior(E_nodes_interior, settings)
+function weighted_residuals_given_E_nodes_interior(E_nodes_interior, settings)
   solved = try solve_model_from_E_nodes(E_nodes_interior, settings).results catch; return fill(10e20, settings.entry_residuals_nodes_count) end
   entry_residual_interpolated = LinearInterpolation(solved.t, solved.entry_residual)
   entry_residuals_nodes = range(0, stop = solved.t[end], length = settings.entry_residuals_nodes_count + 2)
-  return entry_residual_interpolated.(entry_residuals_nodes[2:(end-1)])
+
+  # return weighted residuals
+  return settings.weights .* entry_residual_interpolated.(entry_residuals_nodes[2:(end-1)])
 end

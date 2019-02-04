@@ -22,8 +22,8 @@
         settings = merge(settings, (params_T = params_T, stationary_sol_T = stationary_sol, Ω_0 = Ω_0))
 
         E_nodes_interior = zeros(length(settings.transition_x0))
-        residuals = residuals_given_E_nodes_interior(E_nodes_interior, settings)
-        @test mean(residuals) ≈ 0.0 atol = 1e-3
+        residuals = weighted_residuals_given_E_nodes_interior(E_nodes_interior, settings)
+        @test mean(residuals) ≈ 0.0 atol = 1e-2
     end
 
     @testset "entry_residuals with constant Ω" begin
@@ -49,7 +49,7 @@
         settings = merge(settings, (params_T = params_T, stationary_sol_T = stationary_sol, Ω_0 = Ω_0))
 
         E_nodes_interior = settings.transition_x0
-        residuals = residuals_given_E_nodes_interior(E_nodes_interior, settings)
-        @test mean(residuals) ≈ 0.0 atol = 1e-3
+        residuals = weighted_residuals_given_E_nodes_interior(E_nodes_interior, settings)
+        @test mean(residuals) ≈ 0.0 atol = 1e-2
     end
 end
