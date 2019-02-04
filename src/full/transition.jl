@@ -54,7 +54,7 @@ end
 
 # Returns model solution (i.e., solve_dynamics output) given a set of E nodes. Used by all solvers.
 function solve_model_from_E_nodes(E_nodes_interior, settings; detailed_solution = false, interp = LinearInterpolation)
-  @unpack T, params_T, stationary_sol_T, Ω_0, entry_residuals_nodes_count = settings
+  @unpack T, params_T, stationary_sol_T, Ω_0 = settings
   δ = params_T.δ
   Ω_T = stationary_sol_T.Ω
   # fix the point at T to be zero and sort candidate if needed
@@ -74,9 +74,10 @@ function solve_model_from_E_nodes(E_nodes_interior, settings; detailed_solution 
 end
 
 function weighted_residuals_given_E_nodes_interior(E_nodes_interior, settings)
-  solved = try solve_model_from_E_nodes(E_nodes_interior, settings).results catch; return fill(10e20, settings.entry_residuals_nodes_count) end
+  entry_residuals_nodes_count = length(E_nodes_interior)
+  solved = try solve_model_from_E_nodes(E_nodes_interior, settings).results catch; return fill(10e20, entry_residuals_nodes_count) end
   entry_residual_interpolated = LinearInterpolation(solved.t, solved.entry_residual)
-  entry_residuals_nodes = range(0, stop = solved.t[end], length = settings.entry_residuals_nodes_count + 2)
+  entry_residuals_nodes = range(0, stop = solved.t[end], length = entry_residuals_nodes_count + 2)
 
   # return weighted residuals
   return settings.weights .* entry_residual_interpolated.(entry_residuals_nodes[2:(end-1)])
