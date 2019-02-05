@@ -20,7 +20,15 @@ function solve_full_model_global(settings; impose_E_monotonicity_constraints = t
   return (solution = solve_model_from_E_nodes(E_nodes_found, settings; detailed_solution = true), E_nodes = E_nodes_found)
 end
 
-function solve_full_model(settings; impose_E_monotonicity_constraints = true, write_csv = false, csvpath = nothing)
+function solve_full_model(settings; impose_E_monotonicity_constraints = true, write_csv = false, csvpath = nothing,
+                        run_global = true)
+
+  if (run_global && settings.transition_iterations > 0) 
+    result = solve_full_model_global(settings; impose_E_monotonicity_constraints = impose_E_monotonicity_constraints)
+    E_nodes = result.E_nodes;
+    settings = merge(settings, (transition_x0 = E_nodes, ));
+  end
+  
    # constraint for increasing E nodes
   function constraints_increasing_E!(h, x, jacobian_t)
     L = length(x)
