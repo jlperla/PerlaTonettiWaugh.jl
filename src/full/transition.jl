@@ -10,7 +10,30 @@ function solve_full_model_global(settings; impose_E_monotonicity_constraints = t
     E_nodes_interior = settings.transition_x0
     return (solution = solve_model_from_E_nodes(E_nodes_interior, settings; detailed_solution = true), E_nodes = E_nodes_interior)
   end
-  ranges = map(i->(settings.transition_lb[i], settings.transition_ub[i]), 1:length(settings.transition_x0))
+
+  # exception handling
+  if (length(settings.transition_lb) != length(settings.transition_ub))
+    throw("length(settings.transition_lb) != length(settings.transition_ub)")
+  end
+  if (length(settings.transition_x0) != length(settings.transition_ub))
+    @warn "length(settings.transition_x0) != length(settings.transition_ub); 
+          setting transition_ub as vector of 0.0 with the same length as transition_x0"
+    settings = merge(settings, (transition_ub = fill(0.0, length(settings.transition_x0)),))
+  end
+  if (length(settings.transition_x0) != length(settings.transition_lb))
+    @warn "length(settings.transition_x0) != length(settings.transition_lb); 
+          setting transition_lb as vector of -1.0 with the same length as transition_x0"
+    settings = merge(settings, (transition_lb = fill(-1.0, length(settings.transition_x0)),))
+  end
+  if (length(settings.transition_x0) != length(settings.weights))
+    @warn "length(settings.transition_x0) != length(settings.weights); 
+          setting weights as (x -> x < 10 ? 10. - x : 1.).(1:1:length(settings.transition_x0))"
+    settings = merge(settings, (weights = (x -> x < 10 ? 10. - x : 1.).(1:1:length(settings.transition_x0)),))
+  end
+
+  # setup range for bboptimize
+  ranges = map(i->(settings.transition_lb[i], settings.transition_ub[i]), 1:length(settings.transition_ub))
+
   ssr(residuals) = sum(residuals.^2) + # squared sum of residuals
     settings.transition_penalty_coefficient * sum(max.(-diff(residuals), 0.0)) # add penalty for non-increasing sol
   result = bboptimize(x -> ssr(weighted_residuals_given_E_nodes_interior(impose_E_monotonicity_constraints ? sort(x) : x, settings));
