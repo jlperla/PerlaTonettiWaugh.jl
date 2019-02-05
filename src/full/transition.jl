@@ -65,19 +65,19 @@ function solve_full_model(settings; impose_E_monotonicity_constraints = true, wr
     end
     h[:] = A*x
   end
-   result = solve_system(x -> weighted_residuals_given_E_nodes_interior(x, settings), settings.transition_x0;
+  E_nodes = solve_system(x -> weighted_residuals_given_E_nodes_interior(x, settings), settings.transition_x0;
                     lb = nothing, ub = fill(0.0, length(settings.transition_x0)),
                     constraints_fg! = impose_E_monotonicity_constraints ? constraints_increasing_E! : nothing,
                     algorithm = impose_E_monotonicity_constraints ? :LD_SLSQP : :LD_LBFGS,
                     iterations = settings.transition_iterations)
-    solution = solve_model_from_E_nodes(result, settings; detailed_solution = true)
+    solution = solve_model_from_E_nodes(E_nodes, settings; detailed_solution = true)
 
     # output caching
     if write_csv
       CSV.write(csvpath, solution.results)
     end
 
-  return (solution = solution, E_nodes = result)
+  return (solution = solution, E_nodes = E_nodes)
 end
 
 #=
