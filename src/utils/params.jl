@@ -36,7 +36,7 @@ settings_defaults = @with_kw (z_max = 5,
                                 transition_lb = -ones(length(transition_x0)),
                                 transition_ub = zeros(length(transition_x0)),
                                 transition_iterations = 1000,
-                                transition_penalty_coefficient = 5.0, # coefficient to be used for a penalty function for constraints on increasing E
+                                transition_penalty_coefficient = 0.0, # coefficient to be used for a penalty function for constraints on increasing E
                                 tstops = nothing)
 
 settings_simple_defaults = @with_kw (z = range(0.0, stop = 5.0, length = 100),
@@ -59,7 +59,7 @@ settings_old_paper_defaults = @with_kw (z_max = 5,
                                 transition_lb = -ones(length(transition_x0)),
                                 transition_ub = zeros(length(transition_x0)),
                                 transition_iterations = 1000,
-                                transition_penalty_coefficient = 5.0, # coefficient to be used for a penalty function for constraints on increasing E
+                                transition_penalty_coefficient = 0.0, # coefficient to be used for a penalty function for constraints on increasing E
                                 tstops = nothing)
 
 parameter_simple_stationary_defaults = @with_kw (μ = 0.0,

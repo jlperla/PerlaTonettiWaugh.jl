@@ -11,7 +11,8 @@ function solve_full_model_global(settings; impose_E_monotonicity_constraints = t
     return (solution = solve_model_from_E_nodes(E_nodes_interior, settings; detailed_solution = true), E_nodes = E_nodes_interior)
   end
   ranges = map(i->(settings.transition_lb[i], settings.transition_ub[i]), 1:length(settings.transition_x0))
-  ssr(residuals) = sum(residuals.^2)
+  ssr(residuals) = sum(residuals.^2) + # squared sum of residuals
+    settings.transition_penalty_coefficient * sum(max.(-diff(residuals), 0.0)) # add penalty for non-increasing sol
   result = bboptimize(x -> ssr(weighted_residuals_given_E_nodes_interior(impose_E_monotonicity_constraints ? sort(x) : x, settings));
                       SearchRange = ranges, NumDimensions = length(ranges), MaxSteps = settings.transition_iterations)
   E_nodes_found = best_candidate(result)
