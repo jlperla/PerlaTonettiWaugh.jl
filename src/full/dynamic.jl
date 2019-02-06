@@ -128,13 +128,14 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
         z_bar(t) = gen_z_bar(Ω(t), z_hat_interpolated(t))
         U(t) = quadgk(τ -> exp(-ρ*τ)*(log_M(t+τ) + log_c(t+τ)), 0, (T-t))[1] + exp(-ρ*(T-t))/(ρ^2)*((1+ρ*(T-t))*g_T + ρ*(log_c(T) + log_M(T)))
         c(t) = gen_c(L_tilde_interpolated(t), Ω(t), z_bar(t), S(t))
+        log_M(t) = quadgk(g_interpolated, 0, t)[1]
+        log_c(t) = log(gen_c(L_tilde_interpolated(t), Ω(t), gen_z_bar(Ω(t), z_hat_interpolated(t)), S(g_interpolated(t))))
+
 
         if (detailed_solution)
           # other welfare functions.
           # L_tilde_interpolated = LinearInterpolation(results[:t], results[:L_tilde])
           λ_ii = t -> gen_λ_ii(z_hat_interpolated(t))
-          log_M = t -> quadgk(g_interpolated, 0, t)[1]
-          log_c = t -> log(gen_c(L_tilde_interpolated(t), Ω(t), gen_z_bar(Ω(t), z_hat_interpolated(t)), S(g_interpolated(t))))
 
           results = @transform(results, λ_ii = gen_λ_ii.(:z_hat)) # λ_ii column.
           results = @transform(results, S = gen_S.(:g)) # S column.
@@ -149,5 +150,8 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
         end
 
     # Return.
-      return (results = results, sol = sol, p = p, static_equilibrium = static_equilibrium, U = U, c = c, Ω = Ω) # The results, raw DAE solution, and DAE problem (f!, static_equilibrium, etc.) objects.
+    # The results, raw DAE solution, and DAE problem (f!, static_equilibrium, etc.) objects.
+      return (results = results, sol = sol, p = p, static_equilibrium = static_equilibrium, 
+              U = U, c = c, Ω = Ω, log_M = log_M, log_c = log_c) 
 end
+ 
