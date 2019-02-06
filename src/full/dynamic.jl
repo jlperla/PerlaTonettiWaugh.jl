@@ -32,9 +32,14 @@
 
 # Main method.
 function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed_solution = true)
+
+    if (T < settings.T_U_bar)
+      throw("Terminal time `T` should be large enough so that T >= settings.T_U_bar is satisfied.")
+    end
+
     # Unpack arguments
       @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params_T # Parameters
-      @unpack z, tstops = settings # Settings
+      @unpack z, T_U_bar, tstops = settings # Settings
       v_T = stationary_sol_T.v_tilde # Stationary --
       g_T = stationary_sol_T.g
       z_hat_T = stationary_sol_T.z_hat
@@ -131,7 +136,8 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
         log_M(t) = quadgk(g_interpolated, 0, t)[1]
         log_c(t) = log(gen_c(L_tilde_interpolated(t), Ω(t), gen_z_bar(Ω(t), z_hat_interpolated(t)), S(g_interpolated(t))))
 
-
+        U_bar_T_generator(t, T_cutoff) = quadgk(τ -> exp(-ρ*τ)*(log_M(t+τ) + log_c(t+τ)), 0, (T_cutoff-t))[1] + exp(-ρ*(T_cutoff-t))/(ρ^2)*((1+ρ*(T_cutoff-t))*g_T + ρ*(log_c(T_cutoff) + log_M(T_cutoff)))
+        U_bar_T(t) = U_bar_T_generator(t, T_U_bar)
         if (detailed_solution)
           # other welfare functions.
           # L_tilde_interpolated = LinearInterpolation(results[:t], results[:L_tilde])
@@ -152,6 +158,7 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
     # Return.
     # The results, raw DAE solution, and DAE problem (f!, static_equilibrium, etc.) objects.
       return (results = results, sol = sol, p = p, static_equilibrium = static_equilibrium, 
-              U = U, c = c, Ω = Ω, log_M = log_M, log_c = log_c) 
+              U = U, c = c, Ω = Ω, log_M = log_M, log_c = log_c, U_bar_T = U_bar_T,
+              U_bar_T_generator = U_bar_T_generator) 
 end
  

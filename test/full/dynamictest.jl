@@ -15,7 +15,7 @@
 
 # Construct intermediate objects.
   z = range(z_min, stop = z_max, length = P)
-  settings = (z = z, tstops = tstops, Δ_E = Δ_E)
+  settings = (z = z, tstops = tstops, Δ_E = Δ_E, T_U_bar = 1.0)
   params_0 = merge(params, (d = d_0,))
   params_T = merge(params, (d = d_T,))
 
