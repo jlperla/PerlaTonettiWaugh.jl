@@ -127,16 +127,18 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
       # Add these quantities to the DataFrame.
         results = @transform(results, entry_residual = gen_entry_residual.(:v_0)) # entry_residual column
 
+        log_c_T = log(gen_c(L_tilde_T, Ω_T, gen_z_bar(Ω_T, z_hat_T), S(g_T)))
+
         g_interpolated(t) = (sol(t))[P+1]
         z_hat_interpolated(t) = (sol(t))[end]
         L_tilde_interpolated(t) = L_tilde(S(g_interpolated(t)), z_hat_interpolated(t), E(t), Ω(t))
         z_bar(t) = gen_z_bar(Ω(t), z_hat_interpolated(t))
-        U(t) = quadgk(τ -> exp(-ρ*τ)*(log_M(t+τ) + log_c(t+τ)), 0, (T-t))[1] + exp(-ρ*(T-t))/(ρ^2)*((1+ρ*(T-t))*g_T + ρ*(log_c(T) + log_M(T)))
+        U(t) = quadgk(τ -> exp(-ρ*τ)*(log_M(t+τ) + log_c(t+τ)), 0, (T-t))[1] + exp(-ρ*(T-t))*(g_T + ρ*(log_c_T + g_T * T))/(ρ^2)
         c(t) = gen_c(L_tilde_interpolated(t), Ω(t), z_bar(t), S(t))
         log_M(t) = quadgk(g_interpolated, 0, t)[1]
         log_c(t) = log(gen_c(L_tilde_interpolated(t), Ω(t), gen_z_bar(Ω(t), z_hat_interpolated(t)), S(g_interpolated(t))))
 
-        U_bar_T_generator(t, T_cutoff) = quadgk(τ -> exp(-ρ*τ)*(log_M(t+τ) + log_c(t+τ)), 0, (T_cutoff-t))[1] + exp(-ρ*(T_cutoff-t))/(ρ^2)*((1+ρ*(T_cutoff-t))*g_T + ρ*(log_c(T_cutoff) + log_M(T_cutoff)))
+        U_bar_T_generator(t, T_cutoff) = quadgk(τ -> exp(-ρ*τ)*(log_M(t+τ) + log_c(t+τ)), 0, (T_cutoff-t))[1] + exp(-ρ*(T_cutoff-t))*(g_T + ρ*(log_c_T + g_T * T_cutoff))/(ρ^2)
         U_bar_T(t) = U_bar_T_generator(t, T_U_bar)
         if (detailed_solution)
           # other welfare functions.

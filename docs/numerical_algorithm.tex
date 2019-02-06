@@ -743,7 +743,7 @@ U(t) &= \int_0^{\infty}e^{-\rho \tau}\log C(t+\tau)\diff \tau\\
 \intertext{Given the convergence at time $T$, use \cref{eq:U-def} to split the welfare integral,}
 U(t) &= \int_0^{T-t}e^{-\rho \tau}\left(\log M(t+\tau)+\log c(t+\tau)\right)\diff \tau + \int_{T-t}^{\infty}e^{-\rho \tau}\left(\log M(t+\tau)+\log c(t+\tau)\right)\diff \tau\\
 \intertext{Note that $c(t)= \bar{c}$ for $t \geq T$,}
-&= \int_0^{T-t}e^{-\rho \tau}\left(\log M(t+\tau)+\log c(t+\tau)\right)\diff \tau + \frac{e^{-\rho( T-t)}}{\rho^2}\left((1+\rho( T-t))\bar{g} + \rho\left(\log \bar{c} + \log M(T) \right) \right)\label{eq:U-dynamics}
+&= \int_0^{T-t}e^{-\rho \tau}\left(\log M(t+\tau)+\log c(t+\tau)\right)\diff \tau + \frac{e^{-\rho( T-t)}}{\rho^2}\left(\bar{g} + \rho\left(\log \bar{c} + T \bar{g} \right) \right)\label{eq:U-dynamics}
 %	\intertext{With \cref{eq:M-t-sol}}
 %	&= \int_0^{T}e^{-\rho \tau}\left(\log M(t+\tau)+\log c(t+\tau)\right)\diff \tau + \frac{e^{-\rho( T-t)}}{\rho^2}\left((1+\rho( T-t))g(T) + \rho\left(\log \bar{c} + \log M(T) \right) \right)
 \intertext{With (PTW G.31) and (PTW G.33) and \cref{eq:f-stationary-summary}}
