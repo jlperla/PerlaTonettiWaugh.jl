@@ -28,7 +28,7 @@ function solve_full_model(settings; impose_E_monotonicity_constraints = true, wr
     result = solve_full_model_global(settings; impose_E_monotonicity_constraints = impose_E_monotonicity_constraints, front_nodes_appended = front_nodes_appended)
     E_nodes = result.E_nodes;
     settings = merge(settings, (transition_x0 = E_nodes, ));
-  elseif transition_iterations < 1 # return immediately with the initial condition if that's required
+  elseif settings.transition_iterations < 1 # return immediately with the initial condition if that's required
     E_nodes_interior = settings.transition_x0
     return (solution = solve_model_from_E_nodes(E_nodes_interior, settings; detailed_solution = true), E_nodes = E_nodes_interior)
   end
