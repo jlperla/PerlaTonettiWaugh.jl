@@ -16,7 +16,7 @@ function welfare(vals, params, staticvalues)
     @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x, π_min = staticvals(vals, params)
     c = (1 - L_tilde)*z_bar # (C.74)
     λ_ii = 1/(1 + (N-1)*z_hat^(σ-1-θ)*d^(1-σ)) # (C.75)
-    U_bar = t -> γ == 1 ? (ρ*(log(c) + g*t) + g) / ρ^2 : 1/(1-γ) * (c^(1-γ))/(ρ + (γ-1)*g)  # (C.16)
+    U_bar = γ == 1 ? (ρ*log(c) + g) / ρ^2 : 1/(1-γ) * (c^(1-γ))/(ρ + (γ-1)*g)  # (C.16)
     (y = c, c = c, λ_ii = λ_ii, U_bar = U_bar)
 end
 
