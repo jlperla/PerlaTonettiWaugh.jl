@@ -604,8 +604,16 @@ v(0,t) &= \theta \int_{0}^{\infty} v(z,t) e^{(-\theta + \sigma - 1)z} \diff z - 
 \pi(z,t) &\equiv \bar{\pi}_{\min}(t)\left(1 + (N-1)d^{1-\sigma}\indicator{z \geq \log(\hat{z}(t))}\right) - (N-1)\kappa e^{-(\sigma - 1)z}\indicator{z \geq \log(\hat{z}(t))}
 \end{align}
 
+To calculate the profitability ratio of the mean-to-min firm, take from the main paper (24) -- keeping in mind the change in notation to $z = \log(Z/M(t))$
 
-
+\begin{align}
+	\bar{\pi}_{\text{rat}}(t) &= \frac{1}{\bar{\pi}_{\min}}\int_0^{\infty} \hat{\pi}(z)f(z)\diff z\\
+	\intertext{With \cref{eq:pi-z-t-summary} and splitting the integral}
+	&= \int_0^{\log(\hat{z}(t))} e^{(\sigma - 1)z} f(z) \diff z
+	+  (1 + (N-1)d^{1-\sigma})\int_{\log(\hat{z}(t))}^{\infty}e^{(\sigma - 1)z} f(z) \diff z + (N-1)\frac{\kappa}{\bar{\pi}_{\min}(t)}\int_{\log(\hat{z}(t))}^{\infty}  f(z)\diff z
+	\intertext{Use \cref{eq:f-stationary} and simplify}
+	&= \theta\frac{1 - \hat{z}(t)^{-\theta + \sigma - 1}}{\theta - \sigma + 1} + (1 + (N-1)d^{1-\sigma})\theta\frac{\hat{z}(t)^{-\theta + \sigma - 1}}{\theta - \sigma + 1} + (N-1)\frac{\kappa}{\bar{\pi}_{\min}(t)}\theta \hat{z}(t)^{-\theta}
+\end{align}
 
 %\subsection{Summarizing Normalized Equations}\label{sec:normalized-equations}
 %Take as given $g(t),\pi_{\min}(t),\hat{z}(t), x(t)$, and $\tilde{r}(t)$(alternatively $g_w(t)$ and $r(t)$).  Then, the following equations must be fulfilled for all $t$ and  $z$
