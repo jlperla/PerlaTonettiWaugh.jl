@@ -49,7 +49,7 @@
     @test mean(sol.results[:S]) ≈ 0.05847503367633505
     @test mean(sol.results[:L_tilde]) ≈ 0.200430770186847
   # Full coverage of each column.
-    @test sol.results[:t][4] == 17.44
+    @test sol.results[:t][4] == 1.5
     @test sol.results[:g][5] ≈ 0.020419880572700753
     @test sol.results[:z_hat][6] ≈ 1.4257125350016342
     @test sol.results[:Ω][7] ≈ 1.036549465116929
@@ -73,7 +73,7 @@
   # Detailed checks.
     @test sol.results[:g][1] ≈ 0.020019475192487802 # g check.
     @test sol.results[:z_hat][1] ≈ 2.771561823423923
-    @test sol.results[:z_hat][(end-9)] ≈ 2.77021657056094
+    @test sol.results[:z_hat][(end-9)] ≈ 2.770363670724641
     # Sub-pieces of L_tilde
     @test sol.results[:L_tilde_a] + sol.results[:L_tilde_x] + sol.results[:L_tilde_E] ≈ sol.results[:L_tilde]
 end
