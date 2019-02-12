@@ -28,13 +28,13 @@ function stationary_algebraic_aux(vals, params)
     g, z_hat, Ω = vals
     # Validate parameters.
     # Calculate and assign residuals.
-        big_denom = ν*(θ + ν)*(θ - σ + 1) # (C.18)
-        denom_1 = a*(g - r) # (C.18)
-        num_1 = ν*(N-1)*(θ - σ + 1)*(d^(1 - σ)*(θ + ν)*z_hat^(-θ + σ - 1)-b*θ*z_hat^(-θ-ν)) # (C.18)
-        num_2 = θ*(ν*(N-1)*d^(1-σ)*(θ+ν)*z_hat^(-θ + σ -1) + (ν + σ - 1)*(θ + ν - σ + 1)) # (C.18)
-    return [x/π_min - a*(χ/(1-χ))*(σ + ν - 1)/ν, # (C.17)
-            1 + (σ-1)/ν - (num_1/denom_1 + num_2)/big_denom + (χ/(1-χ))*(σ + ν - 1)/(ν), # (C.18)
-            π_min - (1- L_tilde)/((σ -1)*z_bar^(σ-1))] # (C.19)
+        big_denom = ν*(θ + ν)*(θ - σ + 1) # (C.19)
+        denom_1 = a*(g - r) # (C.19)
+        num_1 = ν*(N-1)*(θ - σ + 1)*(d^(1 - σ)*(θ + ν)*z_hat^(-θ + σ - 1)-b*θ*z_hat^(-θ-ν)) # (C.19)
+        num_2 = θ*(ν*(N-1)*d^(1-σ)*(θ+ν)*z_hat^(-θ + σ -1) + (ν + σ - 1)*(θ + ν - σ + 1)) # (C.19)
+    return [x/π_min - a*(χ/(1-χ))*(σ + ν - 1)/ν, # (C.18)
+            1 + (σ-1)/ν - (num_1/denom_1 + num_2)/big_denom + (χ/(1-χ))*(σ + ν - 1)/(ν), # (C.19)
+            π_min - (1- L_tilde)/((σ -1)*z_bar^(σ-1))] # (C.20)
 end
 
 function staticvals(vals, params)
@@ -97,7 +97,7 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
         free_entry = v_tilde[1] - x*(1-χ)/χ # (50) or (C.48) and (C.60)
 
         # Adoption threshold.
-        adoption_threshold = π_min - (1 - L_tilde)/((σ-1)*z_bar^(σ-1)) # (C.19)
+        adoption_threshold = π_min - (1 - L_tilde)/((σ-1)*z_bar^(σ-1)) # (C.20)
 
         return [value_matching, free_entry, adoption_threshold]
     end
