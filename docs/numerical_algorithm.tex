@@ -109,7 +109,7 @@ In order to solve for the dynamics of $v(t,z)$ and $g(t)$, we will discretize th
 
 \paragraph{Grid}
 
-Define an irregular grid $\set{z_i}_{i=1}^P$ with $z_1 = 0$ and $z_P = \bar{z}$ is a ``large'' number (keeping in mind that the effective number is $e^{\bar{z}}$). 
+Define an irregular grid $\set{z_i}_{i=1}^P$ with $z_1 = 0$ and $z_P = \bar{z}$ is a ``large'' number (keeping in mind that the effective number is $e^{\bar{z}}$).
 
 \paragraph{Discretized Functions}
 
@@ -343,7 +343,7 @@ This will discretize space with backward differences in the first derivative, an
 	\end{bmatrix}
 	\end{align}
 	\item The grid on time $t \in [0,T]$ may be adaptive, and we will let the ODE solver handle the grid in order to use optimal time-stepping algorithms.
-	\item Denote time-varying functions on the grid as a vector without the spatial dimension, i.e. 
+	\item Denote time-varying functions on the grid as a vector without the spatial dimension, i.e.
 	\begin{align}
 	v(t) &\equiv \set{v(z_i, t)}_{i=1}^P\in\R^P\\
 	\hat{\pi}(t) &\equiv	\hat{\pi}(z,t) \in \R^P
@@ -369,17 +369,17 @@ Using the backwards first-order difference, \eqref{eq:new-BC1} can be alternativ
 Similarly, using discretized central differences of second orders, \eqref{eq:new-BC1} can be shown as
 \begin{align}
 \dfrac{v (\Delta, t) - 2 v(0, t) + v(-\Delta, t)}{\Delta^2} &=   \dfrac{v(\Delta, t) - v(0, t)}{\Delta^2} - \dfrac{1}{\Delta}\dfrac{v (0, t) - v(-\Delta, t) }{\Delta}  \\
-&= \dfrac{v(\Delta, t) - v(0, t)}{\Delta^2} + \dfrac{1}{\Delta} \xi v(0, t)  \\ 
-&= \dfrac{1}{\Delta^2}  (- 1 + \Delta \xi) v(0,t)  + \dfrac{1}{\Delta^2}  v(\Delta, t)  
+&= \dfrac{v(\Delta, t) - v(0, t)}{\Delta^2} + \dfrac{1}{\Delta} \xi v(0, t)  \\
+&= \dfrac{1}{\Delta^2}  (- 1 + \Delta \xi) v(0,t)  + \dfrac{1}{\Delta^2}  v(\Delta, t)
 \end{align}
 Similarly, for \eqref{eq:new-BC2}, we have
 \begin{align}
 \dfrac{v (\bar{z} + \Delta, t) - 2 v(\bar{z} , t) + v(\bar{z} -\Delta, t)}{\Delta^2} &=   \dfrac{v(\bar{z} - \Delta, t) - v(\bar{z}, t)}{\Delta^2} + \dfrac{1}{\Delta}\dfrac{ v(\bar{z}+\Delta, t) - v (\bar{z}, t) }{\Delta}  \\
-&= \dfrac{v(\bar{z} - \Delta, t) - v(\bar{z}, t)}{\Delta^2}  - \dfrac{1}{\Delta} \xi v(\bar{z}, t)  \\ 
-&= \dfrac{1}{\Delta^2}  (- 1 - \Delta \xi) v(\bar{z},t)  + \dfrac{1}{\Delta^2}  v(\bar{z} - \Delta, t)  
+&= \dfrac{v(\bar{z} - \Delta, t) - v(\bar{z}, t)}{\Delta^2}  - \dfrac{1}{\Delta} \xi v(\bar{z}, t)  \\
+&= \dfrac{1}{\Delta^2}  (- 1 - \Delta \xi) v(\bar{z},t)  + \dfrac{1}{\Delta^2}  v(\bar{z} - \Delta, t)
 \end{align}
 
-Thus, the corresponding $L_1^{-}$ and $L_2$ matrices are defined as 
+Thus, the corresponding $L_1^{-}$ and $L_2$ matrices are defined as
 
 \begin{align}
 L_1^{-} &\equiv \frac{1}{\Delta}\begin{pmatrix}
@@ -409,19 +409,19 @@ Note that we have assumed that $\Delta_{1,-} = \Delta_{1,+}$ and $\Delta_{P,+} =
 &\dfrac{\Delta_{1,-} v( \Delta_{1,+}, t) - (\Delta_{1,+} + \Delta_{1,-}) v( 0 , t) + \Delta_{1,+}  v( - \Delta_{1,-}, t)}{\frac{1}{2}(\Delta_{1,+} + \Delta_{1,-}) \Delta_{1,+} \Delta_{1,-} } \\
 &=
 \dfrac{v (\Delta_{1, +}, t) - 2 v(0, t) + v(-\Delta_{1, +}, t)}{\Delta_{1, +}^2} \\ &= \dfrac{v(\Delta_{1, +}, t) - v(0, t)}{\Delta_{1, +}^2} - \dfrac{1}{\Delta_{1, +}}\dfrac{v (0, t) - v(-\Delta_{1, +}, t) }{\Delta_{1, +}}  \\
-&= \dfrac{v(\Delta_{1, +}, t) - v(0, t)}{\Delta_{1, +}^2} + \dfrac{1}{\Delta_{i,+}} \xi v(0, t)  \\ 
-&= \dfrac{1}{\Delta_{1, +}^2}  (- 1 + \Delta_{1, +} \xi) v(0,t)  + \dfrac{1}{\Delta_{1, +}^2}  v(\Delta_{1, +}, t)  
+&= \dfrac{v(\Delta_{1, +}, t) - v(0, t)}{\Delta_{1, +}^2} + \dfrac{1}{\Delta_{i,+}} \xi v(0, t)  \\
+&= \dfrac{1}{\Delta_{1, +}^2}  (- 1 + \Delta_{1, +} \xi) v(0,t)  + \dfrac{1}{\Delta_{1, +}^2}  v(\Delta_{1, +}, t)
 \end{align}
 Similarly, for \eqref{eq:new-BC2}, we have
 \begin{align}
 &\dfrac{\Delta_{P,-} v( \bar{z} + \Delta_{P,+}, t) - (\Delta_{P,+} + \Delta_{P,-}) v(\bar{z} , t) + \Delta_{P,+}  v( \bar{z} - \Delta_{P,-}, t)}{\frac{1}{2}(\Delta_{P,+} + \Delta_{P,-}) \Delta_{P,+} \Delta_{P,-} } \\
 &=\dfrac{v (\bar{z} + \Delta_{P,-}, t) - 2 v(\bar{z} , t) + v(\bar{z} -\Delta_{P,-}, t)}{\Delta_{P,-}^2} \\
 &=   \dfrac{v(\bar{z} - \Delta_{P,-}, t) - v(\bar{z}, t)}{\Delta_{P,-}^2} + \dfrac{1}{\Delta_{P,-}}\dfrac{ v(\bar{z}+\Delta_{P,-}, t) - v (\bar{z}, t) }{\Delta_{P,-}}  \\
-&= \dfrac{v(\bar{z} - \Delta_{P,-}, t) - v(\bar{z}, t)}{\Delta_{P,-}^2}  - \dfrac{1}{\Delta_{P,-}} \xi v(\bar{z}, t)  \\ 
-&= \dfrac{1}{\Delta_{P,-}^2}  (- 1 - \Delta_{P,-} \xi) v(\bar{z},t)  + \dfrac{1}{\Delta_{P,-}^2}  v(\bar{z} - \Delta_{P,-}, t)  
+&= \dfrac{v(\bar{z} - \Delta_{P,-}, t) - v(\bar{z}, t)}{\Delta_{P,-}^2}  - \dfrac{1}{\Delta_{P,-}} \xi v(\bar{z}, t)  \\
+&= \dfrac{1}{\Delta_{P,-}^2}  (- 1 - \Delta_{P,-} \xi) v(\bar{z},t)  + \dfrac{1}{\Delta_{P,-}^2}  v(\bar{z} - \Delta_{P,-}, t)
 \end{align}
 
-Thus, the corresponding $L_1^{-}$ and $L_2$ matrices are defined as 
+Thus, the corresponding $L_1^{-}$ and $L_2$ matrices are defined as
 
 \begin{align}
 L_1^{-} &\equiv \begin{pmatrix}
@@ -533,10 +533,16 @@ Note that we have the following static calculations from PTW (H.1) to (H.11)
 	\begin{cases}
 	\frac{\rho \log(c) + g}{\rho^2}, & \gamma = 1 \\
 	\frac{1}{1-\gamma} \frac{c^{1 - \gamma}}{\rho + (\gamma - 1)g} & \text{otherwise}
-	\end{cases} 
+	\end{cases}
 \end{align}
 
-This gives us a system of three nonlinear equations to solve:
+Note also that the following formula for the ratio of aggregate to minimum profits (equation 31 in the main paper), holds in steady state:
+
+\begin{equation}
+	\bar{\pi}_{\text{rat}} \equiv \frac{\left(\theta + (N-1)(\sigma-1)d^{-\theta}\big(\frac{\kappa}{\zeta} \frac{\chi}{\rho (1-\chi)}\big)^{1 - \frac{\theta}{\sigma - 1}}\right)}{1 + \theta - \sigma}
+\end{equation}
+
+The above gives us a system of three nonlinear equations to solve:
 
 		\begin{align}
 		\frac{x}{\bar{\pi}_{\min}} &=  a \frac{\chi}{1-\chi}\frac{\sigma + \nu - 1}{\nu} , \\
@@ -630,7 +636,7 @@ To calculate the profitability ratio of the mean-to-min firm, take from the main
 
 
 Recall that $E(t)$ is the \textbf{gross} entry flow is $E(t)\Omega(t)$.  Since the \textbf{gross} exit flow is $\delta \Omega(t)$, then the differential equation for $\Omega(t)$ comes from the net flows,
-\begin{align} 
+\begin{align}
 	\D[t] \Omega(t) &= \left(E(t) - \delta \right)\Omega(t)\label{eq:E-defined-by-Omega}
 %	\intertext{Rearrange,}
 %	E(t) &\equiv \delta + \D[t]\log \Omega(t)
@@ -739,7 +745,7 @@ Before proceeding, define the following intermediate objects (see Appendix H of 
 
 \begin{align}
 	y &= c = (1 - \tilde{L})\bar{z} \\
-	\lambda_{ii} &= \frac{1}{1 + (N-1)\hat{z}^{\sigma - 1 - \theta}d^{1-\sigma}} 
+	\lambda_{ii} &= \frac{1}{1 + (N-1)\hat{z}^{\sigma - 1 - \theta}d^{1-\sigma}}
 \end{align}
 Note that $y = c$ here because we are only solving the special case of all adoption being done with labor (i.e., $\eta = 0$).
 
