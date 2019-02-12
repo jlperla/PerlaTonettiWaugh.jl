@@ -77,7 +77,7 @@
     # Sub-pieces of L_tilde
     @test sol.results[:L_tilde_a] + sol.results[:L_tilde_x] + sol.results[:L_tilde_E] ≈ sol.results[:L_tilde]
     # Check if π_rat definitions in dynamics solution and SS coincide 
-    @test sol.π_rat[end] ≈ stationary_T.π_rat atol = 1e-3
+    @test sol.results[:π_rat][end] ≈ stationary_T.π_rat atol = 1e-3
 end
 
 @testset "Regression Tests with time-varying Ω" begin
@@ -114,7 +114,7 @@ end
     # Sub-pieces of L_tilde
     @test sol.results[:L_tilde_a] + sol.results[:L_tilde_x] + sol.results[:L_tilde_E] ≈ sol.results[:L_tilde]
     # Check if π_rat definitions in dynamics solution and SS coincide 
-    @test sol.π_rat[end] ≈ stationary_T.π_rat atol = 1e-3
+    @test sol.results[:π_rat][end] ≈ stationary_T.π_rat atol = 1e-3
 end
 
 @testset "Correctness Tests" begin # Here, we compare the DAE output to known correct values, such as MATLAB output or analytical results.
