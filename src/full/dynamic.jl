@@ -142,8 +142,16 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
         U_bar_T(t) = U_bar_T_generator(t, T_U_bar)
         if (detailed_solution)
           # other welfare functions.
-          # L_tilde_interpolated = LinearInterpolation(results[:t], results[:L_tilde])
-          λ_ii = t -> gen_λ_ii(z_hat_interpolated(t))
+          ts = (T >= 20) ? sort(unique([collect(0.0:0.5:20); collect(20.0:T); results.t])) : results.t # add more time stops
+          results = DataFrame(t = ts)
+          
+          results = @transform(results, g = g_interpolated.(:t))
+          results = @transform(results, z_hat = z_hat_interpolated.(:t))
+          results = @transform(results, Ω = Ω.(:t))
+          results = @transform(results, E = E.(:t))
+          results = @transform(results, v_0 = (t -> (sol(t))[1]).(:t))
+          results = @transform(results, L_tilde = L_tilde_interpolated.(:t))
+          results = @transform(results, entry_residual = gen_entry_residual.(:v_0))
 
           results = @transform(results, λ_ii = gen_λ_ii.(:z_hat)) # λ_ii column.
           results = @transform(results, S = gen_S.(:g)) # S column.
