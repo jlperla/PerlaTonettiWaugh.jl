@@ -322,7 +322,7 @@ In the above cases, given the interpolated solutions of the problem, we can use 
 %\small
 
 \section{Spatial Discretization}\label{sec:discretization}
-\subsection{Discretizing the State Space}
+
 This will discretize space with backward differences in the first derivative, and central in space for the 2nd derivative.\footnote{Under a $g(t) > \gamma$ assumption (which may be a general requirement on parameter restrictions), the drift is negative, and the correct ``upwind'' finite difference scheme is always backwards.}  After discretizing the spatial dimension, we have a system of ODEs in time - which are solved using various time-stepping algorithms.
 
 \begin{itemize}
@@ -349,96 +349,6 @@ This will discretize space with backward differences in the first derivative, an
 	\hat{\pi}(t) &\equiv	\hat{\pi}(z,t) \in \R^P
 	\end{align}
 \end{itemize}
-
-\subsection{Discretization Operators}\label{sec:discretization-operators}
-Summarizing the discretized differential operators subject to the boundary conditions.  Let $L_1^{-}$ be the discretized backwards first differences and $L_2$ be the discretized central differences subject to the Neumann boundary conditions in \cref{eq:new-BC1,eq:new-BC2} such that $L_1^{-} v(t)$ and $L_2 v(t)$ represent the first and second derivatives of $v(z,t)$ respectively at $t$. For second derivatives, we use the following numerical scheme (\textbf{TODO: add reference to [Heterogeneous Agent Models in Continuous Time] by Achdou et al. (2017)}):
-
-\begin{equation}
-v''(z_i,t) \approx \dfrac{ \Delta_{i,-} v( z_i + \Delta_{i,+}, t) - (\Delta_{i,+} + \Delta_{i,-}) v( z_i , t) + \Delta_{i,+} v( z_i - \Delta_{i,-}, t)}{\frac{1}{2}(\Delta_{i,+} + \Delta_{i,-}) \Delta_{i,+} \Delta_{i,-} }, \text{for } i = 1, \ldots, P
-\end{equation}
-
-
-
-\subsubsection{Regular grids}
-Suppose that the grids are regular, i.e., elements of $\text{diff}(z)$ are all identical with $\Delta$ for some $\Delta > 0$.
-
-Using the backwards first-order difference, \eqref{eq:new-BC1} can be alternatively represented as
-\begin{align}
-\dfrac{v(0, t) - v(-\Delta, t)}{\Delta} &= - \xi v(0,t)
-\end{align}
-Similarly, using discretized central differences of second orders, \eqref{eq:new-BC1} can be shown as
-\begin{align}
-\dfrac{v (\Delta, t) - 2 v(0, t) + v(-\Delta, t)}{\Delta^2} &=   \dfrac{v(\Delta, t) - v(0, t)}{\Delta^2} - \dfrac{1}{\Delta}\dfrac{v (0, t) - v(-\Delta, t) }{\Delta}  \\
-&= \dfrac{v(\Delta, t) - v(0, t)}{\Delta^2} + \dfrac{1}{\Delta} \xi v(0, t)  \\
-&= \dfrac{1}{\Delta^2}  (- 1 + \Delta \xi) v(0,t)  + \dfrac{1}{\Delta^2}  v(\Delta, t)
-\end{align}
-Similarly, for \eqref{eq:new-BC2}, we have
-\begin{align}
-\dfrac{v (\bar{z} + \Delta, t) - 2 v(\bar{z} , t) + v(\bar{z} -\Delta, t)}{\Delta^2} &=   \dfrac{v(\bar{z} - \Delta, t) - v(\bar{z}, t)}{\Delta^2} + \dfrac{1}{\Delta}\dfrac{ v(\bar{z}+\Delta, t) - v (\bar{z}, t) }{\Delta}  \\
-&= \dfrac{v(\bar{z} - \Delta, t) - v(\bar{z}, t)}{\Delta^2}  - \dfrac{1}{\Delta} \xi v(\bar{z}, t)  \\
-&= \dfrac{1}{\Delta^2}  (- 1 - \Delta \xi) v(\bar{z},t)  + \dfrac{1}{\Delta^2}  v(\bar{z} - \Delta, t)
-\end{align}
-
-Thus, the corresponding $L_1^{-}$ and $L_2$ matrices are defined as
-
-\begin{align}
-L_1^{-} &\equiv \frac{1}{\Delta}\begin{pmatrix}
-1 - (1 + \xi \Delta) &0&0&\dots&0&0&0\\
--1&1&0&\dots&0&0&0\\
-\vdots&\vdots&\vdots&\ddots&\vdots&\vdots&\vdots\\
-0&0&0&\dots&-1&1&0\\
-0&0&0&\cdots&0&-1&1
-\end{pmatrix}_{P\times P}\label{eq:L-1-regular} \\
-L_2 &\equiv \frac{1}{\Delta^2}\begin{pmatrix}
--2 + (1 + \xi\Delta) &1&0&\dots&0&0&0\\
-1&-2&1&\dots&0&0&0\\
-\vdots&\vdots&\vdots&\ddots&\vdots&\vdots&\vdots\\
-0&0&0&\dots&1&-2&1\\
-0&0&0&\cdots&0&1&-2 + (1- \xi\Delta)
-\end{pmatrix}_{P\times P}\label{eq:L-2-regular}
-\end{align}
-
-\subsubsection{Irregular grids}
-Using the backwards first-order difference, \eqref{eq:new-BC1} can be alternatively represented as
-\begin{align}
-\dfrac{v(0, t) - v(-\Delta_{1, -}, t)}{\Delta_{1, -}} &= - \xi v(0,t)
-\end{align}
-
-Note that we have assumed that $\Delta_{1,-} = \Delta_{1,+}$ and $\Delta_{P,+} = \Delta_{P,-}$ for the ghost notes. Using discretized central differences of second orders, \eqref{eq:new-BC1} can be shown as
-\begin{align}
-&\dfrac{\Delta_{1,-} v( \Delta_{1,+}, t) - (\Delta_{1,+} + \Delta_{1,-}) v( 0 , t) + \Delta_{1,+}  v( - \Delta_{1,-}, t)}{\frac{1}{2}(\Delta_{1,+} + \Delta_{1,-}) \Delta_{1,+} \Delta_{1,-} } \\
-&=
-\dfrac{v (\Delta_{1, +}, t) - 2 v(0, t) + v(-\Delta_{1, +}, t)}{\Delta_{1, +}^2} \\ &= \dfrac{v(\Delta_{1, +}, t) - v(0, t)}{\Delta_{1, +}^2} - \dfrac{1}{\Delta_{1, +}}\dfrac{v (0, t) - v(-\Delta_{1, +}, t) }{\Delta_{1, +}}  \\
-&= \dfrac{v(\Delta_{1, +}, t) - v(0, t)}{\Delta_{1, +}^2} + \dfrac{1}{\Delta_{i,+}} \xi v(0, t)  \\
-&= \dfrac{1}{\Delta_{1, +}^2}  (- 1 + \Delta_{1, +} \xi) v(0,t)  + \dfrac{1}{\Delta_{1, +}^2}  v(\Delta_{1, +}, t)
-\end{align}
-Similarly, for \eqref{eq:new-BC2}, we have
-\begin{align}
-&\dfrac{\Delta_{P,-} v( \bar{z} + \Delta_{P,+}, t) - (\Delta_{P,+} + \Delta_{P,-}) v(\bar{z} , t) + \Delta_{P,+}  v( \bar{z} - \Delta_{P,-}, t)}{\frac{1}{2}(\Delta_{P,+} + \Delta_{P,-}) \Delta_{P,+} \Delta_{P,-} } \\
-&=\dfrac{v (\bar{z} + \Delta_{P,-}, t) - 2 v(\bar{z} , t) + v(\bar{z} -\Delta_{P,-}, t)}{\Delta_{P,-}^2} \\
-&=   \dfrac{v(\bar{z} - \Delta_{P,-}, t) - v(\bar{z}, t)}{\Delta_{P,-}^2} + \dfrac{1}{\Delta_{P,-}}\dfrac{ v(\bar{z}+\Delta_{P,-}, t) - v (\bar{z}, t) }{\Delta_{P,-}}  \\
-&= \dfrac{v(\bar{z} - \Delta_{P,-}, t) - v(\bar{z}, t)}{\Delta_{P,-}^2}  - \dfrac{1}{\Delta_{P,-}} \xi v(\bar{z}, t)  \\
-&= \dfrac{1}{\Delta_{P,-}^2}  (- 1 - \Delta_{P,-} \xi) v(\bar{z},t)  + \dfrac{1}{\Delta_{P,-}^2}  v(\bar{z} - \Delta_{P,-}, t)
-\end{align}
-
-Thus, the corresponding $L_1^{-}$ and $L_2$ matrices are defined as
-
-\begin{align}
-L_1^{-} &\equiv \begin{pmatrix}
-\Delta^{-1}_{1,-} [1 - (1 + \xi \Delta^{-1}_{1,-})] &0&0&\dots&0&0&0\\
--\Delta_{2,-}^{-1}&\Delta_{2,-}^{-1}&0&\dots&0&0&0\\
-\vdots&\vdots&\vdots&\ddots&\vdots&\vdots&\vdots\\
-0&0&0&\dots&-\Delta_{P-1,-}^{-1}&\Delta_{P-1,-}^{-1}&0\\
-0&0&0&\cdots&0&-\Delta_{P,-}^{-1}&\Delta_{P,-}^{-1}
-\end{pmatrix}_{P\times P}\label{eq:L-1} \\
-L_2 &\equiv \begin{psmallmatrix}
-\Delta_{1,+}^{-2}[-2 + (1+\xi \Delta_{1,+})] &\Delta_{1,+}^{-2}&0&\cdots&0&0&0 \\
-\vdots&\ddots&\ddots&\ddots&\ddots&\vdots&\vdots\\
-0&\cdots&2(\Delta_{i,+}+\Delta_{i,-})^{-1} \Delta_{i,-}^{-1} &-2\Delta_{i,-}^{-1} \Delta_{i,+}^{-1}  & 2 (\Delta_{i,+}+\Delta_{i,-})^{-1} \Delta_{i,+}^{-1}&\cdots&0 \\
-\vdots&\vdots&\vdots&\ddots&\ddots&\ddots&\vdots\\
-0&0&0&\cdots&0&\Delta_{P,-}^{-2}&\Delta_{P,-}^{-2} [-2 + (1- \xi\Delta_{P,-})]
-\end{psmallmatrix}_{P\times P}\label{eq:L-2}
-\end{align}
 
 \section{Derivations for Simple Model}\label{sec:simple-derivation}
 \subsection{Equations Prior to Rescaling}
