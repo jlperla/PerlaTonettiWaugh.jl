@@ -56,7 +56,7 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
     # Define intermediate quantitities.
       P = length(z)
       ω = ω_weights(z, θ, σ-1) # Quadrature weights.
-      z, L_1_minus, L_1_plus, L_2 = rescaled_diffusionoperators(z, σ-1) # Operator Discretization.
+      L_1_minus, L_1_plus, L_2 = robin_diffusionoperators(z, σ-1) # Operator Discretization.
       L_1 = L_1_minus # L_1 ≡ L_1_minus.
 
     # Define the auxiliary functions for the DAE problem.
@@ -144,7 +144,7 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
           # other welfare functions.
           ts = (T >= 20) ? sort(unique([collect(0.0:0.5:20); collect(20.0:T); results.t])) : results.t # add more time stops
           results = DataFrame(t = ts)
-          
+
           results = @transform(results, g = g_interpolated.(:t))
           results = @transform(results, z_hat = z_hat_interpolated.(:t))
           results = @transform(results, Ω = Ω.(:t))
@@ -167,8 +167,7 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
 
     # Return.
     # The results, raw DAE solution, and DAE problem (f!, static_equilibrium, etc.) objects.
-      return (results = results, sol = sol, p = p, static_equilibrium = static_equilibrium, 
+      return (results = results, sol = sol, p = p, static_equilibrium = static_equilibrium,
               U = U, c = c, Ω = Ω, log_M = log_M, log_c = log_c, U_bar_T = U_bar_T,
-              U_bar_T_generator = U_bar_T_generator) 
+              U_bar_T_generator = U_bar_T_generator)
 end
- 

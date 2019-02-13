@@ -3,7 +3,7 @@
 function testdiffusion()
     ξ = 1.0
     z = 0.:0.01:5.
-    rescaled_diffusionoperators(z, ξ), rescaled_diffusionoperators(collect(z), ξ) # test both the AbstractRange and StepRangeLen methods
+    robin_diffusionoperators(z, ξ), robin_diffusionoperators(collect(z), ξ) # test both the AbstractRange and StepRangeLen methods
 end
 
 @test @inferred testdiffusion() == testdiffusion()

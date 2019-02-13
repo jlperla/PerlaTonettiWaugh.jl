@@ -18,7 +18,7 @@ function stationary_numerical_simple(params, z)
     P = length(z)
     # Unpack parameters.
     @unpack μ, υ, θ, r, ζ, π = params
-    z, L_1_minus, L_1_plus, L_2  = rescaled_diffusionoperators(z, 1) # Discretize the operator
+    L_1_minus, L_1_plus, L_2  = robin_diffusionoperators(z, 1) # Discretize the operator
     # Define the pdf of the truncated exponential distribution
     ω = ω_weights(z, θ, 1) # (20)
     # Function we're solving.

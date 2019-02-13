@@ -20,7 +20,7 @@ function simpleDAE(params, settings)
     # Quadrature weighting
     ω = ω_weights(z, θ, 1)
     # Discretize the operator.
-    z, L_1_minus, L_1_plus, L_2 = rescaled_diffusionoperators(z, 1) # L_1_minus ≡ L_1 is the only one we use.
+    L_1_minus, L_1_plus, L_2 = robin_diffusionoperators(z, 1) # L_1_minus ≡ L_1 is the only one we use.
     # Calculate the stationary solution.
     r_T = r(T)
     g_T = g(T)
