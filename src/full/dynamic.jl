@@ -140,6 +140,9 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
 
         U_bar_T_generator(t, T_cutoff) = quadgk(τ -> exp(-ρ*τ)*(log_M(t+τ) + log_c(t+τ)), 0, (T_cutoff-t))[1] + exp(-ρ*(T_cutoff-t))*(g_T + ρ*(log_c_T + g_T * T_cutoff))/(ρ^2)
         U_bar_T(t) = U_bar_T_generator(t, T_U_bar)
+        π_min(t) = gen_π_min(L_tilde_interpolated(t), z_bar(t))
+        π_rat(t) = θ*(1-z_hat_interpolated(t)^(-θ+σ-1))/(θ-σ+1) + (1+(N-1)*d^(1-σ))*θ*z_hat_interpolated(t)^(-θ+σ-1)/(θ-σ+1)+(N-1)*κ*z_hat_interpolated(t)^(-θ)/π_min(t) # (55)
+
         if (detailed_solution)
           # other welfare functions.
           ts = (T >= 20) ? sort(unique([collect(0.0:0.5:20); collect(20.0:T); results.t])) : results.t # add more time stops
@@ -160,6 +163,7 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
           results = @transform(results, π_min = gen_π_min.(:L_tilde, :z_bar)) # π_min column.
           results = @transform(results, log_M = log_M.(:t)) # log_M column
           results = @transform(results, U = U.(:t)) # U column
+          results = @transform(results, π_rat = π_rat.(:t)) # π_rat column
           results = @transform(results, L_tilde_a = gen_L_tilde_adopt.(:Ω, :S))
           results = @transform(results, L_tilde_x = gen_L_tilde_export.(:Ω, :z_hat))
           results = @transform(results, L_tilde_E = gen_L_tilde_entrycost.(:Ω, :E))

@@ -302,8 +302,9 @@ Some additional calculations useful for analyzing the model, but not required fo
 c(t) &= (1 - \tilde{L}(t))\bar{z}(t) \label{eq:c-summary}\\
 \log M(t) &= \int_0^t g(s)\diff s\label{eq:log-M-summary}\\
 U(t) &= \int_0^{T-t}e^{-\rho \tau}\left(\log M(t+\tau)+\log c(t+\tau)\right)\diff \tau + \frac{e^{-\rho( T-t)}}{\rho^2}\left((1+\rho( T-t))g(T) + \rho\left(\log c(T) + \log M(T) \right) \right)\label{eq:U-dynamics-summary}\\
+\bar{\pi}_{\text{rat}}(t) &= \theta\frac{1 - \hat{z}(t)^{-\theta + \sigma - 1}}{\theta - \sigma + 1} + (1 + (N-1)d^{1-\sigma})\theta\frac{\hat{z}(t)^{-\theta + \sigma - 1}}{\theta - \sigma + 1} + (N-1)\frac{\kappa}{\bar{\pi}_{\min}(t)} \hat{z}(t)^{-\theta}\label{eq:pi_rat-dynamics-summary}
 \intertext{And the calculation of the consumption equivalent ratio to compare the $U(0)$ from above to an alternative $U^{\text{old}}(0))$}
-M_{\text{CE}} &= \exp \left(\rho(U(0) - U^{\text{old}}(0))\right)
+M_{\text{CE}} &= \exp \left(\rho(U(0) - U^{\text{old}}(0))\right) 
 \end{align}
 In the above cases, given the interpolated solutions of the problem, we can use any quadrature method, including pre-built libraries, to calculate the integrals since they are only evaluated after the rest of the solution is complete.
 
