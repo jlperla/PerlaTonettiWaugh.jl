@@ -1,7 +1,7 @@
 % !TEX program = pdflatex
-
+% !BIB program = bibtex
 \documentclass[11pt]{article}
-\usepackage{amsmath,amsfonts,amsthm,amssymb,geometry,dsfont}
+\usepackage{amsmath,amsfonts,amsthm,amssymb,geometry,dsfont,natbib}
 \usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
 \usepackage[
 bookmarks=false,
@@ -23,7 +23,7 @@ breaklinks]
 \crefname{assumption}{Assumption}{Assumptions}
 \crefname{property}{Property}{Properties}
 \geometry{left=1in,right=1in,top=0.6in,bottom=1in}
-
+\bibliographystyle{econometrica}
 \newcommand{\D}[1][]{\ensuremath{\boldsymbol{\partial}_{#1}}}
 \newcommand{\R}{\ensuremath{\mathbb{R}}}
 \newcommand{\diff}{\ensuremath{\mathrm{d}}}
@@ -43,13 +43,15 @@ breaklinks]
 
 This document is a self-contained summary of all of the equations and algorithms used to solve the model and transition dynamics.  Equations in the code have a comment to reference the corresponding equation numbers in this document.  See \url{https://github.com/jlperla/PerlaTonettiWaugh.jl} for the code and instructions for usage.
 
+See \cite{AchdouHanLasryEtAl2017} for more on upwind finite difference methods.  While we discretize the differential operators using the same upwind finite-difference methods, we make several changes to the general approach taken by many economists to solve PDEs: (1) after discretizing the spatial dimension of the PDE to make them ODEs, we stack in further equilibrium equations into the ODEs to make them a system of DAEs; and (2) instead of discretizing the spatial dimension with finite differences and the time-dimension with a homegrown timestepping (e.g. backwards euler), we instead rely on the underlying ODE/DAE solvers to do efficient--and adaptive--time-stepping.  Because of this, this document concentrates on specifying the full set of ODE/DAE equations, which are then handed over to industrial strength solvers.
+
 \section{Simplified Growth Model with Transition Dynamics}
 We start with a simplified version of the model with transition dynamics.  In the more complicated case of this paper, the $\pi(z,t), r(t), x(t)$ will come from equilibrium conditions rather than being given exogenously, but the structure of solving the resulting system of integro-differential-algebraic equations remains the same.
 
 There is a useful simplifying result in both this simple and the full model: in the transition dynamics experiments we are looking at, the normalized distribution $F(z)$ will remain constant over time.  Hence, we do not need to jointly solve the KFE as we will be at the stationary level (post-normalization).  This is a consequence of the PDF remaining stationary (after normalization) under the transition dynamics we examine, and is \textbf{not} an assumption.
 
 \subsection{Summary of Equations}\label{sec:summary-simple}
-We follow the notation of the main paper wherever possible.  This model is the geometric Brownian motion (GBM) model in the technical appendix of Benhabib, Perla, and Tonetti (2019).
+We follow the notation of the main paper wherever possible.  This model is the geometric Brownian motion (GBM) model in the technical appendix of \cite{BenhabibPerlaTonetti2017}.
 
 Let $Z$ be productivity, where $Z(t) \geq M(t)$.  Let $V(Z,t)$ is the value function prior to normalization, $M(t)$ the endogenous threshold, $\Pi(Z,t)$ the profits, and $X(t)$ the adoption cost.  The $\Pi(Z,t)$, $r$, and $X(t)$ are given exogenously in this simplified version, and endogenized with monopolistic competition and trade in the full model.
 
@@ -75,7 +77,7 @@ f(z,t) &= \theta e^{-\theta z},\quad \text{ for all }t \label{eq:f-stationary-su
 
 
 
-\noindent Benhabib, Perla, and Tonetti (2019) gives us a closed-form solution for this balanced growth path (i.e steady state when normalized)
+\noindent \cite{BenhabibPerlaTonetti2017} gives us a closed-form solution for this balanced growth path (i.e steady state when normalized)
 
 \begin{align}
 g \equiv g(T) &= 	\mu+ \frac{1-(\theta -1) \zeta  \left(r-\mu\right)}{(\theta -1)^2 \zeta }+ \frac{\upsilon^2}{2}\frac{\theta  \left(\theta(\theta -1)    \left(r-\mu-\frac{\upsilon ^2}{2}\right) \zeta-2\right)+1}{(\theta -1) \left((\theta -1)   \left(r-\mu-\frac{\upsilon ^2}{2}\right)\zeta-1\right)}. \label{eq:g-gbm}\\
@@ -106,6 +108,7 @@ A(t) &\equiv \left(r - \mu - \frac{\upsilon^2}{2}\right) - (\mu+ \upsilon^2 - g(
 \subsection{Spatial Discretization with Upwind Finite-Differences}
 
 In order to solve for the dynamics of $v(t,z)$ and $g(t)$, we will discretize the PDE, integral, and algebraic equations from \cref{eq:simple-summary1-numerical,eq:simple-summary2-numerical,eq:simple-summary3-numerical,eq:simple-summary4-numerical} into a system of ODEs and algebraic equations.\footnote{As a test, we solve the steady state version of the discretized system of ODEs numerically and compare it to \cref{sec:simple-steady-state} to determine the degree of numerical error and stability of the methods.}
+
 
 \paragraph{Grid}
 
@@ -171,7 +174,7 @@ The basic algorithm for this, which we have not seen in the literature, is to di
 
 \begin{itemize}
 	\item Choose an appropriate $z$ grid, with a large number of points close to $0$ as well as near the $\bar{z}$.\footnote{There is a degree of sensitivity in this model for the particular choice of $\bar{z}$ and the grid points for several reasons: (a) the imposition of the \cref{eq:simple-summary3-numerical} condition on $\D[z]v(0,t)$  is analytically the correct boundary condition of the optimal stopping problem for the imitation threshold--it comes from the smooth-pasting condition--but is sensitive to the precise curvature.  For this reason, the discretization needs to give it enough precision or the $g(t)$ can get distorted; (b) the majority of the curvature is close to the $z=0$ barrier, after which the function rapidly becomes constant; (c) the artificial boundary at $\bar{z}$ introduces a lot of curvature right near the end.  If there are not enough grid points close to the $\bar{z}$, then the local curvature near $v(\bar{z},t)$ effects a larger part of the whole distribution; and (d) since the expectation in \cref{eq:discretized-simple-vm} is taken over a heavy-tailed distribution, and is essential for solving the endogenous $g(t)$, truncations can have a significant bias if $\bar{z}$ is too small.  In particular, if you change the $\theta$ radically or conditions which lead to large changes in $g(t)$, you should verify that the analytical and numerical steady states do not become too different.}
-	\item Identify an industrial-strength DAE solver (e.g. \url{http://docs.juliadiffeq.org/latest/tutorials/dae_example.html}).  For these, you give a an operator in the form of a stacked system of ODEs and algebraic equations, and then flag the algebraic ones for the solver.
+	\item Identify an industrial-strength DAE solver in the (e.g. Sundials.jl in \url{http://docs.juliadiffeq.org/latest/tutorials/dae_example.html}).\footnote{See \cite{RackauckasNie2017} for more on the Julia ODE and DAE packages.  We use the SUNDIALS DAE solver from \cite{HindmarshBrownGrantEtAl2005}.}  For these, you give a an operator in the form of a stacked system of ODEs and algebraic equations, and then flag the algebraic ones for the solver.
 	\item Find the time $T$ steady state as $v(T) \in \R^P$ and $g(T) \in R$ from \cref{eq:discretized-simple-stationary,eq:discretized-simple-vm-stationary} as the \textit{initial condition}, for working backwards in time.\footnote{While we have an analytical solution in this specific case, it is better to use the numerical solution for the steady-state since it is the steady-state of the DAE for a given grid.}
 	\item Setup a function for the \cref{eq:discretized-simple,eq:discretized-simple-vm} tagging the last equation as an algebraic one.
 	\item Solve the system, which is at most a medium-sized problem for a serious DAE solver
@@ -354,7 +357,7 @@ This will discretize space with backward differences in the first derivative, an
 \section{Derivations for Simple Model}\label{sec:simple-derivation}
 \subsection{Equations Prior to Rescaling}
 
-From the technical appendix of Benhabib, Perla, and Tonetti (2019) (but renaming the $v$ function to be $\hat{v}$ here to avoid confusion with our normalization), assume an exogenously given $\hat{\pi}(z,t)$ and $x(t)$ function.  We will only look at examples where $F(z) = 1 - e^{-\theta z}$ for all $t$.
+From the technical appendix of \cite{BenhabibPerlaTonetti2017} (but renaming the $v$ function to be $\hat{v}$ here to avoid confusion with our normalization), assume an exogenously given $\hat{\pi}(z,t)$ and $x(t)$ function.  We will only look at examples where $F(z) = 1 - e^{-\theta z}$ for all $t$.
 \begin{align}
 (r - g(t)) \hat{v}(z,t) &= \hat{\pi}(z,t) + (\mu- g(t)) \D[z] \hat{v}(z,t) + \frac{\upsilon^2}{2} \D[zz] \hat{v}(z,t) + \D[t]\hat{v}(z,t)\label{eq:bellman-GBM-dynamic}	\\
 \hat{v}(0,t) &= \int_{0}^{\infty} \hat{v}(z,t) F'(z)\diff z - x(t)\label{eq:vm-GBM-dynamic}\\
@@ -697,8 +700,7 @@ Calculate the welfare at the steady state before the shock (which assumes a $M(0
 
 Then the $M(0)$ should be greater than $1$, and it is the inverse of the proportion of consumption the would be willing to give up to change regimes.
 
-
-
-
+\newpage
+\bibliography{numerical_algorithm}
 
 \end{document}
