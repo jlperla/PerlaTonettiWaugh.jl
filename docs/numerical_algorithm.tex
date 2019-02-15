@@ -41,9 +41,12 @@ breaklinks]
 \author{Jesse Perla \and Christopher Tonetti \and Michael E. Waugh}
 \maketitle
 
-This document is a self-contained summary of all of the equations and algorithms used to solve the model and transition dynamics.  Equations in the code have a comment to reference the corresponding equation numbers in this document.  See \url{https://github.com/jlperla/PerlaTonettiWaugh.jl} for the code and instructions for usage.
+\noindent See \url{https://github.com/jlperla/PerlaTonettiWaugh.jl} for the code and instructions.
+\bigskip
 
-See \cite{AchdouHanLasryEtAl2017} for more on upwind finite difference methods.  While we discretize the differential operators using the same upwind finite-difference methods, we make several changes to the general approach taken by many economists to solve PDEs: (1) after discretizing the spatial dimension of the PDE to make them ODEs, we stack in further equilibrium equations into the ODEs to make them a system of DAEs; and (2) instead of discretizing the spatial dimension with finite differences and the time-dimension with a homegrown timestepping (e.g. backwards euler), we instead rely on the underlying ODE/DAE solvers to do efficient--and adaptive--time-stepping.  Because of this, this document concentrates on specifying the full set of ODE/DAE equations, which are then handed over to industrial strength solvers.
+This document is a self-contained summary of all of the equations and algorithms used to solve the model and transition dynamics.  Equations in the code have a comment to reference the corresponding equation numbers in this document.  
+
+\cite{AchdouHanLasryEtAl2017} and it's technical appendix provide many of the details on the upwind finite difference methods used here.  While using these techniques to discretize the "spatial" dimension, we make several changes to the general approach taken by many economists to solve PDEs: (1) after discretizing the spatial dimension of the PDE to make them ODEs, we stack in further equilibrium equations into the ODEs to make them a system of DAEs; and (2) instead of discretizing the spatial dimension with finite differences and the time-dimension with a homegrown time-stepping (e.g. backwards euler), we instead rely on the underlying ODE/DAE solvers to do numerically stable, efficient, and often adaptive--time-stepping.  Because of this, this document concentrates on specifying the full set of ODE/DAE equations, which are then handed over to industrial strength solvers.
 
 \section{Simplified Growth Model with Transition Dynamics}
 We start with a simplified version of the model with transition dynamics.  In the more complicated case of this paper, the $\pi(z,t), r(t), x(t)$ will come from equilibrium conditions rather than being given exogenously, but the structure of solving the resulting system of integro-differential-algebraic equations remains the same.
@@ -101,9 +104,7 @@ v(0,t) &= \int_{0}^{\bar{z}}  v(z,t) \left(e^z \frac{F'(z)}{F(\bar{z})}\right) \
 A(t) &\equiv \left(r - \mu - \frac{\upsilon^2}{2}\right) - (\mu+ \upsilon^2 - g(t)) \D[z] - \frac{\upsilon^2}{2} \D[zz]\label{eq:simple-summary5-numerical}
 \end{align}
 
-\noindent A solution to this equilibrium is a $g(t)$ and $v(z,t)$ fulfilling this system of equations
-
-\textbf{Note:} in this class of models, it is known that if the distribution was forced to have a finite-support with a fixed frontier, it would lead to no long-run growth.  This is not what the artificial boundary is doing.  In particular, the pre-normalized boundary is growing at the same rate as the economy, i.e. $\bar{Z}(t) = M(t) e^{\bar{z}}$.  We have numerically verified that for a large $\bar{z}$, this converges to analytic  solution with an infinite support.
+\noindent A solution to this equilibrium is a $g(t)$ and $v(z,t)$ fulfilling this system of equations\footnote{\textbf{Note:} in this class of models, it is known that if the distribution was forced to have a finite-support with a fixed frontier, it would lead to no long-run growth.  This is not what the artificial boundary is doing.  In particular, the pre-normalized boundary is growing at the same rate as the economy, i.e. $\bar{Z}(t) = M(t) e^{\bar{z}}$.  We have numerically verified that for a large $\bar{z}$, this converges to known analytic solution with an infinite support.}
 
 \subsection{Spatial Discretization with Upwind Finite-Differences}
 
@@ -120,9 +121,9 @@ After discretizing, we abuse notation and denote the grid by the variable name, 
 
 \paragraph{Discretized Operator}
 
-To discretize the system, we use upwind finite differences.  In particular, we need to discretize the differential operator in \cref{eq:simple-summary5-numerical} subject to the \cref{eq:simple-summary3-numerical,eq:simple-summary4-numerical} boundary conditions.  Crucially, since these boundary conditions are homogeneous, we can decompose the linear $A(t)$ operator into additive parts where: the $\D[z]$ is discretized as $L^{-}_1$ using backwards first differences, and the $\D[zz]$ is discretized as $L_2$ using central second difference.   Furthermore, the $L^{-}_1$ and $L_2$ linear operators \textit{impose the boundary condition for any vector} they operator on.\footnote{See \url{https://github.com/QuantEcon/SimpleDifferentialOperators.jl} for more on the theory of discretizing operators with affine boundary conditions.}
+To discretize the system, we use upwind finite differences.  In particular, we need to discretize the differential operator in \cref{eq:simple-summary5-numerical} subject to the \cref{eq:simple-summary3-numerical,eq:simple-summary4-numerical} boundary conditions.  Crucially, since these boundary conditions are homogeneous, we can decompose the linear $A(t)$ operator into additive parts where: the $\D[z]$ is discretized as $L^{-}_1$ using backwards first differences, and the $\D[zz]$ is discretized as $L_2$ using central second difference.   Furthermore, the $L^{-}_1$ and $L_2$ linear operators \textit{impose the boundary condition for any vector} they operator on.\footnote{See \url{https://github.com/QuantEcon/SimpleDifferentialOperators.jl} for more on the derivation of discretizing operators with linear and affine boundary conditions.}
 
-Using the derivations in \cref{sec:discretization-operators}, the discretization of $A(t)$ subject to the boundary conditions is then the $P \times P$ matrix
+Using the derivations in \url{https://github.com/QuantEcon/SimpleDifferentialOperators.jl/blob/master/docs/tex/discretized-differential-operator-derivation.pdf}, the discretization of $A(t)$ subject to the boundary conditions is then the $P \times P$ matrix
 \begin{align}
 A(t) &\equiv \left(r - \mu - \frac{\upsilon^2}{2}\right) I - (\mu + \upsilon^2 - g(t)) L^{-}_1 - \frac{\upsilon^2}{2} L_2 \label{eq:A-def-simple}
 \end{align}
@@ -133,6 +134,8 @@ While non-binding in practice here, to check that the  $L^{-}_1$ backwards diffe
 \mu + \sigma^2 - g(t) < 0
 \end{equation}
 
+See \url{https://quantecon.github.io/SimpleDifferentialOperators.jl/latest/#Formulas-1} for the specific formulas used for $L_1^-$ and $L_2$ subject to the \cref{eq:simple-summary4-numerical,eq:simple-summary5-numerical} boundary conditions.
+
 \paragraph{Quadrature}
 In order to discretize \cref{eq:simple-summary2-numerical}, we need to calculate the integral using quadrature.  Since the grid points are already given (i.e. we can't choose Gaussian quadrature nodes), we use the weights for the non-uniform trapezoidal rule.
 
@@ -141,7 +144,7 @@ To calculate these, use $\Delta_{-}$ and $\Delta_{+}$ backwards and forward diff
 \bar{\omega}&\equiv \frac1{2}(\Delta_{-} + \Delta_{+})\in \R^P
 \end{align}
 
-Then, in \cref{sec:quadrature}, we can combine both the quadrature nodes and all non-$v$ values at the nodes (i.e.$e^z$ and the $F'(z)$) with $\bar{\omega}$ so that
+Then, in \cref{sec:quadrature}, we can combine both the quadrature nodes and all non-$v$ values at the nodes (i.e. $e^z$ and the $F'(z)$) with $\bar{\omega}$ so that
 \begin{align}
 \omega_i &\equiv \bar{\omega}_i \frac{\theta e^{(1 - \theta)z_i}}{1 - e^{-\theta \bar{z}}}
 \end{align}
@@ -170,7 +173,7 @@ Where the $ A(T; g)$ is to reinforce that it is the only component which is a fu
 
 Transition dynamics can be solved for any exogenous $x(t)$ and $\pi(z,t)$ functions defined on $t \in [0,\infty)$ where they remain constant after $T$.
 
-The basic algorithm for this, which we have not seen in the literature, is to directly solve the system \cref{eq:discretized-simple,eq:discretized-simple-vm} as a DAE.\footnote{ We experimented extensively with the more typical method in the economics literature of guessing a path for $g(t)$, solving the discretized system as an ODE in \cref{eq:discretized-simple}, and then minimizing residuals of \cref{eq:discretized-simple-vm}.  For various reasons, this approach ended up being much slower and less stable for this particular problem, which led to the DAE solution.  While we were able to get solutions using this approach for the simple solution, it failed to effectively solve the full model dynamics robustly.}
+The general approach  for this is to directly solve the system \cref{eq:discretized-simple,eq:discretized-simple-vm} as a DAE.\footnote{ We experimented extensively with the more typical method in the economics literature of guessing a path for $g(t)$, solving the discretized system as an ODE in \cref{eq:discretized-simple}, and then minimizing residuals of \cref{eq:discretized-simple-vm}.  For various reasons, this approach ended up being much slower and less stable for this particular problem, which led to the DAE solution.  While we were able to get solutions using this approach for the simple solution, it failed to effectively solve the full model dynamics robustly.}
 
 \begin{itemize}
 	\item Choose an appropriate $z$ grid, with a large number of points close to $0$ as well as near the $\bar{z}$.\footnote{There is a degree of sensitivity in this model for the particular choice of $\bar{z}$ and the grid points for several reasons: (a) the imposition of the \cref{eq:simple-summary3-numerical} condition on $\D[z]v(0,t)$  is analytically the correct boundary condition of the optimal stopping problem for the imitation threshold--it comes from the smooth-pasting condition--but is sensitive to the precise curvature.  For this reason, the discretization needs to give it enough precision or the $g(t)$ can get distorted; (b) the majority of the curvature is close to the $z=0$ barrier, after which the function rapidly becomes constant; (c) the artificial boundary at $\bar{z}$ introduces a lot of curvature right near the end.  If there are not enough grid points close to the $\bar{z}$, then the local curvature near $v(\bar{z},t)$ effects a larger part of the whole distribution; and (d) since the expectation in \cref{eq:discretized-simple-vm} is taken over a heavy-tailed distribution, and is essential for solving the endogenous $g(t)$, truncations can have a significant bias if $\bar{z}$ is too small.  In particular, if you change the $\theta$ radically or conditions which lead to large changes in $g(t)$, you should verify that the analytical and numerical steady states do not become too different.}
