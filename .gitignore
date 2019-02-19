@@ -12,3 +12,4 @@
 *.bbl
 *.bak
 *.blg
+*.synctex(busy)
