@@ -56,7 +56,7 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
     # Define intermediate quantitities.
       P = length(z)
       ω = ω_weights(z, θ, σ-1) # Quadrature weights.
-      L_1_minus, L_1_plus, L_2 = diffusionoperators(z, Mixed(σ-1), Mixed(σ-1)) # Operator Discretization.
+      L_1_minus, L_1_plus, L_2 = robin_diffusionoperators(z, σ-1) # Operator Discretization.
       L_1 = L_1_minus # L_1 ≡ L_1_minus.
 
     # Define the auxiliary functions for the DAE problem.
