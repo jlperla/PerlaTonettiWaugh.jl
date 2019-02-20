@@ -247,9 +247,9 @@ version = "0.0.4"
 
 [[DiffRules]]
 deps = ["Random", "Test"]
-git-tree-sha1 = "26b96a1a506b06cb272ef60568d478adab039b96"
+git-tree-sha1 = "dc0869fb2f5b23466b32ea799bd82c76480167f7"
 uuid = "b552c78f-8df3-52c6-915a-8e097449b14b"
-version = "0.0.9"
+version = "0.0.10"
 
 [[DifferentialEquations]]
 deps = ["BoundaryValueDiffEq", "DelayDiffEq", "DiffEqBase", "DiffEqCallbacks", "DiffEqFinancial", "DiffEqJump", "DiffEqMonteCarlo", "DiffEqNoiseProcess", "DiffEqPDEBase", "DiffEqPhysics", "DimensionalPlotRecipes", "LinearAlgebra", "MultiScaleArrays", "OrdinaryDiffEq", "Random", "RecursiveArrayTools", "Reexport", "SteadyStateDiffEq", "StochasticDiffEq", "Sundials", "Test"]
@@ -385,9 +385,9 @@ uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
 [[MacroTools]]
 deps = ["Compat"]
-git-tree-sha1 = "c443e1c8d58a4e9f61b708ad0a88286c7042145b"
+git-tree-sha1 = "3fd1a3022952128935b449c33552eb65895380c1"
 uuid = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
-version = "0.4.4"
+version = "0.4.5"
 
 [[Markdown]]
 deps = ["Base64"]
@@ -619,10 +619,10 @@ uuid = "992d4aef-0814-514b-bc4d-f2e9a6c4116f"
 version = "0.2.1"
 
 [[SimpleDifferentialOperators]]
-deps = ["LinearAlgebra", "Test"]
-git-tree-sha1 = "cad19899a3744c8f5d989fc6f437708b738a93aa"
+deps = ["LinearAlgebra", "Statistics", "Test"]
+git-tree-sha1 = "f625bad2e54459d1f34561c3e0616d5d0df60062"
 uuid = "7ccca996-40d6-5c2f-be7f-4eb2934af9c4"
-version = "0.2.0"
+version = "0.2.1"
 
 [[Sockets]]
 uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
@@ -673,9 +673,9 @@ version = "1.4.0"
 
 [[StochasticDiffEq]]
 deps = ["DataStructures", "DiffEqBase", "DiffEqDiffTools", "DiffEqNoiseProcess", "DiffEqOperators", "Distributed", "ForwardDiff", "LinearAlgebra", "Logging", "MuladdMacro", "NLsolve", "Parameters", "Random", "RandomNumbers", "RecursiveArrayTools", "Reexport", "SparseArrays", "StaticArrays", "Test"]
-git-tree-sha1 = "c6e6c43b055c6b8964a30081829edfd79bffb352"
+git-tree-sha1 = "af003918bf0ccc7a712b1c8b4d40df59bc76ca8d"
 uuid = "789caeaf-c7a9-5a7d-9973-96adeb23e2a0"
-version = "6.1.0"
+version = "6.1.1"
 
 [[SuiteSparse]]
 deps = ["Libdl", "LinearAlgebra", "SparseArrays"]
