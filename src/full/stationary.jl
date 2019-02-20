@@ -73,7 +73,7 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
     @assert params.υ > 0 && params.κ > 0 # Parameter validation
 
     # Discretization objects and quadrature weights.
-    L_1_minus, L_1_plus, L_2 = diffusionoperators(z, Mixed(σ-1), Mixed(σ-1)) # Operators.
+    L_1_minus, L_1_plus, L_2 = robin_diffusionoperators(z, σ-1) # Operators.
     ω = ω_weights(z, θ, σ-1) # Get quadrature weights for the distribution on the rescaled grid.
 
     # Define the system of equations we're solving.
