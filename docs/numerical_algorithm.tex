@@ -23,7 +23,7 @@ breaklinks]
 \crefname{assumption}{Assumption}{Assumptions}
 \crefname{property}{Property}{Properties}
 \geometry{left=1in,right=1in,top=0.6in,bottom=1in}
-\bibliographystyle{econometrica}
+\bibliographystyle{ecta}
 \newcommand{\D}[1][]{\ensuremath{\boldsymbol{\partial}_{#1}}}
 \newcommand{\R}{\ensuremath{\mathbb{R}}}
 \newcommand{\diff}{\ensuremath{\mathrm{d}}}
@@ -46,12 +46,12 @@ breaklinks]
 
 This document is a self-contained summary of all of the equations and algorithms used to solve the model and transition dynamics.  Equations in the code have a comment to reference the corresponding equation numbers in this document.  
 
-\cite{AchdouHanLasryEtAl2017} and it's technical appendix provide many of the details on the upwind finite difference methods used here.  While using these techniques to discretize the "spatial" dimension, we make several changes to the general approach taken by many economists to solve PDEs: (1) after discretizing the spatial dimension of the PDE to make them ODEs, we stack in further equilibrium equations into the ODEs to make them a system of DAEs; and (2) instead of discretizing the spatial dimension with finite differences and the time-dimension with a homegrown time-stepping (e.g. backwards euler), we instead rely on the underlying ODE/DAE solvers to do numerically stable, efficient, and often adaptive--time-stepping.  Because of this, this document concentrates on specifying the full set of ODE/DAE equations, which are then handed over to industrial strength solvers.
+\cite{AchdouHanLasryEtAl2017} and its technical appendix provide many of the details on the upwind finite difference methods used here.  While using these techniques to discretize the "spatial" dimension, we make several changes to the general approach taken by many economists to solve PDEs: (1) after discretizing the spatial dimension of the PDE to make them ODEs, we stack in further equilibrium equations into the ODEs to make them a system of DAEs; and (2) instead of discretizing the spatial dimension with finite differences and the time-dimension with a homegrown time-stepping (e.g. backwards euler), we instead rely on the underlying ODE/DAE solvers to do numerically stable, efficient, and often adaptive--time-stepping.  Because of this, this document concentrates on specifying the full set of ODE/DAE equations, which are then handed over to industrial strength solvers.
 
 \section{Simplified Growth Model with Transition Dynamics}
 We start with a simplified version of the model with transition dynamics.  In the more complicated case of this paper, the $\pi(z,t), r(t), x(t)$ will come from equilibrium conditions rather than being given exogenously, but the structure of solving the resulting system of integro-differential-algebraic equations remains the same.
 
-There is a useful simplifying result in both this simple and the full model: in the transition dynamics experiments we are looking at, the normalized distribution $F(z)$ will remain constant over time.  Hence, we do not need to jointly solve the KFE as we will be at the stationary level (post-normalization).  This is a consequence of the PDF remaining stationary (after normalization) under the transition dynamics we examine, and is \textbf{not} an assumption.
+There is a useful simplifying result in both this miimal and the full model: in the transition dynamics experiments we are looking at, the normalized distribution $F(z)$ will remain constant over time.  Hence, we do not need to jointly solve the KFE as we will be at the stationary level (post-normalization).  This is a consequence of the PDF remaining stationary (after normalization) under the transition dynamics we examine, and is \textbf{not} an assumption.
 
 \subsection{Summary of Equations}\label{sec:summary-simple}
 We follow the notation of the main paper wherever possible.  This model is the geometric Brownian motion (GBM) model in the technical appendix of \cite{BenhabibPerlaTonetti2017}.
@@ -65,7 +65,7 @@ v(0,t) &= \int_{0}^{\infty}  v(z,t) \left(e^z F'(z)\right) \diff z - x(t)\label{
 \D[z]v(0,t) + v(0,t) &= 0\label{eq:simple-summary3}\\
 \intertext{Given the differential operator,}
 A(t) &\equiv \left(r - \mu - \frac{\upsilon^2}{2}\right) - (\mu+ \upsilon^2 - g(t)) \D[z] - \frac{\upsilon^2}{2} \D[zz]\label{eq:simple-summary4}\\
-\intertext{Where the normalized BGP distribution is}
+\intertext{Where the normalized distribution for all $t$ is}
 F(z) &= 1 - e^{-\theta z}
 \end{align}
 
@@ -108,7 +108,7 @@ A(t) &\equiv \left(r - \mu - \frac{\upsilon^2}{2}\right) - (\mu+ \upsilon^2 - g(
 
 \subsection{Spatial Discretization with Upwind Finite-Differences}
 
-In order to solve for the dynamics of $v(t,z)$ and $g(t)$, we will discretize the PDE, integral, and algebraic equations from \cref{eq:simple-summary1-numerical,eq:simple-summary2-numerical,eq:simple-summary3-numerical,eq:simple-summary4-numerical} into a system of ODEs and algebraic equations.\footnote{As a test, we solve the steady state version of the discretized system of ODEs numerically and compare it to \cref{sec:simple-steady-state} to determine the degree of numerical error and stability of the methods.}
+In order to solve for the dynamics of $v(z,t)$ and $g(t)$, we will discretize the PDE, integral, and algebraic equations from \cref{eq:simple-summary1-numerical,eq:simple-summary2-numerical,eq:simple-summary3-numerical,eq:simple-summary4-numerical} into a system of ODEs and algebraic equations.\footnote{As a test, we solve the steady state version of the discretized system of ODEs numerically and compare it to \cref{sec:simple-steady-state} to determine the degree of numerical error and stability of the methods.}
 
 
 \paragraph{Grid}
@@ -123,7 +123,7 @@ After discretizing, we abuse notation and denote the grid by the variable name, 
 
 To discretize the system, we use upwind finite differences.  In particular, we need to discretize the differential operator in \cref{eq:simple-summary5-numerical} subject to the \cref{eq:simple-summary3-numerical,eq:simple-summary4-numerical} boundary conditions.  Crucially, since these boundary conditions are homogeneous, we can decompose the linear $A(t)$ operator into additive parts where: the $\D[z]$ is discretized as $L^{-}_1$ using backwards first differences, and the $\D[zz]$ is discretized as $L_2$ using central second difference.   Furthermore, the $L^{-}_1$ and $L_2$ linear operators \textit{impose the boundary condition for any vector} they operator on.\footnote{See \url{https://github.com/QuantEcon/SimpleDifferentialOperators.jl} for more on the derivation of discretizing operators with linear and affine boundary conditions.}
 
-Using the derivations in \url{https://github.com/QuantEcon/SimpleDifferentialOperators.jl/blob/master/docs/tex/discretized-differential-operator-derivation.pdf}, the discretization of $A(t)$ subject to the boundary conditions is then the $P \times P$ matrix
+Using the derivations in \url{https://github.com/QuantEcon/SimpleDifferentialOperators.jl/blob/master/docs/tex/discretized-differential-operator-derivation.pdf}, the discretization of $A(t)$ in \cref{eq:simple-summary5-numerical} subject to the boundary conditions is then the $P \times P$ matrix
 \begin{align}
 A(t) &\equiv \left(r - \mu - \frac{\upsilon^2}{2}\right) I - (\mu + \upsilon^2 - g(t)) L^{-}_1 - \frac{\upsilon^2}{2} L_2 \label{eq:A-def-simple}
 \end{align}
@@ -184,7 +184,7 @@ Transition dynamics can be solved for any exogenous $x(t)$ and $\pi(z,t)$ functi
 \noindent To give a sense of the scale and speed in solving the DAE
 \begin{itemize}
 	\item The simple model solves a system of about 100 ODEs and algebraic equations in less than $70\mu$s.  The number of nodes of $z$ is relatively low because the normalization of $v(z,t)$ leads to a fairly flat value function for most of the domain.
-	\item For the full model, we need about 1000 ODEs to capture extra curvature from the export decision, which is solved in less than $500ms$.  Most of the extra time is due to the complexity of static equilibrium conditions.
+	\item For the full model, we need about 1000 ODEs to capture extra curvature from the export decision, which is solved in a few seconds.  Most of the extra time is due to the complexity of static equilibrium conditions.  When we are solving the full model to gain further precision, we will sometimes add in extra time-steps which can increase this substantially, but this is generally not needed since--while sparse--the adaptive time-steps do a good job of capturing the dynamics of the model.
 \end{itemize}
 
 
