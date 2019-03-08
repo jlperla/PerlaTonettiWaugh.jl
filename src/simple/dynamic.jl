@@ -20,7 +20,9 @@ function simpleDAE(params, settings)
     # Quadrature weighting
     ω = ω_weights(z, θ, 1)
     # Discretize the operator.
-    L_1_minus, L_1_plus, L_2 = diffusionoperators(z, Mixed(1), Mixed(1)) # L_1_minus ≡ L_1 is the only one we use.
+    bc = Mixed(1), Mixed(1) # boundary conditions for differential operators
+    L_1_minus = L₁₋(z, bc) # use backward difference as the drift is negative
+    L_2 = L₂(z, bc) 
     # Calculate the stationary solution.
     r_T = r(T)
     g_T = g(T)

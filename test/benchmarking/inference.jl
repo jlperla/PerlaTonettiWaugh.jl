@@ -3,7 +3,9 @@
 function testdiffusion()
     ξ = 1.0
     z = 0.:0.01:5.
-    diffusionoperators(z, Mixed(ξ), Mixed(ξ)), diffusionoperators(collect(z), Mixed(ξ), Mixed(ξ)) # test both the AbstractRange and StepRangeLen methods
+    bc = (Mixed(ξ), Mixed(ξ))
+    (L₁₋ = L₁₋(z, bc), L₁₊ = L₁₊(z, bc), L₂ = L₂(z, bc)),
+    (L₁₋ = L₁₋(collect(z), bc), L₁₊ = L₁₊(collect(z), bc), L₂ = L₂(collect(z), bc)) # test both the AbstractRange and StepRangeLen methods
 end
 
 @test @inferred testdiffusion() == testdiffusion()
