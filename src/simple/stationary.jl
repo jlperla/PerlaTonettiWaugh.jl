@@ -18,7 +18,11 @@ function stationary_numerical_simple(params, z)
     P = length(z)
     # Unpack parameters.
     @unpack μ, υ, θ, r, ζ, π = params
-    L_1_minus, L_1_plus, L_2  = diffusionoperators(z, Mixed(1), Mixed(1)) # Discretize the operator
+
+    bc = (Mixed(1), Mixed(1)) # boundary conditions for differential operators
+    L_1_minus = L₁₋(z, bc) # use backward difference as the drift is negative
+    L_2 = L₂(z, bc) 
+
     # Define the pdf of the truncated exponential distribution
     ω = ω_weights(z, θ, 1) # (20)
     # Function we're solving.
