@@ -19,7 +19,7 @@ function stationary_numerical_simple(params, z)
     # Unpack parameters.
     @unpack μ, υ, θ, r, ζ, π = params
 
-    bc = Mixed(1), Mixed(1) # boundary conditions for differential operators
+    bc = (Mixed(1), Mixed(1)) # boundary conditions for differential operators
     L_1_minus = L₁₋(z, bc) # use backward difference as the drift is negative
     L_2 = L₂(z, bc) 
 
