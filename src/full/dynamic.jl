@@ -175,18 +175,17 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
           # logic for r
           results.r = ones(Float64, nrow(results)) # filler
           for i in 1:nrow(results)
-            if i > 1
+            if i < nrow(results) # forward differencing logic
               t = results[:t][i]
               c = results[:c][i]
-              t_prev = results[:t][i-1]
-              c_prev = results[:c][i-1]
-              log_c_backward = (log(c) - log(c_prev))/(t - t_prev)
-              results.r[i] = r = ρ + δ + γ*log_c_backward # (C.55)
+              t_forward = results[:t][i+1]
+              c_forward = results[:c][i+1]
+              log_c_forward = (log(c_forward) - log(c))/(t_forward - t)
+              results.r[i] = ρ + δ + γ*(results[:g][i] + log_c_forward) # (C.56)
             else
               results.r[i] = ρ + δ + γ*results[:g][i] # (C.6)
             end
           end
-
         end
 
     # Return.
