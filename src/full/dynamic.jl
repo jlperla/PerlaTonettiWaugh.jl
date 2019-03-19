@@ -178,7 +178,7 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
             t = results[:t][i]
             c = results[:c][i]
             g = results[:g][i]
-            log_c_forward = (i < nrow(results)) ? (log(results[:c][i+1]) - c)/(results[:t][i+1] - t) : 0.0
+            log_c_forward = (i < nrow(results)) ? (log(results[:c][i+1]) - log(c))/(results[:t][i+1] - t) : 0.0
             i == nrow(results) || @assert results[:t][i+1] > t # ensure that differencing is actually forward
             results.r[i] = ρ + δ + γ*(g + log_c_forward) # (C.56)
           end
