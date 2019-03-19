@@ -69,13 +69,12 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
         L_tilde_t = L_tilde(S_t, z_hat, E_t, Ω_t)
         z_bar = Ω_t * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ)) # (31)
         w = σ^(-1)*z_bar # (C.13)
-        r = ρ + γ*g + δ # (C.6) {TOOD: CHANGE TO APPROPRIATE FORMULA}
         π_min = (1 - L_tilde_t) / ((σ-1)*z_bar) # (32)
         i_vectorized = z .>= log(z_hat) # Vectorized indicator function
         π = π_min * (1.0.+(N-1)*d^(1-σ)*i_vectorized) - (N-1)*κ*exp.(-(σ-1).*z).*i_vectorized # (33)
         entry_residual = v_0 - ζ * (1-χ) / χ # value matching condition (45)
         return (S_t = S_t, L_tilde_t = L_tilde_t, z_bar = z_bar, π_min = π_min, π = π, entry_residual = entry_residual,
-                w = w, r = r)
+                w = w)
       end
 
     # Set the initial conditions.
@@ -128,11 +127,9 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
         gen_L_tilde_export = (Ω, z_hat) -> Ω * ((N-1)*z_hat^(-θ))*κ # (28)
         gen_L_tilde_entrycost = (Ω, E) -> Ω * ζ * E / χ # (29)
         gen_w = z_bar -> σ^(-1)/z_bar # (C.13)
-        gen_r = g -> ρ + γ*g + δ # (C.6) {TODO: CHANGE TO APPROPRIATE FORMULA}
 
       # Add these quantities to the DataFrame.
         results = @transform(results, entry_residual = gen_entry_residual.(:v_0)) # entry_residual column
-
         log_c_T = log(gen_c(L_tilde_T, Ω_T, gen_z_bar(Ω_T, z_hat_T), S(g_T)))
 
         g_interpolated(t) = (sol(t))[P+1]
@@ -174,7 +171,22 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
           results = @transform(results, L_tilde_x = gen_L_tilde_export.(:Ω, :z_hat))
           results = @transform(results, L_tilde_E = gen_L_tilde_entrycost.(:Ω, :E))
           results = @transform(results, w = gen_w.(:z_bar))
-          results = @transform(results, r = gen_r.(:g))
+
+          # logic for r
+          results.r = ones(Float64, nrow(results)) # filler 
+          for i in 1:nrow(results)
+            if i > 1
+              t = results[:t][i]
+              c = results[:c][i]
+              t_prev = results[:t][i-1]
+              c_prev = results[:c][i-1]
+              log_c_backward = (log(c) - log(c_prev))/(t - t_prev)
+              results.r[i] = r = ρ + γ*results[:g][i] + δ*log_c_backward # (C.55) 
+            else 
+              results.r[i] = ρ + γ*results[:g][i] + δ # (C.6) 
+            end 
+          end
+
         end
 
     # Return.
