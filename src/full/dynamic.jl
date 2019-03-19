@@ -173,19 +173,16 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
           results = @transform(results, w = gen_w.(:z_bar))
 
           # logic for r
-          results.r = ones(Float64, nrow(results)) # filler
+          results.r = ones(Float64, nrow(results)) # filler, to be overwritten
           for i in 1:nrow(results)
-            if i < nrow(results) # forward differencing logic
-              t = results[:t][i]
-              c = results[:c][i]
-              t_forward = results[:t][i+1]
-              c_forward = results[:c][i+1]
-              log_c_forward = (log(c_forward) - log(c))/(t_forward - t)
-              results.r[i] = ρ + δ + γ*(results[:g][i] + log_c_forward) # (C.56)
-            else
-              results.r[i] = ρ + δ + γ*results[:g][i] # (C.6)
-            end
+            t = results[:t][i]
+            c = results[:c][i]
+            g = results[:g][i]
+            log_c_forward = (i < nrow(results)) ? (log(results[:c][i+1]) - c)/(results[:t][i+1] - t) : 0.0
+            i == nrow(results) || @assert results[:t][i+1] > t # ensure that differencing is actually forward
+            results.r[i] = ρ + δ + γ*(g + log_c_forward)
           end
+
         end
 
     # Return.
