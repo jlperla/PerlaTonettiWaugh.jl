@@ -173,8 +173,8 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
           results = @transform(results, L_tilde_a = gen_L_tilde_adopt.(:Ω, :S))
           results = @transform(results, L_tilde_x = gen_L_tilde_export.(:Ω, :z_hat))
           results = @transform(results, L_tilde_E = gen_L_tilde_entrycost.(:Ω, :E))
-          results = @transform(results, w = gen_w(:z_bar))
-          results = @transform(results, r = gen_r(:g))
+          results = @transform(results, w = gen_w.(:z_bar))
+          results = @transform(results, r = gen_r.(:g))
         end
 
     # Return.
