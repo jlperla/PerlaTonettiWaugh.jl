@@ -172,8 +172,8 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
           results = @transform(results, L_tilde_E = gen_L_tilde_entrycost.(:Ω, :E))
           results = @transform(results, w = gen_w.(:z_bar))
 
-          # stuff for r
-          results.r = ones(Float64, nrow(results))
+          # logic for r
+          results.r = ones(Float64, nrow(results)) # filler 
           for i in 1:nrow(results)
             if i > 1
               t = results[:t][i]
@@ -181,11 +181,12 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
               t_prev = results[:t][i-1]
               c_prev = results[:c][i-1]
               log_c_forward = (log(c) - log(c_prev))/(t - t_prev)
-              results.r[i] = r = ρ + γ*g + δ*log_c_forward # (C.55) 
+              results.r[i] = r = ρ + γ*results[:g][i] + δ*log_c_forward # (C.55) 
             else 
-              results.r[i] = ρ + γ*g + δ # (C.6) 
+              results.r[i] = ρ + γ*results[:g][i] + δ # (C.6) 
             end 
           end
+
         end
 
     # Return.
