@@ -180,8 +180,8 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
               c = results[:c][i]
               t_prev = results[:t][i-1]
               c_prev = results[:c][i-1]
-              log_c_forward = (log(c) - log(c_prev))/(t - t_prev)
-              results.r[i] = r = ρ + γ*results[:g][i] + δ*log_c_forward # (C.55) 
+              log_c_backward = (log(c) - log(c_prev))/(t - t_prev)
+              results.r[i] = r = ρ + γ*results[:g][i] + δ*log_c_backward # (C.55) 
             else 
               results.r[i] = ρ + γ*results[:g][i] + δ # (C.6) 
             end 
