@@ -68,11 +68,14 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
         S_t = S(g)
         L_tilde_t = L_tilde(S_t, z_hat, E_t, Ω_t)
         z_bar = Ω_t * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ)) # (31)
+        w = σ^(-1)*z_bar # (C.13)
+        r = ρ + γ*g + δ # (C.6) {TOOD: CHANGE TO APPROPRIATE FORMULA}
         π_min = (1 - L_tilde_t) / ((σ-1)*z_bar) # (32)
         i_vectorized = z .>= log(z_hat) # Vectorized indicator function
         π = π_min * (1.0.+(N-1)*d^(1-σ)*i_vectorized) - (N-1)*κ*exp.(-(σ-1).*z).*i_vectorized # (33)
         entry_residual = v_0 - ζ * (1-χ) / χ # value matching condition (45)
-        return (S_t = S_t, L_tilde_t = L_tilde_t, z_bar = z_bar, π_min = π_min, π = π, entry_residual = entry_residual)
+        return (S_t = S_t, L_tilde_t = L_tilde_t, z_bar = z_bar, π_min = π_min, π = π, entry_residual = entry_residual,
+                w = w, r = r)
       end
 
     # Set the initial conditions.
@@ -124,6 +127,8 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
         gen_L_tilde_adopt = (Ω, S) -> Ω * ζ * S # (30)
         gen_L_tilde_export = (Ω, z_hat) -> Ω * ((N-1)*z_hat^(-θ))*κ # (28)
         gen_L_tilde_entrycost = (Ω, E) -> Ω * ζ * E / χ # (29)
+        gen_w = z_bar -> σ^(-1)/z_bar # (C.13)
+        gen_r = g -> ρ + γ*g + δ # (C.6) {TODO: CHANGE TO APPROPRIATE FORMULA}
 
       # Add these quantities to the DataFrame.
         results = @transform(results, entry_residual = gen_entry_residual.(:v_0)) # entry_residual column
@@ -168,6 +173,8 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
           results = @transform(results, L_tilde_a = gen_L_tilde_adopt.(:Ω, :S))
           results = @transform(results, L_tilde_x = gen_L_tilde_export.(:Ω, :z_hat))
           results = @transform(results, L_tilde_E = gen_L_tilde_entrycost.(:Ω, :E))
+          results = @transform(results, w = gen_w(:z_bar))
+          results = @transform(results, r = gen_r(:g))
         end
 
     # Return.
