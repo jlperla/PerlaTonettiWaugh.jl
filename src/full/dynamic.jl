@@ -58,7 +58,7 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
       ω = ω_weights(z, θ, σ-1) # Quadrature weights.
       bc = (Mixed(σ-1), Mixed(σ-1)) # boundary conditions for differential operators
       L_1 = L₁₋(z, bc) # use backward difference as the drift is negative
-      L_2 = L₂(z, bc) 
+      L_2 = L₂(z, bc)
 
     # Define the auxiliary functions for the DAE problem.
       S(g) = θ * (g - μ - θ * υ^2/2) # Compute S given g. (26)
@@ -173,18 +173,14 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
           results = @transform(results, w = gen_w.(:z_bar))
 
           # logic for r
-          results.r = ones(Float64, nrow(results)) # filler 
+          results.r = ones(Float64, nrow(results)) # filler, to be overwritten
           for i in 1:nrow(results)
-            if i > 1
-              t = results[:t][i]
-              c = results[:c][i]
-              t_prev = results[:t][i-1]
-              c_prev = results[:c][i-1]
-              log_c_backward = (log(c) - log(c_prev))/(t - t_prev)
-              results.r[i] = r = ρ + γ*results[:g][i] + δ*log_c_backward # (C.55) 
-            else 
-              results.r[i] = ρ + γ*results[:g][i] + δ # (C.6) 
-            end 
+            t = results[:t][i]
+            c = results[:c][i]
+            g = results[:g][i]
+            log_c_forward = (i < nrow(results)) ? (log(results[:c][i+1]) - log(c))/(results[:t][i+1] - t) : 0.0
+            i == nrow(results) || @assert results[:t][i+1] > t # ensure that differencing is actually forward
+            results.r[i] = ρ + γ*(g + log_c_forward) # (C.56)
           end
 
         end

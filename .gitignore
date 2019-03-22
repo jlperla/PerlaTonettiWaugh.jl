@@ -3,7 +3,7 @@
 *.jl.mem
 *.vscode
 *.log
-*.pdf
+docs/*.pdf
 *.aux
 *.gz
 .DS_Store
