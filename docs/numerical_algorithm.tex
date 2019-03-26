@@ -332,7 +332,7 @@ This will discretize space with backward differences in the first derivative, an
 
 \begin{itemize}
 	\item Define an irregular  grid $\set{z_i}_{i=0}^{P+1}$ with $z_0 = 0$ and $z_{P+1} = \bar{z}$ is a ``large'' number (keeping in mind that the effective number is $e^{\bar{z}}$).  After discretizing, we will denote the grid with the variable name, i.e. $z \equiv \set{z_i}_{i=0}^{P+1}$.
-	\item Denote the distance between the grid points as the \textit{backwards} difference
+	\item Denote the distance between the grid points as the \textit{backwards} and \textit{forwards} difference respectively
 	\begin{align}
 	\Delta_{i,-} &\equiv z_i - z_{i-1},\, \text{for } i = 1,\ldots, P+1\\
 	\Delta_{i,+} &\equiv z_{i+1} - z_i,\, \text{for } i = 0,\ldots, P
@@ -405,17 +405,20 @@ However, for the numerical approximation with the artificial boundary at $\bar{z
 
 
 \subsection{Quadrature}\label{sec:quadrature}
-With the discretized grid, the integral in \cref{eq:vm-GBM-dynamic-normalized} will be calculated with some quadrature rules.\footnote{An issue here is that the support of the integral is infinite, but the finite differences go to $\bar{z}$.  While not ideal, since $F'(\bar{z})\to 0$ rapidly, the Trapezoidal rule should be a  reasonable approximation.}  Recall that with a grid on $z$ we have that $z_0 \equiv 0$ and $z_{P+1} \equiv \bar{z}$.  Most generally, let the quadrature rule weights be $\bar{\omega} \in \R^{P+2}$ where for some $q(z)$
+With the discretized grid, the integral in \cref{eq:vm-GBM-dynamic-normalized} will be calculated with some quadrature rules.\footnote{An issue here is that the support of the integral is infinite, but the finite differences go to $\bar{z}$.  While not ideal, since $F'(\bar{z})\to 0$ rapidly, the Trapezoidal rule should be a  reasonable approximation.}  Recall that with a grid on $z$ we have that $z_0 \equiv 0$ and $z_{P+1} \equiv \bar{z}$.  Define Let $q \equiv \set{q(z_i)}_{i=0}^{P+1}$ for some function $q(\cdot)$, then a quadrature rule are weights $\bar{\omega} \in \R^{P+2}$ such that
 \begin{align}
 \int_0^{\bar{z}} q(z) \diff z &\approx \bar{\omega} \cdot q
 \intertext{To derive the non-uniform trapezoidal rules for an arbitrary $q$ function,}
-\int_{z_0}^{z_{P+1}} q(z)\diff z &\approx \frac{1}{2}\sum_{i=0}^{P}(z_{i+1}-z_i)(q(z_i) + q(z_{i+1}))\\
-&= \frac1{2}\left(\Delta_{0,+}q(z_0) + (\Delta_{0,+} + \Delta_{1,+})q(z_1) + \ldots (\Delta_{P-1,+} + \Delta_{P,+})q(z_{P})+\Delta_{P,+}q(z_{P+1})\right)
-\intertext{Let $q \equiv \set{q(z_i)}_{i=0}^{P+1}$, then this can be discretized as}
-\int_{z_0}^{z_{P+1}} q(z)\diff z &\approx \bar{\omega}\cdot q\\
+\int_{0}^{\bar{z}} q(z)\diff z &\approx \frac{1}{2}\sum_{i=0}^{P}(z_{i+1}-z_i)(q(z_i) + q(z_{i+1}))\\
+\intertext{Use the forward difference $\Delta_{i,+} \equiv z_{i+1} - z_i$, and rearrange}
+&= \frac1{2}\left((0 + \Delta_{0,+})q(z_0) + (\Delta_{0,+} + \Delta_{1,+})q(z_1) + \ldots (\Delta_{P-1,+} + \Delta_{P,+})q(z_{P})+(\Delta_{P,+} + 0)q(z_{P+1})\right)
+\intertext{Since $\Delta_{i,+} = \Delta_{i+1,-}$ for all $i = 1, \ldots P$}
+&= \frac1{2}\left((0 + \Delta_{0,+})q(z_0) + (\Delta_{1,-} + \Delta_{1,+})q(z_1) + \ldots (\Delta_{P,-} + \Delta_{P,+})q(z_{P})+(\Delta_{P+1,-} + 0)q(z_{P+1})\right)
+\intertext{Finally, use the $\Delta_{-}$ and $\Delta_{+}$ as defined from \cref{eq:Delta-minus,eq:Delta-plus} (note the use of a padding $0$ in those definitions) and group to find}
+\int_{0}^{\bar{z}} q(z)\diff z &\approx \bar{\omega}\cdot q\\
 \intertext{Where,}
 \bar{\omega}&\equiv \frac1{2}(\Delta_{-} + \Delta_{+})\in\R^{P+2}\\
-\intertext{With $\Delta_{-}$ and $\Delta_{+}$ are defined from \cref{eq:Delta-minus,eq:Delta-plus}, with the exception that $\Delta_{1,-} = 0$ and $\Delta_{P,+} = 0$ then, (i.e. different than use of ghost nodes in discretizing derivatives).  Moving to the specific integral in \cref{eq:vm-GBM-dynamic-normalized}, define the $\omega$ weights to combine the $\bar{\omega}$ and the $\left(e^{\xi z} \frac{F'(z)}{F(\bar{z})}\right)$ term so that}
+\intertext{Moving to the specific integral in \cref{eq:vm-GBM-dynamic-normalized}, define the $\omega$ weights to combine the $\bar{\omega}$ and the $\left(e^{\xi z} \frac{F'(z)}{F(\bar{z})}\right)$ term so that}
 \omega_i &\equiv \bar{\omega}_i e^{\xi z_i}\frac{F'(z_i)}{F(\bar{z})}\\
 \intertext{Then with the discretized vector $v(t) \in \R^P$, the integral in \cref{eq:vm-GBM-dynamic-normalized} becomes,}
 v_1(t) &= \omega \cdot v(t) - x(t)
