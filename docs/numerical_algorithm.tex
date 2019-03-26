@@ -44,7 +44,7 @@ breaklinks]
 \noindent See \url{https://github.com/jlperla/PerlaTonettiWaugh.jl} for the code and instructions.
 \bigskip
 
-This document is a self-contained summary of all of the equations and algorithms used to solve the model and transition dynamics.  Equations in the code have a comment to reference the corresponding equation numbers in this document.  
+This document is a self-contained summary of all of the equations and algorithms used to solve the model and transition dynamics.  Equations in the code have a comment to reference the corresponding equation numbers in this document.
 
 \cite{AchdouHanLasryEtAl2017} and its technical appendix provide many of the details on the upwind finite difference methods used here.  While using these techniques to discretize the "spatial" dimension, we make several changes to the general approach taken by many economists to solve PDEs: (1) after discretizing the spatial dimension of the PDE to make them ODEs, we stack in further equilibrium equations into the ODEs to make them a system of DAEs; and (2) instead of discretizing the spatial dimension with finite differences and the time-dimension with a homegrown time-stepping (e.g. backwards euler), we instead rely on the underlying ODE/DAE solvers to do numerically stable, efficient, and often adaptive--time-stepping.  Because of this, this document concentrates on specifying the full set of ODE/DAE equations, which are then handed over to industrial strength solvers.
 
@@ -308,7 +308,7 @@ c(t) &= (1 - \tilde{L}(t))\bar{z}(t) \label{eq:c-summary}\\
 U(t) &= \int_0^{T-t}e^{-\rho \tau}\left(\log M(t+\tau)+\log c(t+\tau)\right)\diff \tau + \frac{e^{-\rho( T-t)}}{\rho^2}\left((1+\rho( T-t))g(T) + \rho\left(\log c(T) + \log M(T) \right) \right)\label{eq:U-dynamics-summary}\\
 \bar{\pi}_{\text{rat}}(t) &= \theta\frac{1 - \hat{z}(t)^{-\theta + \sigma - 1}}{\theta - \sigma + 1} + (1 + (N-1)d^{1-\sigma})\theta\frac{\hat{z}(t)^{-\theta + \sigma - 1}}{\theta - \sigma + 1} + (N-1)\frac{\kappa}{\bar{\pi}_{\min}(t)} \hat{z}(t)^{-\theta}\label{eq:pi_rat-dynamics-summary}
 \intertext{And the calculation of the consumption equivalent ratio to compare the $U(0)$ from above to an alternative $U^{\text{old}}(0))$}
-M_{\text{CE}} &= \exp \left(\rho(U(0) - U^{\text{old}}(0))\right) 
+M_{\text{CE}} &= \exp \left(\rho(U(0) - U^{\text{old}}(0))\right)
 \end{align}
 In the above cases, given the interpolated solutions of the problem, we can use any quadrature method, including pre-built libraries, to calculate the integrals since they are only evaluated after the rest of the solution is complete.
 
@@ -331,28 +331,29 @@ In the above cases, given the interpolated solutions of the problem, we can use 
 This will discretize space with backward differences in the first derivative, and central in space for the 2nd derivative.\footnote{Under a $g(t) > \gamma$ assumption (which may be a general requirement on parameter restrictions), the drift is negative, and the correct ``upwind'' finite difference scheme is always backwards.}  After discretizing the spatial dimension, we have a system of ODEs in time - which are solved using various time-stepping algorithms.
 
 \begin{itemize}
-	\item Define an irregular  grid $\set{z_i}_{i=1}^P$ with $z_1 = 0$ and $z_P = \bar{z}$ is a ``large'' number (keeping in mind that the effective number is $e^{\bar{z}}$).  After discretizing, we will denote the grid with the variable name, i.e. $z \equiv \set{z_i}_{i=1}^P$.
+	\item Define an irregular  grid $\set{z_i}_{i=0}^{P+1}$ with $z_0 = 0$ and $z_{P+1} = \bar{z}$ is a ``large'' number (keeping in mind that the effective number is $e^{\bar{z}}$).  After discretizing, we will denote the grid with the variable name, i.e. $z \equiv \set{z_i}_{i=0}^{P+1}$.
 	\item Denote the distance between the grid points as the \textit{backwards} difference
 	\begin{align}
-	\Delta_{i,-} &\equiv z_i - z_{i-1},\, \text{for } i = 2,\ldots, P\\
-	\Delta_{i,+} &\equiv z_{i+1} - z_i,\, \text{for } i = 1,\ldots, P-1
+	\Delta_{i,-} &\equiv z_i - z_{i-1},\, \text{for } i = 1,\ldots, P+1\\
+	\Delta_{i,+} &\equiv z_{i+1} - z_i,\, \text{for } i = 0,\ldots, P
 	\end{align}
 
-	\item Assume $\Delta_{1, -} = \Delta_{1, +}$ and $\Delta_{P, +} = \Delta_{P, -}$, due to ghost points, $z_0$ and $z_{P+1}$ on both boundaries. (i.e., the distance to the ghost nodes are the same as the distance to the closest nodes).  Then define the vector of backwards and forwards first differences as
+	\item Define the vector of backwards and forwards first differences (padding with $0$s) as
 	\begin{align}
-	\Delta_{-} &\equiv \begin{bmatrix} z_2 - z_1\label{eq:Delta-minus} \\
+	\Delta_{-} &\equiv \begin{bmatrix} 0 \\
 	\text{diff}(z)
-	\end{bmatrix}\\
+	\end{bmatrix}\in\R^{P+2}\label{eq:Delta-minus}\\
 	\Delta_{+} &\equiv \begin{bmatrix} \text{diff}(z)\\
-	z_P - z_{P-1}\label{eq:Delta-plus}
-	\end{bmatrix}
-	\end{align}
+	0
+\end{bmatrix}\in\R^{P+2}
+	\end{align}\label{eq:Delta-plus}
 	\item The grid on time $t \in [0,T]$ may be adaptive, and we will let the ODE solver handle the grid in order to use optimal time-stepping algorithms.
 	\item Denote time-varying functions on the grid as a vector without the spatial dimension, i.e.
 	\begin{align}
 	v(t) &\equiv \set{v(z_i, t)}_{i=1}^P\in\R^P\\
 	\hat{\pi}(t) &\equiv	\hat{\pi}(z,t) \in \R^P
 	\end{align}
+	\item Note in the above definition that $v(t) \in \R^P$ and hence is not evaluated at the boundaries.  In the cases of boundaries, define $v_0(t) \equiv v(z_0, t)$ and $v_{P+1}(t) \equiv v(z_{P+1},t)$
 \end{itemize}
 
 \section{Derivations for Simple Model}\label{sec:simple-derivation}
@@ -404,16 +405,16 @@ However, for the numerical approximation with the artificial boundary at $\bar{z
 
 
 \subsection{Quadrature}\label{sec:quadrature}
-With the discretized grid, the integral in \cref{eq:vm-GBM-dynamic-normalized} will be calculated with some quadrature rules.\footnote{An issue here is that the support of the integral is infinite, but the finite differences go to $z_P$.  While not ideal, since $F'(z_P)\to 0$ rapidly, the Trapezoidal rule should be a  reasonable approximation.}  Most generally, let the quadrature rule weights be $\bar{\omega} \in \R^P$ where for some $q(z)$ and $q \equiv \set{q(z_i)}_{i=1}^P$,
+With the discretized grid, the integral in \cref{eq:vm-GBM-dynamic-normalized} will be calculated with some quadrature rules.\footnote{An issue here is that the support of the integral is infinite, but the finite differences go to $\bar{z}$.  While not ideal, since $F'(\bar{z})\to 0$ rapidly, the Trapezoidal rule should be a  reasonable approximation.}  Recall that with a grid on $z$ we have that $z_0 \equiv 0$ and $z_{P+1} \equiv \bar{z}$.  Most generally, let the quadrature rule weights be $\bar{\omega} \in \R^{P+2}$ where for some $q(z)$
 \begin{align}
 \int_0^{\bar{z}} q(z) \diff z &\approx \bar{\omega} \cdot q
 \intertext{To derive the non-uniform trapezoidal rules for an arbitrary $q$ function,}
-\int_{z_1}^{z_P} q(z)\diff z &\approx \frac1{2}\sum_{i=1}^{P-1}(z_{i+1}-z_i)(q(z_i) + q(z_{i+1}))\\
-&= \frac1{2}\left(\Delta_{1,+}q(z_1) + (\Delta_{1,+} + \Delta_{2,+})q(z_2) + \ldots (\Delta_{P-2,+} + \Delta_{P-1,+})q(z_{P-1})+\Delta_{P-1,+}q(z_P)\right)
-\intertext{This can be discretized as}
-\int_{z_1}^{z_P} q(z)\diff z &\approx \bar{\omega}\cdot q\\
+\int_{z_0}^{z_{P+1}} q(z)\diff z &\approx \frac{1}{2}\sum_{i=0}^{P}(z_{i+1}-z_i)(q(z_i) + q(z_{i+1}))\\
+&= \frac1{2}\left(\Delta_{0,+}q(z_0) + (\Delta_{0,+} + \Delta_{1,+})q(z_1) + \ldots (\Delta_{P-1,+} + \Delta_{P,+})q(z_{P})+\Delta_{P,+}q(z_{P+1})\right)
+\intertext{Let $q \equiv \set{q(z_i)}_{i=0}^{P+1}$, then this can be discretized as}
+\int_{z_0}^{z_{P+1}} q(z)\diff z &\approx \bar{\omega}\cdot q\\
 \intertext{Where,}
-\bar{\omega}&\equiv \frac1{2}(\Delta_{-} + \Delta_{+})\\
+\bar{\omega}&\equiv \frac1{2}(\Delta_{-} + \Delta_{+})\in\R^{P+2}\\
 \intertext{With $\Delta_{-}$ and $\Delta_{+}$ are defined from \cref{eq:Delta-minus,eq:Delta-plus}, with the exception that $\Delta_{1,-} = 0$ and $\Delta_{P,+} = 0$ then, (i.e. different than use of ghost nodes in discretizing derivatives).  Moving to the specific integral in \cref{eq:vm-GBM-dynamic-normalized}, define the $\omega$ weights to combine the $\bar{\omega}$ and the $\left(e^{\xi z} \frac{F'(z)}{F(\bar{z})}\right)$ term so that}
 \omega_i &\equiv \bar{\omega}_i e^{\xi z_i}\frac{F'(z_i)}{F(\bar{z})}\\
 \intertext{Then with the discretized vector $v(t) \in \R^P$, the integral in \cref{eq:vm-GBM-dynamic-normalized} becomes,}
