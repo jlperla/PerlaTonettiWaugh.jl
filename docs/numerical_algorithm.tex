@@ -113,7 +113,7 @@ In order to solve for the dynamics of $v(z,t)$ and $g(t)$, we will discretize th
 
 \paragraph{Grid}
 
-Define an irregular grid $\set{z_i}_{i=1}^P$ with $z_1 = 0$ and $z_P = \bar{z}$ is a ``large'' number (keeping in mind that the effective number is $e^{\bar{z}}$).
+Define an irregular extended grid $z^{\text{ex}} = \set{z_i}_{i=0}^{P+1}$ with boundary nodes $z_0 = 0$ and $z_{P+1} = \bar{z}$ is a ``large'' number (keeping in mind that the effective number is $e^{\bar{z}}$), and the corresponding interior grid $z = set{z_i}_{i=1}^P$ that excludes boundary points.
 
 \paragraph{Discretized Functions}
 
