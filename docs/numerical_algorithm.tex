@@ -326,8 +326,8 @@ In the above cases, given the interpolated solutions of the problem, we can use 
 %\let\normalsize\small
 %\small
 
-\section{Spatial Discretization}\label{sec:discretization}
-
+\section{Discretization}
+\subsection{Spatial Discretization}\label{sec:discretization}
 This will discretize space with backward differences in the first derivative, and central in space for the 2nd derivative.\footnote{Under a $g(t) > \gamma$ assumption (which may be a general requirement on parameter restrictions), the drift is negative, and the correct ``upwind'' finite difference scheme is always backwards.}  After discretizing the spatial dimension, we have a system of ODEs in time - which are solved using various time-stepping algorithms.
 
 \begin{itemize}
@@ -348,13 +348,28 @@ This will discretize space with backward differences in the first derivative, an
 \end{bmatrix}\in\R^{P+2}
 	\end{align}\label{eq:Delta-plus}
 	\item The grid on time $t \in [0,T]$ may be adaptive, and we will let the ODE solver handle the grid in order to use optimal time-stepping algorithms.
-	\item Denote time-varying functions on the grid as a vector without the spatial dimension, i.e.
+	\item Denote time-varying functions on the grid as a vector without the spatial dimension (on the interior of the domain), i.e.
 	\begin{align}
 	v(t) &\equiv \set{v(z_i, t)}_{i=1}^P\in\R^P\\
 	\hat{\pi}(t) &\equiv	\hat{\pi}(z,t) \in \R^P
 	\end{align}
-	\item Note in the above definition that $v(t) \in \R^P$ and hence is not evaluated at the boundaries.  In the cases of boundaries, define $v_0(t) \equiv v(z_0, t)$ and $v_{P+1}(t) \equiv v(z_{P+1},t)$
 \end{itemize}
+
+\subsection{Boundary Extrapolation}
+Note in the above definition, $v(t) \in \R^P$ and hence is not evaluated at the boundaries.  In the cases of boundaries, define $v_0(t) \equiv v(z_0, t)$ and $v_{P+1}(t) \equiv v(z_{P+1},t)$.
+
+Given a solution for $v(t)$, we can extrapolate to find the function at the boundaries $v_0(t)$ and $v_{P+1}(t)$ by using the boundary conditions from the PDE.  In the case of the boundary conditions in \cref{eq:new-BC1,eq:new-BC2}, substitute in the first differences (forward and backwards, respectively) and use the $z$ grid
+
+\begin{align}
+	\xi v(z_0, t) + \frac{v(z_1,t)) - v(z_0,t)}{z_1 - z_0} &= 0\\
+	\xi v(z_{P+1},t) + \frac{v(z_{P+1},t)) - v(z_P,t)}{z_{P+1} - z_P} &= 0
+\end{align}
+Rearrange and use definitions of the vectors to find expressions for the extrapolation as linear functions of the interior nodes
+\begin{align}
+	v_0(t) &= \frac{1}{1 - \xi \Delta_{0,+}}v_1(t)\\
+	v_{P+1}(t) &= \frac{1}{1 + \xi \Delta_{P+1,-}}v_P(t)\\
+\end{align}
+
 
 \section{Derivations for Simple Model}\label{sec:simple-derivation}
 \subsection{Equations Prior to Rescaling}
@@ -418,10 +433,16 @@ With the discretized grid, the integral in \cref{eq:vm-GBM-dynamic-normalized} w
 \int_{0}^{\bar{z}} q(z)\diff z &\approx \bar{\omega}\cdot q\\
 \intertext{Where,}
 \bar{\omega}&\equiv \frac1{2}(\Delta_{-} + \Delta_{+})\in\R^{P+2}\\
-\intertext{Moving to the specific integral in \cref{eq:vm-GBM-dynamic-normalized}, define the $\omega$ weights to combine the $\bar{\omega}$ and the $\left(e^{\xi z} \frac{F'(z)}{F(\bar{z})}\right)$ term so that}
-\omega_i &\equiv \bar{\omega}_i e^{\xi z_i}\frac{F'(z_i)}{F(\bar{z})}\\
+\intertext{Moving to the specific integral in \cref{eq:vm-GBM-dynamic-normalized},}
+\int_{0}^{\bar{z}}  v(z,t) \left(e^{\xi z} \frac{F'(z)}{F(\bar{z})}\right) \diff z &\approx \sum_{i=0}^{P+1} \bar{\omega}_i e^{\xi z_i}\frac{F'(z_i)}{F(\bar{z})}v(z_i,t)
+\intertext{With this, define the $\omega \in R^P$ weights to combine the $\bar{\omega}$ and the $\left(e^{\xi z} \frac{F'(z)}{F(\bar{z})}\right)$ terms so that}
+\omega_i &\equiv\begin{cases}
+& \text{ for } i = 1\\
+\bar{\omega}_i e^{\xi z_i}\frac{F'(z_i)}{F(\bar{z})} & \text{ for } i = 2, \ldots P-1\\
+& \text{ for } i = P
+\end{cases}
 \intertext{Then with the discretized vector $v(t) \in \R^P$, the integral in \cref{eq:vm-GBM-dynamic-normalized} becomes,}
-v_1(t) &= \omega \cdot v(t) - x(t)
+\bar{v}_0(t) &= \omega \cdot \bar{v}(t) - x(t)
 \end{align}
 
 \section{Derivations of Full Model}\label{sec:full-model-derivations}
