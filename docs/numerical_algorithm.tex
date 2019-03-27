@@ -100,7 +100,7 @@ To solve the model numerically, we need to bound the state space by adding an ar
 v(0,t) &= \int_{0}^{\bar{z}}  v(z,t) \left(e^z \frac{F'(z)}{F(\bar{z})}\right) \diff z - x(t)\label{eq:simple-summary2-numerical}\\
 \D[z]v(0,t) + v(0,t) &= 0\label{eq:simple-summary3-numerical}\\
 \D[z]v(\bar{z},t) + v(\bar{z},t) &= 0\label{eq:simple-summary4-numerical}\\
-\intertext{With the same operator $A(t)$ in \cref{eq:simple-summary4} now defined on $z \in [0,\bar{z}]$}
+\intertext{With the same operator $A(t)$ in \cref{eq:simple-summary4} now defined on $z \in (0,\bar{z})$}
 A(t) &\equiv \left(r - \mu - \frac{\upsilon^2}{2}\right) - (\mu+ \upsilon^2 - g(t)) \D[z] - \frac{\upsilon^2}{2} \D[zz]\label{eq:simple-summary5-numerical}
 \end{align}
 
@@ -113,11 +113,11 @@ In order to solve for the dynamics of $v(z,t)$ and $g(t)$, we will discretize th
 
 \paragraph{Grid}
 
-Define an irregular grid $\set{z_i}_{i=1}^P$ with $z_1 = 0$ and $z_P = \bar{z}$ is a ``large'' number (keeping in mind that the effective number is $e^{\bar{z}}$).
+Define an irregular grid $\set{z_i}_{i=0}^{P+1}$ with $z_0 = 0$ and $z_{P+1} = \bar{z}$ is a ``large'' number (keeping in mind that the effective number is $e^{\bar{z}}$).  The core PDE in \cref{eq:simple-summary1-numerical} is defined on the interior of the domain, i.e. $z \in (0, \bar{z})$ while the boundary conditions are defined on the closure $z \in [0,\bar{z}]$.  Consequently, after discretizing, the PDE will be defined on $\set{z_i}_{i=1}^P$.
 
 \paragraph{Discretized Functions}
 
-After discretizing, we abuse notation and denote the grid by the variable name, i.e. $z \equiv \set{z_i)}_{i=1}^P$.  We also denote discretized function with the same symbol, but dropping the dependence on $z$, i.e. $\pi(z,t)$ becomes $\pi(t) \in \R^P$, and $v(z,t)$ becomes $v(t) \in \R^P$
+After discretizing, we abuse notation and denote the grid by the variable name, i.e. $z \equiv \set{z_i)}_{i=0}^{P+1}$.  We also denote discretized function with the same symbol, but dropping the dependence on $z$.  In the case of the payoffs and resulting functions, they are only defined on the interior, i.e. $\pi(t) \equiv \set{\pi(z_i,t)}_{i=0}^P\in \R^P$ and $v(t) \equiv \set{v(z_i,t)}_{i=0}^P\in \R^P$
 
 \paragraph{Discretized Operator}
 
@@ -139,7 +139,7 @@ See \url{https://quantecon.github.io/SimpleDifferentialOperators.jl/latest/#Form
 \paragraph{Quadrature}
 In order to discretize \cref{eq:simple-summary2-numerical}, we need to calculate the integral using quadrature.  Since the grid points are already given (i.e. we can't choose Gaussian quadrature nodes), we use the weights for the non-uniform trapezoidal rule.
 
-To calculate these, use $\Delta_{-}$ and $\Delta_{+}$ backwards and forward diffs (respectively) for the $z$ grid (with $\Delta_{1,-} = 0$ and $\Delta_{P,+} = 0$ set for the ghost nodes),
+To calculate these, use $\Delta_{-}$ and $\Delta_{+}$ backwards and forward diffs (respectively) for the $z$ grid (with $\Delta_{1,-} = 0$ and $\Delta_{P,+} = 0$),
 \begin{align}
 \bar{\omega}&\equiv \frac1{2}(\Delta_{-} + \Delta_{+})\in \R^P
 \end{align}
@@ -155,17 +155,17 @@ Then, in \cref{sec:quadrature}, we can combine both the quadrature nodes and all
 \end{align}
 
 \subsection{Discretized Model as an DAE}
-Let $v_1(t)$ be the $1$st element in the $v(t)$ vector, corresponding to $v(0,t)$.  Then, the value matching condition in \cref{eq:simple-summary2-numerical,eq:simple-summary1-numerical} along with the system of ODEs becomes the system of differential-algebraic equations (DAE)
+Let $v_1(t)$ be the $1$st element in the $v(t)$ vector, corresponding to $v(\Delta_{0,+},t)$.  From \cref{sec:boundary-extrapolation}, we know that $v(0, t) = \Xi_1 v(\Delta_{0,+},t)$  Then value matching condition in \cref{eq:simple-summary2-numerical,eq:simple-summary1-numerical} along with the system of ODEs becomes the system of differential-algebraic equations (DAE)
 \begin{align}
 	v'(t) &= A(t) v(t) - \pi(t)\label{eq:discretized-simple}\\
-	0 &= v_1(t) - \omega \cdot v(t) + x(t)\label{eq:discretized-simple-vm}
+	0 &= \Xi_1 v_1(t) - \omega \cdot v(t) + x(t)\label{eq:discretized-simple-vm}
 \end{align}
 
 
 \noindent To find the stationary solution at $T$,  $v'(T) = 0$, we can solve the nonlinear system of equations
 \begin{align}
 	0 &= A(T; g) v(T) - \pi(T)\label{eq:discretized-simple-stationary}\\
-	0 &= v_1(T) - \omega \cdot v(T) + x(T)\label{eq:discretized-simple-vm-stationary}
+	0 &= \Xi_1 v_1(T) - \omega \cdot v(T) + x(T)\label{eq:discretized-simple-vm-stationary}
 \end{align}
 Where the $ A(T; g)$ is to reinforce that it is the only component which is a function of $g$.  This can be solved by using a nonlinear solver for $v(T)$ and $g$, or by fixing $g$, solving the linear \cref{eq:discretized-simple-stationary} for $v(T)$ and then checking \cref{eq:discretized-simple-vm-stationary} for convergence of the $g$.
 
@@ -289,11 +289,11 @@ As before, this operator implement the boundary conditions in the discretized op
 
 The three algebraic variables required in the DAE are $g(t), \hat{z}(t),$ and $\Omega(t)$. The \cref{eq:normalized-vm-summary-rescaled} value matching equation uses the same discretization approach as in the simple example (combining everything into the weights $\omega$, with the truncated exponential distribution, etc.)
 \begin{align}
-	0 &= v_1(t) - \omega \cdot v(t) + \zeta
+	0 &= \Xi_1 v_1(t) - \omega \cdot v(t) + \zeta
 	\intertext{The export threshold equation is}
 	0&=\hat{z}(t)^{\sigma-1}-  \kappa d^{\sigma - 1} \bar{\pi}_{\min}(t)^{-1}
 	\intertext{From \cref{sec:free-entry}, we see that the free-entry condition is}
-	v_1(t) -  \zeta \frac{1-\chi}{\chi} &\leq 0,\, = 0 \text{ if } E(t) > 0
+	\Xi_1 v_1(t) -  \zeta \frac{1-\chi}{\chi} &\leq 0,\, = 0 \text{ if } E(t) > 0
 \end{align}
 
 
@@ -355,7 +355,7 @@ This will discretize space with backward differences in the first derivative, an
 	\end{align}
 \end{itemize}
 
-\subsection{Boundary Extrapolation}
+\subsection{Boundary Extrapolation}\label{sec:boundary-extrapolation}
 Note in the above definition, $v(t) \in \R^P$ and hence is not evaluated at the boundaries.  In the cases of boundaries, define $v_0(t) \equiv v(z_0, t)$ and $v_{P+1}(t) \equiv v(z_{P+1},t)$.
 
 Given a solution for $v(t)$, we can extrapolate to find the function at the boundaries $v_0(t)$ and $v_{P+1}(t)$ by using the boundary conditions from the PDE.  In the case of the boundary conditions in \cref{eq:new-BC1,eq:new-BC2}, substitute in the first differences (forward and backwards, respectively) and use the $z$ grid
@@ -366,8 +366,11 @@ Given a solution for $v(t)$, we can extrapolate to find the function at the boun
 \end{align}
 Rearrange and use definitions of the vectors to find expressions for the extrapolation as linear functions of the interior nodes
 \begin{align}
-	v_0(t) &= \frac{1}{1 - \xi \Delta_{0,+}}v_1(t)\\
-	v_{P+1}(t) &= \frac{1}{1 + \xi \Delta_{P+1,-}}v_P(t)\\
+	v_0(t) &= \Xi_1 v_1(t) \label{eq:v0-1-bc}\\
+	v_{P+1}(t) &=  \Xi_P v_P(t)\label{eq:vP-P1-bc}
+	\intertext{Where,}
+	\Xi_1 &\equiv \frac{1}{1 - \xi \Delta_{0,+}}\\
+	\Xi_P &\equiv \frac{1}{1 + \xi \Delta_{P+1,-}}
 \end{align}
 
 
@@ -435,15 +438,16 @@ With the discretized grid, the integral in \cref{eq:vm-GBM-dynamic-normalized} w
 \bar{\omega}&\equiv \frac1{2}(\Delta_{-} + \Delta_{+})\in\R^{P+2}\\
 \intertext{Moving to the specific integral in \cref{eq:vm-GBM-dynamic-normalized},}
 \int_{0}^{\bar{z}}  v(z,t) \left(e^{\xi z} \frac{F'(z)}{F(\bar{z})}\right) \diff z &\approx \sum_{i=0}^{P+1} \bar{\omega}_i e^{\xi z_i}\frac{F'(z_i)}{F(\bar{z})}v(z_i,t)
-\intertext{With this, define the $\omega \in R^P$ weights to combine the $\bar{\omega}$ and the $\left(e^{\xi z} \frac{F'(z)}{F(\bar{z})}\right)$ terms so that}
+\intertext{With this, define the $\omega \in R^P$ weights to combine the $\bar{\omega}$ and the $\left(e^{\xi z} \frac{F'(z)}{F(\bar{z})}\right)$ terms, and use \cref{eq:vP-P1-bc,eq:v0-1-bc} so that}
 \omega_i &\equiv\begin{cases}
-& \text{ for } i = 1\\
+\Xi_1\bar{\omega}_0 e^{\xi z_0}\frac{F'(z_0)}{F(\bar{z})} + \bar{\omega}_1 e^{\xi z_1}\frac{F'(z_1)}{F(\bar{z})} & \text{ for } i = 1\\
 \bar{\omega}_i e^{\xi z_i}\frac{F'(z_i)}{F(\bar{z})} & \text{ for } i = 2, \ldots P-1\\
-& \text{ for } i = P
+\bar{\omega}_P e^{\xi z_P}\frac{F'(z_P)}{F(\bar{z})} +  \Xi_P\bar{\omega}_{P+1} e^{\xi z_{P+1}}\frac{F'(z_{P+1})}{F(\bar{z})}& \text{ for } i = P
 \end{cases}
 \intertext{Then with the discretized vector $v(t) \in \R^P$, the integral in \cref{eq:vm-GBM-dynamic-normalized} becomes,}
-\bar{v}_0(t) &= \omega \cdot \bar{v}(t) - x(t)
+\Xi_1 v_1(t) &= \omega \cdot v(t) - x(t)
 \end{align}
+
 
 \section{Derivations of Full Model}\label{sec:full-model-derivations}
 
@@ -608,7 +612,7 @@ To determine the $E(t)$ function, we need the free entry complementarity conditi
 \begin{align}
 v(t,0) &= \zeta \frac{1-\chi}{\chi}
 \intertext{In the case that there is no entry, and $E(t) = 0$ for some $t$, from (PTW D.18)}
-v(0,t) &< \zeta \frac{1-\chi}{\chi}
+v(t,0) &< \zeta \frac{1-\chi}{\chi}
 \end{align}
 
 \subsection{Derivation of Rates of Change and Interest Rates}\label{sec:derive-interest-rates}
