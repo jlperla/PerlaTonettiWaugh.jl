@@ -139,15 +139,29 @@ See \url{https://quantecon.github.io/SimpleDifferentialOperators.jl/latest/#Form
 \paragraph{Quadrature}
 In order to discretize \cref{eq:simple-summary2-numerical}, we need to calculate the integral using quadrature.  Since the grid points are already given (i.e. we can't choose Gaussian quadrature nodes), we use the weights for the non-uniform trapezoidal rule.
 
-To calculate these, use $\Delta_{-}$ and $\Delta_{+}$ backwards and forward diffs (respectively) for the $z$ grid (with $\Delta_{1,-} = 0$ and $\Delta_{P,+} = 0$),
+To calculate these, use $\Delta_{-}$ and $\Delta_{+}$ backwards and forward diffs (respectively) for the $z$ grid, padded with (with $\Delta_{0,-} = 0$ and $\Delta_{P+1,+} = 0$), so that from \cref{eq:Delta-minus,eq:Delta-plus}
 \begin{align}
-\bar{\omega}&\equiv \frac1{2}(\Delta_{-} + \Delta_{+})\in \R^P
+	\Delta_{-} &\equiv \begin{bmatrix} 0 \\
+	\text{diff}(z)
+	\end{bmatrix}\in\R^{P+2}\label{eq:Delta-minus}\\
+	\Delta_{+} &\equiv \begin{bmatrix} \text{diff}(z)\\
+	0
+\end{bmatrix}\in\R^{P+2}
+\intertext{Then define}
+\bar{\omega}&\equiv \frac1{2}(\Delta_{-} + \Delta_{+})\in \R^{P+2}\\
+\Xi_1 &\equiv \frac{1}{1 - \xi \Delta_{0,+}}\\
+\Xi_P &\equiv \frac{1}{1 + \xi \Delta_{P+1,-}}
 \end{align}
 
-Then, in \cref{sec:quadrature}, we can combine both the quadrature nodes and all non-$v$ values at the nodes (i.e. $e^z$ and the $F'(z)$) with $\bar{\omega}$ so that
+Then, using \cref{eq:omega-i}, we can combine both the quadrature nodes and all non-$v$ values at the nodes (i.e. $e^z$ and the $F'(z)$) with $\bar{\omega}$ so that
 \begin{align}
-\omega_i &\equiv \bar{\omega}_i \frac{\theta e^{(1 - \theta)z_i}}{1 - e^{-\theta \bar{z}}}
+\omega_i &\equiv\begin{cases}
+\bar{\omega}_0\Xi_1 \frac{\theta e^{(\xi - \theta)z_0}}{1 - e^{-\theta \bar{z}}} + \bar{\omega}_1 \frac{\theta e^{(\xi - \theta)z_1}}{1 - e^{-\theta \bar{z}}}& \text{ for } i = 1\\
+\bar{\omega}_i \frac{\theta e^{(\xi - \theta)z_i}}{1 - e^{-\theta \bar{z}}} & \text{ for } i = 2, \ldots P-1\\
+\bar{\omega}_P \frac{\theta e^{(\xi - \theta)z_P}}{1 - e^{-\theta \bar{z}}} +  \bar{\omega}_{P+1}\Xi_P\frac{\theta e^{(\xi - \theta)z_{P+1}}}{1 - e^{-\theta \bar{z}}}& \text{ for } i = P
+\end{cases}\label{eq:omega-i}
 \end{align}
+% \frac{\theta e^{(\xi - \theta)z_0}}{1 - e^{-\theta \bar{z}}}
 
 \noindent Using this definition, the integral is approximated by a linear operator $\omega\in\R^P$
 \begin{align}
@@ -155,7 +169,7 @@ Then, in \cref{sec:quadrature}, we can combine both the quadrature nodes and all
 \end{align}
 
 \subsection{Discretized Model as an DAE}
-Let $v_1(t)$ be the $1$st element in the $v(t)$ vector, corresponding to $v(\Delta_{0,+},t)$.  From \cref{sec:boundary-extrapolation}, we know that $v(0, t) = \Xi_1 v(\Delta_{0,+},t)$  Then value matching condition in \cref{eq:simple-summary2-numerical,eq:simple-summary1-numerical} along with the system of ODEs becomes the system of differential-algebraic equations (DAE)
+Let $v_1(t)$ be the $1$st element in the $v(t)$ vector (i.e., the first value in the interior).  From \cref{sec:boundary-extrapolation}, we know that $v(0, t) = \Xi_1 v_1(t)$  Then value matching condition in \cref{eq:simple-summary2-numerical,eq:simple-summary1-numerical} along with the system of ODEs becomes the system of differential-algebraic equations (DAE)
 \begin{align}
 	v'(t) &= A(t) v(t) - \pi(t)\label{eq:discretized-simple}\\
 	0 &= \Xi_1 v_1(t) - \omega \cdot v(t) + x(t)\label{eq:discretized-simple-vm}
@@ -432,7 +446,9 @@ With the discretized grid, the integral in \cref{eq:vm-GBM-dynamic-normalized} w
 &= \frac1{2}\left((0 + \Delta_{0,+})q(z_0) + (\Delta_{0,+} + \Delta_{1,+})q(z_1) + \ldots (\Delta_{P-1,+} + \Delta_{P,+})q(z_{P})+(\Delta_{P,+} + 0)q(z_{P+1})\right)
 \intertext{Since $\Delta_{i,+} = \Delta_{i+1,-}$ for all $i = 1, \ldots P$}
 &= \frac1{2}\left((0 + \Delta_{0,+})q(z_0) + (\Delta_{1,-} + \Delta_{1,+})q(z_1) + \ldots (\Delta_{P,-} + \Delta_{P,+})q(z_{P})+(\Delta_{P+1,-} + 0)q(z_{P+1})\right)
-\intertext{Finally, use the $\Delta_{-}$ and $\Delta_{+}$ as defined from \cref{eq:Delta-minus,eq:Delta-plus} (note the use of a padding $0$ in those definitions) and group to find}
+\end{align}
+Finally, use the $\Delta_{-}$ and $\Delta_{+}$ as defined from \cref{eq:Delta-minus,eq:Delta-plus} (note the use of a padding $0$ in those definitions) and group to find
+\begin{align}
 \int_{0}^{\bar{z}} q(z)\diff z &\approx \bar{\omega}\cdot q\\
 \intertext{Where,}
 \bar{\omega}&\equiv \frac1{2}(\Delta_{-} + \Delta_{+})\in\R^{P+2}\\
@@ -443,7 +459,7 @@ With the discretized grid, the integral in \cref{eq:vm-GBM-dynamic-normalized} w
 \Xi_1\bar{\omega}_0 e^{\xi z_0}\frac{F'(z_0)}{F(\bar{z})} + \bar{\omega}_1 e^{\xi z_1}\frac{F'(z_1)}{F(\bar{z})} & \text{ for } i = 1\\
 \bar{\omega}_i e^{\xi z_i}\frac{F'(z_i)}{F(\bar{z})} & \text{ for } i = 2, \ldots P-1\\
 \bar{\omega}_P e^{\xi z_P}\frac{F'(z_P)}{F(\bar{z})} +  \Xi_P\bar{\omega}_{P+1} e^{\xi z_{P+1}}\frac{F'(z_{P+1})}{F(\bar{z})}& \text{ for } i = P
-\end{cases}
+\end{cases}\label{eq:omega-i}
 \intertext{Then with the discretized vector $v(t) \in \R^P$, the integral in \cref{eq:vm-GBM-dynamic-normalized} becomes,}
 \Xi_1 v_1(t) &= \omega \cdot v(t) - x(t)
 \end{align}
