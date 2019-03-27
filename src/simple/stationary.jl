@@ -20,9 +20,8 @@ function stationary_numerical_simple(params, z)
     @unpack μ, υ, θ, r, ζ, π = params
 
     bc = (Mixed(1), Mixed(1)) # boundary conditions for differential operators
-    z_extended = [z[1] - diff(z)[1]; z; z[end] + diff(z)[end]]
-    L_1_minus = L₁₋(z_extended, bc) # use backward difference as the drift is negative
-    L_2 = L₂(z_extended, bc) 
+    L_1_minus = L₁₋(z, bc) # use backward difference as the drift is negative
+    L_2 = L₂(z, bc) 
 
     # Define the pdf of the truncated exponential distribution
     ω = ω_weights(z, θ, 1) # (20)
