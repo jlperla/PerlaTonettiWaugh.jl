@@ -39,7 +39,7 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
 
     # Unpack arguments
       @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params_T # Parameters
-      @unpack z, T_U_bar, tstops = settings # Settings
+      @unpack z, z_extended, T_U_bar, tstops = settings # Settings
       v_T = stationary_sol_T.v_tilde # Stationary --
       g_T = stationary_sol_T.g
       z_hat_T = stationary_sol_T.z_hat
@@ -57,8 +57,8 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
       P = length(z)
       ω = ω_weights(z, θ, σ-1) # Quadrature weights.
       bc = (Mixed(σ-1), Mixed(σ-1)) # boundary conditions for differential operators
-      L_1 = L₁₋(z, bc) # use backward difference as the drift is negative
-      L_2 = L₂(z, bc)
+      L_1 = L₁₋(z_extended, bc) # use backward difference as the drift is negative
+      L_2 = L₂(z_extended, bc)
 
     # Define the auxiliary functions for the DAE problem.
       S(g) = θ * (g - μ - θ * υ^2/2) # Compute S given g. (26)

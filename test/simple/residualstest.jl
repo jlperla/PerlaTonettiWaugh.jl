@@ -4,7 +4,7 @@
     z_max = 5.0
     P = 100
     z_grid = range(z_min, stop = z_max, length = P) # Since we only care about the grid.
-
+    z_grid_extended = [z_grid[1] - diff(z_grid)[1]; z_grid; z_grid[end] + diff(z_grid)[end]]
 # Time grid.
     T_val = 100.0
     N = 10
@@ -47,7 +47,7 @@
     g_func = t -> g_int(t) # Not idiosyncratic.
 
 # Create settings object.
-    settings = @with_kw (z = z_grid, T = T_val, g = t -> g_stationary,
+    settings = @with_kw (z = z_grid, z_extended = z_grid_extended, T = T_val, g = t -> g_stationary,
                         ode_solve_algorithm = CVODE_BDF(), iterations = 1000,
                         t_grid = range(0.0, stop = T_val, length = length(z_grid)))
 

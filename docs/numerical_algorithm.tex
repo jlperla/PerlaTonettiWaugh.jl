@@ -350,17 +350,9 @@ This will discretize space with backward differences in the first derivative, an
 	\begin{align}
 	\Delta_{i,-} &\equiv z_i - z_{i-1},\, \text{for } i = 1,\ldots, P+1\\
 	\Delta_{i,+} &\equiv z_{i+1} - z_i,\, \text{for } i = 0,\ldots, P
-	\end{align}
-
-	\item Define the vector of backwards and forwards first differences (padding with $0$s) as
-	\begin{align}
-	\Delta_{-} &\equiv \begin{bmatrix} 0 \\
-	\text{diff}(z)
-	\end{bmatrix}\in\R^{P+2}\label{eq:Delta-minus}\\
-	\Delta_{+} &\equiv \begin{bmatrix} \text{diff}(z)\\
-	0
-\end{bmatrix}\in\R^{P+2}
 	\end{align}\label{eq:Delta-plus}
+	and define the vector of backwards and forwards first differences for interior nodes as $\Delta_{-} \equiv \set{\Delta_{i,-}}_{i=1}^P$ and $\Delta_{+} \equiv \set{\Delta_{i,+}}_{i=1}^P $
+
 	\item The grid on time $t \in [0,T]$ may be adaptive, and we will let the ODE solver handle the grid in order to use optimal time-stepping algorithms.
 	\item Denote time-varying functions on the grid as a vector without the spatial dimension (on the interior of the domain), i.e.
 	\begin{align}
