@@ -159,7 +159,7 @@ Then, using \cref{eq:omega-i}, we can combine both the quadrature nodes and all 
 \bar{\omega}_0\Xi_1 \frac{\theta e^{(\xi - \theta)z_0}}{1 - e^{-\theta \bar{z}}} + \bar{\omega}_1 \frac{\theta e^{(\xi - \theta)z_1}}{1 - e^{-\theta \bar{z}}}& \text{ for } i = 1\\
 \bar{\omega}_i \frac{\theta e^{(\xi - \theta)z_i}}{1 - e^{-\theta \bar{z}}} & \text{ for } i = 2, \ldots P-1\\
 \bar{\omega}_P \frac{\theta e^{(\xi - \theta)z_P}}{1 - e^{-\theta \bar{z}}} +  \bar{\omega}_{P+1}\Xi_P\frac{\theta e^{(\xi - \theta)z_{P+1}}}{1 - e^{-\theta \bar{z}}}& \text{ for } i = P
-\end{cases}\label{eq:omega-i}
+\end{cases}
 \end{align}
 % \frac{\theta e^{(\xi - \theta)z_0}}{1 - e^{-\theta \bar{z}}}
 
@@ -367,8 +367,8 @@ Note in the above definition, $v(t) \in \R^P$ and hence is not evaluated at the 
 Given a solution for $v(t)$, we can extrapolate to find the function at the boundaries $v_0(t)$ and $v_{P+1}(t)$ by using the boundary conditions from the PDE.  In the case of the boundary conditions in \cref{eq:new-BC1,eq:new-BC2}, substitute in the first differences (forward and backwards, respectively) and use the $z$ grid
 
 \begin{align}
-	\xi v(z_0, t) + \frac{v(z_1,t)) - v(z_0,t)}{z_1 - z_0} &= 0\\
-	\xi v(z_{P+1},t) + \frac{v(z_{P+1},t)) - v(z_P,t)}{z_{P+1} - z_P} &= 0
+	\xi v(z_0, t) + \frac{v(z_1,t) - v(z_0,t)}{z_1 - z_0} &= 0\\
+	\xi v(z_{P+1},t) + \frac{v(z_{P+1},t) - v(z_P,t)}{z_{P+1} - z_P} &= 0
 \end{align}
 Rearrange and use definitions of the vectors to find expressions for the extrapolation as linear functions of the interior nodes
 \begin{align}
