@@ -139,16 +139,16 @@ See \url{https://quantecon.github.io/SimpleDifferentialOperators.jl/latest/#Form
 \paragraph{Quadrature}
 In order to discretize \cref{eq:simple-summary2-numerical}, we need to calculate the integral using quadrature.  Since the grid points are already given (i.e. we can't choose Gaussian quadrature nodes), we use the weights for the non-uniform trapezoidal rule.
 
-To calculate these, use $\Delta_{-}$ and $\Delta_{+}$ backwards and forward diffs (respectively) for the $z$ grid, padded with (with $\Delta_{0,-} = 0$ and $\Delta_{P+1,+} = 0$), so that from \cref{eq:Delta-minus,eq:Delta-plus}
+To calculate these, use $\Delta_{-}$ and $\Delta_{+}$ (from \cref{eq:Delta-minus,eq:Delta-plus}), backwards and forward diffs (respectively) for the $z$ grid, padded with (with $\Delta_{0,-} = 0$ and $\Delta_{P+1,+} = 0$):
 \begin{align}
-	\Delta_{-} &\equiv \begin{bmatrix} 0 \\
+	\overline{\Delta}_{-} &\equiv \begin{bmatrix} 0 \\
 	\text{diff}(z)
 	\end{bmatrix}\in\R^{P+2}\label{eq:Delta-minus}\\
-	\Delta_{+} &\equiv \begin{bmatrix} \text{diff}(z)\\
+	\overline{\Delta}_{+} &\equiv \begin{bmatrix} \text{diff}(z)\\
 	0
 \end{bmatrix}\in\R^{P+2}
 \intertext{Then define}
-\bar{\omega}&\equiv \frac1{2}(\Delta_{-} + \Delta_{+})\in \R^{P+2}\\
+\bar{\omega}&\equiv \frac1{2}(\overline{\Delta}_{-} + \overline{\Delta}_{+})\in \R^{P+2}\\
 \Xi_1 &\equiv \frac{1}{1 - \xi \Delta_{0,+}}\\
 \Xi_P &\equiv \frac{1}{1 + \xi \Delta_{P+1,-}}
 \end{align}
@@ -443,7 +443,7 @@ Finally, use the $\Delta_{-}$ and $\Delta_{+}$ as defined from \cref{eq:Delta-mi
 \begin{align}
 \int_{0}^{\bar{z}} q(z)\diff z &\approx \bar{\omega}\cdot q\\
 \intertext{Where,}
-\bar{\omega}&\equiv \frac1{2}(\Delta_{-} + \Delta_{+})\in\R^{P+2}\\
+\bar{\omega}&\equiv \frac1{2}(\overline{\Delta}_{-} + \overline{\Delta}_{+})\in\R^{P+2}\\
 \intertext{Moving to the specific integral in \cref{eq:vm-GBM-dynamic-normalized},}
 \int_{0}^{\bar{z}}  v(z,t) \left(e^{\xi z} \frac{F'(z)}{F(\bar{z})}\right) \diff z &\approx \sum_{i=0}^{P+1} \bar{\omega}_i e^{\xi z_i}\frac{F'(z_i)}{F(\bar{z})}v(z_i,t)
 \intertext{With this, define the $\omega \in R^P$ weights to combine the $\bar{\omega}$ and the $\left(e^{\xi z} \frac{F'(z)}{F(\bar{z})}\right)$ terms, and use \cref{eq:vP-P1-bc,eq:v0-1-bc} so that}
