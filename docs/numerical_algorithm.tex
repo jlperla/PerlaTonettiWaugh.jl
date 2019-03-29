@@ -46,7 +46,7 @@ breaklinks]
 
 This document is a self-contained summary of all of the equations and algorithms used to solve the model and transition dynamics.  Equations in the code have a comment to reference the corresponding equation numbers in this document.
 
-\cite{AchdouHanLasryEtAl2017} and its technical appendix provide many of the details on the upwind finite difference methods used here.  While using these techniques to discretize the "spatial" dimension, we make several changes to the general approach taken by many economists to solve PDEs: (1) after discretizing the spatial dimension of the PDE to make them ODEs, we stack in further equilibrium equations into the ODEs to make them a system of DAEs; and (2) instead of discretizing the spatial dimension with finite differences and the time-dimension with a homegrown time-stepping (e.g. backwards euler), we instead rely on the underlying ODE/DAE solvers to do numerically stable, efficient, and often adaptive--time-stepping.  Because of this, this document concentrates on specifying the full set of ODE/DAE equations, which are then handed over to industrial strength solvers.
+\cite{AchdouHanLasryEtAl2017} and its technical appendix provide many of the details on the upwind finite difference methods used here.  While using these techniques to discretize the "spatial" dimension, we make several changes to the general approach taken by many economists to solve PDEs: (1) after discretizing the spatial dimension of the PDE to make them ODEs, we stack in further equilibrium equations into the ODEs to make them a system of DAEs; and (2) instead of discretizing the spatial dimension with finite differences and the time-dimension with a homegrown time-stepping (e.g. backwards euler), we instead rely on the underlying ODE/DAE solvers to do numerically stable, efficient, and often adaptive--time-stepping.  Hence, we concentrate on specifying the full set of ODE/DAE equations, which are then handed over to industrial strength solvers.
 
 \section{Simplified Growth Model with Transition Dynamics}
 We start with a simplified version of the model with transition dynamics.  In the more complicated case of this paper, the $\pi(z,t), r(t), x(t)$ will come from equilibrium conditions rather than being given exogenously, but the structure of solving the resulting system of integro-differential-algebraic equations remains the same.
@@ -113,11 +113,11 @@ In order to solve for the dynamics of $v(z,t)$ and $g(t)$, we will discretize th
 
 \paragraph{Grid}
 
-Define an irregular grid $\set{z_i}_{i=0}^{P+1}$ with $z_0 = 0$ and $z_{P+1} = \bar{z}$ is a ``large'' number (keeping in mind that the effective number is $e^{\bar{z}}$).  The core PDE in \cref{eq:simple-summary1-numerical} is defined on the interior of the domain, i.e. $z \in (0, \bar{z})$ while the boundary conditions are defined on the closure $z \in [0,\bar{z}]$.  Consequently, after discretizing, the PDE will be defined on $\set{z_i}_{i=1}^P$.
+Define an irregular grid $\set{z_i}_{i=0}^{P+1}$ with $z_0 = 0$ and $z_{P+1} = \bar{z}$ is a ``large'' number (keeping in mind that the effective number is $e^{\bar{z}}$).  The core PDE in \cref{eq:simple-summary1-numerical} is defined on the interior of the domain, i.e. $z \in (0, \bar{z})$ while the boundary conditions are defined on the closure $z \in [0,\bar{z}]$.  Consequently, after discretizing, the PDE will be solved on the interior $\set{z_i}_{i=1}^P$ and the boundary conditions for $z_0 = 0$ and $z_{P+1} = \bar{z}$ will be fulfilled by the solution through the discretization approach.
 
 \paragraph{Discretized Functions}
 
-After discretizing, we abuse notation and denote the grid by the variable name, i.e. $z \equiv \set{z_i)}_{i=0}^{P+1}$.  We also denote discretized function with the same symbol, but dropping the dependence on $z$.  In the case of the payoffs and resulting functions, they are only defined on the interior, i.e. $\pi(t) \equiv \set{\pi(z_i,t)}_{i=0}^P\in \R^P$ and $v(t) \equiv \set{v(z_i,t)}_{i=0}^P\in \R^P$
+After discretizing, we abuse notation and denote the grid by the variable name, i.e. $z \equiv \set{z_i)}_{i=0}^{P+1}$.  We also denote discretized function with the same symbol, but dropping the dependence on $z$.  In the case of the payoffs and resulting functions, they are only defined on the interior, i.e. $\pi(t) \equiv \set{\pi(z_i,t)}_{i=1}^P\in \R^P$ and $v(t) \equiv \set{v(z_i,t)}_{i=1}^P\in \R^P$
 
 \paragraph{Discretized Operator}
 
@@ -127,19 +127,19 @@ Using the derivations in \url{https://github.com/QuantEcon/SimpleDifferentialOpe
 \begin{align}
 A(t) &\equiv \left(r - \mu - \frac{\upsilon^2}{2}\right) I - (\mu + \upsilon^2 - g(t)) L^{-}_1 - \frac{\upsilon^2}{2} L_2 \label{eq:A-def-simple}
 \end{align}
-where $I$ is the identity matrix.
+where $I$ is the identity matrix.\footnote{See \url{https://github.com/QuantEcon/SimpleDifferentialOperators.jl/blob/master/docs/tex/discretized-differential-operator-derivation.pdf} for the specific formulas used for $L_1^-$ and $L_2$ subject to the \cref{eq:simple-summary4-numerical,eq:simple-summary5-numerical} boundary conditions.}
 
 While non-binding in practice here, to check that the  $L^{-}_1$ backwards differences is the correct upwind direction, verify that\footnote{In the steady-state, this equation will be fulfilled for any non-degenerate solutions, but it is best to check this result at a few points in the transition path for off-equilibrium steps in the numerical algorithm.}
 \begin{equation}
 \mu + \sigma^2 - g(t) < 0
 \end{equation}
 
-See \url{https://quantecon.github.io/SimpleDifferentialOperators.jl/latest/#Formulas-1} for the specific formulas used for $L_1^-$ and $L_2$ subject to the \cref{eq:simple-summary4-numerical,eq:simple-summary5-numerical} boundary conditions.
+
 
 \paragraph{Quadrature}
 In order to discretize \cref{eq:simple-summary2-numerical}, we need to calculate the integral using quadrature.  Since the grid points are already given (i.e. we can't choose Gaussian quadrature nodes), we use the weights for the non-uniform trapezoidal rule.
 
-To calculate these, use $\Delta_{-}$ and $\Delta_{+}$ backwards and forward diffs (respectively) for the $z$ grid, padded with (with $\Delta_{0,-} = 0$ and $\Delta_{P+1,+} = 0$), so that from \cref{eq:Delta-minus,eq:Delta-plus}
+To calculate these, use $\Delta_{-}$ and $\Delta_{+}$ backwards and forward diffs (respectively) for the $z$ grid.  That is, $\Delta_{i,+} = z_{i+1} - z_i$ for $i = 0,\ldots P$, and $\Delta_{i,-} = z_i - z_{i-1}$ for $i = 1,\ldots P+1$.  Pad these with (with $\Delta_{0,-} = 0$ and $\Delta_{P+1,+} = 0$), so that from \cref{eq:Delta-minus,eq:Delta-plus}
 \begin{align}
  	\Delta_{-} &\equiv \begin{bmatrix} 0 \\
 	\text{diff}(z)
@@ -147,13 +147,13 @@ To calculate these, use $\Delta_{-}$ and $\Delta_{+}$ backwards and forward diff
 	\Delta_{+} &\equiv \begin{bmatrix} \text{diff}(z)\\
 	0
 \end{bmatrix}\in\R^{P+2}
-\intertext{Then define}
+\intertext{Define}
 \bar{\omega}&\equiv \frac1{2}(\Delta_{-} + \Delta_{+})\in \R^{P+2}\\
 \Xi_1 &\equiv \frac{1}{1 - \xi \Delta_{0,+}}\\
 \Xi_P &\equiv \frac{1}{1 + \xi \Delta_{P+1,-}}
 \end{align}
 
-Then, using \cref{eq:omega-i}, we can combine both the quadrature nodes and all non-$v$ values at the nodes (i.e. $e^z$ and the $F'(z)$) with $\bar{\omega}$ so that
+Use \cref{eq:omega-i}, so that the rule only uses the interior values $v_1(t)$ to $v_P(t)$ and all other values are collapsed into constants (i.e. $e^z$ and the $F'(z)$) with $\bar{\omega}$ so that\footnote{It is important to remember that we are imposing the boundary conditions here in the calculation of the quadrature rules, so this approach would require adjustment with different boundaries (i.e. the $\Xi_1$ and $\Xi_P$ might be different).}
 \begin{align}
 \omega_i &\equiv\begin{cases}
 \bar{\omega}_0\Xi_1 \frac{\theta e^{(\xi - \theta)z_0}}{1 - e^{-\theta \bar{z}}} + \bar{\omega}_1 \frac{\theta e^{(\xi - \theta)z_1}}{1 - e^{-\theta \bar{z}}}& \text{ for } i = 1\\
@@ -163,7 +163,7 @@ Then, using \cref{eq:omega-i}, we can combine both the quadrature nodes and all 
 \end{align}
 % \frac{\theta e^{(\xi - \theta)z_0}}{1 - e^{-\theta \bar{z}}}
 
-\noindent Using this definition, the integral is approximated by a linear operator $\omega\in\R^P$
+\noindent Using this definition, the integral is approximated by a linear operator $\omega\in\R^P$ applied to the solution of the PDE on the interior, i.e. $v(t)$.
 \begin{align}
  \int_{0}^{\bar{z}}  v(z,t) \left(e^z \frac{F'(z)}{F(\bar{z})}\right) \diff z &\approx \omega \cdot v(t)
 \end{align}
@@ -369,7 +369,7 @@ This will discretize space with backward differences in the first derivative, an
 \end{itemize}
 
 \subsection{Boundary Extrapolation}\label{sec:boundary-extrapolation}
-Note in the above definition, $v(t) \in \R^P$ and hence is not evaluated at the boundaries.  In the cases of boundaries, define $v_0(t) \equiv v(z_0, t)$ and $v_{P+1}(t) \equiv v(z_{P+1},t)$.
+Note in the above definition, $v(t) \in \R^P$ and hence is not evaluated at the boundaries.  In the case of boundary points in the discretized model, define $v_0(t) \equiv v(z_0, t)$ and $v_{P+1}(t) \equiv v(z_{P+1},t)$.
 
 Given a solution for $v(t)$, we can extrapolate to find the function at the boundaries $v_0(t)$ and $v_{P+1}(t)$ by using the boundary conditions from the PDE.  In the case of the boundary conditions in \cref{eq:new-BC1,eq:new-BC2}, substitute in the first differences (forward and backwards, respectively) and use the $z$ grid
 
