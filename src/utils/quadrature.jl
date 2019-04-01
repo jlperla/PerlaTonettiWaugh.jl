@@ -12,7 +12,7 @@ function ω_weights(z_ex, θ, ξ)
     # ω objects
         ω = zeros(eltype(z), P) # object to return
         ω_bar_vec = 1/2 * (Δ₋ + Δ₊) # (B.19)
-        ω_bar(i) = ω_bar_vec[i+1] # so we can match the notation of (B.21) and write ω_bar(0), ω_bar(1), ..., ω_bar(P+1)
+        ω_bar(i) = ω_bar_vec[i+1] # so we can match the notation of (B.21) and (24), and write ω_bar(0), ω_bar(1), ..., ω_bar(P+1)
 
     # fill ω
     for i = 1:P
