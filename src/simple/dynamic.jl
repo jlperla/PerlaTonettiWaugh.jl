@@ -46,21 +46,21 @@ function simpleDAE(params, settings)
     return DAEProblem(f!_simple, resid_M1, u_T, (T, 0.0), differential_vars = [fill(true, P); false], p)
 end
 
-# Calculate residuals given diffeq problem and primitives
-function calculate_residuals(ode_prob, x, ω, ode_solve_algorithm, ts) # To keep the params consistent with other tuples.
-    # Solve ode
-    sol = Sundials.solve(ode_prob, ode_solve_algorithm, tstops = ts)
-    P = length(ω)
-    # Calculate the residual at each time point
-    residuals = zeros(length(ts))
-    v_ts = zeros(P, length(ts))
-    g_ts = zeros(length(ts))
-    for (i, t) in enumerate(ts)
-        v_t = sol(t)[1:P] # i.e., the value function at the point.
-        # TODO: FIGURE OUT BEST WAY TO PASS in Ξ₁ TO THIS FUNCTION 
-        residuals[i] = Ξ₁*v_t[1] + x(t) - dot(ω, v_t) # value matching condition (27)
-        v_ts[:,i] = v_t
-        g_ts[i] = sol(t)[end]
-    end
-    return (residuals = residuals, v_ts = v_ts, g_ts = g_ts)
-end
+# # Calculate residuals given diffeq problem and primitives
+# function calculate_residuals(ode_prob, x, ω, ode_solve_algorithm, ts) # To keep the params consistent with other tuples.
+#     # Solve ode
+#     sol = Sundials.solve(ode_prob, ode_solve_algorithm, tstops = ts)
+#     P = length(ω)
+#     # Calculate the residual at each time point
+#     residuals = zeros(length(ts))
+#     v_ts = zeros(P, length(ts))
+#     g_ts = zeros(length(ts))
+#     for (i, t) in enumerate(ts)
+#         v_t = sol(t)[1:P] # i.e., the value function at the point.
+#         # TODO: FIGURE OUT BEST WAY TO PASS in Ξ₁ TO THIS FUNCTION 
+#         residuals[i] = Ξ₁*v_t[1] + x(t) - dot(ω, v_t) # value matching condition (27)
+#         v_ts[:,i] = v_t
+#         g_ts[i] = sol(t)[end]
+#     end
+#     return (residuals = residuals, v_ts = v_ts, g_ts = g_ts)
+# end
