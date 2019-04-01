@@ -10,14 +10,14 @@ results_algebraic = stationary_algebraic_simple(simple_params());
 @test_broken results_algebraic.v(5)*exp(5) ≈ 3298.0717492785516;
 
 # Test for one particular grid.
-z1 = unique([range(0.0, stop = 1.0, length = 500)' range(1.0, stop = 5.0, length = 201)'])
-results_num1 = stationary_numerical_simple(simple_params(), z1)
+z_ex = unique([range(0.0, stop = 1.0, length = 500)' range(1.0, stop = 5.0, length = 201)'])
+results_num1 = stationary_numerical_simple(simple_params(), z_ex)
 @test_broken results_num1.g ≈ 0.02010032283241259 # Invariance
 @test_broken abs(results_num1.g - results_algebraic.g) < 1e-3 # Consistency.
 
 # Test for a second grid.
-z = unique([range(0.0, stop = 1.0, length = 1000)' range(1.0, stop = 2.0, length = 11)' range(2.0, stop = 5.0, length = 20)'])
-results_num2 = stationary_numerical_simple(simple_params(), z)
+z_ex = unique([range(0.0, stop = 1.0, length = 1000)' range(1.0, stop = 2.0, length = 11)' range(2.0, stop = 5.0, length = 20)'])
+results_num2 = stationary_numerical_simple(simple_params(), z_ex)
 @test_broken abs(results_num2.g - results_algebraic.g) < 1e-3 # Growth rate
 
 # Test approximateness on the value function.
@@ -25,16 +25,16 @@ results_num2 = stationary_numerical_simple(simple_params(), z)
 @test_broken norm((results_num2.v.*exp.(ξ*z))[1:end-7] - results_algebraic.v.(z[1:end-7]) .* exp.(ξ*z[1:end-7]), Inf) < 1 # Tighten this up.
 
 # Test for change zbar for grid and add points.
-z = unique([range(0.0, stop = 1.0, length = 1000)' range(1.0, stop = 2.0, length = 60)' range(2.0, stop = 8.0, length = 40)'])
-results = stationary_numerical_simple(simple_params(), z)
+z_ex = unique([range(0.0, stop = 1.0, length = 1000)' range(1.0, stop = 2.0, length = 60)' range(2.0, stop = 8.0, length = 40)'])
+results = stationary_numerical_simple(simple_params(), z_ex)
 @test_broken abs(results.g - results_algebraic.g) < 1e-4  # Growth rate
 
 # Test for change zbar for grid and add points.
-z = unique([range(0.0, stop = 1.0, length = 1000)' range(1.0, stop = 2.0, length = 60)' range(2.0, stop = 10.0, length = 40)'])
-results = stationary_numerical_simple(simple_params(), z)
+z_ex = unique([range(0.0, stop = 1.0, length = 1000)' range(1.0, stop = 2.0, length = 60)' range(2.0, stop = 10.0, length = 40)'])
+results = stationary_numerical_simple(simple_params(), z_ex)
 @test_broken abs(results.g - results_num1.g) < 1e-3 # Growth rate
 
 # a baseline grid z
-z = unique([range(0.0, stop = 1.0, length = 300)' range(1.0, stop = 2.0, length = 50)' range(2.0, stop = 7.0, length = 50)'])
-results = stationary_numerical_simple(simple_params(), z)
+z_ex = unique([range(0.0, stop = 1.0, length = 300)' range(1.0, stop = 2.0, length = 50)' range(2.0, stop = 7.0, length = 50)'])
+results = stationary_numerical_simple(simple_params(), z_ex)
 @test_broken abs(results.g - results_algebraic.g) < 1e-4  # Growth rate
