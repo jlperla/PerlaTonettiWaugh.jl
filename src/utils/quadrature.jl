@@ -1,16 +1,30 @@
 # New method.
-function ω_weights(z, α, ξ)
-     #=
-        Notation: z consists of P points z_1, z_2, ..., z_M.
-        Formula: For the interior points, the weights are given by [f(z_k)/2 * (Δ_k + Δ_{k+1})]
-        where Δ_k = z_k - z_{k-1}. For the boundary points, the weights are given by [f(z_1)/2 * Δ_2]
-        and [f(z_M)/2 * Δ_M]
-    =#
-    Δ = diff(z)
-    P = length(z)
-    prepend!(Δ, NaN) # To keep the indexing straight. Now, Δ[2] = Δ_2 = z_2 - z_1. And NaN will throw an error if we try to use it.
-    z_bar = z[end]
-    f_vec = (α * exp.(z * (ξ - α)))/(1 - exp(-α*z_bar)) # Get the vector of probability masses. (B.19)
-    interiorWeights = [f_vec[i]/2 * (Δ[i] + Δ[i+1]) for i = 2:P-1] # Turn these into interior trapezoidal weights. (19)
-    return [f_vec[1]/2 * Δ[2]; interiorWeights; f_vec[P]/2 * Δ[P]] # Add the boundary weights. (19, with ghost node definitions)
+function ω_weights(z_ex, θ, ξ)
+    # preliminaries
+    # grid objects
+        z_0 = z_ex[1]
+        z_bar = z_ex[end]
+        z = z_ex[2:end-1] # i.e., interior of z_ex
+        d = diff(z_ex)
+        Δ₋ = [0; d] # (A.3)
+        Δ₊ = [d; 0] # (A.4)
+        P = length(z)
+    # ω objects
+        ω = zeros(eltype(z), P) # object to return
+        ω_bar_vec = 1/2 * (Δ₋ + Δ₊) # (B.19)
+        ω_bar(i) = ω_bar_vec[i+1] # so we can match the notation of (B.21) and write ω_bar(0), ω_bar(1), ..., ω_bar(P+1)
+
+    # fill ω
+    for i = 1:P
+        if i == 1
+            Ξ₁ = 1/(1 - ξ*(z[1] - z_0)) # (A.11)
+            ω[1] = ω_bar(0) * Ξ₁ * (θ*exp( (ξ-θ)*z_0 ))/(1 - exp(-θ * z_bar)) + ω_bar(1)*(exp( (ξ-θ)*z[1] ))/(1 - exp(-θ * z_bar)) # (24), left endpoint
+        elseif i == P
+            Ξₚ = 1/(1 + ξ*(z_ex[end] - z_ex[end-1])) # (A.12)
+            ω[P] = ω_bar(P) * (θ*exp( (ξ-θ)*z[P] ))/(1 - exp(-θ * z_bar)) + ω_bar(P+1)*Ξₚ*(θ*exp( (ξ-θ)*z_bar ))/(1 - exp(-θ * z_bar))
+        else
+            ω[i] = ω_bar(i) * (θ * exp( (ξ - θ)*z[i] ))/(1 - exp(-θ * z_bar))
+        end
+    end
+    return ω
 end
