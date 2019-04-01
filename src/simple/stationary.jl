@@ -14,17 +14,23 @@ function stationary_algebraic_simple(params)
 end
 
 # Numerically solve for the stationary solution as a system of equations.
-function stationary_numerical_simple(params, z)
+function stationary_numerical_simple(params, z_ex)
+    @assert z_ex[1] == 0.0 && issorted(z_ex)  # validate grid 
+    z = z_ex[2:end-1]
     P = length(z)
-    # Unpack parameters.
+
+    # Unpack parameters
     @unpack μ, υ, θ, r, ζ, π = params
 
+    # Define the pdf of the truncated exponential distribution
+    ω = ω_weights(z_ex, θ, 1) # (20)
+
+    # Everything to follow will use z instead of z_ex 
+    # Differential objects 
     bc = (Mixed(1), Mixed(1)) # boundary conditions for differential operators
     L_1_minus = L₁₋(z, bc) # use backward difference as the drift is negative
     L_2 = L₂(z, bc) 
 
-    # Define the pdf of the truncated exponential distribution
-    ω = ω_weights(z, θ, 1) # (20)
     # Function we're solving.
     function stationary_numerical_given_g(in)
         g = in[1]
@@ -34,10 +40,12 @@ function stationary_numerical_simple(params, z)
         diff = v[1] + ζ - dot(ω, v) # value matching condition (23)
         return diff
     end
+    
     # Find and validate the root.
     sol = solve_system(stationary_numerical_given_g, [0.1])
     g_T = sol[1]
     @assert(μ + υ^2/2 - g_T < 0) # Negative drift condition (18)
+    
     # Use the g_T to recreate L_T and v_T.
     A_T = (r - μ - υ^2/2)*I - (μ + υ^2 - g_T)*L_1_minus - υ^2/2 * L_2 # (17)
     v_T = A_T \ π.(z) # (24)
