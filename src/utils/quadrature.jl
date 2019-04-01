@@ -3,6 +3,7 @@ function ω_weights(z_ex, θ, ξ)
     # preliminaries
     # grid objects
         z_0 = z_ex[1]
+        @assert z_0 == 0.0 
         z_bar = z_ex[end]
         z = z_ex[2:end-1] # i.e., interior of z_ex
         d = diff(z_ex)
