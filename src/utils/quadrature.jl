@@ -18,7 +18,7 @@ function ω_weights(z_ex, θ, ξ)
     for i = 1:P
         if i == 1
             Ξ₁ = 1/(1 - ξ*(z[1] - z_0)) # (A.11)
-            ω[1] = ω_bar(0) * Ξ₁ * (θ*exp( (ξ-θ)*z_0 ))/(1 - exp(-θ * z_bar)) + ω_bar(1)*(exp( (ξ-θ)*z[1] ))/(1 - exp(-θ * z_bar)) # (24), left endpoint
+            ω[1] = ω_bar(0) * Ξ₁ * (θ*exp( (ξ-θ)*z_0 ))/(1 - exp(-θ * z_bar)) + ω_bar(1)*(θ*exp( (ξ-θ)*z[1] ))/(1 - exp(-θ * z_bar)) # (24), left endpoint
         elseif i == P
             Ξₚ = 1/(1 + ξ*(z_ex[end] - z_ex[end-1])) # (A.12)
             ω[P] = ω_bar(P) * (θ*exp( (ξ-θ)*z[P] ))/(1 - exp(-θ * z_bar)) + ω_bar(P+1)*Ξₚ*(θ*exp( (ξ-θ)*z_bar ))/(1 - exp(-θ * z_bar))
