@@ -27,6 +27,7 @@ breaklinks]
 \newcommand{\D}[1][]{\ensuremath{\boldsymbol{\partial}_{#1}}}
 \newcommand{\R}{\ensuremath{\mathbb{R}}}
 \newcommand{\diff}{\ensuremath{\mathrm{d}}}
+\newcommand{\ex}{\ensuremath{\mathrm{ex}}}
 \newcommand{\set}[1]{\ensuremath{\left\{{#1}\right\}}}
 \newcommand{\indicator}[1]{\ensuremath{\mathds{1}\left\{{#1}\right\}}}
 \newcommand{\condexpec}[3][]{\ensuremath{\mathbb{E}_{#1}\left[{#2} \; \middle| \; {#3} \right]}}
@@ -112,8 +113,18 @@ In order to solve for the dynamics of $v(z,t)$ and $g(t)$, we will discretize th
 
 
 \paragraph{Grid}
+The core PDE in \cref{eq:simple-summary1-numerical} is defined on the interior of the domain, i.e. $z \in (0, \bar{z})$ while the boundary conditions are defined on the closure $z \in [0,\bar{z}]$.  To aid the implementation, define the potentially irregular grid on $[0,\bar{z}]$
+\begin{align}
+	z_{\ex} &= \set{z_i}_{i=0}^{P+1} \in \R^{P+2}
+\end{align}
+Where $z_0 = 0$ and $z_{P+1} = \bar{z}$ is a ``large'' number (keeping in mind that the effective number is $e^{\bar{z}}$).
 
-Define an irregular grid $\set{z_i}_{i=0}^{P+1}$ with $z_0 = 0$ and $z_{P+1} = \bar{z}$ is a ``large'' number (keeping in mind that the effective number is $e^{\bar{z}}$).  The core PDE in \cref{eq:simple-summary1-numerical} is defined on the interior of the domain, i.e. $z \in (0, \bar{z})$ while the boundary conditions are defined on the closure $z \in [0,\bar{z}]$.  Consequently, after discretizing, the PDE will be solved on the interior $\set{z_i}_{i=1}^P$ and the boundary conditions for $z_0 = 0$ and $z_{P+1} = \bar{z}$ will be fulfilled by the solution through the discretization approach.
+We abuse notation and use $z$ to denote the grid on the interior, representing where the PDE holds outside of boundary conditions.  That is,
+\begin{align}
+	z &= \set{z_i}_{i=1}^P \in \R^{P}
+\end{align}
+
+Where we note that $z \equiv z_{\ex}[2:P+1] = \set{z_1, z_2, \ldots z_P}$.\footnote{Throughout this document, when we use the $[ ]$ to access within an array, it has $1$ based indices.}  Consequently, after discretizing, the PDE will be solved on the interior $\set{z_i}_{i=1}^P$ and the boundary conditions for $z_0 = 0$ and $z_{P+1} = \bar{z}$ will be fulfilled by the solution through the discretization approach.
 
 \paragraph{Discretized Functions}
 
@@ -156,7 +167,7 @@ To calculate these, use $\Delta_{-}$ and $\Delta_{+}$ backwards and forward diff
 Use \cref{eq:omega-i}, so that the rule only uses the interior values $v_1(t)$ to $v_P(t)$ and all other values are collapsed into constants (i.e. $e^z$ and the $F'(z)$) with $\bar{\omega}$ so that\footnote{It is important to remember that we are imposing the boundary conditions here in the calculation of the quadrature rules, so this approach would require adjustment with different boundaries (i.e. the $\Xi_1$ and $\Xi_P$ might be different).}
 \begin{align}
 \omega_i &\equiv\begin{cases}
-\bar{\omega}_0\Xi_1 \frac{\theta e^{(\xi - \theta)z_0}}{1 - e^{-\theta \bar{z}}} + \bar{\omega}_1 \frac{\theta e^{(\xi - \theta)z_1}}{1 - e^{-\theta \bar{z}}}& \text{ for } i = 1\\
+\bar{\omega}_1 \frac{\theta e^{(\xi - \theta)z_1}}{1 - e^{-\theta \bar{z}}} + \bar{\omega}_0\Xi_1 \frac{\theta e^{(\xi - \theta)z_0}}{1 - e^{-\theta \bar{z}}}& \text{ for } i = 1\\
 \bar{\omega}_i \frac{\theta e^{(\xi - \theta)z_i}}{1 - e^{-\theta \bar{z}}} & \text{ for } i = 2, \ldots P-1\\
 \bar{\omega}_P \frac{\theta e^{(\xi - \theta)z_P}}{1 - e^{-\theta \bar{z}}} +  \bar{\omega}_{P+1}\Xi_P\frac{\theta e^{(\xi - \theta)z_{P+1}}}{1 - e^{-\theta \bar{z}}}& \text{ for } i = P
 \end{cases}
