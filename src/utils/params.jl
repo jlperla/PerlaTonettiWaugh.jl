@@ -24,7 +24,8 @@ parameters_old_paper = parameter_defaults(d = 4.0,
 
 # some default settings
 settings_defaults = @with_kw (z_max = 5,
-                                z = unique([range(0., 0.1, length = 400)' range(0.1, 1., length = 400)' range(1., z_max, length = 100)']),
+                                z_ex = unique([range(0., 0.1, length = 400)' range(0.1, 1., length = 400)' range(1., z_max, length = 100+2)']),
+                                z = z_ex[2:end-1],
                                 Δ_E = 1e-6,
                                 ode_solve_algorithm = CVODE_BDF(),
                                 T = 75.0,
@@ -41,7 +42,8 @@ settings_defaults = @with_kw (z_max = 5,
                                 tstops = nothing)
 
 settings_old_paper_defaults = @with_kw (z_max = 5,
-                                z = unique([range(0., 0.1, length = 400)' range(0.1, 1., length = 400)' range(1., 10.0, length = 200)']),
+                                z_ex = unique([range(0., 0.1, length = 400)' range(0.1, 1., length = 400)' range(1., 10.0, length = 200+2)']),
+                                z = z_ex[2:end-1],
                                 Δ_E = 1e-6,
                                 ode_solve_algorithm = CVODE_BDF(),
                                 T = 120.0,
