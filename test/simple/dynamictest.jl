@@ -1,21 +1,3 @@
-function calculate_residuals(ode_prob, x, ω, ode_solve_algorithm, ts) # To keep the params consistent with other tuples.
-    # Solve ode
-    sol = Sundials.solve(ode_prob, ode_solve_algorithm, tstops = ts)
-    P = length(ω)
-    Ξ₁ = ode_prob.p.Ξ₁
-    # Calculate the residual at each time point
-    residuals = zeros(length(ts))
-    v_ts = zeros(P, length(ts))
-    g_ts = zeros(length(ts))
-    for (i, t) in enumerate(ts)
-        v_t = sol(t)[1:P] # i.e., the value function at the point.
-        residuals[i] = Ξ₁*v_t[1] + x(t) - dot(ω, v_t) # value matching condition (27)
-        v_ts[:,i] = v_t
-        g_ts[i] = sol(t)[end]
-    end
-    return (residuals = residuals, v_ts = v_ts, g_ts = g_ts)
-end
-
 # User settings.
 # State grid.
     z_min = 0.0
@@ -73,26 +55,26 @@ end
     # even by solving with DAE
     ω = ω_weights(z_ex, θ_val, ξ_val)
     daeprob = simpleDAE(params_func_, settings())
-    residuals, v_ts, g_ts = calculate_residuals(daeprob, x_func, ω, IDA(), settings().t_grid)
+    residuals, v_ts, g_ts = solve_simple_dae(daeprob, x_func, ω, IDA(), settings().t_grid)
     @test norm(residuals[1]) ≈ 0 atol = 1e-5
     @test norm(residuals[end]) ≈ 0 atol = 1e-5
     @test norm(residuals) ≈ 0 atol = 1e-5
 
 # Solve with time-varying r and π, now with DAE
     daeprob = simpleDAE(params_func_varying_1, settings())
-    residuals, v_ts, g_ts = calculate_residuals(daeprob, x_func, ω, IDA(), settings().t_grid)
+    residuals, v_ts, g_ts = solve_simple_dae(daeprob, x_func, ω, IDA(), settings().t_grid)
     @test norm(residuals[1]) ≈ 0 atol = 1e-5
     @test norm(residuals[end]) ≈ 0 atol = 1e-5
     @test norm(residuals) ≈ 0 atol = 1e-5
     v_ts_dae1 = copy(v_ts) # save value functions
     daeprob = simpleDAE(params_func_varying_2, settings())
-    residuals, v_ts, g_ts = calculate_residuals(daeprob, x_func, ω, IDA(), settings().t_grid)
+    residuals, v_ts, g_ts = solve_simple_dae(daeprob, x_func, ω, IDA(), settings().t_grid)
     @test norm(residuals[1]) ≈ 0 atol = 1e-5
     @test norm(residuals[end]) ≈ 0 atol = 1e-5
     @test norm(residuals) ≈ 0 atol = 1e-5
     v_ts_dae2 = copy(v_ts) # save value functions
     daeprob = simpleDAE(params_func_varying_3, settings())
-    residuals, v_ts, g_ts = calculate_residuals(daeprob, x_func, ω, IDA(), settings().t_grid)
+    residuals, v_ts, g_ts = solve_simple_dae(daeprob, x_func, ω, IDA(), settings().t_grid)
     @test norm(residuals[1]) ≈ 0 atol = 1e-5
     @test norm(residuals[end]) ≈ 0 atol = 1e-5
     @test norm(residuals) ≈ 0 atol = 1e-5

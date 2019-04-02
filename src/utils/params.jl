@@ -41,13 +41,6 @@ settings_defaults = @with_kw (z_max = 5,
                                 T_U_bar = 50.0,
                                 tstops = nothing)
 
-settings_simple_defaults = @with_kw (z_ex = range(0.0, stop = 5.0, length = (100+2)),
-                                    z = z_ex[2:end-1],
-                                    T = 100.0,
-                                    ode_solve_algorithm = CVODE_BDF(),
-                                    iterations = 1000,
-                                    t_grid = range(0.0, stop = 100.0, length = length(z)))
-
 settings_old_paper_defaults = @with_kw (z_max = 5,
                                 z_ex = unique([range(0., 0.1, length = 400)' range(0.1, 1., length = 400)' range(1., 10.0, length = 200+2)']),
                                 z = z_ex[2:end-1],
@@ -66,18 +59,3 @@ settings_old_paper_defaults = @with_kw (z_max = 5,
                                 transition_penalty_coefficient = 0.0, # coefficient to be used for a penalty function for constraints on increasing E
                                 T_U_bar = 50.0,
                                 tstops = nothing)
-
-parameter_simple_stationary_defaults = @with_kw (μ = 0.0,
-    υ = 0.1,
-    θ = 2.1,
-    r = 0.05,
-    ζ = 14.5,
-    ξ = 1.0)
-
-parameter_simple_transition_defaults = @with_kw (μ = 0.0,
-    υ = 0.1,
-    θ = 2.1,
-    r = t -> (0.05 - 1e-02 * (1 - t / 100.0)),
-    ζ = 14.5,
-    ξ = 1.0,
-    x = t -> ζ)
