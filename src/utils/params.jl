@@ -57,3 +57,8 @@ settings_old_paper_defaults = @with_kw (z_max = 5,
                                 transition_penalty_coefficient = 0.0, # coefficient to be used for a penalty function for constraints on increasing E
                                 T_U_bar = 50.0,
                                 tstops = nothing)
+
+
+params_simple  = @with_kw (μ = 0.0, υ = 0.01, θ = 2.1, r = 0.05, ζ = 14.5, ξ = 1.0, π = x -> 1, x = t -> ζ)
+settings_simple = @with_kw (z_ex = range(0., stop = 5.0, length = 1000), T = 100.0, iterations = 1000, t_grid = range(0., stop = 100., length = length(z_ex)))
+
