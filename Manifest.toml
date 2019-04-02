@@ -19,10 +19,10 @@ uuid = "13072b0f-2c55-5437-9ae7-d433b7a33950"
 version = "0.3.0"
 
 [[BandedMatrices]]
-deps = ["FillArrays", "LazyArrays", "LinearAlgebra", "Random", "SparseArrays", "Test"]
-git-tree-sha1 = "ac5b244e729922c61f75c2e4478e13e8949b1f56"
+deps = ["FillArrays", "LazyArrays", "LinearAlgebra", "MatrixFactorizations", "Random", "SparseArrays", "Test"]
+git-tree-sha1 = "1249cc93e4a685e8f0aaf1aa858fdd636551c754"
 uuid = "aae01518-5342-5314-be14-df237901396f"
-version = "0.8.2"
+version = "0.9.0"
 
 [[Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
@@ -320,9 +320,9 @@ uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
 
 [[GR]]
 deps = ["Base64", "DelimitedFiles", "LinearAlgebra", "Pkg", "Printf", "Random", "Serialization", "Sockets", "Test"]
-git-tree-sha1 = "41bd911efffb56957b45366770eaaa443de3f782"
+git-tree-sha1 = "08c4fc28ae58479f93616d5df164ab6b73541f2d"
 uuid = "28b8d3ca-fb5f-59d9-8090-bfdbd6d07a71"
-version = "0.38.1"
+version = "0.39.0"
 
 [[GenericSVD]]
 deps = ["LinearAlgebra", "Random", "Test"]
@@ -354,9 +354,9 @@ version = "0.20.0"
 
 [[LazyArrays]]
 deps = ["FillArrays", "LinearAlgebra", "StaticArrays", "Test"]
-git-tree-sha1 = "5e65ca3ab05ae82e441fa51e9e91fb3fca1e7bb5"
+git-tree-sha1 = "737472254720be95800f859a7c2aaf62488fd53f"
 uuid = "5078a376-72f3-5289-bfd5-ec5146d43c02"
-version = "0.7.0"
+version = "0.7.1"
 
 [[LeastSquaresOptim]]
 deps = ["DiffEqDiffTools", "ForwardDiff", "LinearAlgebra", "Optim", "Printf", "SparseArrays", "Statistics", "SuiteSparse", "Test"]
@@ -398,6 +398,12 @@ deps = ["Compat"]
 git-tree-sha1 = "3bf2e534e635df810e5f4b4f1a8b6de9004a0d53"
 uuid = "fdba3010-5040-5b88-9595-932c9decdf73"
 version = "0.7.7"
+
+[[MatrixFactorizations]]
+deps = ["LinearAlgebra", "Random", "Test"]
+git-tree-sha1 = "cebc71d929a846dda61400f1cf3ba69c7e75fa63"
+uuid = "a3b82374-2e81-5b9e-98ce-41277c0e4c87"
+version = "0.0.4"
 
 [[Measures]]
 deps = ["Test"]
@@ -458,9 +464,9 @@ version = "0.10.0"
 
 [[Optim]]
 deps = ["Calculus", "DiffEqDiffTools", "ForwardDiff", "LineSearches", "LinearAlgebra", "NLSolversBase", "NaNMath", "Parameters", "PositiveFactorizations", "Printf", "Random", "SparseArrays", "StatsBase", "Test"]
-git-tree-sha1 = "ed8d072e6bbab73ab294a11eb37d0dc50a8aeafd"
+git-tree-sha1 = "a626e09c1f7f019b8f3a30a8172c7b82d2f4810b"
 uuid = "429524aa-4258-5aef-a3af-852621145aeb"
-version = "0.18.0"
+version = "0.18.1"
 
 [[OrderedCollections]]
 deps = ["Random", "Serialization", "Test"]
@@ -504,9 +510,9 @@ version = "0.3.0"
 
 [[PlotUtils]]
 deps = ["Colors", "Dates", "Printf", "Random", "Reexport", "Test"]
-git-tree-sha1 = "fd28f30a294a38ec847de95d8ac7ac916ccd7c06"
+git-tree-sha1 = "c93a471a55fe44e8e6ef5c750769fee15334bccf"
 uuid = "995b91a9-d308-5afd-9ec6-746e21dbc043"
-version = "0.5.5"
+version = "0.5.6"
 
 [[Plots]]
 deps = ["Base64", "Contour", "Dates", "FixedPointNumbers", "GR", "JSON", "LinearAlgebra", "Measures", "NaNMath", "Pkg", "PlotThemes", "PlotUtils", "Printf", "REPL", "Random", "RecipesBase", "Reexport", "Requires", "Showoff", "SparseArrays", "StaticArrays", "Statistics", "StatsBase", "Test", "UUIDs"]
@@ -620,9 +626,9 @@ version = "0.2.1"
 
 [[SimpleDifferentialOperators]]
 deps = ["LinearAlgebra", "Random", "SparseArrays", "Statistics", "Test"]
-git-tree-sha1 = "037c6dc2257bebf55f93cbf94f38200efc11ac90"
+git-tree-sha1 = "bbc9402ae2bf586a5cad61f2f9d3f2a438b26e1b"
 uuid = "7ccca996-40d6-5c2f-be7f-4eb2934af9c4"
-version = "0.3.0"
+version = "0.4.0"
 
 [[Sockets]]
 uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
@@ -705,9 +711,9 @@ uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [[TranscodingStreams]]
 deps = ["Pkg", "Random", "Test"]
-git-tree-sha1 = "d4718bd4db6b7850af3c3833556c6aedbb8e9904"
+git-tree-sha1 = "f42956022d8084539f1d7219f632542b0ea686ce"
 uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
-version = "0.9.2"
+version = "0.9.3"
 
 [[TreeViews]]
 deps = ["Test"]
