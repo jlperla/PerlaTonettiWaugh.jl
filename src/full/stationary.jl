@@ -71,11 +71,12 @@ function stationary_numerical(params, z, init_x = defaultiv(params); kwargs...)
     # Unpack params and settings.
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params
     @assert params.υ > 0 && params.κ > 0 # Parameter validation
+    z_ex = [z[1] - diff(z)[1]; z; z[end] + diff(z)[end]] # form a uniform extended grid
 
     # Discretization objects and quadrature weights.
     bc = (Mixed(σ-1), Mixed(σ-1)) # boundary conditions for differential operators
-    L_1_minus = L₁₋(z, bc) # use backward difference as the drift is negative
-    L_2 = L₂(z, bc) 
+    L_1_minus = L₁₋(z_ex, bc) # use backward difference as the drift is negative
+    L_2 = L₂(z_ex, bc) 
     ω = ω_weights(z, θ, σ-1) # Get quadrature weights for the distribution on the rescaled grid.
 
     # Define the system of equations we're solving.
