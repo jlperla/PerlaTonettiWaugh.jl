@@ -32,9 +32,7 @@ gs = [
     0.019862262497972627
 ]
 
-for el in zip(grids, gs),  
-    results = stationary_numerical_simple(simple_params(), el[1])
-    @show results
-    @test results.g ≈ el[2] # regression
-    @show results.g - results_algebraic.g # accuracy 
+for i in 1:length(gs)
+    results = stationary_numerical_simple(simple_params(), grids[i])
+    @test results.g ≈ gs[i] # regression
 end 
