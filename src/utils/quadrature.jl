@@ -17,4 +17,5 @@ function ω_weights(z_ex, θ, ξ)
     ω = ω_bar[2:end-1]*θ.*exp.((ξ-θ)*z)/denom # (24)
     ω[1] += ω_bar[1]*Ξ₁*θ*exp((ξ-θ)*z_0)/denom # (24), left endpoint
     ω[end] += ω_bar[end]*Ξₚ*θ*exp((ξ-θ)*z_bar)/denom # (24), right endpoint
+    return ω
 end
