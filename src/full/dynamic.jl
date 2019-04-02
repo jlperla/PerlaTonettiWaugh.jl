@@ -55,7 +55,7 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
 
     # Define intermediate quantitities.
       P = length(z)
-      ω = ω_weights(z, θ, σ-1) # Quadrature weights.
+      ω = ω_weights(z_ex, θ, σ-1) # Quadrature weights.
       bc = (Mixed(σ-1), Mixed(σ-1)) # boundary conditions for differential operators
       L_1 = L₁₋(z_ex, bc) # use backward difference as the drift is negative
       L_2 = L₂(z_ex, bc)
