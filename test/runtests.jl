@@ -8,6 +8,6 @@ using Sundials, BenchmarkTools, Interpolations, Parameters, SimpleDifferentialOp
   @time @testset "Simple Dynamic" begin include("simple/dynamictest.jl") end
   @time @testset "Full Dynamic" begin include("full/dynamictest.jl") end
   @time @testset "Entry residuals" begin include("full/entryresidualstest.jl") end
-  # @time @testset "Type Stability and Speed" begin include("benchmarking/inference.jl") end
+  @time @testset "Type Stability and Speed" begin include("benchmarking/inference.jl") end
   @time @testset "Utilities" begin include("utils/solve-system.jl") end
 end
