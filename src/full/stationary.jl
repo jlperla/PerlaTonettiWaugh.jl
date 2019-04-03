@@ -78,6 +78,7 @@ function stationary_numerical(params, z_ex, init_x = defaultiv(params); kwargs..
     L_1_minus = L₁₋(z_ex, bc) # use backward difference as the drift is negative
     L_2 = L₂(z_ex, bc) 
     ω = ω_weights(z_ex, θ, σ-1) # Get quadrature weights for the distribution on the rescaled grid.
+    Ξ₁ = 1/(1 - (σ-1)*(z[1] - z_ex[1])) # (24)
 
     # Define the system of equations we're solving.
     function stationary_numerical_given_vals(vals)
@@ -95,10 +96,10 @@ function stationary_numerical(params, z_ex, init_x = defaultiv(params); kwargs..
         =#
 
         # Value-matching condition.
-        value_matching = v_tilde[1] - dot(v_tilde, ω) + x # (48) and (C.60)
+        value_matching = Ξ₁*v_tilde[1] - dot(v_tilde, ω) + x # (48) and (C.60)
 
         # Free-entry condition.
-        free_entry = v_tilde[1] - x*(1-χ)/χ # (50) or (C.48) and (C.60)
+        free_entry = Ξ₁*v_tilde[1] - x*(1-χ)/χ # (50) or (C.48) and (C.60)
 
         # Adoption threshold.
         adoption_threshold = π_min - (1 - L_tilde)/((σ-1)*z_bar^(σ-1)) # (C.20)
