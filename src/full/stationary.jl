@@ -97,7 +97,8 @@ function stationary_numerical(params, z_ex, init_x = [0.02; 18.94; 17.07]; kwarg
     g_T, z_hat_T, Ω_T = solve_system(stationary_numerical_given_vals, [0.02; 18.94; 17.07])
 
     # Grab static objects at steady-state and recreate the steady-state objects using the g, z_hat, Ω.
-    @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x, π_min = staticvals([g_T, z_hat_T, Ω_T], params)
+    staticvalues = staticvals([g_T, z_hat_T, Ω_T], params)
+    @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x, π_min = staticvalues
     r_tilde = r - g_T - 0 # (C.59, and g_w = 0 at steady-state)
     ρ_tilde = r_tilde - (σ - 1)*(μ - g_T + (σ-1)*(υ^2/2)) # (C.41)
     A_T = (ρ_tilde * I - (μ-g_T + (σ-1)*υ^2)*L_1_minus - υ^2/2 * L_2) # (52)
