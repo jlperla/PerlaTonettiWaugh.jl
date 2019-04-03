@@ -65,7 +65,10 @@ function solve_full_model(settings; impose_E_monotonicity_constraints = true, wr
     E_nodes = front_nodes_appended == nothing ? E_nodes : [front_nodes_appended; E_nodes]
     solution = solve_model_from_E_nodes(E_nodes, settings; detailed_solution = true)
     # output caching
-    write_csv && CSV.write(csvpath, solution.results)
+    if (write_csv)  
+        CSV.write(csvpath, solution.results)
+    end
+    
     # return
     return (solution = solution, E_nodes = E_nodes)
 end
