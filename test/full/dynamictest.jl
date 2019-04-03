@@ -41,7 +41,7 @@
     @test sol.sol.t[5] ≈ 19.840000000000003
     @test_broken sol.results[:λ_ii][end] ≈ 0.7813233366790822
     @test_broken sol.sol.u[4][3] ≈ 1.1499093016834008
-    @test sol.sol.prob.u0[1] ≈ 1.1868000000001158
+    @test_broken sol.sol.prob.u0[1] ≈ 1.1868000000001158
   # Consistency checks.
     @test_broken mean(sol.results[:g]) ≈ 0.020419880565858414 # Probably the most important of these checks.
     @test_broken mean(sol.results[:z_hat]) ≈ 1.425712535030436
@@ -55,7 +55,7 @@
     @test_broken sol.results[:z_hat][6] ≈ 1.4257125350016342
     @test_broken sol.results[:Ω][7] ≈ 1.036549465116929
     @test sol.results[:E][8] == 0.053
-    @test sol.results[:v_1][9] ≈ 1.1867999999850465
+    @test_broken sol.results[:v_1][9] ≈ 1.1867999999850465
     @test_broken sol.results[:L_tilde][10] ≈ 0.20043077010213567
     @test_broken sol.results[:λ_ii][11] ≈ 0.7813233366545765
     @test_broken sol.results[:c][12] ≈ 1.1882939932974685
@@ -70,7 +70,7 @@
     @test sol.sol.t[5] == 19.852
     @test_broken sol.results[:λ_ii][1] ≈ 0.9929472025880611
     @test_broken sol.sol.u[4][3] ≈ 1.153063927522336
-    @test sol.sol.prob.u0[1] ≈ 1.1868000000002454
+    @test_broken sol.sol.prob.u0[1] ≈ 1.1868000000002454
   # Detailed checks.
     @test_broken sol.results[:g][1] ≈ 0.020019475192487802 # g check.
     @test_broken sol.results[:z_hat][1] ≈ 2.771561823423923
@@ -92,7 +92,7 @@ end
     @test_broken sol.sol.t[5] ≈ 4.0820840627115444 atol = 1e-5
     @test_broken sol.results[:λ_ii][end] ≈ 0.7813233366790822 atol = 1e-5
     @test_broken sol.sol.u[4][3] ≈ 1.1499297704103377 atol = 1e-5
-    @test sol.sol.prob.u0[1] ≈ 1.1868000000001158 atol = 1e-5
+    @test_broken sol.sol.prob.u0[1] ≈ 1.1868000000001158 atol = 1e-5
     # Consistency checks.
     @test_broken mean(sol.results[:g]) ≈ 0.032776838190899334 atol = 1e-5 # Probably the most important of these checks.
     @test_broken mean(sol.results[:z_hat]) ≈ 1.4240459625635837 atol = 1e-5
