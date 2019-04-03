@@ -47,9 +47,9 @@ function staticvals(vals, params)
     r = ρ + γ*g + δ # (C.6)
     ν = (μ-g)/υ^2 + sqrt(((g-μ)/υ^2)^2 + (r-g)/(υ^2/2)) # (C.3)
     a = (r - g - (σ - 1)*(μ - g + (σ - 1)*υ^2/2))^(-1) # (C.4)
-    b = (1 - a*(r-g))*d^(1-σ)*z_hat^(ν + σ - 1) # (eq:C.5)
+    b = (1 - a*(r-g))*d^(1-σ)*z_hat^(ν + σ - 1) # (C.5)
     S = θ * (g - μ - θ * υ^2 /2) # (C.2)
-    L_tilde = Ω * ((N-1)*z_hat^(-θ)*κ + (1-η)*ζ*(S + δ/χ)) # (eq:C.7)
+    L_tilde = Ω * ((N-1)*z_hat^(-θ)*κ + (1-η)*ζ*(S + δ/χ)) # (C.7)
     L_tilde_x = Ω * (N - 1) * z_hat^(-θ) * κ # (C.8)
     L_tilde_E = ζ/χ * Ω * δ # (C.9)
     L_tilde_a = ζ * Ω * S # (C.10)
@@ -85,10 +85,10 @@ function stationary_numerical(params, z_ex, init_x = defaultiv(params); kwargs..
         @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x, π_min = staticvals([g, z_hat, Ω], params) # Grab static values.
         r_tilde = r - g - 0 # (C.55, and g_w = 0 at steady state)
         ρ_tilde = r_tilde - (σ - 1)*(μ - g + (σ-1)*(υ^2/2)) # (C.40)
-        A_T = (ρ_tilde * I - (μ - g + (σ-1)*υ^2)*L_1_minus - υ^2/2 * L_2) # (46)
+        A_T = (ρ_tilde * I - (μ - g + (σ-1)*υ^2)*L_1_minus - υ^2/2 * L_2) # (52)
         i(z) = z >= log(z_hat) ? 1 : 0 # indicator function for next equation.
-        π(z) = π_min * (1 + (N-1)*d^(1-σ)*i(z)) - (N-1)*κ*exp(-(σ-1)*z)*i(z) # (33)
-        v_tilde = A_T \ π.(z) # discretized system of ODE for v, where v'(T) = 0 (47)
+        π(z) = π_min * (1 + (N-1)*d^(1-σ)*i(z)) - (N-1)*κ*exp(-(σ-1)*z)*i(z) # (39)
+        v_tilde = A_T \ π.(z) # discretized system of ODE for v, where v'(T) = 0 (53)
 
         #=
             System of equations to be solved.
@@ -114,10 +114,10 @@ function stationary_numerical(params, z_ex, init_x = defaultiv(params); kwargs..
     # Recreate the steady-state objects using the solution in g, z_hat, Ω.
     r_tilde = r - g_T - 0 # (C.55, and g_w = 0 at steady-state)
     ρ_tilde = r_tilde - (σ - 1)*(μ - g_T + (σ-1)*(υ^2/2)) # (C.40)
-    A_T = (ρ_tilde * I - (μ-g_T + (σ-1)*υ^2)*L_1_minus - υ^2/2 * L_2) # (46)
+    A_T = (ρ_tilde * I - (μ-g_T + (σ-1)*υ^2)*L_1_minus - υ^2/2 * L_2) # (52)
     i(z) = z >= log(z_hat_T) ? 1 : 0 # indicator function for next equation.
-    π(z) = π_min * (1 + (N-1)*d^(1-σ)*i(z)) - (N-1)*κ*exp(-(σ-1)*z)*i(z) # (33)
-    v_tilde = A_T \ π.(z) # discretized system of ODE for v, where v'(T) = 0 (47)
+    π(z) = π_min * (1 + (N-1)*d^(1-σ)*i(z)) - (N-1)*κ*exp(-(σ-1)*z)*i(z) # (39)
+    v_tilde = A_T \ π.(z) # discretized system of ODE for v, where v'(T) = 0 (53)
 
     return merge(staticvalues, merge((g = g_T, z_hat = z_hat_T, Ω = Ω_T, v_tilde = v_tilde), welfare([g_T; z_hat_T; Ω_T], params, staticvalues)))
 end
