@@ -19,15 +19,15 @@
         L_tilde_log_derivative = (log(1 - L_tilde_forward) - log(1 - L_tilde_t))/(t_forward - t) # See note under (34)
       end
     #=  Reset the residuals to slack in the DAE conditions.
-        Note that (C.40) and (46) yield A_t = (ρ + δ + L_tilde_log_derivative - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2))*I - (μ - g + (σ-1)*υ^2)*L_1 - (υ^2/2)*L_2 and we're decomposing this.
+        Note that (C.40) and (52) yield A_t = (ρ + δ + L_tilde_log_derivative - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2))*I - (μ - g + (σ-1)*υ^2)*L_1 - (υ^2/2)*L_2 and we're decomposing this.
     =#
-      residual[1:P] = (ρ + δ + L_tilde_log_derivative - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2))*u[1:P] # (34)
-      residual[1:P] .-= (μ - g + (σ-1)*υ^2)*L_1*u[1:P] # (46)
-      residual[1:P] .-= (υ^2/2)*L_2*u[1:P] # (46)
+      residual[1:P] = (ρ + δ + L_tilde_log_derivative - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2))*u[1:P] # (40)
+      residual[1:P] .-= (μ - g + (σ-1)*υ^2)*L_1*u[1:P] # (52)
+      residual[1:P] .-= (υ^2/2)*L_2*u[1:P] # (52)
       residual[1:P] .-= du[1:P]
-      residual[1:P] .-= π # discretized system of ODE for v, where v'(T) = 0 (47)
-      residual[P+1] = u[1] + x - dot(ω, u[1:P]) # value matching residual, (48) and x(t) = ζ assumption at beginning of Section 2
-      residual[P+2] = z_hat^(σ-1) - κ * d^(σ-1) / π_min # export threshold (49)
+      residual[1:P] .-= π # discretized system of ODE for v, where v'(T) = 0 (53)
+      residual[P+1] = u[1] + x - dot(ω, u[1:P]) # value matching residual, (54) and x(t) = ζ assumption at beginning of Section 2
+      residual[P+2] = z_hat^(σ-1) - κ * d^(σ-1) / π_min # export threshold (55)
   end
 
 # Main method.
