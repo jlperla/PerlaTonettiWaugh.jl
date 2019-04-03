@@ -19,13 +19,13 @@
     ξ_val = 1.0
 
 # Functional parameters.
-    x_func = t -> ζ_val # Not idiosyncratic, per equation (4)
-    r_func_varying = t -> (r_val - 1e-02 * (1 - t / T_val)) # Not idiosyncratic, per intro to doc.
-    r_func_ = t -> r_val
+    x_func(t) = ζ_val # Not idiosyncratic, per equation (4)
+    r_func_varying(t) = (r_val - 1e-02 * (1 - t / T_val)) # Not idiosyncratic, per intro to doc.
+    r_func_(t) = r_val
 
 # π_func_varying = (t, z) -> r_val .- 1e-02 * (1 .- 0* t / T_val) # Not idiosyncratic, per intro to doc.
-    π_func_varying = (t, z) -> (1 + 1e-02 * (1 - t / T_val))
-    π_func_ = (t, z) -> 1 # Potentially idiosyncratic.
+    π_func_varying(t, z) = (1 + 1e-02 * (1 - t / T_val))
+    π_func_(t, z) = 1 # Potentially idiosyncratic.
 
 # Param generators and param NTs.
     params_ = @with_kw (μ = 0.0, υ = υ_val, θ = θ_val, r = r_val, ζ = ζ_val, ξ = ξ_val, π = z -> 1)
@@ -44,7 +44,7 @@
 # Create the interpolation object of g
     g_vector = g_stationary .+ 0.01 * t
     g_int = LinearInterpolation(t, g_vector)
-    g_func = t -> g_int(t) # Not idiosyncratic.
+    g_func(t) = g_int(t) # Not idiosyncratic.
 
 # Create settings object.
     settings = @with_kw (z_ex = z_ex, T = T_val, g = t -> g_stationary,
