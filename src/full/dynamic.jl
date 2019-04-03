@@ -26,6 +26,7 @@
       residual[1:P] .-= (υ^2/2)*L_2*u[1:P] # (52)
       residual[1:P] .-= du[1:P]
       residual[1:P] .-= π # discretized system of ODE for v, where v'(T) = 0 (53)
+      # TODO: PUT A \Xi_1 HERE.
       residual[P+1] = u[1] + x - dot(ω, u[1:P]) # value matching residual, (54) and x(t) = ζ assumption at beginning of Section 2
       residual[P+2] = z_hat^(σ-1) - κ * d^(σ-1) / π_min # export threshold (55)
   end
@@ -61,18 +62,18 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
       L_2 = L₂(z_ex, bc)
 
     # Define the auxiliary functions for the DAE problem.
-      S(g) = θ * (g - μ - θ * υ^2/2) # Compute S given g. (26)
-      L_tilde(S, z_hat, E_t, Ω_t) = Ω_t * ((N-1) * z_hat^(-θ)*κ + ζ*(S + E_t / χ)) # Compute L_tilde. (27)
+      S(g) = θ * (g - μ - θ * υ^2/2) # Compute S given g. (32)
+      L_tilde(S, z_hat, E_t, Ω_t) = Ω_t * ((N-1) * z_hat^(-θ)*κ + ζ*(S + E_t / χ)) # Compute L_tilde. (33)
 
       function static_equilibrium(v_0, g, z_hat, E_t, Ω_t)
         S_t = S(g)
         L_tilde_t = L_tilde(S_t, z_hat, E_t, Ω_t)
-        z_bar = Ω_t * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ)) # (31)
+        z_bar = Ω_t * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ)) # (37)
         w = σ^(-1)*z_bar # (C.13)
-        π_min = (1 - L_tilde_t) / ((σ-1)*z_bar) # (32)
+        π_min = (1 - L_tilde_t) / ((σ-1)*z_bar) # (38)
         i_vectorized = z .>= log(z_hat) # Vectorized indicator function
-        π = π_min * (1.0.+(N-1)*d^(1-σ)*i_vectorized) - (N-1)*κ*exp.(-(σ-1).*z).*i_vectorized # (33)
-        entry_residual = v_0 - ζ * (1-χ) / χ # value matching condition (45)
+        π = π_min * (1.0.+(N-1)*d^(1-σ)*i_vectorized) - (N-1)*κ*exp.(-(σ-1).*z).*i_vectorized # (39)
+        entry_residual = v_0 - ζ * (1-χ) / χ # value matching condition (51)
         return (S_t = S_t, L_tilde_t = L_tilde_t, z_bar = z_bar, π_min = π_min, π = π, entry_residual = entry_residual,
                 w = w)
       end
@@ -121,11 +122,11 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
         gen_c(L_tilde, Ω, z_bar, S) = (1 - L_tilde)*z_bar - η*ζ*Ω*Theta*(S + δ/χ) # (52)
         gen_S = S
         gen_z_bar(Ω_t, z_hat) = (Ω_t * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ)))^(1/(σ-1)) # (31)
-        gen_π_min(L_tilde_t, z_bar) = (1 - L_tilde_t) / ((σ-1)*z_bar) # (32)
-        gen_entry_residual(v_0) = v_0 - ζ*(1-χ)/χ # (45)
-        gen_L_tilde_adopt(Ω, S) = Ω * ζ * S # (30)
-        gen_L_tilde_export(Ω, z_hat) = Ω * ((N-1)*z_hat^(-θ))*κ # (28)
-        gen_L_tilde_entrycost(Ω, E) = Ω * ζ * E / χ # (29)
+        gen_π_min(L_tilde_t, z_bar) = (1 - L_tilde_t) / ((σ-1)*z_bar) # (38)
+        gen_entry_residual(v_0) = v_0 - ζ*(1-χ)/χ # (51)
+        gen_L_tilde_adopt(Ω, S) = Ω * ζ * S # (36)
+        gen_L_tilde_export(Ω, z_hat) = Ω * ((N-1)*z_hat^(-θ))*κ # (34)
+        gen_L_tilde_entrycost(Ω, E) = Ω * ζ * E / χ # (35)
         gen_w(z_bar) = σ^(-1)/z_bar # (C.13)
 
       # Add these quantities to the DataFrame.
