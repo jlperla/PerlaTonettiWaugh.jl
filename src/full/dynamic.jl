@@ -67,8 +67,8 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
       function static_equilibrium(v_1, g, z_hat, E_t, Ω_t)
         S_t = S(g)
         L_tilde_t = L_tilde(S_t, z_hat, E_t, Ω_t)
-        w = σ^(-1)*z_bar # (C.13)  # TODO WRONG WITH THE ABOVE z_bar!!!!
         z_bar = (Ω_t * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ)))^(1/(σ-1)) # (37) 
+        w = ((σ-1)/σ)*z_bar # (C.13) 
         π_min = (1 - L_tilde_t) / ((σ-1)*z_bar^(σ-1)) # (38)
         i_vectorized = z .>= log(z_hat) # Vectorized indicator function
         π = π_min * (1.0.+(N-1)*d^(1-σ)*i_vectorized) - (N-1)*κ*exp.(-(σ-1).*z).*i_vectorized # (39)
@@ -126,7 +126,7 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
         gen_L_tilde_adopt(Ω, S) = Ω * ζ * S # (36)
         gen_L_tilde_export(Ω, z_hat) = Ω * ((N-1)*z_hat^(-θ))*κ # (34)
         gen_L_tilde_entrycost(Ω, E) = Ω * ζ * E / χ # (35)
-        gen_w(z_bar) = σ^(-1)/z_bar # (C.13)
+        gen_w(z_bar) = ((σ-1)/σ)/z_bar # (C.13)
 
       # Add these quantities to the DataFrame.
         results = @transform(results, entry_residual = gen_entry_residual.(:v_1)) # entry_residual column
