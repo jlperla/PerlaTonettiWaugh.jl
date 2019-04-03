@@ -7,10 +7,22 @@
 # Global solver.
 function solve_full_model_global(settings; impose_E_monotonicity_constraints = true, front_nodes_appended = nothing)
   # some exception handling on the inputs
-  length(settings.transition_lb) == length(settings.transition_ub) || @warn "length(settings.transition_lb) != length(settings.transition_ub)"
-  length(settings.transition_x0) == length(settings.transition_ub) || @warn "transition_x0 and transition_ub sizes differ; setting ub to zeros(size(transition_x0))"; settings = merge(settings, (transition_ub = fill(0.0, length(settings.transition_x0)),))
-  length(settings.transition_x0) == length(settings.transition_lb) || @warn "transition_x0 and transition_lb sizes differ; setting lb to -1*ones(size(transition_x0))"; settings = merge(settings, (transition_lb = fill(-1.0, length(settings.transition_x0)),))
-  length(settings.transition_x0) == length(settings.weights) || @warn "transition_x0 and weights sizes differ; setting weights to default function"; settings = merge(settings, (weights = (x -> x < 10 ? 10. - x : 1.).(1:1:length(settings.transition_x0)),))
+  if (length(settings.transition_lb) == length(settings.transition_ub))
+    @error "length(settings.transition_lb) != length(settings.transition_ub)"
+  end
+  if (length(settings.transition_x0) == length(settings.transition_ub) )
+    @warn "transition_x0 and transition_ub sizes differ; setting ub to zeros(size(transition_x0))"
+    settings = merge(settings, (transition_ub = fill(0.0, length(settings.transition_x0)),))
+  end
+  if (length(settings.transition_x0) == length(settings.transition_lb))
+    @warn "transition_x0 and transition_lb sizes differ; setting lb to -1*ones(size(transition_x0))"
+    settings = merge(settings, (transition_lb = fill(-1.0, length(settings.transition_x0)),))
+  end
+  if (length(settings.transition_x0) == length(settings.weights))
+    @warn "transition_x0 and weights sizes differ; setting weights to default function"
+    settings = merge(settings, (weights = (x -> x < 10 ? 10. - x : 1.).(1:1:length(settings.transition_x0)),))
+  end
+  
   # setup range for bboptimize
   ranges = map(i->(settings.transition_lb[i], settings.transition_ub[i]), 1:length(settings.transition_ub))
   # run solver and process result
