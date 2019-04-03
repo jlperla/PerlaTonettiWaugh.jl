@@ -35,6 +35,12 @@ function solve_full_model_global(settings; impose_E_monotonicity_constraints = t
 end
 
 function solve_full_model(settings; impose_E_monotonicity_constraints = true, write_csv = false, csvpath = nothing, run_global = true, front_nodes_appended = nothing)
+  # some exception handling on the inputs
+  if (length(settings.transition_x0) == length(settings.weights))
+    @warn "transition_x0 and weights sizes differ; setting weights to default function"
+    settings = merge(settings, (weights = (x -> x < 10 ? 10. - x : 1.).(1:1:length(settings.transition_x0)),))
+  end
+
   # preprocessing before NLopt/local solver
   if (run_global && settings.transition_iterations > 0) # run global if required
     result = solve_full_model_global(settings; impose_E_monotonicity_constraints = impose_E_monotonicity_constraints, front_nodes_appended = front_nodes_appended)
