@@ -3,11 +3,11 @@ function stationary_algebraic_simple(params)
     # Unpack parameters.
     @unpack μ, υ, θ, r, ζ = params
     # Calculate g.
-    g = μ + (1-(θ-1)*ζ*(r-μ))/((θ-1)^2 * ζ) + υ^2/2 * (θ*(θ*(θ-1)*(r-μ-υ^2/2)*ζ-2)+1)/((θ-1)*((θ-1)*(r-μ-υ^2/2)*ζ-1)); # (9)
+    g = μ + (1 - (θ - 1)*ζ*(r - μ))/((θ - 1)^2 * ζ) + υ^2/2 * (θ*(θ*(θ - 1)*(r - μ - υ^2/2)*ζ - 2) + 1)/((θ - 1)*((θ - 1)*(r - μ - υ^2/2)*ζ - 1)); # (9)
     # Calculate ν
     ν = (μ-g)/υ^2 + √(((g-μ)/υ^2)^2 + (r-g)/(υ^2/2)); # (11)
     # Calculate a generic v.
-    v(z) = 1/(r - μ - υ^2/2) * (1 + 1/ν * exp(-(ν+1)*z)); # (10). Note that these values are in the transformed space.
+    v(z) = 1/(r - μ - υ^2/2) * (1 + 1/ν * exp(-(ν + 1)*z)); # (10). Note that these values are in the transformed space.
     # Validate parameters.
     # Return.
     return (g = g, ν = ν, v = v)
