@@ -120,7 +120,7 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
     gen_L_tilde_adopt(Ω, S) = Ω * ζ * S # (36)
     gen_L_tilde_export(Ω, z_hat) = Ω * ((N-1)*z_hat^(-θ))*κ # (34)
     gen_L_tilde_entrycost(Ω, E) = Ω * ζ * E / χ # (35)
-    gen_w(z_bar) = (σ-1)/σ) * z_bar # (C.13)
+    gen_w(z_bar) = ((σ-1)/σ) * z_bar # (C.13)
 
     # Add these quantities to the DataFrame.
     results = @transform(results, entry_residual = gen_entry_residual.(:v_1)) # entry_residual column
