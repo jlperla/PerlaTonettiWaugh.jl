@@ -14,8 +14,8 @@ function welfare(vals, params, staticvalues)
     g, z_hat, Ω = vals
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params
     @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x, π_min = staticvals(vals, params)
-    c = (1 - L_tilde)*z_bar # (C.74)
-    λ_ii = 1/(1 + (N-1)*z_hat^(σ-1-θ)*d^(1-σ)) # (C.75)
+    c = (1 - L_tilde)*z_bar # (C.15)
+    λ_ii = 1/(1 + (N-1)*z_hat^(σ-1-θ)*d^(1-σ)) # (C.79)
     U_bar = γ == 1 ? (ρ*log(c) + g) / ρ^2 : 1/(1-γ) * (c^(1-γ))/(ρ + (γ-1)*g)  # (C.16)
     (y = c, c = c, λ_ii = λ_ii, U_bar = U_bar)
 end
@@ -76,7 +76,7 @@ function stationary_numerical(params, z_ex, init_x = defaultiv(params); kwargs..
     # Discretization objects and quadrature weights.
     bc = (Mixed(σ-1), Mixed(σ-1)) # boundary conditions for differential operators
     L_1_minus = L₁₋(z_ex, bc) # use backward difference as the drift is negative
-    L_2 = L₂(z_ex, bc) 
+    L_2 = L₂(z_ex, bc)
     ω = ω_weights(z_ex, θ, σ-1) # Get quadrature weights for the distribution on the rescaled grid.
     Ξ₁ = 1/(1 - (σ-1)*(z[1] - z_ex[1])) # (24), with ξ = (σ-1)
 
