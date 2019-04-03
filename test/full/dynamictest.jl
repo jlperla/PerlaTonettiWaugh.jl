@@ -32,8 +32,8 @@
   z_hat_T = stationary_T.z_hat
 
 # Define more interim quantities.
-  Ω = t -> Ω_T # This is constant.
-  E = t -> (log(Ω(t + Δ_E)) - (log(Ω(t - Δ_E))))/(2*Δ_E) + params.δ # central differences.
+  Ω(t) = Ω_T # This is constant.
+  E(t) = (log(Ω(t + Δ_E)) - (log(Ω(t - Δ_E))))/(2*Δ_E) + params.δ # central differences.
 @testset "Regression Tests with constant Ω" begin
   # Run the solver.
     sol = solve_dynamics(params_T, stationary_T, settings, T, Ω, E)
@@ -85,7 +85,7 @@ end
     # Run the solver.
     T = sqrt(2*(log(Ω_0) - log(Ω_T)) / params.δ)
     Ω_t(t) = t < T ? Ω_0 * exp(-params.δ*T*t + params.δ*t*t/2) : Ω_T # Exponential Ω with time smoothing
-    E_t = t -> (log(Ω_t(t + Δ_E)) - (log(Ω_t(t - Δ_E))))/(2*Δ_E) + params.δ # central differences.
+    E_t(t) = (log(Ω_t(t + Δ_E)) - (log(Ω_t(t - Δ_E))))/(2*Δ_E) + params.δ # central differences.
     sol = solve_dynamics(params_T, stationary_T, settings, T, Ω_t, E_t)
 
     # Spot-checks.
