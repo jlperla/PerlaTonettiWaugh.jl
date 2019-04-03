@@ -55,7 +55,7 @@
     @test_broken sol.results[:z_hat][6] ≈ 1.4257125350016342
     @test_broken sol.results[:Ω][7] ≈ 1.036549465116929
     @test sol.results[:E][8] == 0.053
-    @test sol.results[:v_0][9] ≈ 1.1867999999850465
+    @test sol.results[:v_1][9] ≈ 1.1867999999850465
     @test_broken sol.results[:L_tilde][10] ≈ 0.20043077010213567
     @test_broken sol.results[:λ_ii][11] ≈ 0.7813233366545765
     @test_broken sol.results[:c][12] ≈ 1.1882939932974685
@@ -104,7 +104,7 @@ end
     @test_broken sol.results[:g][5] ≈ 0.04344370969889273 atol = 1e-5
     @test_broken sol.results[:z_hat][6] ≈ 1.4138759332401472 atol = 1e-5
     @test_broken sol.results[:Ω][7] ≈ 1.0852902581449317 atol = 1e-5
-    @test_broken sol.results[:v_0][9] ≈ 1.2162498772031762 atol = 1e-5
+    @test_broken sol.results[:v_1][9] ≈ 1.2162498772031762 atol = 1e-5
     @test_broken sol.results[:L_tilde][10] ≈ 0.18748845694858562 atol = 1e-5
     @test_broken sol.results[:λ_ii][11] ≈ 0.7810856222518524 atol = 1e-5
     @test_broken sol.results[:c][12] ≈ 1.1899458996247958 atol = 1e-5
