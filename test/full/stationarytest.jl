@@ -19,28 +19,28 @@
     # Test algebraic equilibrium quantities.
     # Growth rate tests.
     algebraic_gs = (x -> x.g).(algebraic_sols)
-    @test var(algebraic_gs) < 1e-10 # Tests that the solutions are similar to one another.
+    @test var(algebraic_gs) < 1e-6 # Tests that the solutions are similar to one another.
     @test algebraic_gs[1] ≈ 0.01900455065415125 # Tests proximity to true value.
     # Ω tests.
     algebraic_Ωs = (x -> x.Ω).(algebraic_sols)
-    @test var(algebraic_Ωs) < 1e-10
+    @test var(algebraic_Ωs) < 1e-6
     @test algebraic_Ωs[1] ≈ 1.0651775565541244
     # z_hat tests.
     algebraic_zs = (x -> x.z_hat).(algebraic_sols)
-    @test var(algebraic_zs) < 1e-10
+    @test var(algebraic_zs) < 1e-6
     @test all(algebraic_zs .≈ 1.434969541725385)
 
     # Compute numerical solutions.
     numerical_sols = stationary_numerical.(Ref(baseline), grids)
     # Test numerical equilibrium quantities.
     numerical_gs = (x -> x.g).(numerical_sols)
-    @test var(numerical_gs) < 1e-10 # Tests that the solutions are similar to one another.
+    @test var(numerical_gs) < 1e-6 # Tests that the solutions are similar to one another.
     # Ω tests.
     numerical_Ωs = (x -> x.Ω).(numerical_sols)
-    @test var(numerical_Ωs) < 1e-8
+    @test var(numerical_Ωs) < 1e-6
     # z_hat tests.
     numerical_zs = (x -> x.z_hat).(numerical_sols)
-    @test var(numerical_zs) < 1e-9
+    @test var(numerical_zs) < 1e-6
     # Numerical residuals tests.
     for i in 1:length(numerical_sols)
         # Get values to test.
@@ -66,9 +66,9 @@ end
     algebraic_gs = (x -> x.g).(algebraic_sols)
     algebraic_Ωs = (x -> x.Ω).(algebraic_sols)
     algebraic_zs = (x -> x.z_hat).(algebraic_sols)
-    @test var(algebraic_gs) < 1e-10 # Tests that the solutions are similar to one another.
-    @test var(algebraic_Ωs) < 1e-10
-    @test var(algebraic_zs) < 1e-10
+    @test var(algebraic_gs) < 1e-6 # Tests that the solutions are similar to one another.
+    @test var(algebraic_Ωs) < 1e-6
+    @test var(algebraic_zs) < 1e-6
 
     # Compute numerical solutions.
     numerical_sols = stationary_numerical.(Ref(newparams), grids)
@@ -76,9 +76,9 @@ end
     numerical_gs = (x -> x.g).(numerical_sols)
     numerical_Ωs = (x -> x.Ω).(numerical_sols)
     numerical_zs = (x -> x.z_hat).(numerical_sols)
-    @test var(numerical_gs) < 1e-8 # Tests that the solutions are similar to one another.
-    @test var(numerical_Ωs) < 1e-8
-    @test var(numerical_zs) < 1e-8
+    @test var(numerical_gs) < 1e-6 # Tests that the solutions are similar to one another.
+    @test var(numerical_Ωs) < 1e-6
+    @test var(numerical_zs) < 1e-6
 
     # Numerical residuals tests.
     for i in 1:length(numerical_sols)
