@@ -1,7 +1,7 @@
 # Kernel function for main method.
   function f!(residual,du,u,p,t)
     # Setup (unpack arguments, reset residual, grab E and Ω evaluations, etc.)
-      @unpack ζ, Ω, E, static_equilibrium, T, results, ρ, δ, σ, μ, υ, L_1, L_2, ω, κ, d = p
+      @unpack ζ, Ω, E, static_equilibrium, T, results, ρ, δ, σ, μ, υ, L_1, L_2, ω, κ, d, Ξ₁ = p
       residual .= 0
       P = length(residual) - 2
       g = u[P+1]
@@ -26,8 +26,8 @@
       residual[1:P] .-= (υ^2/2)*L_2*u[1:P] # (52)
       residual[1:P] .-= du[1:P]
       residual[1:P] .-= π # discretized system of ODE for v, where v'(T) = 0 (53)
-      # TODO: PUT A \Xi_1 HERE.
-      residual[P+1] = u[1] + x - dot(ω, u[1:P]) # value matching residual, (54) and x(t) = ζ assumption at beginning of Section 2
+      # TODO: CHECK THIS.
+      residual[P+1] = Ξ₁*u[1] + x - dot(ω, u[1:P]) # value matching residual, (54) and x(t) = ζ assumption at beginning of Section 2
       residual[P+2] = z_hat^(σ-1) - κ * d^(σ-1) / π_min # export threshold (55)
   end
 
@@ -60,6 +60,8 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
       bc = (Mixed(σ-1), Mixed(σ-1)) # boundary conditions for differential operators
       L_1 = L₁₋(z_ex, bc) # use backward difference as the drift is negative
       L_2 = L₂(z_ex, bc)
+      # TODO: CHECK THIS
+      Ξ₁ = 1/(1 - (σ-1)*(z[1] - z_ex[1])) # (24)
 
     # Define the auxiliary functions for the DAE problem.
       S(g) = θ * (g - μ - θ * υ^2/2) # Compute S given g. (32)
@@ -85,7 +87,7 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
     # Create the parameters object
       p = (ζ = ζ, Ω = Ω, E = E, static_equilibrium = static_equilibrium, T = T,
             results = results, ρ = ρ, δ = δ, σ = σ, μ = μ, υ = υ, L_1 = L_1, L_2 = L_2,
-            ω = ω, κ = κ, d = d)
+            ω = ω, κ = κ, d = d, Ξ₁ = Ξ₁)
 
     # Bundle all of this into an actual DAE problem.
       dae_prob = DAEProblem(f!, du0, u0, (T, 0.0), p, differential_vars = [trues(P); false; false])
