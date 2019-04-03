@@ -68,12 +68,13 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
       function static_equilibrium(v_1, g, z_hat, E_t, Ω_t)
         S_t = S(g)
         L_tilde_t = L_tilde(S_t, z_hat, E_t, Ω_t)
+        # TODO: Decide what to do here. 
         z_bar = Ω_t * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ)) # (37)
         w = σ^(-1)*z_bar # (C.13)
         π_min = (1 - L_tilde_t) / ((σ-1)*z_bar) # (38)
         i_vectorized = z .>= log(z_hat) # Vectorized indicator function
         π = π_min * (1.0.+(N-1)*d^(1-σ)*i_vectorized) - (N-1)*κ*exp.(-(σ-1).*z).*i_vectorized # (39)
-        entry_residual = Ξ₁*v_1 - ζ * (1-χ) / χ # value matching condition (56) 
+        entry_residual = Ξ₁*v_1 - ζ * (1-χ) / χ # value matching condition (56)
         return (S_t = S_t, L_tilde_t = L_tilde_t, z_bar = z_bar, π_min = π_min, π = π, entry_residual = entry_residual,
                 w = w)
       end
