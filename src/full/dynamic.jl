@@ -75,7 +75,8 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
         π_min = (1 - L_tilde_t) / ((σ-1)*z_bar) # (38)
         i_vectorized = z .>= log(z_hat) # Vectorized indicator function
         π = π_min * (1.0.+(N-1)*d^(1-σ)*i_vectorized) - (N-1)*κ*exp.(-(σ-1).*z).*i_vectorized # (39)
-        entry_residual = v_0 - ζ * (1-χ) / χ # value matching condition (51)
+        # TODO: CHECK THIS
+        entry_residual = Ξ₁*v_0 - ζ * (1-χ) / χ # value matching condition (56)
         return (S_t = S_t, L_tilde_t = L_tilde_t, z_bar = z_bar, π_min = π_min, π = π, entry_residual = entry_residual,
                 w = w)
       end
