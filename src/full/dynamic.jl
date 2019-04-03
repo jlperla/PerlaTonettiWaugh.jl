@@ -1,65 +1,64 @@
 # Kernel function for main method.
-  function f!(residual,du,u,p,t)
-    # Setup (unpack arguments, reset residual, grab E and Ω evaluations, etc.)
-      @unpack ζ, Ω, E, static_equilibrium, T, results, ρ, δ, σ, μ, υ, L_1, L_2, ω, κ, d, Ξ₁ = p
-      residual .= 0
-      P = length(residual) - 2
-      g = u[P+1]
-      z_hat = u[P+2]
-      x = ζ
-      Ω_t = Ω(t)
-      E_t = E(t)
-    # Get static equilibrium values
-      @unpack S_t, L_tilde_t, z_bar, π_min, π = static_equilibrium(u[1], g, z_hat, E_t, Ω_t)
-    # Grab the L_tilde derivative.
-      L_tilde_log_derivative = 0.0 # Default to Float literal.
-      if (t < T)
+function f!(residual,du,u,p,t)
+    @unpack ζ, Ω, E, static_equilibrium, T, results, ρ, δ, σ, μ, υ, L_1, L_2, ω, κ, d, Ξ₁ = p
+    residual .= 0
+    P = length(residual) - 2 # note u[1:P]  = v(t) in the solution iterators
+    g = u[P+1]
+    z_hat = u[P+2]
+    x = ζ
+    Ω_t = Ω(t)
+    E_t = E(t)
+
+    # Get static equilibrium values and calculate the L_tilde growth rate
+    @unpack S_t, L_tilde_t, z_bar, π_min, π = static_equilibrium(u[1], g, z_hat, E_t, Ω_t)
+    L_tilde_log_derivative = 0.0 # Default to Float literal.
+    if (t < T)
         t_forward = results[:t][end]
         L_tilde_forward = results[:L_tilde][end]
         L_tilde_log_derivative = (log(1 - L_tilde_forward) - log(1 - L_tilde_t))/(t_forward - t) # See note under (34)
-      end
-    #=  Reset the residuals to slack in the DAE conditions.
-        Note that (C.40) and (52) yield A_t = (ρ + δ + L_tilde_log_derivative - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2))*I - (μ - g + (σ-1)*υ^2)*L_1 - (υ^2/2)*L_2 and we're decomposing this.
-    =#
-      residual[1:P] = (ρ + δ + L_tilde_log_derivative - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2))*u[1:P] # (40)
-      residual[1:P] .-= (μ - g + (σ-1)*υ^2)*L_1*u[1:P] # (52)
-      residual[1:P] .-= (υ^2/2)*L_2*u[1:P] # (52)
-      residual[1:P] .-= du[1:P]
-      residual[1:P] .-= π # discretized system of ODE for v, where v'(T) = 0 (53)
-      residual[P+1] = Ξ₁*u[1] + x - dot(ω, u[1:P]) # value matching residual, (54) and x(t) = ζ assumption at beginning of Section 2
-      residual[P+2] = z_hat^(σ-1) - κ * d^(σ-1) / π_min # export threshold (55)
-  end
+    end
 
-# Main method.
+    # Combine (40) with (52) to get A_t = (ρ + δ + L_tilde_log_derivative - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2))*I - (μ - g + (σ-1)*υ^2)*L_1 - (υ^2/2)*L_2
+    # Then building the A(t) * v(t) - v'(t) residual directly for the non-algebraic equations
+    residual[1:P] = (ρ + δ + L_tilde_log_derivative - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2))*u[1:P] # (40)
+    residual[1:P] .-= (μ - g + (σ-1)*υ^2)*L_1*u[1:P] # (52)
+    residual[1:P] .-= (υ^2/2)*L_2*u[1:P] # (52)
+    residual[1:P] .-= π # (53)
+    residual[1:P] .-= du[1:P] # (53) subtracting the v'(t) to form the residual
+    residual[P+1] = Ξ₁*u[1] + ζ - dot(ω, u[1:P])  # (54)
+    residual[P+2] = z_hat^(σ-1) - κ * d^(σ-1) / π_min  # (55)
+end
+
+# Calculate the transition dynamics given a fixed Ω(t), E(t) function
+# To calculate the full equilibrium, you can solve until Ω(t), E(t) fulfill free-entry conditions
 function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed_solution = true)
 
     if (T < settings.T_U_bar)
-      throw("Terminal time `T` should be large enough so that T >= settings.T_U_bar is satisfied.")
+        throw("Terminal time `T` should be large enough so that T >= settings.T_U_bar is satisfied.")
     end
 
     # Unpack arguments
-      @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params_T # Parameters
-      @unpack z, z_ex, T_U_bar, tstops = settings # Settings
-      v_T = stationary_sol_T.v_tilde # Stationary --
-      g_T = stationary_sol_T.g
-      z_hat_T = stationary_sol_T.z_hat
-      L_tilde_T = stationary_sol_T.L_tilde
-      Ω_T = stationary_sol_T.Ω # -- Stationary
+    @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params_T
+    @unpack z, z_ex, T_U_bar, tstops = settings
+    @assert γ ≈ 1 # These are the only supported parameters for the transition dynamics at this point
+    @assert η == 0
 
-    # Validate arguments
-      @assert γ ≈ 1 # γ has to be close 1 to have consistent results with the stationary solutions
-      @assert η == 0
+    v_T = stationary_sol_T.v_tilde
+    g_T = stationary_sol_T.g
+    z_hat_T = stationary_sol_T.z_hat
+    L_tilde_T = stationary_sol_T.L_tilde
+    Ω_T = stationary_sol_T.Ω
 
     # Define the results data frame we'll be using and push the stationary onto it.
-      results = DataFrame(t = T, g = g_T, z_hat = z_hat_T, Ω = Ω_T, E = δ, v_1 = v_T[1], L_tilde = L_tilde_T)
+    results = DataFrame(t = T, g = g_T, z_hat = z_hat_T, Ω = Ω_T, E = δ, v_1 = v_T[1], L_tilde = L_tilde_T)
 
     # Define intermediate quantitities.
-      P = length(z)
-      ω = ω_weights(z_ex, θ, σ-1) # Quadrature weights.
-      bc = (Mixed(σ-1), Mixed(σ-1)) # boundary conditions for differential operators
-      L_1 = L₁₋(z_ex, bc) # use backward difference as the drift is negative
-      L_2 = L₂(z_ex, bc)
-      Ξ₁ = 1/(1 - (σ-1)*(z[1] - z_ex[1])) # (24), with ξ = (σ-1)
+    P = length(z)
+    ω = ω_weights(z_ex, θ, σ-1) # Quadrature weights.
+    bc = (Mixed(σ-1), Mixed(σ-1)) # boundary conditions for differential operators
+    L_1 = L₁₋(z_ex, bc) # use backward difference as the drift is negative
+    L_2 = L₂(z_ex, bc)
+    Ξ₁ = 1/(1 - (σ-1)*(z[1] - z_ex[1])) # (24), with ξ = (σ-1)
 
     # Define the auxiliary functions for the DAE problem.
       S(g) = θ * (g - μ - θ * υ^2/2) # Compute S given g. (32)
@@ -73,7 +72,7 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
         π_min = (1 - L_tilde_t) / ((σ-1)*z_bar) # (38)
         i_vectorized = z .>= log(z_hat) # Vectorized indicator function
         π = π_min * (1.0.+(N-1)*d^(1-σ)*i_vectorized) - (N-1)*κ*exp.(-(σ-1).*z).*i_vectorized # (39)
-        entry_residual = Ξ₁*v_1 - ζ * (1-χ) / χ # value matching condition (56) 
+        entry_residual = Ξ₁*v_1 - ζ * (1-χ) / χ # value matching condition (56)
         return (S_t = S_t, L_tilde_t = L_tilde_t, z_bar = z_bar, π_min = π_min, π = π, entry_residual = entry_residual,
                 w = w)
       end
