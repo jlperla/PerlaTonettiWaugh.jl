@@ -56,8 +56,10 @@ function solve_full_model(settings; impose_E_monotonicity_constraints = true, wr
         h .= A*x
     end
     # run the local (NLopt) solver
-    E_nodes = solve_system(x -> weighted_residuals_given_E_nodes_interior(x, settings; front_nodes_appended = front_nodes_appended), settings.transition_x0;
-                    lb = nothing, ub = fill(0.0, length(settings.transition_x0)),
+    nlopt_objective(x) =  weighted_residuals_given_E_nodes_interior(x, settings; front_nodes_appended = front_nodes_appended)
+    E_nodes = solve_system(nlopt_objective;
+                    lb = nothing, 
+                    ub = fill(0.0, length(settings.transition_x0)),
                     constraints_fg! = impose_E_monotonicity_constraints ? constraints_increasing_E! : nothing,
                     algorithm = impose_E_monotonicity_constraints ? :LD_SLSQP : :LD_LBFGS,
                     iterations = settings.transition_iterations)
