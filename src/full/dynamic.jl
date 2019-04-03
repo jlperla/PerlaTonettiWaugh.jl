@@ -126,7 +126,7 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
         gen_S = S
         gen_z_bar(Ω_t, z_hat) = (Ω_t * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ)))^(1/(σ-1)) # (31)
         gen_π_min(L_tilde_t, z_bar) = (1 - L_tilde_t) / ((σ-1)*z_bar) # (38)
-        gen_entry_residual(v_0) = v_0 - ζ*(1-χ)/χ # (51)
+        gen_entry_residual(v_0) = Ξ₁*v_0 - ζ*(1-χ)/χ # (56) TODO: CHECK THIS
         gen_L_tilde_adopt(Ω, S) = Ω * ζ * S # (36)
         gen_L_tilde_export(Ω, z_hat) = Ω * ((N-1)*z_hat^(-θ))*κ # (34)
         gen_L_tilde_entrycost(Ω, E) = Ω * ζ * E / χ # (35)
