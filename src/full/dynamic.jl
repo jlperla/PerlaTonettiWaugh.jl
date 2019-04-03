@@ -26,7 +26,6 @@
       residual[1:P] .-= (υ^2/2)*L_2*u[1:P] # (52)
       residual[1:P] .-= du[1:P]
       residual[1:P] .-= π # discretized system of ODE for v, where v'(T) = 0 (53)
-      # TODO: CHECK THIS.
       residual[P+1] = Ξ₁*u[1] + x - dot(ω, u[1:P]) # value matching residual, (54) and x(t) = ζ assumption at beginning of Section 2
       residual[P+2] = z_hat^(σ-1) - κ * d^(σ-1) / π_min # export threshold (55)
   end
@@ -60,8 +59,7 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
       bc = (Mixed(σ-1), Mixed(σ-1)) # boundary conditions for differential operators
       L_1 = L₁₋(z_ex, bc) # use backward difference as the drift is negative
       L_2 = L₂(z_ex, bc)
-      # TODO: CHECK THIS
-      Ξ₁ = 1/(1 - (σ-1)*(z[1] - z_ex[1])) # (24)
+      Ξ₁ = 1/(1 - (σ-1)*(z[1] - z_ex[1])) # (24), with ξ = (σ-1)
 
     # Define the auxiliary functions for the DAE problem.
       S(g) = θ * (g - μ - θ * υ^2/2) # Compute S given g. (32)
@@ -75,7 +73,6 @@ function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed
         π_min = (1 - L_tilde_t) / ((σ-1)*z_bar) # (38)
         i_vectorized = z .>= log(z_hat) # Vectorized indicator function
         π = π_min * (1.0.+(N-1)*d^(1-σ)*i_vectorized) - (N-1)*κ*exp.(-(σ-1).*z).*i_vectorized # (39)
-        # TODO: CHECK THIS
         entry_residual = Ξ₁*v_1 - ζ * (1-χ) / χ # value matching condition (56) 
         return (S_t = S_t, L_tilde_t = L_tilde_t, z_bar = z_bar, π_min = π_min, π = π, entry_residual = entry_residual,
                 w = w)

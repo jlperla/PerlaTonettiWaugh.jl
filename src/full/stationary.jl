@@ -78,7 +78,7 @@ function stationary_numerical(params, z_ex, init_x = defaultiv(params); kwargs..
     L_1_minus = L₁₋(z_ex, bc) # use backward difference as the drift is negative
     L_2 = L₂(z_ex, bc) 
     ω = ω_weights(z_ex, θ, σ-1) # Get quadrature weights for the distribution on the rescaled grid.
-    Ξ₁ = 1/(1 - (σ-1)*(z[1] - z_ex[1])) # (24)
+    Ξ₁ = 1/(1 - (σ-1)*(z[1] - z_ex[1])) # (24), with ξ = (σ-1)
 
     # Define the system of equations we're solving.
     function stationary_numerical_given_vals(vals)
