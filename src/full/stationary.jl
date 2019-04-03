@@ -1,7 +1,7 @@
 # Implements the algebraic stationary solution for the full model. Returns the equilibrium quantities (g, Ω, π) determined by equations H.15-H.17.
 
 # Gives us the (full algebraic) stationary solution for a set of params and an initial x.
-function stationary_algebraic(params, init_x = defaultiv(params); kwargs...)
+function stationary_algebraic(params, init_x = [0.02; 18.94; 17.07]; kwargs...)
     @assert params.υ > 0 && params.κ > 0 # validate params
     g, z_hat, Ω = solve_system(x -> stationary_algebraic_aux(x, params), init_x)
     @assert z_hat > 1 && Ω > 0 && g > 0 # validate solution
@@ -97,7 +97,8 @@ function stationary_numerical(params, z_ex, init_x = [0.02; 18.94; 17.07]; kwarg
     g_T, z_hat_T, Ω_T = solve_system(stationary_numerical_given_vals, [0.02; 18.94; 17.07])
 
     # Grab static objects at steady-state and recreate the steady-state objects using the g, z_hat, Ω.
-    @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x, π_min = staticvals([g_T, z_hat_T, Ω_T], params)
+    staticvalues = staticvals([g_T, z_hat_T, Ω_T], params)
+    @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x, π_min = staticvalues
     r_tilde = r - g_T - 0 # (C.59, and g_w = 0 at steady-state)
     ρ_tilde = r_tilde - (σ - 1)*(μ - g_T + (σ-1)*(υ^2/2)) # (C.41)
     A_T = (ρ_tilde * I - (μ-g_T + (σ-1)*υ^2)*L_1_minus - υ^2/2 * L_2) # (52)

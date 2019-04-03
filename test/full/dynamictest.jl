@@ -2,7 +2,7 @@
   # Time and space grid.
     z_min = 0.0
     z_max = 5.0
-    P = 1000
+    P = 50
     T = 20.0
   # Experiment settings.
     d_0 = 5.0
@@ -34,6 +34,7 @@
 # Define more interim quantities.
   Ω(t) = Ω_T # This is constant.
   E(t) = (log(Ω(t + Δ_E)) - (log(Ω(t - Δ_E))))/(2*Δ_E) + params.δ # central differences.
+
 @testset "Regression Tests with constant Ω" begin
   # Run the solver.
     sol = solve_dynamics(params_T, stationary_T, settings, T, Ω, E)
