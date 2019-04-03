@@ -17,7 +17,7 @@ function welfare(vals, params, staticvalues)
     c = (1 - L_tilde)*z_bar # (C.15)
     λ_ii = 1/(1 + (N-1)*z_hat^(σ-1-θ)*d^(1-σ)) # (C.79)
     U_bar = γ == 1 ? (ρ*log(c) + g) / ρ^2 : 1/(1-γ) * (c^(1-γ))/(ρ + (γ-1)*g)  # (C.16)
-    (y = c, c = c, λ_ii = λ_ii, U_bar = U_bar)
+    return (y = c, c = c, λ_ii = λ_ii, U_bar = U_bar)
 end
 
 # Gives us the residuals for a point x in state-space and a set of params.
@@ -26,12 +26,12 @@ function stationary_algebraic_aux(vals, params)
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params
     @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x, π_min = staticvals(vals, params)
     g, z_hat, Ω = vals
-    # Validate parameters.
+
     # Calculate and assign residuals.
-        big_denom = ν*(θ + ν)*(θ - σ + 1) # (C.19)
-        denom_1 = a*(g - r) # (C.19)
-        num_1 = ν*(N-1)*(θ - σ + 1)*(d^(1 - σ)*(θ + ν)*z_hat^(-θ + σ - 1)-b*θ*z_hat^(-θ-ν)) # (C.19)
-        num_2 = θ*(ν*(N-1)*d^(1-σ)*(θ+ν)*z_hat^(-θ + σ -1) + (ν + σ - 1)*(θ + ν - σ + 1)) # (C.19)
+    big_denom = ν*(θ + ν)*(θ - σ + 1) # (C.19)
+    denom_1 = a*(g - r) # (C.19)
+    num_1 = ν*(N-1)*(θ - σ + 1)*(d^(1 - σ)*(θ + ν)*z_hat^(-θ + σ - 1)-b*θ*z_hat^(-θ-ν)) # (C.19)
+    num_2 = θ*(ν*(N-1)*d^(1-σ)*(θ+ν)*z_hat^(-θ + σ -1) + (ν + σ - 1)*(θ + ν - σ + 1)) # (C.19)
     return [x/π_min - a*(χ/(1-χ))*(σ + ν - 1)/ν, # (C.18)
             1 + (σ-1)/ν - (num_1/denom_1 + num_2)/big_denom + (χ/(1-χ))*(σ + ν - 1)/(ν), # (C.19)
             π_min - (1- L_tilde)/((σ -1)*z_bar^(σ-1))] # (C.20)
@@ -54,7 +54,7 @@ function staticvals(vals, params)
     L_tilde_E = ζ/χ * Ω * δ # (C.9)
     L_tilde_a = ζ * Ω * S # (C.10)
     z_bar = (Ω * (θ/(1 + θ - σ) + (N-1)*(1-F(z_hat))*d^(1-σ)*(z_hat^(-1 + σ)*θ/(1 + θ - σ))))^((σ-1)^(-1)) # (C.11)
-    w = σ^(-1)*z_bar # (C,13)
+    w = (σ-1)/σ*z_bar # (C.13)
     x = ζ * (1- η + η * Theta / w) # (C.14)
     π_min = (d^(σ-1) * κ)/(z_hat^(σ-1)) # (C.12, inverted to express π_min as a function of parameters and z_hat)
     π_rat = (θ + (N-1)*(σ-1)*d^(-θ)*((κ/ζ) * χ/(ρ*(1-χ)))^(1 - θ/(σ - 1)))/(1 + θ - σ) # (C.17)
@@ -63,11 +63,8 @@ function staticvals(vals, params)
             z_bar = z_bar, w = w, x = x, π_min = π_min, π_rat = π_rat)
 end
 
-# Default initial values
-defaultiv(params) = [0.02; 18.94; 17.07]
-
-# Numerical method.
-function stationary_numerical(params, z_ex, init_x = defaultiv(params); kwargs...)
+# Numerical method checking the stationary solution to the ODE.  In general, use the analtyic when only looking at steady states but this provides guidance on the convergence and accuracy of the finite-difference methods.
+function stationary_numerical(params, z_ex, init_x = [0.02; 18.94; 17.07]; kwargs...)
     # Unpack params and settings.
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params
     @assert params.υ > 0 && params.κ > 0 # Parameter validation
@@ -84,37 +81,25 @@ function stationary_numerical(params, z_ex, init_x = defaultiv(params); kwargs..
     function stationary_numerical_given_vals(vals)
         g, z_hat, Ω = vals
         @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x, π_min = staticvals([g, z_hat, Ω], params) # Grab static values.
-        r_tilde = r - g - 0 # (C.55, and g_w = 0 at steady state)
-        ρ_tilde = r_tilde - (σ - 1)*(μ - g + (σ-1)*(υ^2/2)) # (C.40)
-        A_T = (ρ_tilde * I - (μ - g + (σ-1)*υ^2)*L_1_minus - υ^2/2 * L_2) # (52)
+        r_tilde = r - g - 0 # (C.59, and g_w = 0 at steady state)
+        ρ_tilde = r_tilde - (σ - 1)*(μ - g + (σ-1)*(υ^2/2)) # (C.41)
+        A_T = ρ_tilde * I - (μ - g + (σ-1)*υ^2)*L_1_minus - υ^2/2 * L_2 # (52)
         i(z) = z >= log(z_hat) ? 1 : 0 # indicator function for next equation.
         π(z) = π_min * (1 + (N-1)*d^(1-σ)*i(z)) - (N-1)*κ*exp(-(σ-1)*z)*i(z) # (39)
         v_tilde = A_T \ π.(z) # discretized system of ODE for v, where v'(T) = 0 (53)
 
-        #=
-            System of equations to be solved.
-        =#
-
-        # Value-matching condition.
-        value_matching = Ξ₁*v_tilde[1] - dot(v_tilde, ω) + x # (48) and (C.60)
-
-        # Free-entry condition.
-        free_entry = Ξ₁*v_tilde[1] - x*(1-χ)/χ # (50) or (C.48) and (C.60)
-
-        # Adoption threshold.
-        adoption_threshold = π_min - (1 - L_tilde)/((σ-1)*z_bar^(σ-1)) # (C.20)
-
-        return [value_matching, free_entry, adoption_threshold]
+        # System of equations, given the numerically solved ODE
+        return [Ξ₁*v_tilde[1] - dot(v_tilde, ω) + ζ, # (54)
+                Ξ₁*v_tilde[1] - ζ*(1-χ)/χ, # (56)
+                π_min - (1 - L_tilde)/((σ-1)*z_bar^(σ-1))] # (38), from the static equilibrium
     end
 
     g_T, z_hat_T, Ω_T = solve_system(stationary_numerical_given_vals, [0.02; 18.94; 17.07])
 
-    # Grab static objects at steady-state.
-    staticvalues = staticvals([g_T, z_hat_T, Ω_T], params) # Grab static values.
-    @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x, π_min = staticvalues
-    # Recreate the steady-state objects using the solution in g, z_hat, Ω.
-    r_tilde = r - g_T - 0 # (C.55, and g_w = 0 at steady-state)
-    ρ_tilde = r_tilde - (σ - 1)*(μ - g_T + (σ-1)*(υ^2/2)) # (C.40)
+    # Grab static objects at steady-state and recreate the steady-state objects using the g, z_hat, Ω.
+    @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x, π_min = staticvals([g_T, z_hat_T, Ω_T], params)
+    r_tilde = r - g_T - 0 # (C.59, and g_w = 0 at steady-state)
+    ρ_tilde = r_tilde - (σ - 1)*(μ - g_T + (σ-1)*(υ^2/2)) # (C.41)
     A_T = (ρ_tilde * I - (μ-g_T + (σ-1)*υ^2)*L_1_minus - υ^2/2 * L_2) # (52)
     i(z) = z >= log(z_hat_T) ? 1 : 0 # indicator function for next equation.
     π(z) = π_min * (1 + (N-1)*d^(1-σ)*i(z)) - (N-1)*κ*exp(-(σ-1)*z)*i(z) # (39)

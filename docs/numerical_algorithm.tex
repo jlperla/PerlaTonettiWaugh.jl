@@ -247,8 +247,8 @@ Let $E(t)\Omega(t)$ be the associated gross entry flow at time $t$ and $\Omega(t
 	\tilde{L}_{\text{x}}(t) &= \Omega(t) (N -1)\hat{z}^{-\theta}\kappa\\
 	\tilde{L}_{\text{E}}(t) &= \frac{\zeta}{\chi}\Omega(t) E(t)\\
 	\tilde{L}_{\text{a}}(t) &= \zeta \Omega(t) S(t)\\
-	\bar{z}(t)^{\sigma - 1}&\equiv \Omega(t)
-\frac{\theta}{1+\theta - \sigma}\left(1 + (N-1)d^{1-\sigma}\hat{z}^{\sigma - 1 -\theta} \right)\\
+	\bar{z}(t)&\equiv \left(\Omega(t)
+\frac{\theta}{1+\theta - \sigma}\left(1 + (N-1)d^{1-\sigma}\hat{z}^{\sigma - 1 -\theta} \right)\right)^{\frac{1}{\sigma - 1}}\\
 	\bar{\pi}_{\min}(t) &\equiv \frac{1-\tilde{L}(t)}{(\sigma-1)\bar{z}(t)^{\sigma-1}}\\
 	\pi(z,t) &\equiv \bar{\pi}_{\min}(t)\left(1 + (N-1)d^{1-\sigma}\indicator{z \geq \log(\hat{z}(t))}\right) - (N-1)\kappa e^{-(\sigma - 1)z}\indicator{z \geq \log(\hat{z}(t))}\\
 	\tilde{\rho}(t) &\equiv \rho+ \delta + \D[t]\log\left(1 - \tilde{L}(t)\right) - (\sigma - 1)\left(\mu - g(t) + (\sigma - 1)\frac{\upsilon^2}{2} \right)
@@ -484,7 +484,7 @@ Note that we have the following static calculations from PTW (H.1) to (H.11)
 \begin{align}
 	F(z) &= 1 - z^{-\theta} \\
 	S &= \theta \left(g - \mu - \theta \frac{\upsilon^2}{2}\right) \\
-	\nu &= \frac{\mu - g}{\upsilon^2} + \sqrt{\left(\frac{g - \mu}{\upsilon^2}\right)^2 + \frac{\upsilon^2}{2}} \\
+	\nu &\equiv  \frac{\mu- g}{\upsilon^2} + \sqrt{\left(\frac{g-\mu}{\upsilon^2} \right)^{2} + \frac{r-g}{\upsilon^2/2}}\\
 	a &= \frac{1}{r - g - (\sigma - 1)(\mu - g  + (\sigma - 1)\upsilon^2/2)} \\
 	b &= (1 - a(r-g))d^{1-\sigma}\hat{z}^{\nu + \sigma -1} \\
 	r &= \rho + \gamma g + \delta \\
@@ -496,7 +496,7 @@ Note that we have the following static calculations from PTW (H.1) to (H.11)
 	\bar{z}&\equiv \left[\Omega
 	\frac{\theta}{1+\theta - \sigma}\left(1 + (N-1)d^{1-\sigma}\hat{z}^{\sigma - 1 -\theta} \right)\right]^{1/(\sigma - 1)} \\
 	\hat{z} &= d \left(\frac{\kappa}{\bar{\pi}_{\textup{min}}}\right)^{\frac{1}{\sigma - 1}} \\
-	w &= \frac{1}{\bar{\sigma}}\bar{z} \\
+	w &= \frac{\sigma - 1}{\sigma}\bar{z} \\
 	x &= \zeta(1 - \eta + \eta \Theta / w) \\
 		c &= (1 - \tilde{L})\bar{z} \\
 		\bar{U} &=
