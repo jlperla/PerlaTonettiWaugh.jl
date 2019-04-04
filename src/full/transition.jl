@@ -43,18 +43,18 @@ function solve_full_model_global(settings; impose_E_monotonicity_constraints = t
     return (solution = solve_model_from_E_nodes(E_nodes_found, settings; detailed_solution = true), E_nodes = E_nodes_found)
 end
 
-function solve_full_model(settings; impose_E_monotonicity_constraints = true, datadir = "data", write_data = true, run_global = true, front_nodes_appended = nothing)
+function solve_full_model(settings; impose_E_monotonicity_constraints = true, datadir = "data", write_data = true, run_global = true, front_nodes_appended = nothing, read_data = true)
 
     # check for inputs and solution  
-    if datadir isa String 
-        datapath = joinpath(pwd(), datadir)
+    datapath = joinpath(pwd(), datadir)
+    if isdir(datapath) == true && read_data == true
         list = readdir(datapath)
         cachename = join(hash(settings))
         if cachename * ".csv" in list 
             println("Cache found; returning data.")
             return (data = CSV.read(joinpath(datapath, string(cachename) * ".csv")),) # return the cache. different name reflects different code branch.
         else 
-            @warn "no cache found in $datadir"
+            @warn "no cache found in $datapath, or it doesn't exist."
         end
     elseif settings.transition_iterations < 1 # bail out with solution on supplied nodes 
         E_nodes_interior = settings.transition_x0
