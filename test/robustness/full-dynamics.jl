@@ -48,9 +48,4 @@ E(t) = (log(Ω(t + Δ_E)) - (log(Ω(t - Δ_E))))/(2*Δ_E) + params.δ # central 
     @test sol.results[:z_hat][(end-9)] ≈ 2.8259905922985666
     # Sub-pieces of L_tilde
     @test sol.results[:L_tilde_a] + sol.results[:L_tilde_x] + sol.results[:L_tilde_E] ≈ sol.results[:L_tilde]
-end 
-
-@testset "Correctness" begin 
-  sol = solve_dynamics(params_0, stationary_0, settings, T, Ω, E)
-  @test all([isapprox(x, 0.0, atol = 1e-6) for x in sol.results[:entry_residual]]) # Free-entry condition holds ∀ t.
-end 
+end
