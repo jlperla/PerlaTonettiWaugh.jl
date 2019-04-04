@@ -94,7 +94,7 @@ end
     @test sol.sol.t[5] ≈ 3.532316848641289 atol = 1e-5
     @test sol.results[:λ_ii][end] ≈ 0.8205696009690461 atol = 1e-5
     @test sol.sol.u[4][3] ≈ 0.713186458707734 atol = 1e-5
-    @test sol.sol.prob.u0[1] ≈ 0.9329809580656181atol = 1e-5
+    @test sol.sol.prob.u0[1] ≈ 0.9329809580656181 atol = 1e-5
     # Consistency checks.
     @test mean(sol.results[:g]) ≈ 0.020144154416595162 atol = 1e-5 # Probably the most important of these checks.
     @test mean(sol.results[:z_hat]) ≈ 1.6118214712011016 atol = 1e-5
