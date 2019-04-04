@@ -39,17 +39,15 @@ E(t) = (log(Ω(t + Δ_E)) - (log(Ω(t - Δ_E))))/(2*Δ_E) + params.δ # central 
     sol = solve_dynamics(params_0, stationary_0, settings, T, Ω, E)
   # Spot-checks.
     @test sol.sol.t[5] == 19.852
-    @test sol.results[:λ_ii][1] ≈ 0.9929472025880611
-    @test sol.sol.u[4][3] ≈ 1.153063927522336
-    @test sol.sol.prob.u0[1] ≈ 1.1868000000002454
+    @test sol.results[:λ_ii][1] ≈ 0.993204827349257
+    @test sol.sol.u[4][3] ≈ 1.1338849871884573 
+    @test sol.sol.prob.u0[1] ≈ 1.1675290237815987
   # Detailed checks.
-    @test sol.results[:g][1] ≈ 0.020019475192487802 # g check.
-    @test sol.results[:z_hat][1] ≈ 2.771561823423923
-    @test sol.results[:z_hat][(end-9)] ≈ 2.770363670724641
+    @test sol.results[:g][1] ≈ 0.01739899362603311 # g check.
+    @test sol.results[:z_hat][1] ≈  2.827474674128036
+    @test sol.results[:z_hat][(end-9)] ≈ 2.8259905922985666
     # Sub-pieces of L_tilde
     @test sol.results[:L_tilde_a] + sol.results[:L_tilde_x] + sol.results[:L_tilde_E] ≈ sol.results[:L_tilde]
-    # Check if π_rat definitions in dynamics solution and SS coincide
-    @test sol.results[:π_rat][end] ≈ stationary_T.π_rat atol = 1e-3
 end 
 
 @testset "Correctness" begin 
