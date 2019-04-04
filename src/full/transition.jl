@@ -49,7 +49,7 @@ function solve_full_model(settings; impose_E_monotonicity_constraints = true, da
     datapath = joinpath(pwd(), datadir)
     if isdir(datapath) == true && read_data == true
         list = readdir(datapath)
-        cachename = join(hash(settings))
+        cachename = join(hash(settings.params_T))
         if cachename * ".csv" in list 
             println("Cache found; returning data.")
             return (data = CSV.read(joinpath(datapath, string(cachename) * ".csv")),) # return the cache. different name reflects different code branch.
