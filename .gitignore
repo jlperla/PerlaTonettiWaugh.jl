@@ -7,7 +7,6 @@
 *.gz
 .DS_Store
 .ipynb_checkpoints
-*.csv
 *.bbl
 *.bak
 *.blg
