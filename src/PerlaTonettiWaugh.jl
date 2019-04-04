@@ -3,7 +3,7 @@ module PerlaTonettiWaugh
 # Dependencies.
 using DifferentialEquations, Sundials, LinearAlgebra, DataFrames, DataFramesMeta, DiffEqCallbacks, Interpolations, QuadGK, NLopt, LeastSquaresOptim, BlackBoxOptim, CSV
 using NLSolversBase
-using SimpleDifferentialOperators, SHA
+using SimpleDifferentialOperators
 import Parameters: @with_kw, @unpack
 
 # General utilities files.
