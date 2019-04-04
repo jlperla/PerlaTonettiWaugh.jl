@@ -45,7 +45,7 @@ end
 
 function solve_full_model(settings; impose_E_monotonicity_constraints = true, datadir = "data", write_data = true, run_global = true, front_nodes_appended = nothing)
 
-    # check for solution caching 
+    # check for inputs and solution  
     if datadir isa String 
         datapath = joinpath(pwd(), datadir)
         list = readdir(datapath)
@@ -56,27 +56,14 @@ function solve_full_model(settings; impose_E_monotonicity_constraints = true, da
         else 
             @warn "no cache found in $datadir"
         end
-    else
-        # do nothing. 
+    elseif settings.transition_iterations < 1 # bail out with solution on supplied nodes 
+        E_nodes_interior = settings.transition_x0
+        return (solution = solve_model_from_E_nodes(E_nodes_interior, settings, detailed_solution = true), E_nodes = E_nodes_interior)
+    elseif run_global # run global solver if asked for 
+        result = solve_full_model_global(settings, impose_E_monotonicity_constraints = impose_E_monotonicity_constraints, front_nodes_appended = front_nodes_appended)
+        E_nodes = result.E_nodes
+        settings = merge(settings, (transition_x0 = E_nodes, ))
     end 
-
-
-    # TODO: These checks broke things when I was working on the caching code above. Should take another look at them.
-
-    # # some exception handling on the inputs
-    # if (length(settings.transition_x0) != length(settings.weights))
-    #     @warn "transition_x0 and weights sizes differ; setting weights to default function"
-    #     settings = merge(settings, (weights = (x -> x < 10 ? 10. - x : 1.).(1:1:length(settings.transition_x0)),))
-    # end
-    # # preprocessing before NLopt/local solver
-    # if (run_global && settings.transition_iterations > 0) # run global if required
-    #     result = solve_full_model_global(settings, impose_E_monotonicity_constraints = impose_E_monotonicity_constraints, front_nodes_appended = front_nodes_appended)
-    #     E_nodes = result.E_nodes
-    #     settings = merge(settings, (transition_x0 = E_nodes, ))
-    # elseif settings.transition_iterations < 1 # return immediately with the initial condition if that's required
-    #     E_nodes_interior = settings.transition_x0
-    # return (solution = solve_model_from_E_nodes(E_nodes_interior, settings, detailed_solution = true), E_nodes = E_nodes_interior)
-    # end
 
     # linear constraint for increasing E nodes
     function constraints_increasing_E!(h, x, jacobian_t)
@@ -103,7 +90,6 @@ function solve_full_model(settings; impose_E_monotonicity_constraints = true, da
     solution = solve_model_from_E_nodes(E_nodes, settings; detailed_solution = true)
     # output caching
     if write_data && datadir isa String
-        cachename = hash(settings)
         filename = joinpath(datadir, cachename * ".csv")
         CSV.write(filename, solution.results)
         println("Results written to $(filename)")
