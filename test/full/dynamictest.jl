@@ -64,23 +64,6 @@
     @test sol.results[:z_bar][3] ≈ 1.1778088573728906
     @test sol.results[:π_min][2] ≈ 0.14649422762537112
     @test sol.results[:entry_residual][12] ≈ 2.7166018323754315e-9 atol = 1e-5
-
-  # TODO: Move this to the robustness section, and keep the original 1000-node grid (it doesn't work otherwise.)
-  # # Run the solver for another case.
-  #   sol = solve_dynamics(params_0, stationary_0, settings, T, Ω, E)
-  # # Spot-checks.
-  #   @test sol.sol.t[5] == 19.852
-  #   @test_broken sol.results[:λ_ii][1] ≈ 0.9929472025880611
-  #   @test_broken sol.sol.u[4][3] ≈ 1.153063927522336
-  #   @test_broken sol.sol.prob.u0[1] ≈ 1.1868000000002454
-  # # Detailed checks.
-  #   @test_broken sol.results[:g][1] ≈ 0.020019475192487802 # g check.
-  #   @test_broken sol.results[:z_hat][1] ≈ 2.771561823423923
-  #   @test_broken sol.results[:z_hat][(end-9)] ≈ 2.770363670724641
-  #   # Sub-pieces of L_tilde
-  #   @test sol.results[:L_tilde_a] + sol.results[:L_tilde_x] + sol.results[:L_tilde_E] ≈ sol.results[:L_tilde]
-  #   # Check if π_rat definitions in dynamics solution and SS coincide
-  #   @test_broken sol.results[:π_rat][end] ≈ stationary_T.π_rat atol = 1e-3
 end
 
 @testset "Regression Tests with time-varying Ω" begin
@@ -116,19 +99,12 @@ end
     @test sol.results[:entry_residual][12] ≈ 0.013589358773159477 atol = 1e-5
     # Sub-pieces of L_tilde
     @test sol.results[:L_tilde_a] + sol.results[:L_tilde_x] + sol.results[:L_tilde_E] ≈ sol.results[:L_tilde]
-    # TODO: is this still valid with a coarse grid? 
-    # Check if π_rat definitions in dynamics solution and SS coincide
-    # @test_broken sol.results[:π_rat][end] ≈ stationary_T.π_rat atol = 1e-3
 end
 
 @testset "Correctness Tests" begin # Here, we compare the DAE output to known correct values, such as MATLAB output or analytical results.
   # First case.
   sol = solve_dynamics(params_T, stationary_T, settings, T, Ω, E)
   @test all([isapprox(x, 0.0, atol = 1e-6) for x in sol.results[:entry_residual]]) # Free-entry condition holds ∀ t.
-
-  # TODO: Move this to robustness, with the original fine grid.
-  # sol = solve_dynamics(params_0, stationary_0, settings, T, Ω, E)
-  # @test all([isapprox(x, 0.0, atol = 1e-6) for x in sol.results[:entry_residual]]) # Free-entry condition holds ∀ t.
 end
 
 @testset "Regression Tests for f! at T" begin
