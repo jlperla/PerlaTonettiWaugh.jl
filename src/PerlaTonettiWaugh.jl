@@ -20,7 +20,7 @@ include("full/stationary.jl")
 include("full/dynamic.jl")
 include("full/transition.jl")
 
-export parameter_defaults, parameters_old_paper, settings_defaults, settings_old_paper_defaults
+export parameter_defaults, settings_defaults
 export params_simple, settings_simple
 export solve_simple_dae
 export stationary_algebraic, stationary_numerical, simpleDAE, stationary_algebraic_simple, stationary_numerical_simple, ω_weights, solve_dynamics, welfare
