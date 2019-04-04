@@ -43,7 +43,23 @@ function solve_full_model_global(settings; impose_E_monotonicity_constraints = t
     return (solution = solve_model_from_E_nodes(E_nodes_found, settings; detailed_solution = true), E_nodes = E_nodes_found)
 end
 
-function solve_full_model(settings; impose_E_monotonicity_constraints = true, write_csv = false, csvpath = nothing, run_global = true, front_nodes_appended = nothing)
+function solve_full_model(settings; impose_E_monotonicity_constraints = true, datadir = "data", write_data = true, run_global = true, front_nodes_appended = nothing)
+
+    # check for solution caching 
+    if datadir isa String 
+        datapath = joinpath(pwd(), datadir)
+        list = readdir(datapath)
+        cachename = join(hash(settings))
+        if string(cachename) * ".csv" in list 
+            println("Cache found; returning data.")
+            return (data = CSV.read(joinpath(datapath, string(cachename) * ".csv")),) # return the cache. different name reflects different code branch.
+        else 
+            # silently continue if no cache found (don't bother users with details.)
+        end
+    else
+        # do nothing. 
+    end 
+
     # some exception handling on the inputs
     if (length(settings.transition_x0) != length(settings.weights))
         @warn "transition_x0 and weights sizes differ; setting weights to default function"
@@ -83,8 +99,11 @@ function solve_full_model(settings; impose_E_monotonicity_constraints = true, wr
     E_nodes = front_nodes_appended == nothing ? E_nodes : [front_nodes_appended; E_nodes]
     solution = solve_model_from_E_nodes(E_nodes, settings; detailed_solution = true)
     # output caching
-    if (write_csv)  
-        CSV.write(csvpath, solution.results)
+    if write_data && datadir isa String
+        cachename = hash(settings)
+        filename = joinpath(datadir, string(cachename) * ".csv")
+        CSV.write(filename, solution.results)
+        println("Results written to $(filename)")
     end
     
     # return
