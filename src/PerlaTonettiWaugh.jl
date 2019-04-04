@@ -4,6 +4,7 @@ module PerlaTonettiWaugh
 using DifferentialEquations, Sundials, LinearAlgebra, DataFrames, DataFramesMeta, DiffEqCallbacks, Interpolations, QuadGK, NLopt, LeastSquaresOptim, BlackBoxOptim, CSV
 using NLSolversBase
 using SimpleDifferentialOperators
+using JSON 
 import Parameters: @with_kw, @unpack
 
 # General utilities files.

@@ -51,7 +51,7 @@ function solve_full_model(settings; impose_E_monotonicity_constraints = true, da
         list = readdir(datapath)
         cachename = join(hash(settings))
         if cachename * ".csv" in list 
-            @warn "Cache found; returning data."
+            println("Cache found; returning data.")
             return (data = CSV.read(joinpath(datapath, string(cachename) * ".csv")),) # return the cache. different name reflects different code branch.
         else 
             @warn "no cache found in $datadir"
@@ -91,8 +91,11 @@ function solve_full_model(settings; impose_E_monotonicity_constraints = true, da
     # output caching
     if write_data && datadir isa String
         filename = joinpath(datadir, cachename * ".csv")
+        paramsname = joinpath(datadir, cachename * ".json")
         CSV.write(filename, solution.results)
         println("Results written to $(filename)")
+        write(paramsname, JSON.json(settings.params_T))
+        println("Parameters written to $(paramsname)")
     end
     
     # return
