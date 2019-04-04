@@ -94,8 +94,8 @@ function solve_full_model(settings; impose_E_monotonicity_constraints = true, da
         paramsname = joinpath(datadir, cachename * ".json")
         CSV.write(filename, solution.results)
         println("Results written to $(filename)")
-        write(paramsname, JSON.json(settings.params_T))
-        println("Parameters written to $(paramsname)")
+        write(paramsname, JSON.json(settings))
+        println("Settings written to $(paramsname)")
     end
     
     # return
