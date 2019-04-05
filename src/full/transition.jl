@@ -87,7 +87,7 @@ function solve_full_model(settings; impose_E_monotonicity_constraints = true, da
                     iterations = settings.transition_iterations)
     # append front_nodes_appended in front if needed
     E_nodes = front_nodes_appended == nothing ? E_nodes : [front_nodes_appended; E_nodes]
-    solution = solve_model_from_E_nodes(E_nodes, settings; detailed_solution = true)
+    solution = solve_model_from_E_nodes(E_nodes, settings; detailed_solution = true, interp = settings.transition_interpolation_function)
     # output caching
     if write_data && datadir isa String
         filename = joinpath(datadir, cachename * ".csv")

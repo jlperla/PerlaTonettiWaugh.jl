@@ -29,6 +29,7 @@ settings_defaults = @with_kw (z_max = 5,
                                 transition_ub = zeros(length(transition_x0)),
                                 transition_iterations = 1000,
                                 transition_penalty_coefficient = 0.0, # coefficient to be used for a penalty function for constraints on increasing E
+                                transition_interpolation_function = Interpolations.LinearInterpolation,
                                 T_U_bar = 50.0,
                                 tstops = nothing)
 
