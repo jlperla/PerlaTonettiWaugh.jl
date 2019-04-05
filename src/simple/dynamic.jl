@@ -27,8 +27,8 @@ function simpleDAE(params, settings)
 
     # Differential objects
     bc = (Mixed(1), Mixed(1)) # boundary conditions for differential operators
-    L_1_minus = L₁₋(z_ex, bc) # use backward difference as the drift is negative
-    L_2 = L₂(z_ex, bc)
+    L_1_minus = L₁₋bc(z_ex, bc) # use backward difference as the drift is negative
+    L_2 = L₂bc(z_ex, bc)
 
     # Calculate the stationary solution.
     r_T = r(T)

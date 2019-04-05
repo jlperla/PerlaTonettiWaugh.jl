@@ -26,8 +26,8 @@ function stationary_numerical_simple(params, z_ex)
 
     # Differential objects
     bc = (Mixed(1), Mixed(1)) # boundary conditions for differential operators
-    L_1_minus = L₁₋(z_ex, bc) # use backward difference as the drift is negative
-    L_2 = L₂(z_ex, bc)
+    L_1_minus = L₁₋bc(z_ex, bc) # use backward difference as the drift is negative
+    L_2 = L₂bc(z_ex, bc)
 
     Ξ₁ = 1/(1 - 1*(z[1] - 0.0)) # (24)
 
