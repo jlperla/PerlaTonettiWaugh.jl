@@ -609,9 +609,9 @@ version = "0.2.1"
 
 [[SimpleDifferentialOperators]]
 deps = ["LinearAlgebra", "Random", "SparseArrays", "Statistics", "Test"]
-git-tree-sha1 = "bbc9402ae2bf586a5cad61f2f9d3f2a438b26e1b"
+git-tree-sha1 = "f223bd20302d19de13f6b0c101ce63fca3176985"
 uuid = "7ccca996-40d6-5c2f-be7f-4eb2934af9c4"
-version = "0.4.0"
+version = "0.4.1"
 
 [[Sockets]]
 uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
