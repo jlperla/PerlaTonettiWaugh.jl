@@ -59,10 +59,10 @@
     @test sol.results[:v_1][9] ≈ 0.9329809601676073
     @test sol.results[:L_tilde][10] ≈ 0.18929887587415023
     @test sol.results[:λ_ii][11] ≈ 0.8205696004618322
-    @test sol.results[:c][12] ≈ 0.9548509646788975
+    @test sol.results[:c][12] ≈ 1.3801007368941405 
     @test sol.results[:S][4] ≈ -0.013749472948335131
-    @test sol.results[:z_bar][3] ≈ 1.1778088573728906
-    @test sol.results[:π_min][2] ≈ 0.14649422762537112
+    @test sol.results[:z_bar][3] ≈ 1.702354537311347
+    @test sol.results[:π_min][2] ≈ 0.04423572434773227
     @test sol.results[:entry_residual][12] ≈ 2.7166018323754315e-9 atol = 1e-5
 end
 
@@ -92,10 +92,10 @@ end
     @test sol.results[:v_1][9] ≈ 0.98515301205966 atol = 1e-5
     @test sol.results[:L_tilde][10] ≈ 0.160812673571405 atol = 1e-5
     @test sol.results[:λ_ii][11] ≈ 0.8197747097913394 atol = 1e-5
-    @test sol.results[:c][12] ≈ 0.9667053570460247 atol = 1e-5
+    @test sol.results[:c][12] ≈ 1.3988705217099884 atol = 1e-5
     @test sol.results[:S][4] ≈ 0.14915482412907646 atol = 1e-5
-    @test sol.results[:z_bar][3] ≈ 1.2083652214290672 atol = 1e-5
-    @test sol.results[:π_min][2] ≈ 0.2042841017741823 atol = 1e-5
+    @test sol.results[:z_bar][3] ≈ 1.8501628840220694 atol = 1e-5
+    @test sol.results[:π_min][2] ≈ 0.04861652751120392 atol = 1e-5
     @test sol.results[:entry_residual][12] ≈ 0.013589358773159477 atol = 1e-5
     # Sub-pieces of L_tilde
     @test sol.results[:L_tilde_a] + sol.results[:L_tilde_x] + sol.results[:L_tilde_E] ≈ sol.results[:L_tilde]
