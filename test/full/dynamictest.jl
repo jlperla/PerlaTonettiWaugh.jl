@@ -39,30 +39,30 @@
   # Run the solver.
     sol = solve_dynamics(params_T, stationary_T, settings, T, Ω, E)
   # Spot-checks.
-    @test sol.sol.t[5] ≈ 19.840000000000003
-    @test sol.results[:λ_ii][end] ≈ 0.8205696009690461
-    @test sol.sol.u[4][3] ≈ 0.713179042868647
-    @test sol.sol.prob.u0[1] ≈ 0.9329809580656181
+    @test sol.sol.t[5] ≈ 19.840000000000003 atol = 1e-5
+    @test sol.results[:λ_ii][end] ≈ 0.8205696009690461 atol = 1e-5
+    @test sol.sol.u[4][3] ≈ 0.713179042868647 atol = 1e-5
+    @test sol.sol.prob.u0[1] ≈ 0.9329809580656181 atol = 1e-5
   # Consistency checks.
-    @test mean(sol.results[:g]) ≈ 0.006332516508877774 # Probably the most important of these checks.
-    @test mean(sol.results[:z_hat]) ≈ 1.626173967797714
-    @test mean(sol.results[:Ω]) ≈ 1.6928323073432825
+    @test mean(sol.results[:g]) ≈ 0.006332516508877774  atol = 1e-5 # Probably the most important of these checks.
+    @test mean(sol.results[:z_hat]) ≈ 1.626173967797714 atol = 1e-5
+    @test mean(sol.results[:Ω]) ≈ 1.6928323073432825 atol = 1e-5
     @test all(sol.results[:E] .== 0.053)
-    @test mean(sol.results[:S]) ≈ -0.013749473107398985
-    @test mean(sol.results[:L_tilde]) ≈ 0.1892988756097014
+    @test mean(sol.results[:S]) ≈ -0.013749473107398985 atol = 1e-5
+    @test mean(sol.results[:L_tilde]) ≈ 0.1892988756097014 atol = 1e-5
   # Full coverage of each column.
-    @test sol.results[:t][4] == 1.5
-    @test sol.results[:g][5] ≈ 0.006332516539866723
-    @test sol.results[:z_hat][6] ≈ 1.6261739679041103
-    @test sol.results[:Ω][7] ≈ 1.6928323073432825
+    @test sol.results[:t][4] ≈ 1.5 atol = 1e-5
+    @test sol.results[:g][5] ≈ 0.006332516539866723 atol = 1e-5
+    @test sol.results[:z_hat][6] ≈ 1.6261739679041103 atol = 1e-5
+    @test sol.results[:Ω][7] ≈ 1.6928323073432825 atol = 1e-5
     @test sol.results[:E][8] == 0.053
-    @test sol.results[:v_1][9] ≈ 0.9329809601676073
-    @test sol.results[:L_tilde][10] ≈ 0.18929887587415023
-    @test sol.results[:λ_ii][11] ≈ 0.8205696004618322
-    @test sol.results[:c][12] ≈ 1.3801007368941405 
-    @test sol.results[:S][4] ≈ -0.013749472948335131
-    @test sol.results[:z_bar][3] ≈ 1.702354537311347
-    @test sol.results[:π_min][2] ≈ 0.04423572434773227
+    @test sol.results[:v_1][9] ≈ 0.9329809601676073 atol = 1e-5
+    @test sol.results[:L_tilde][10] ≈ 0.18929887587415023 atol = 1e-5
+    @test sol.results[:λ_ii][11] ≈ 0.8205696004618322 atol = 1e-5
+    @test sol.results[:c][12] ≈ 1.3801007368941405 atol = 1e-5
+    @test sol.results[:S][4] ≈ -0.013749472948335131 atol = 1e-5
+    @test sol.results[:z_bar][3] ≈ 1.702354537311347 atol = 1e-5
+    @test sol.results[:π_min][2] ≈ 0.04423572434773227 atol = 1e-5
     @test sol.results[:entry_residual][12] ≈ 2.7166018323754315e-9 atol = 1e-5
 end
 
