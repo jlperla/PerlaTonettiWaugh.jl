@@ -26,7 +26,7 @@ export params_simple, settings_simple
 export solve_simple_dae
 export stationary_algebraic, stationary_numerical, simpleDAE, stationary_algebraic_simple, stationary_numerical_simple, ω_weights, solve_dynamics, welfare
 export weighted_residuals_given_E_nodes_interior
-export solve_full_model
+export solve_transition
 export consumption_equivalent, display_stationary_sol
 export f!, f!_simple, f_simple, solve_system
 

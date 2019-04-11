@@ -43,7 +43,7 @@ function solve_full_model_global(settings; impose_E_monotonicity_constraints = t
     return (solution = solve_model_from_E_nodes(E_nodes_found, settings; detailed_solution = true), E_nodes = E_nodes_found)
 end
 
-function solve_full_model(settings; impose_E_monotonicity_constraints = true, run_global = true, front_nodes_appended = nothing)
+function solve_transition(settings; impose_E_monotonicity_constraints = true, run_global = true, front_nodes_appended = nothing)
     
     if run_global 
         result = solve_full_model_global(settings, impose_E_monotonicity_constraints = impose_E_monotonicity_constraints, front_nodes_appended = front_nodes_appended)
