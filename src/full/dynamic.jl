@@ -31,14 +31,14 @@ end
 
 # Calculate the transition dynamics given a fixed Ω(t), E(t) function
 # To calculate the full equilibrium, you can solve until Ω(t), E(t) fulfill free-entry conditions
-function solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed_solution = true)
+function solve_dynamics(parameters, stationary_sol_T, settings, T, Ω, E; detailed_solution = true)
 
     if (T < settings.T_U_bar)
         throw("Terminal time `T` should be large enough so that T >= settings.T_U_bar is satisfied.")
     end
 
     # Unpack arguments
-    @unpack ρ, σ, N, θ, γ, d_T, κ, ζ, η, Theta, χ, υ, μ, δ = params_T
+    @unpack ρ, σ, N, θ, γ, d_T, κ, ζ, η, Theta, χ, υ, μ, δ = parameters
     d = d_T # for convenience
     @unpack z, z_ex, T_U_bar, tstops = settings
     @assert γ ≈ 1 # These are the only supported parameters for the transition dynamics at this point
