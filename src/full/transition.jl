@@ -1,47 +1,31 @@
-#=
-  Functions to solve the model (i.e., return equilibrium quantities and a set of E nodes to interpolate) on a transition from one steady state to another.
-
-  The first set of functions are caller functions, which users would interact with. Then come the auxiliary functions used by the callers.
-=#
-
+# Functions to solve the model (i.e., return equilibrium quantities and a set of E nodes to interpolate) on a transition from one steady state to another.
 # Global solver.
-function solve_full_model_global(settings; impose_E_monotonicity_constraints = true, front_nodes_appended = nothing)
-
+function solve_transition_global(parameters, settings)
+    @unpack impose_E_monotonicity_constraints = settings
     # setup range and objective for bboptimize
     try 
         ranges = map(i->(settings.transition_lb[i], settings.transition_ub[i]), 1:length(settings.transition_ub))
     catch e 
-        @warn "Couldn't construct the errors from (lb, ub). Make sure the sizes of weights, x0, ub, lb all agree."
+        @warn "Couldn't construct the ranges (lb[i], ub[i]). Make sure the sizes of weights, x0, ub, lb all agree."
         throw(e)
     end 
-
-    # run solver and process result
+    # define objective function 
     ssr(residuals) = sum(residuals.^2) + settings.transition_penalty_coefficient * sum(max.(-diff(residuals), 0.0)) # add penalty for non-increasing sol
-    
-    function bb_objective(x)
-        if (impose_E_monotonicity_constraints)
-            sort!(x)
-        end
-        return ssr(weighted_residuals_given_E_nodes_interior(x, settings,front_nodes_appended = front_nodes_appended))
-    end
-  
+    bb_objective(x) = (impose_E_monotonicity_constraints) ? ssr(weighted_residuals(sort(x), parameters, settings)) : ssr(weighted_residuals(x, parameters, settings))
+    # run solver 
     result = bboptimize(bb_objective, SearchRange = ranges, NumDimensions = length(ranges), MaxSteps = settings.transition_iterations)
-
-    E_nodes_found = best_candidate(result)
-    E_nodes_found = impose_E_monotonicity_constraints ? sort(E_nodes_found) : E_nodes_found
-    # return
-    return (solution = solve_model_from_E_nodes(E_nodes_found, settings; detailed_solution = true), E_nodes = E_nodes_found)
+    # process and return results 
+    E_nodes_found = impose_E_monotonicity_constraints ? sort(best_candidate(result)) : best_candidate(result)
+    return E_nodes_found
 end
 
 function solve_transition(parameters, settings)
-    @unpack impose_E_monotonicity_constraints, run_global, front_nodes_appended = settings
-
-    if run_global 
-        result = solve_full_model_global(settings, impose_E_monotonicity_constraints = impose_E_monotonicity_constraints, front_nodes_appended = front_nodes_appended)
-        E_nodes = result.E_nodes
-        settings = merge(settings, (transition_x0 = E_nodes, ))
+    x0 = settings.transition_x0 
+    # run global if requested 
+    if settings.run_global 
+        result = solve_transition_global(parameters, settings)
+        x0 = result.E_nodes
     end 
-
     # linear constraint for increasing E nodes
     function constraints_increasing_E!(h, x, jacobian_t)
         L = length(x)
@@ -54,56 +38,61 @@ function solve_transition(parameters, settings)
         end
         h .= A*x
     end
-
     # run the local (NLopt) solver
-    nlopt_objective(x) =  weighted_residuals_given_E_nodes_interior(x, settings; front_nodes_appended = front_nodes_appended)
-    E_nodes = solve_system(nlopt_objective, settings.transition_x0;
+    nlopt_objective(x) =  weighted_residuals(x, parameters, settings)
+    E_nodes = solve_system(nlopt_objective, x0;
                     lb = nothing, 
-                    ub = fill(0.0, length(settings.transition_x0)),
+                    ub = fill(0.0, length(x0)),
                     constraints_fg! = impose_E_monotonicity_constraints ? constraints_increasing_E! : nothing,
                     algorithm = impose_E_monotonicity_constraints ? :LD_SLSQP : :LD_LBFGS,
                     iterations = settings.transition_iterations)
-    # append front_nodes_appended in front if needed
-    E_nodes = front_nodes_appended == nothing ? E_nodes : [front_nodes_appended; E_nodes]
+    # process solution and return 
     solution = solve_model_from_E_nodes(E_nodes, settings; detailed_solution = true, interp = settings.transition_interpolation_function)
-    
-    # return
+    # TODO: CACHING 
     return (solution = solution, E_nodes = E_nodes)
 end
 
-# Returns model solution (i.e., solve_dynamics output) given a set of E nodes. Used by all solvers.
-function solve_model_from_E_nodes(E_nodes_interior, settings; detailed_solution = false, interp = LinearInterpolation)
-    @unpack T, params_T, stationary_sol_T, Ω_0 = settings
-    δ = params_T.δ
-    Ω_T = stationary_sol_T.Ω
+function weighted_residuals(E_nodes_interior, parameters, settings)
+    entry_residuals_nodes_count = length(E_nodes_interior)
+    # solve the model using E_nodes
+    solved = try solve_model_from_E_nodes(E_nodes_interior, parameters, settings).results catch; return fill(10e20, entry_residuals_nodes_count) end
+    entry_residual_interpolated = LinearInterpolation(solved.t, solved.entry_residual)
+    entry_residuals_nodes = range(0, stop = solved.t[end], length = entry_residuals_nodes_count + 2)
+    # return 
+    return settings.weights .* entry_residual_interpolated.(entry_residuals_nodes[2:(end-1)])
+  end
 
-    # fix the point at T to be zero and sort candidate if needed
+# Returns model solution (i.e., solve_dynamics output) given a set of E nodes. Used by all solvers.
+function solve_model_from_E_nodes(E_nodes_interior, parameters, settings; detailed_solution = false, interp = LinearInterpolation)
+    @unpack T = settings 
+    @unpack d_0, d_T, δ = parameters 
+    params_T = merge(parameters, (d = d_T,)) 
+    params_0 = merge(parameters, (d = d_0,))
+
+    stationary_sol_T = stationary_algebraic(params_T)
+    stationary_sol_0 = stationary_algebraic(params_0)
+    Ω_T = stationary_sol_T.Ω
+    Ω_0 = stationary_sol_0.Ω
+
+    # formulate and solve the DAEProblem
+    @unpack Ω, E = Ω_E_funcs(E_nodes_interior, Ω_T, Ω_0, parameters)
+    return solve_dynamics(parameters, stationary_sol_T, settings, T, Ω, E; detailed_solution = detailed_solution)
+end
+
+function Ω_E_funcs(E_nodes_interior, Ω_T, Ω_0, parameters)
+    @unpack δ, T = parameters
     E_nodes = [-1.0; E_nodes_interior; 0.0] # See footnote 19.  Without pinning a corner there is an extra degree of freedom in the scale
     ts = range(0.0, T, length=length(E_nodes))
+
     E_hat_interpolation = interp(ts, E_nodes) # might worth trying cubic spline
     E_hat(t) = E_hat_interpolation(t)
     E_hat_integral = quadgk(E_hat, 0, T)[1] # (42)
-
-    # Formulate and solve ODEProblem
     Q = log(Ω_T/Ω_0) / E_hat_integral # (42) when Ω_T = Ω_0, then Q = 0 so that E(t) is constant with δ as expected
-    Ω_derivative(Ω,p,t) = Q*E_hat(t)*Ω # (44)
-    Ω_solution = DifferentialEquations.solve(ODEProblem(Ω_derivative,Ω_0,(0.0, T)), reltol = 1e-15) # if this fails, error will be thrown
-    Ω(t) = t <= T ? Ω_solution(t) : Ω_solution(T)
     E(t) = Q*E_hat(t) + δ # (43)
 
-    # solve the dynamics and get the resulting entry_residual vector; if solution is not valid, return Inf
-    return solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed_solution = detailed_solution)
-end
+    Ω_derivative(Ω,p,t) = Q*E_hat(t)*Ω # (44)
+    Ω_solution = DifferentialEquations.solve(ODEProblem(Ω_derivative, Ω_0, (0.0, T)), reltol = 1e-15) # if this fails, error will be thrown
+    Ω(t) = t <= T ? Ω_solution(t) : Ω_solution(T)
 
-function weighted_residuals_given_E_nodes_interior(E_nodes_interior, settings; front_nodes_appended = nothing)
-  entry_residuals_nodes_count = length(E_nodes_interior)
-  # append front_nodes_appended in front if needed
-  E_nodes_interior = front_nodes_appended == nothing ? E_nodes_interior : [front_nodes_appended; E_nodes_interior]
-
-  # solve the model using E_nodes_interior received
-  solved = try solve_model_from_E_nodes(E_nodes_interior, settings).results catch; return fill(10e20, entry_residuals_nodes_count) end
-  entry_residual_interpolated = LinearInterpolation(solved.t, solved.entry_residual)
-  entry_residuals_nodes = range(0, stop = solved.t[end], length = entry_residuals_nodes_count + 2)
-
-  return settings.weights .* entry_residual_interpolated.(entry_residuals_nodes[2:(end-1)])
-end
+    return (Ω = Ω, E = E)
+end 
