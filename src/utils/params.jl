@@ -28,7 +28,7 @@ settings_defaults = @with_kw (z_max = 5,
                                 fifty_node_iv = [-1.00157, -0.848157, -0.821211, -0.821211, -0.821211, -0.748497, -0.633587, -0.527711, -0.498239, -0.498239, -0.498239, -0.498239, -0.3316, -0.3316, -0.3316, -0.3316, -0.3316, -0.281318, -0.281318, -0.281318, -0.281318, -0.281318, -0.241756, -0.230492, -0.168434, -0.168434, -0.168434, -0.168434, -0.105236, -0.103655, -0.103655, -0.0787871, -0.0787871, -0.0787871, -0.0787871, -0.0787871, -0.0787871, -0.0713765, -0.0713765, -0.0713765, -0.0713765, -0.0343871, -0.0334064, -0.0334064, -0.029373, -0.029373, -0.029373, -0.029373, -0.029373, -0.029373],
                                 transition_lb = transition_x0 .- 1e-4,
                                 transition_ub = transition_x0 .+ 1e-4,
-                                transition_iterations = 1000,
+                                transition_iterations = 10000,
                                 transition_penalty_coefficient = 1.0, # coefficient to be used for a penalty function for constraints on increasing E
                                 interp = Interpolations.LinearInterpolation,
                                 T_U_bar = 50.0,
