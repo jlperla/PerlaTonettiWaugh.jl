@@ -6,25 +6,27 @@
 
 # Global solver.
 function solve_full_model_global(settings; impose_E_monotonicity_constraints = true, front_nodes_appended = nothing)
-    # replace invalid initial conditions
+    # warn the user about inputs 
     if (length(settings.transition_lb) != length(settings.transition_ub))
-        @error "length(settings.transition_lb) != length(settings.transition_ub)"
+        @warn "lb and ub sizes differ; this could cause problems"
     end
     if (length(settings.transition_x0) != length(settings.transition_ub) )
-        @warn "transition_x0 and transition_ub sizes differ; setting ub to zeros(size(transition_x0))"
-        settings = merge(settings, (transition_ub = fill(0.0, length(settings.transition_x0)),))
+        @warn "x0 and ub sizes differ; this could cause problems"
     end
     if (length(settings.transition_x0) != length(settings.transition_lb))
-        @warn "transition_x0 and transition_lb sizes differ; setting lb to -1*ones(size(transition_x0))"
-        settings = merge(settings, (transition_lb = fill(-1.0, length(settings.transition_x0)),))
+        @warn "x0 and lb sizes differ; this could cause problems"
     end
     if (length(settings.transition_x0) != length(settings.weights))
-        @warn "transition_x0 and weights sizes differ; setting weights to default function"
-        settings = merge(settings, (weights = (x -> x < 10 ? 10. - x : 1.).(1:1:length(settings.transition_x0)),))
+        @warn "x0 and weights sizes differ; this could cause problem"
     end
 
     # setup range and objective for bboptimize
-    ranges = map(i->(settings.transition_lb[i], settings.transition_ub[i]), 1:length(settings.transition_ub))
+    try 
+        ranges = map(i->(settings.transition_lb[i], settings.transition_ub[i]), 1:length(settings.transition_ub))
+    catch e 
+        @warn "Couldn't construct the errors from (lb, ub). Fix any size warnings."
+        throw(e)
+    end 
     # run solver and process result
     ssr(residuals) = sum(residuals.^2) + settings.transition_penalty_coefficient * sum(max.(-diff(residuals), 0.0)) # add penalty for non-increasing sol
     
@@ -45,6 +47,7 @@ end
 
 function solve_transition(parameters, settings)
     @unpack impose_E_monotonicity_constraints, run_global, front_nodes_appended = settings
+
     if run_global 
         result = solve_full_model_global(settings, impose_E_monotonicity_constraints = impose_E_monotonicity_constraints, front_nodes_appended = front_nodes_appended)
         E_nodes = result.E_nodes
@@ -63,6 +66,7 @@ function solve_transition(parameters, settings)
         end
         h .= A*x
     end
+
     # run the local (NLopt) solver
     nlopt_objective(x) =  weighted_residuals_given_E_nodes_interior(x, settings; front_nodes_appended = front_nodes_appended)
     E_nodes = solve_system(nlopt_objective, settings.transition_x0;
