@@ -21,8 +21,8 @@
   params_T = merge(params, (d = d_T,))
 
 # Get (numerical) stationary solution.
-  stationary_0 = stationary_numerical(params_0, z_ex)
-  stationary_T = stationary_numerical(params_T, z_ex)
+  stationary_0 = stationary_numerical(params_0, settings_defaults(z_ex = z_ex))
+  stationary_T = stationary_numerical(params_T, settings_defaults(z_ex = z_ex))
 
 # Process those
   Ω_0 = stationary_0.Ω
