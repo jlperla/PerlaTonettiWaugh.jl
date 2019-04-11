@@ -15,7 +15,7 @@
 # Execute tests.
 @testset "Tests with Vanilla Parameters" begin
     # Compute algebraic solutions.
-    algebraic_sols = stationary_algebraic.(Ref(baseline), initial_values)
+    algebraic_sols = [stationary_algebraic(baseline, settings_defaults(z_ex = grid, stationary_x0 = iv)) for grid in grids, iv in initial_values]
     # Test algebraic equilibrium quantities.
     # Growth rate tests.
     algebraic_gs = (x -> x.g).(algebraic_sols)
@@ -31,7 +31,7 @@
     @test all(algebraic_zs .≈ 1.434969541725385)
 
     # Compute numerical solutions.
-    numerical_sols = stationary_numerical.(Ref(baseline), grids)
+    numerical_sols = [stationary_numerical(baseline, settings_defaults(z_ex = grid)) for grid in grids]
     # Test numerical equilibrium quantities.
     numerical_gs = (x -> x.g).(numerical_sols)
     @test var(numerical_gs) < 1e-6 # Tests that the solutions are similar to one another.
@@ -61,7 +61,7 @@ end
     # Generate new parameters.
     newparams = params(σ = 4.0) # Arbitrary change.
     # Compute algebraic solutions.
-    algebraic_sols = stationary_algebraic.(Ref(newparams), initial_values)
+    algebraic_sols = [stationary_algebraic(newparams, settings_defaults(z_ex = grid, stationary_x0 = iv)) for grid in grids, iv in initial_values]
     # Test consistency.
     algebraic_gs = (x -> x.g).(algebraic_sols)
     algebraic_Ωs = (x -> x.Ω).(algebraic_sols)
@@ -71,7 +71,7 @@ end
     @test var(algebraic_zs) < 1e-6
 
     # Compute numerical solutions.
-    numerical_sols = stationary_numerical.(Ref(newparams), grids)
+    numerical_sols = [stationary_numerical(newparams, settings_defaults(z_ex = grid)) for grid in grids]
     # Test consistency.
     numerical_gs = (x -> x.g).(numerical_sols)
     numerical_Ωs = (x -> x.Ω).(numerical_sols)

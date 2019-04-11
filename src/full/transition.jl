@@ -74,9 +74,9 @@ function solve_model_from_E_nodes(E_nodes_interior, parameters, settings; detail
     # calculate stationary objects
     params_T = merge(parameters, (d = d_T,)) 
     params_0 = merge(parameters, (d = d_0,))
-    stationary_sol_T = stationary_numerical(params_T, z_ex)
+    stationary_sol_T = stationary_numerical(params_T, settings)
     Ω_T = stationary_sol_T.Ω
-    Ω_0 = stationary_numerical(params_0, z_ex).Ω
+    Ω_0 = stationary_numerical(params_0, settings).Ω
     
     # formulate and solve the DAEproblem
     @unpack Ω, E = Ω_E_funcs(E_nodes_interior, Ω_T, Ω_0, parameters, settings)
