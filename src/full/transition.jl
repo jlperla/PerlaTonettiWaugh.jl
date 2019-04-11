@@ -6,27 +6,15 @@
 
 # Global solver.
 function solve_full_model_global(settings; impose_E_monotonicity_constraints = true, front_nodes_appended = nothing)
-    # warn the user about inputs 
-    if (length(settings.transition_lb) != length(settings.transition_ub))
-        @warn "lb and ub sizes differ; this could cause problems"
-    end
-    if (length(settings.transition_x0) != length(settings.transition_ub) )
-        @warn "x0 and ub sizes differ; this could cause problems"
-    end
-    if (length(settings.transition_x0) != length(settings.transition_lb))
-        @warn "x0 and lb sizes differ; this could cause problems"
-    end
-    if (length(settings.transition_x0) != length(settings.weights))
-        @warn "x0 and weights sizes differ; this could cause problem"
-    end
 
     # setup range and objective for bboptimize
     try 
         ranges = map(i->(settings.transition_lb[i], settings.transition_ub[i]), 1:length(settings.transition_ub))
     catch e 
-        @warn "Couldn't construct the errors from (lb, ub). Fix any size warnings."
+        @warn "Couldn't construct the errors from (lb, ub). Make sure the sizes of weights, x0, ub, lb all agree."
         throw(e)
     end 
+
     # run solver and process result
     ssr(residuals) = sum(residuals.^2) + settings.transition_penalty_coefficient * sum(max.(-diff(residuals), 0.0)) # add penalty for non-increasing sol
     
