@@ -1,12 +1,10 @@
 # Functions to solve the model (i.e., return equilibrium quantities and a set of E nodes to interpolate) on a transition from one steady state to another.
 # Global solver.
 function solve_transition_global(parameters, settings)
-    ranges = try # define bounds for each dimension 
-        map(i->(settings.transition_lb[i], settings.transition_ub[i]), 1:length(settings.transition_ub))
-    catch e 
-        @warn "Couldn't construct the ranges (lb[i], ub[i]). Make sure the sizes of weights, x0, ub, lb all agree."
-        throw(e)
-    end 
+    @assert size(settings.transition_lb) == size(settings.transition_ub) "Lower and upper bound vector lengths disagree."
+    @assert size(settings.transition_x0) == size(settings.weights) "x0 and weight vector lengths disagree."
+    @assert size(settings.transition_x0) == size(settings.transition_lb) "x0 and bound vector lengths disagree."
+    ranges = map(i->(settings.transition_lb[i], settings.transition_ub[i]), 1:length(settings.transition_ub))
     
     # define objective function 
     ssr(residuals) = sum(residuals.^2) + settings.transition_penalty_coefficient * sum(max.(-diff(residuals), 0.0)) # add penalty for non-increasing sol
@@ -54,7 +52,7 @@ function solve_transition(parameters, settings)
     cachepath = joinpath(pwd(), "data", cachename)
     CSV.write(cachepath * ".csv", solution.results) # write DataFrame 
     write(cachepath * ".json", JSON.json(parameters)) # write parameters (can't always serialize full settings)
-    return (solution = solution, E_nodes = E_nodes)
+    return (solution = solution, results = solution.results, E_nodes = E_nodes)
 end
 
 function weighted_residuals(E_nodes_interior, parameters, settings)
