@@ -45,7 +45,7 @@ end
 
 function solve_full_model(settings; impose_E_monotonicity_constraints = true, run_global = true, front_nodes_appended = nothing)
     
-    if run_global # run global solver if asked for 
+    if run_global 
         result = solve_full_model_global(settings, impose_E_monotonicity_constraints = impose_E_monotonicity_constraints, front_nodes_appended = front_nodes_appended)
         E_nodes = result.E_nodes
         settings = merge(settings, (transition_x0 = E_nodes, ))
