@@ -38,8 +38,7 @@ function solve_dynamics(parameters, stationary_sol_T, settings, T, Ω, E; detail
     end
 
     # Unpack arguments
-    @unpack ρ, σ, N, θ, γ, d_T, κ, ζ, η, Theta, χ, υ, μ, δ = parameters
-    d = d_T # for convenience
+    @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = parameters
     @unpack z, z_ex, T_U_bar, tstops = settings
     @assert γ ≈ 1 # These are the only supported parameters for the transition dynamics at this point
     @assert η == 0
