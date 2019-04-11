@@ -43,20 +43,9 @@ function solve_full_model_global(settings; impose_E_monotonicity_constraints = t
     return (solution = solve_model_from_E_nodes(E_nodes_found, settings; detailed_solution = true), E_nodes = E_nodes_found)
 end
 
-function solve_full_model(settings; impose_E_monotonicity_constraints = true, datadir = "data", write_data = true, run_global = true, front_nodes_appended = nothing, read_data = true)
-
-    # check for inputs and solution  
-    datapath = joinpath(pwd(), datadir)
-    if isdir(datapath) == true && read_data == true
-        list = readdir(datapath)
-        cachename = join(hash(settings.params_T))
-        if cachename * ".csv" in list 
-            println("Cache found; returning data.")
-            return (data = CSV.read(joinpath(datapath, string(cachename) * ".csv")),) # return the cache. different name reflects different code branch.
-        else 
-            @warn "no cache found in $datapath, or it doesn't exist."
-        end
-    elseif settings.transition_iterations < 1 # bail out with solution on supplied nodes 
+function solve_full_model(settings; impose_E_monotonicity_constraints = true, run_global = true, front_nodes_appended = nothing)
+    
+    if settings.transition_iterations < 1 # bail out with solution on supplied nodes 
         E_nodes_interior = settings.transition_x0
         return (solution = solve_model_from_E_nodes(E_nodes_interior, settings, detailed_solution = true), E_nodes = E_nodes_interior)
     elseif run_global # run global solver if asked for 
@@ -88,15 +77,6 @@ function solve_full_model(settings; impose_E_monotonicity_constraints = true, da
     # append front_nodes_appended in front if needed
     E_nodes = front_nodes_appended == nothing ? E_nodes : [front_nodes_appended; E_nodes]
     solution = solve_model_from_E_nodes(E_nodes, settings; detailed_solution = true, interp = settings.transition_interpolation_function)
-    # output caching
-    if write_data && datadir isa String
-        filename = joinpath(datadir, cachename * ".csv")
-        paramsname = joinpath(datadir, cachename * ".json")
-        CSV.write(filename, solution.results)
-        println("Results written to $(filename)")
-        write(paramsname, JSON.json(settings))
-        println("Settings written to $(paramsname)")
-    end
     
     # return
     return (solution = solution, E_nodes = E_nodes)
