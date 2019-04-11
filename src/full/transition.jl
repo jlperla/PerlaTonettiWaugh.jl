@@ -45,10 +45,7 @@ end
 
 function solve_full_model(settings; impose_E_monotonicity_constraints = true, run_global = true, front_nodes_appended = nothing)
     
-    if settings.transition_iterations < 1 # bail out with solution on supplied nodes 
-        E_nodes_interior = settings.transition_x0
-        return (solution = solve_model_from_E_nodes(E_nodes_interior, settings, detailed_solution = true), E_nodes = E_nodes_interior)
-    elseif run_global # run global solver if asked for 
+    if run_global # run global solver if asked for 
         result = solve_full_model_global(settings, impose_E_monotonicity_constraints = impose_E_monotonicity_constraints, front_nodes_appended = front_nodes_appended)
         E_nodes = result.E_nodes
         settings = merge(settings, (transition_x0 = E_nodes, ))
