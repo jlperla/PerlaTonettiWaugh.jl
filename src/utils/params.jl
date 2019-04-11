@@ -35,7 +35,7 @@ settings_defaults = @with_kw (z_max = 5,
                                 tstops = nothing,
                                 impose_E_monotonicity_constraints = true,
                                 run_global = true,
-                                stationary_x0 = [0.02; 18.94; 17.07])
+                                stationary_x0 = [0.02; 2; .57])
 
 # Simple model objects 
 params_simple  = @with_kw (μ = 0.0048, υ = 0.02, θ = 2.1, r = 0.05, ζ = 14.5, ξ = 1.0, π = x -> 1, x = t -> ζ)
