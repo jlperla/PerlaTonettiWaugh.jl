@@ -16,7 +16,7 @@ parameter_defaults = @with_kw (ρ = 0.0215,
                                 d_T = 1 + (d_0-1)*0.9)
 
 settings_defaults = @with_kw (z_max = 5,
-                                z_ex = unique([range(0., 0.1, length = 400)' range(0.1, 1., length = 400)' range(1., z_max, length = 100+2)']),
+                                z_ex = unique([range(0., 0.1, length = 150)' range(0.1, 1., length = 100)' range(1., 5, length = 50)']),
                                 z = z_ex[2:end-1],
                                 Δ_E = 1e-6,
                                 ode_solve_algorithm = CVODE_BDF(),
@@ -29,7 +29,7 @@ settings_defaults = @with_kw (z_max = 5,
                                 transition_lb = -ones(length(transition_x0)),
                                 transition_ub = zeros(length(transition_x0)),
                                 transition_iterations = 1000,
-                                transition_penalty_coefficient = 0.0, # coefficient to be used for a penalty function for constraints on increasing E
+                                transition_penalty_coefficient = 1.0, # coefficient to be used for a penalty function for constraints on increasing E
                                 transition_interpolation_function = Interpolations.LinearInterpolation,
                                 T_U_bar = 50.0,
                                 tstops = nothing)
