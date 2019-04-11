@@ -33,7 +33,10 @@ settings_defaults = @with_kw (z_max = 5,
                                 transition_penalty_coefficient = 1.0, # coefficient to be used for a penalty function for constraints on increasing E
                                 transition_interpolation_function = Interpolations.LinearInterpolation,
                                 T_U_bar = 50.0,
-                                tstops = nothing)
+                                tstops = nothing,
+                                impose_E_monotonicity_constraints = true,
+                                run_global = true,
+                                front_nodes_appended = nothing)
 
 # Simple model objects 
 params_simple  = @with_kw (μ = 0.0048, υ = 0.02, θ = 2.1, r = 0.05, ζ = 14.5, ξ = 1.0, π = x -> 1, x = t -> ζ)
