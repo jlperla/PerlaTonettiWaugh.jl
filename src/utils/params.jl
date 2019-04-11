@@ -12,7 +12,8 @@ parameter_defaults = @with_kw (ρ = 0.0215,
                                 υ = 0.0484 , 
                                 μ = -0.0189,
                                 δ = 0.02,
-                                d = 3.0426)
+                                d_0 = 3.0426,
+                                d_T = 1 + (d_0-1)*0.9)
 
 settings_defaults = @with_kw (z_max = 5,
                                 z_ex = unique([range(0., 0.1, length = 400)' range(0.1, 1., length = 400)' range(1., z_max, length = 100+2)']),
