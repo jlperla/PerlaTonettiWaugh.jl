@@ -1,9 +1,8 @@
 # Functions to solve the model (i.e., return equilibrium quantities and a set of E nodes to interpolate) on a transition from one steady state to another.
 # Global solver.
 function solve_transition_global(parameters, settings)
-    # define bounds 
-    try 
-        ranges = map(i->(settings.transition_lb[i], settings.transition_ub[i]), 1:length(settings.transition_ub))
+    ranges = try # define bounds for each dimension 
+        map(i->(settings.transition_lb[i], settings.transition_ub[i]), 1:length(settings.transition_ub))
     catch e 
         @warn "Couldn't construct the ranges (lb[i], ub[i]). Make sure the sizes of weights, x0, ub, lb all agree."
         throw(e)
@@ -20,10 +19,8 @@ function solve_transition_global(parameters, settings)
 end
 
 function solve_transition(parameters, settings)
-    @unpack impose_E_monotonicity_constraints, transition_iterations = settings
-    
     # run global if requested 
-    if run_global 
+    if settings.run_global 
         x0 = solve_transition_global(parameters, settings)
     else 
         x0 = settings.transition_x0 
@@ -47,12 +44,12 @@ function solve_transition(parameters, settings)
     E_nodes = solve_system(nlopt_objective, x0;
                     lb = nothing, 
                     ub = fill(0.0, length(x0)),
-                    constraints_fg! = impose_E_monotonicity_constraints ? constraints_increasing_E! : nothing,
-                    algorithm = impose_E_monotonicity_constraints ? :LD_SLSQP : :LD_LBFGS,
-                    iterations = transition_iterations)
+                    constraints_fg! = settings.impose_E_monotonicity_constraints ? constraints_increasing_E! : nothing,
+                    algorithm = settings.impose_E_monotonicity_constraints ? :LD_SLSQP : :LD_LBFGS,
+                    iterations = settings.transition_iterations)
     
     # solve, cache, and return 
-    solution = solve_model_from_E_nodes(E_nodes, settings; detailed_solution = true)
+    solution = solve_model_from_E_nodes(E_nodes, parameters, settings; detailed_solution = true)
     cachename = join(hash(merge(parameters, settings)))
     cachepath = joinpath(pwd(), "data", cachename)
     CSV.write(cachepath * ".csv", solution.results) # write DataFrame 
@@ -73,23 +70,24 @@ function weighted_residuals(E_nodes_interior, parameters, settings)
 
 # Returns model solution (i.e., solve_dynamics output) given a set of E nodes. Used by all solvers.
 function solve_model_from_E_nodes(E_nodes_interior, parameters, settings; detailed_solution = false)
-    @unpack T, interp = settings 
+    @unpack T, interp, z_ex = settings 
     @unpack d_0, d_T, δ = parameters 
     
     # calculate stationary objects
     params_T = merge(parameters, (d = d_T,)) 
     params_0 = merge(parameters, (d = d_0,))
-    stationary_sol_T = stationary_algebraic(params_T)
+    stationary_sol_T = stationary_numerical(params_T, z_ex)
     Ω_T = stationary_sol_T.Ω
-    Ω_0 = stationary_algebraic(params_0).Ω
+    Ω_0 = stationary_numerical(params_0, z_ex).Ω
     
     # formulate and solve the DAEproblem
-    @unpack Ω, E = Ω_E_funcs(E_nodes_interior, Ω_T, Ω_0, parameters)
+    @unpack Ω, E = Ω_E_funcs(E_nodes_interior, Ω_T, Ω_0, parameters, settings)
     return solve_dynamics(parameters, stationary_sol_T, settings, T, Ω, E; detailed_solution = detailed_solution)
 end
 
-function Ω_E_funcs(E_nodes_interior, Ω_T, Ω_0, parameters)
-    @unpack δ, T = parameters
+function Ω_E_funcs(E_nodes_interior, Ω_T, Ω_0, parameters, settings)
+    @unpack δ = parameters
+    @unpack T, interp = settings
     E_nodes = [-1.0; E_nodes_interior; 0.0] # See footnote 19.  Without pinning a corner there is an extra degree of freedom in the scale
     ts = range(0.0, T, length=length(E_nodes))
 
