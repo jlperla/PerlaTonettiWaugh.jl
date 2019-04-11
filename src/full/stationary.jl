@@ -1,9 +1,10 @@
 # Implements the algebraic stationary solution for the full model. Returns the equilibrium quantities (g, Ω, π) determined by equations H.15-H.17.
 
 # Gives us the (full algebraic) stationary solution for a set of params and an initial x.
-function stationary_algebraic(params, init_x = [0.02; 2.0; 0.57])
+function stationary_algebraic(params, settings)
+    stationary_x0 = settings.stationary_x0
     @assert params.υ > 0 && params.κ > 0 # validate params
-    g, z_hat, Ω = solve_system(x -> stationary_algebraic_aux(x, params), init_x)
+    g, z_hat, Ω = solve_system(x -> stationary_algebraic_aux(x, params), stationary_x0)
     @assert z_hat > 1 && Ω > 0 && g > 0 # validate solution
     staticvalues = staticvals([g, z_hat, Ω], params)
     return merge(staticvalues, merge((g = g, z_hat = z_hat, Ω = Ω), welfare([g, z_hat, Ω], params, staticvalues))) # calculate quantities and return
@@ -64,7 +65,8 @@ function staticvals(vals, params)
 end
 
 # Numerical method checking the stationary solution to the ODE.  In general, use the analtyic when only looking at steady states but this provides guidance on the convergence and accuracy of the finite-difference methods.
-function stationary_numerical(params, z_ex, init_x = [0.02; 18.94; 17.07])
+function stationary_numerical(params, settings)
+    @unpack z_ex, stationary_x0 = settings
     # Unpack params and settings.
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params
     @assert params.υ > 0 && params.κ > 0 # Parameter validation
@@ -94,7 +96,7 @@ function stationary_numerical(params, z_ex, init_x = [0.02; 18.94; 17.07])
                 π_min - (1 - L_tilde)/((σ-1)*z_bar^(σ-1))] # (38), from the static equilibrium
     end
 
-    g_T, z_hat_T, Ω_T = solve_system(stationary_numerical_given_vals, init_x)
+    g_T, z_hat_T, Ω_T = solve_system(stationary_numerical_given_vals, stationary_x0)
 
     # Grab static objects at steady-state and recreate the steady-state objects using the g, z_hat, Ω.
     staticvalues = staticvals([g_T, z_hat_T, Ω_T], params)
