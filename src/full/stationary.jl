@@ -94,7 +94,7 @@ function stationary_numerical(params, z_ex, init_x = [0.02; 18.94; 17.07]; kwarg
                 π_min - (1 - L_tilde)/((σ-1)*z_bar^(σ-1))] # (38), from the static equilibrium
     end
 
-    g_T, z_hat_T, Ω_T = solve_system(stationary_numerical_given_vals, [0.02; 18.94; 17.07])
+    g_T, z_hat_T, Ω_T = solve_system(stationary_numerical_given_vals, init_x)
 
     # Grab static objects at steady-state and recreate the steady-state objects using the g, z_hat, Ω.
     staticvalues = staticvals([g_T, z_hat_T, Ω_T], params)
