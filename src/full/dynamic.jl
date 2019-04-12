@@ -1,3 +1,17 @@
+function static_equilibrium(v_1, g, z_hat, E_t, Ω_t)
+    # S_t = S(g)
+    # L_tilde_t = L_tilde(S_t, z_hat, E_t, Ω_t)
+    z_bar = (Ω_t * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ)))^(1/(σ-1))  # (37)
+    # w = ((σ-1)/σ)*z_bar # (C.13)
+    π_min = (1 - L_tilde_t) / ((σ-1)*z_bar^(σ-1))  # (38)
+
+    i_vectorized = z .>= log(z_hat) # Vectorized indicator function
+    π = π_min * (1.0.+(N-1)*d^(1-σ)*i_vectorized) - (N-1)*κ*exp.(-(σ-1).*z).*i_vectorized  # (39)
+    entry_residual = Ξ₁*v_1 - ζ * (1-χ) / χ  # (56)
+    return (S_t = S_t, L_tilde_t = L_tilde_t, z_bar = z_bar, π_min = π_min, π = π, entry_residual = entry_residual,
+            w = w)
+end
+
 # Kernel function for main method.
 function f!(residual,du,u,p,t)
     @unpack ζ, Ω, E, static_equilibrium, T, results, ρ, δ, σ, μ, υ, L_1, L_2, ω, κ, d, Ξ₁ = p
@@ -57,31 +71,13 @@ function solve_dynamics(parameters, stationary_sol_T, settings, Ω, E; detailed_
     L_2 = L₂bc(z_ex, bc)
     Ξ₁ = 1/(1 - (σ-1)*(z[1] - z_ex[1]))  # (24), with ξ = (σ-1)
 
-    # Define the auxiliary functions for the DAE problem.
-    S(g) = θ * (g - μ - θ * υ^2/2)  # (32)
-    L_tilde(S, z_hat, E_t, Ω_t) = Ω_t * ((N-1) * z_hat^(-θ)*κ + ζ*(S + E_t / χ))  # (33)
-
-    function static_equilibrium(v_1, g, z_hat, E_t, Ω_t)
-        S_t = S(g)
-        L_tilde_t = L_tilde(S_t, z_hat, E_t, Ω_t)
-        z_bar = (Ω_t * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ)))^(1/(σ-1))  # (37)
-        w = ((σ-1)/σ)*z_bar # (C.13)
-        π_min = (1 - L_tilde_t) / ((σ-1)*z_bar^(σ-1))  # (38)
-
-        i_vectorized = z .>= log(z_hat) # Vectorized indicator function
-        π = π_min * (1.0.+(N-1)*d^(1-σ)*i_vectorized) - (N-1)*κ*exp.(-(σ-1).*z).*i_vectorized  # (39)
-        entry_residual = Ξ₁*v_1 - ζ * (1-χ) / χ  # (56)
-        return (S_t = S_t, L_tilde_t = L_tilde_t, z_bar = z_bar, π_min = π_min, π = π, entry_residual = entry_residual,
-                w = w)
-    end
-
     # initial conditions and parameters for the solver
     u0 = [v_T; g_T; z_hat_T]
     du0 = zeros(P+2)
 
-    p = (ζ = ζ, Ω = Ω, E = E, static_equilibrium = static_equilibrium, T = T,
-        results = results, ρ = ρ, δ = δ, σ = σ, μ = μ, υ = υ, L_1 = L_1, L_2 = L_2,
-        ω = ω, κ = κ, d = d, Ξ₁ = Ξ₁)
+    p = (results = results, parameters = parameters, L_1 = L_1, L_2 = L_2, 
+        ω = ω, Ξ₁ = Ξ₁, E = E, Ω = Ω, T = T)
+
     dae_prob = DAEProblem(f!, du0, u0, (T, 0.0), p, differential_vars = [trues(P); false; false])
 
     # called at end of each time-step in the DAE solver (primiarly to calculate L_tilde for derivatives)
@@ -96,7 +92,6 @@ function solve_dynamics(parameters, stationary_sol_T, settings, Ω, E; detailed_
         push!(results, (t = t, g = g_t, z_hat = z_hat_t, Ω = Ω_t, E = E_t, v_1 = v_1_t, L_tilde = L_tilde_t))
     end
 
-
     # Solve that DAE passing in the callbacks to store "future" L_tilde
     cb = FunctionCallingCallback(cb_aux, tdir = -1, func_start = false) # Callback object.
     if (tstops == nothing)
@@ -108,15 +103,15 @@ function solve_dynamics(parameters, stationary_sol_T, settings, Ω, E; detailed_
     # add calculations to the DataFrame
     results = sort!(results) # sort results to be forward in time
 
-    gen_λ_ii(z_hat) = 1 / (1 + (N-1)*z_hat^(σ-1-θ)*d^(1-σ)) # (57)
-    gen_c(L_tilde, Ω, z_bar, S) = (1 - L_tilde)*z_bar # (58)
+    # gen_λ_ii(z_hat) = 1 / (1 + (N-1)*z_hat^(σ-1-θ)*d^(1-σ)) # (57)
+    # gen_c(L_tilde, Ω, z_bar, S) = (1 - L_tilde)*z_bar # (58)
     gen_S = S
     gen_z_bar(Ω_t, z_hat) = ((Ω_t * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ)))^(1/(σ-1))) # (37)
     gen_π_min(L_tilde_t, z_bar) = (1 - L_tilde_t) / ((σ-1)*z_bar^(σ-1)) # (38)
     gen_entry_residual(v_1) = Ξ₁*v_1 - ζ*(1-χ)/χ # (56)
-    gen_L_tilde_adopt(Ω, S) = Ω * ζ * S # (36)
-    gen_L_tilde_export(Ω, z_hat) = Ω * ((N-1)*z_hat^(-θ))*κ # (34)
-    gen_L_tilde_entrycost(Ω, E) = Ω * ζ * E / χ # (35)
+    # gen_L_tilde_adopt(Ω, S) = Ω * ζ * S # (36)
+    # gen_L_tilde_export(Ω, z_hat) = Ω * ((N-1)*z_hat^(-θ))*κ # (34)
+    # gen_L_tilde_entrycost(Ω, E) = Ω * ζ * E / χ # (35)
     gen_w(z_bar) = ((σ-1)/σ) * z_bar # (C.13)
 
     # Add these quantities to the DataFrame.
@@ -176,6 +171,6 @@ function solve_dynamics(parameters, stationary_sol_T, settings, Ω, E; detailed_
     end
 
     # The results, raw DAE solution, and DAE problem (f!, static_equilibrium, etc.) objects.
-    return (results = results, sol = sol, p = p, static_equilibrium = static_equilibrium,
-          U = U, c = c, Ω = Ω, log_M = log_M, log_c = log_c)
+    return (results = results, sol = sol, p = p,
+            U = U, c = c, Ω = Ω, log_M = log_M, log_c = log_c)
 end

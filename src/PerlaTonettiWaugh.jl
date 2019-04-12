@@ -13,6 +13,7 @@ include("utils/quadrature.jl")
 include("utils/solve-system.jl")
 include("utils/consumption-equivalent.jl")
 include("utils/display_stationary_sol.jl")
+include("utils/static.jl")
 # Simple model.
 include("simple/dynamic.jl")
 include("simple/stationary.jl")

@@ -15,8 +15,8 @@ function welfare(vals, params, staticvalues)
     g, z_hat, Ω = vals
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params
     @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x, π_min = staticvals(vals, params)
-    c = (1 - L_tilde)*z_bar # (C.15)
-    λ_ii = 1/(1 + (N-1)*z_hat^(σ-1-θ)*d^(1-σ)) # (C.79)
+    c = c(L_tilde, Ω, z_bar)
+    λ_ii = λ_ii(z_hat, params)
     U_bar = γ == 1 ? (ρ*log(c) + g) / ρ^2 : 1/(1-γ) * (c^(1-γ))/(ρ + (γ-1)*g)  # (C.16)
     return (y = c, c = c, λ_ii = λ_ii, U_bar = U_bar)
 end
@@ -44,19 +44,19 @@ function staticvals(vals, params)
     # Unpack params.
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params
     # Compute interim quantities.
-    F(z) = 1 - z^(-θ) # (C.1)
+    F = F(params) # (C.1)
     r = ρ + γ*g + δ # (C.6)
     ν = (μ-g)/υ^2 + sqrt(((g-μ)/υ^2)^2 + (r-g)/(υ^2/2)) # (C.3)
     a = (r - g - (σ - 1)*(μ - g + (σ - 1)*υ^2/2))^(-1) # (C.4)
     b = (1 - a*(r-g))*d^(1-σ)*z_hat^(ν + σ - 1) # (C.5)
-    S = θ * (g - μ - θ * υ^2 /2) # (C.2)
-    L_tilde = Ω * ((N-1)*z_hat^(-θ)*κ + (1-η)*ζ*(S + δ/χ)) # (C.7)
-    L_tilde_x = Ω * (N - 1) * z_hat^(-θ) * κ # (C.8)
-    L_tilde_E = ζ/χ * Ω * δ # (C.9)
-    L_tilde_a = ζ * Ω * S # (C.10)
+    S = S(g, params) # calls like this rely on utils/static.jl
+    L_tilde = L_tilde(g, z_hat, Ω, δ, S, params)
+    L_tilde_x = L_tilde_x(z_hat, Ω, params)
+    L_tilde_E = L_tilde_E(Ω, δ, params)
+    L_tilde_a = L_tilde_a(Ω, S, params)
     z_bar = (Ω * (θ/(1 + θ - σ) + (N-1)*(1-F(z_hat))*d^(1-σ)*(z_hat^(-1 + σ)*θ/(1 + θ - σ))))^((σ-1)^(-1)) # (C.11)
-    w = (σ-1)/σ*z_bar # (C.13)
-    x = ζ * (1- η + η * Theta / w) # (C.14)
+    w = w(z_bar, params)
+    x = x(w, params)
     π_min = (d^(σ-1) * κ)/(z_hat^(σ-1)) # (C.12, inverted to express π_min as a function of parameters and z_hat)
     π_rat = (θ + (N-1)*(σ-1)*d^(-θ)*((κ/ζ) * χ/(ρ*(1-χ)))^(1 - θ/(σ - 1)))/(1 + θ - σ) # (C.17)
 
