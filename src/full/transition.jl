@@ -48,7 +48,7 @@ function solve_transition(parameters, settings)
     
     # solve, cache, and return 
     solution = solve_model_from_E_nodes(E_nodes, parameters, settings; detailed_solution = true)
-    cachename = join(hash(merge(parameters, settings)))
+    cachename = join(hash((parameters = parameters, settings = settings))) # uniquely identify the run by parameters + settings
     cachepath = joinpath(pwd(), "data", cachename)
     CSV.write(cachepath * ".csv", solution.results) # write DataFrame 
     write(cachepath * ".json", JSON.json(parameters)) # write parameters (can't always serialize full settings)
