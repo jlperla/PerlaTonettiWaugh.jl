@@ -69,14 +69,14 @@ function weighted_residuals(E_nodes_interior, parameters, settings)
 # Returns model solution (i.e., solve_dynamics output) given a set of E nodes. Used by all solvers.
 function solve_model_from_E_nodes(E_nodes_interior, parameters, settings; detailed_solution = false)
     @unpack T, interp, z_ex = settings 
-    @unpack d_0, d_T, δ = parameters 
+    @unpack d_0, d_T = parameters 
     
     # calculate stationary objects
     params_T = merge(parameters, (d = d_T,)) 
     params_0 = merge(parameters, (d = d_0,))
     stationary_sol_T = stationary_numerical(params_T, settings)
-    Ω_T = stationary_sol_T.Ω
     Ω_0 = stationary_numerical(params_0, settings).Ω
+    Ω_T = stationary_sol_T.Ω
     
     # formulate and solve the DAEproblem
     @unpack Ω, E = Ω_E_funcs(E_nodes_interior, Ω_T, Ω_0, parameters, settings)
