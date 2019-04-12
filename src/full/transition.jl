@@ -51,7 +51,7 @@ function solve_transition(parameters, settings)
     cachename = join(hash((parameters = parameters, settings = settings))) # uniquely identify the run by parameters + settings
     cachepath = joinpath(pwd(), "data", cachename)
     CSV.write(cachepath * ".csv", solution.results) # write DataFrame 
-    write(cachepath * ".json", JSON.json(parameters)) # write parameters (can't always serialize full settings)
+    write(cachepath * ".json", JSON.json((parameters = parameters, settings = merge(settings, (interp = typeof(settings.interp),))))) # write parameters (can't always serialize full settings)
     return (solution = solution, results = solution.results, E_nodes = E_nodes)
 end
 
