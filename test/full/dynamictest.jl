@@ -3,7 +3,7 @@
     z_min = 0.0
     z_max = 5.0
     P = 75
-    T = 20.0
+    T_default = 20.0
   # Experiment settings.
     d_0 = 5.0
     d_T = 2.3701
@@ -16,7 +16,7 @@
 # Construct intermediate objects.
   z_ex = range(z_min, stop = z_max, length = P+2)
   z = z_ex[2:end-1]
-  settings = (z = z, z_ex = z_ex, tstops = tstops, Δ_E = Δ_E, T_U_bar = 1.0)
+  settings = (z = z, z_ex = z_ex, tstops = tstops, Δ_E = Δ_E, T = T_default)
   params_0 = merge(params, (d = d_0,))
   params_T = merge(params, (d = d_T,))
 
@@ -37,7 +37,7 @@
 
 @testset "Regression Tests with constant Ω" begin
   # Run the solver.
-    sol = solve_dynamics(params_T, stationary_T, settings, T, Ω, E)
+    sol = solve_dynamics(params_T, stationary_T, settings, Ω, E)
   # Spot-checks.
     @test sol.sol.t[5] ≈ 19.840000000000003 atol = 1e-5
     @test sol.results[:λ_ii][end] ≈ 0.8205696009690461 atol = 1e-5
@@ -71,7 +71,8 @@ end
     T = sqrt(2*(log(Ω_0) - log(Ω_T)) / params.δ)
     Ω_t(t) = t < T ? Ω_0 * exp(-params.δ*T*t + params.δ*t*t/2) : Ω_T # Exponential Ω with time smoothing
     E_t(t) = (log(Ω_t(t + Δ_E)) - (log(Ω_t(t - Δ_E))))/(2*Δ_E) + params.δ # central differences.
-    sol = solve_dynamics(params_T, stationary_T, settings, T, Ω_t, E_t)
+    settings = (z = z, z_ex = z_ex, tstops = tstops, Δ_E = Δ_E, T = T)
+    sol = solve_dynamics(params_T, stationary_T, settings, Ω_t, E_t)
 
     # Spot-checks.
     @test sol.sol.t[5] ≈ 3.532316848641289 atol = 1e-5
@@ -103,7 +104,7 @@ end
 
 @testset "Correctness Tests" begin # Here, we compare the DAE output to known correct values, such as MATLAB output or analytical results.
   # First case.
-  sol = solve_dynamics(params_T, stationary_T, settings, T, Ω, E)
+  sol = solve_dynamics(params_T, stationary_T, settings, Ω, E)
   @test all([isapprox(x, 0.0, atol = 1e-6) for x in sol.results[:entry_residual]]) # Free-entry condition holds ∀ t.
 end
 
@@ -112,8 +113,8 @@ end
     du = zeros(P+2)
     u = [v_T..., g_T, z_hat_T]
     resid = zeros(P+2)
-    t = T
-    p = solve_dynamics(params_T, stationary_T, settings, T, Ω, E).p
+    t = T_default
+    p = solve_dynamics(params_T, stationary_T, settings, Ω, E).p
   # Fill the residuals vector
     f!(resid, du, u, p, t)
   # Tests

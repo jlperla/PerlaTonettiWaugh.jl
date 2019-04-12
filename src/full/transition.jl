@@ -80,7 +80,7 @@ function solve_model_from_E_nodes(E_nodes_interior, parameters, settings; detail
     
     # formulate and solve the DAEproblem
     @unpack Ω, E = Ω_E_funcs(E_nodes_interior, Ω_T, Ω_0, parameters, settings)
-    return solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed_solution = detailed_solution)
+    return solve_dynamics(params_T, stationary_sol_T, settings, Ω, E; detailed_solution = detailed_solution)
 end
 
 function Ω_E_funcs(E_nodes_interior, Ω_T, Ω_0, parameters, settings)

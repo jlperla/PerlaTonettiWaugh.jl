@@ -1,3 +1,4 @@
+# NOTE: This file is mainly for records-keeping purposes, and the interface may have evolved.
 # User settings.
   # Time and space grid.
   z_min = 0.0
@@ -14,7 +15,7 @@
   tstops = nothing
 
 # Construct intermediate objects.
-z_ex = range(z_min, stop = z_max, length = P+2)
+z_ex = range(z_min, stop = z_max, length = P+2) 
 z = z_ex[2:end-1]
 settings = (z = z, z_ex = z_ex, tstops = tstops, Δ_E = Δ_E, T_U_bar = 1.0)
 params_0 = merge(params, (d = d_0,))
