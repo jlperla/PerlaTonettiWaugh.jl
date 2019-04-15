@@ -17,8 +17,6 @@ include("simple/stationary.jl")
 # Full model.
 include("full/params.jl")
 include("full/static.jl")
-include("full/consumption-equivalent.jl")
-include("full/display_stationary_sol.jl")
 include("full/stationary.jl")
 include("full/dynamic.jl")
 include("full/transition.jl")

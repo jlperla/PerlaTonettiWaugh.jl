@@ -46,3 +46,5 @@ function static_equilibrium(Ξ₁, v_1, g, z_hat, E_t, Ω_t, z, params)
     return (S_t = S_t, L_tilde_t = L_tilde_t, z_bar = z_bar, π_min = π_min, π = π, entry_residual = entry_residual,
             w = w_t)
 end
+
+consumption_equivalent(U, U_old, params) = exp(params.ρ*(U - U_old)) # (C.89) from computational appendix
