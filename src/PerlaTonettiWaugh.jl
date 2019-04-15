@@ -11,13 +11,13 @@ import Parameters: @with_kw, @unpack
 include("utils/params.jl")
 include("utils/quadrature.jl")
 include("utils/solve-system.jl")
-include("utils/consumption-equivalent.jl")
-include("utils/display_stationary_sol.jl")
-include("utils/static.jl")
 # Simple model.
 include("simple/dynamic.jl")
 include("simple/stationary.jl")
 # Full model.
+include("full/static.jl")
+include("full/consumption-equivalent.jl")
+include("full/display_stationary_sol.jl")
 include("full/stationary.jl")
 include("full/dynamic.jl")
 include("full/transition.jl")
