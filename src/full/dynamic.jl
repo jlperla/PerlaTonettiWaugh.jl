@@ -33,18 +33,15 @@ end
 
 # Calculate the transition dynamics given a fixed Ω(t), E(t) function
 # To calculate the full equilibrium, you can solve until Ω(t), E(t) fulfill free-entry conditions
-function solve_dynamics(parameters, stationary_sol_T, settings, Ω, E; detailed_solution = true)
+function solve_dynamics(parameters, sol, settings, Ω, E; detailed_solution = true)
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = parameters
     @unpack z, z_ex, T, tstops = settings
     @assert γ ≈ 1 # These are the only supported parameters for the transition dynamics at this point
     @assert η == 0
     T >= 50 ? nothing : @warn "T < 50 can give erratic behavior."
 
-    v_T = stationary_sol_T.v_tilde
-    g_T = stationary_sol_T.g
-    z_hat_T = stationary_sol_T.z_hat
-    L_tilde_T = stationary_sol_T.L_tilde
-    Ω_T = stationary_sol_T.Ω
+    # unpack the stationary solution 
+    v_T, g_T, z_hat_T, L_tilde_T, Ω_T = (sol.v_tilde, sol.g, sol.z_hat, sol.L_tilde, sol.Ω)
 
     # Define the results data frame we'll be using and push the stationary onto it.
     results = DataFrame(t = T, g = g_T, z_hat = z_hat_T, Ω = Ω_T, E = δ, v_1 = v_T[1], L_tilde = L_tilde_T)
@@ -98,12 +95,13 @@ function solve_dynamics(parameters, stationary_sol_T, settings, Ω, E; detailed_
     L_tilde_interpolated(t) = L_tilde(g_interpolated(t), z_hat_interpolated(t), Ω(t), E(t), S(g_interpolated(t), parameters), parameters)
     z_bar_interpolated(t) = z_bar(Ω(t), z_hat_interpolated(t))
     c_interpolated(t) = c(L_tilde_interpolated(t), Ω(t), z_bar_interpolated(t))
+    π_min_interpolated(t) = π_min(L_tilde_interpolated(t), z_bar_interpolated(t))
+    # use interpolates to compute quantities 
     log_c(t) = log(c_interpolated(t))
     log_c_T = log(c(L_tilde_T, Ω_T, z_bar(Ω_T, z_hat_T))) # this is a scalar 
     log_M(t) = quadgk(g_interpolated, 0, t)[1]
     U(t) = quadgk(τ -> exp(-ρ*τ)*(log_M(t+τ) + log_c(t+τ)), 0, (T-t))[1] + exp(-ρ*(T-t))*(g_T + ρ*(log_c_T + g_T * T))/(ρ^2) # (C.83)
-    π_min(t) = π_min(L_tilde_interpolated(t), z_bar_interpolated(t))
-    π_rat(t) = θ*(1-z_hat_interpolated(t)^(-θ+σ-1))/(θ-σ+1) + (1+(N-1)*d^(1-σ))*θ*z_hat_interpolated(t)^(-θ+σ-1)/(θ-σ+1)+(N-1)*κ*z_hat_interpolated(t)^(-θ)/π_min(t) # (61)
+    π_rat(t) = θ*(1-z_hat_interpolated(t)^(-θ+σ-1))/(θ-σ+1) + (1+(N-1)*d^(1-σ))*θ*z_hat_interpolated(t)^(-θ+σ-1)/(θ-σ+1)+(N-1)*κ*z_hat_interpolated(t)^(-θ)/π_min_interpolated(t) # (61)
 
     # Add these quantities to the DataFrame.
     results = @transform(results, entry_residual = entry_residual.(:v_1))
