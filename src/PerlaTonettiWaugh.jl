@@ -8,13 +8,14 @@ using JSON
 import Parameters: @with_kw, @unpack
 
 # General utilities files.
-include("utils/params.jl")
 include("utils/quadrature.jl")
 include("utils/solve-system.jl")
 # Simple model.
+include("simple/params.jl")
 include("simple/dynamic.jl")
 include("simple/stationary.jl")
 # Full model.
+include("full/params.jl")
 include("full/static.jl")
 include("full/consumption-equivalent.jl")
 include("full/display_stationary_sol.jl")
