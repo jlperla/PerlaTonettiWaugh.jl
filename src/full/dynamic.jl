@@ -12,7 +12,7 @@ function f!(residual,du,u,p,t)
     E_t = E(t)
 
     # Get static equilibrium values and calculate the L_tilde growth rate
-    @unpack S_t, L_tilde_t, z_bar, π_min, π = static_equilibrium(Ξ₁, u[1], g, z_hat, E_t, Ω_t, z, parameters)
+    @unpack S, L_tilde, z_bar, π_min, π = static_equilibrium(Ξ₁, u[1], g, z_hat, E_t, Ω_t, z, parameters)
     L_tilde_log_derivative = 0.0 # Default to Float literal.
     if (t < T)
         t_forward = results[:t][end]
