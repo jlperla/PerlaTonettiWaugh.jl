@@ -16,7 +16,7 @@ function welfare(vals, params)
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params
     @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x, π_min = staticvals(vals, params)
     c_T = c(L_tilde, Ω, z_bar)
-    return (y = c_T,
+    return (y = c_T, # y = c by (C.78)
             c = c_T,
             λ_ii = λ_ii(z_hat, params),
             U_bar = γ == 1 ? (ρ*log(c_T) + g) / ρ^2 : 1/(1-γ) * (c_T^(1-γ))/(ρ + (γ-1)*g)) # (C.16)
@@ -95,10 +95,10 @@ function stationary_numerical(params, settings)
         return (residuals = [Ξ₁*v_tilde[1] - dot(v_tilde, ω) + ζ, # (54)
                 Ξ₁*v_tilde[1] - ζ*(1-χ)/χ, # (56)
                 π_min - (1 - L_tilde)/((σ-1)*z_bar^(σ-1))], # (38), from the static equilibrium
-                v_tilde = v_tilde)
-            end
+                v_tilde = v_tilde) 
+    end
 
-    g_T, z_hat_T, Ω_T = solve_system(vals -> stationary_numerical_given_vals.residuals, stationary_x0)
+    g_T, z_hat_T, Ω_T = solve_system(vals -> stationary_numerical_given_vals(vals).residuals, stationary_x0)
 
     # Grab static objects at steady-state and recreate the steady-state objects using the g, z_hat, Ω.
     staticvalues = staticvals([g_T, z_hat_T, Ω_T], params)
