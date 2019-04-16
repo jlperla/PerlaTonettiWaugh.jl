@@ -50,7 +50,7 @@ display_stationary_sol(stationary_sol_T)
 The code is
 
 ```julia 
-cachename = join(hash((parameters = params, settings = settings))) # uniquely identify the run by parameters + settings
+cachename = join(hash((parameters = parameters, settings = settings))) # uniquely identify the run by parameters + settings
 cachepath = joinpath(pwd(), "data", cachename * ".csv")
 use_cache = true # change this to false if you don't want to use the cache for a run
 write_cache = true # change this to false if you don't want to generate *any* cache files for a run
@@ -61,7 +61,7 @@ if isfile(cachepath) && use_cache
     solved = CSV.read(cachepath); 
 else
     println("solving without cache.")
-    @time solution = solve_transition(params, settings);
+    @time solution = solve_transition(parameters, settings);
     solved = solution.results;
 end
     
@@ -69,7 +69,7 @@ end
 if write_cache
     mkpath(joinpath(pwd(), "data")) # if this doesn't eist for whatever reason
     CSV.write(cachepath, solved) # write DataFrame 
-    write(joinpath(pwd(), "data", cachename * ".json"), JSON.json((parameters = params, settings = merge(settings, (interp = typeof(settings.interp),))))) # write parameters
+    write(joinpath(pwd(), "data", cachename * ".json"), JSON.json((parameters = parameters, settings = merge(settings, (interp = typeof(settings.interp),))))) # write parameters
 else
     # nothing 
 end
