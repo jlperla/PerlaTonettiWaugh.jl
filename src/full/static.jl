@@ -36,6 +36,8 @@ function z_bar(z_hat, Ω, params)
     return (Ω*θ/(1 + θ - σ) * (1 + (N - 1)*d^(1 - σ)*z_hat^(σ - 1 - θ)))^(1/(σ-1)) # (C.11) and 37 
 end 
 
+entry_residual(v_1, Ξ₁, params) = Ξ₁*v_1 - params.ζ*(1-params.χ)/params.χ # (56)  
+
 # subset of the above used in the dynamic model 
 function static_equilibrium(Ξ₁, v_1, g, z_hat, E, Ω, z, params)
     @unpack θ, σ, N, d, χ, ζ, κ = params 

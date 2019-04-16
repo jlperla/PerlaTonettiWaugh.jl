@@ -60,10 +60,10 @@ function weighted_residuals(E_nodes_interior, parameters, settings)
     entry_residuals_nodes = range(0, stop = solved.t[end], length = entry_residuals_nodes_count + 2)
     
     return settings.weights .* entry_residual_interpolated.(entry_residuals_nodes[2:(end-1)])
-  end
+end
 
 # Returns model solution (i.e., solve_dynamics output) given a set of E nodes. Used by all solvers.
-function solve_model_from_E_nodes(E_nodes_interior, parameters, settings; detailed_solution = false)
+function solve_model_from_E_nodes(E_nodes_interior, parameters, settings; detailed_solution = true)
     @unpack T, interp, z_ex = settings 
     @unpack d_0, d_T = parameters 
     
@@ -76,7 +76,15 @@ function solve_model_from_E_nodes(E_nodes_interior, parameters, settings; detail
     
     # formulate and solve the DAEproblem
     @unpack Ω, E = Ω_E_funcs(E_nodes_interior, Ω_T, Ω_0, parameters, settings)
-    return solve_dynamics(params_T, stationary_sol_T, settings, Ω, E; detailed_solution = detailed_solution)
+    solve_dynamics_output = solve_dynamics(params_T, stationary_sol_T, settings, Ω, E)
+    results = solve_dynamics_output.results 
+
+    if detailed_solution == false 
+        return solve_dynamics_output 
+    else 
+        new_results = detailed_output(solve_dynamics_output, stationary_sol_T) # add new DataFrame columns 
+        return (sol = solve_dynamics_output.sol, p = solve_dynamics_output.p, results = new_results)
+    end 
 end
 
 function Ω_E_funcs(E_nodes_interior, Ω_T, Ω_0, parameters, settings)
@@ -98,4 +106,77 @@ function Ω_E_funcs(E_nodes_interior, Ω_T, Ω_0, parameters, settings)
     Ω(t) = t <= T ? Ω_solution(t) : Ω_solution(T)
 
     return (Ω = Ω, E = E)
+end 
+
+# Adds detailed output to a results dataframe 
+function detailed_output(solve_dynamics_output, stationary_sol_T)
+    @unpack results, sol, p = solve_dynamics_output 
+    @unpack Ω, E, parameters, settings, Ξ₁ = p
+    @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = parameters
+    @unpack z, z_ex, T, tstops = settings
+
+    # unpack stationary solution 
+    g_T = stationary_sol_T.g 
+    z_hat_T = stationary_sol_T.z_hat 
+    L_tilde_T = stationary_sol_T.L_tilde 
+    Ω_T = stationary_sol_T.Ω
+
+    π_min(L_tilde_t, z_bar) = (1 - L_tilde_t) / ((σ-1)*z_bar^(σ-1)) # (38)
+
+    # define interpolates 
+    P = length(z)
+    interpolated_g(t) = sol(t)[P+1]
+    interpolated_z_hat(t) = sol(t)[P+2]
+    interpolated_L_tilde(t) = L_tilde(interpolated_g(t), interpolated_z_hat(t), Ω(t), E(t), S(interpolated_g(t), parameters), parameters)
+    interpolated_z_bar(t) = z_bar(interpolated_z_hat(t), Ω(t), parameters)
+    interpolated_c(t) = c(interpolated_L_tilde(t), Ω(t), interpolated_z_bar(t))
+    interpolated_π_min(t) = π_min(interpolated_L_tilde(t), interpolated_z_bar(t))
+
+    # define welfare quantities based on interpolates 
+    log_c(t) = log(interpolated_c(t))
+    log_c_T = log(c(L_tilde_T, Ω_T, z_bar(z_hat_T, Ω_T, parameters))) # this is a scalar 
+    log_M(t) = quadgk(interpolated_g, 0, t)[1]
+    U(t) = quadgk(τ -> exp(-ρ*τ)*(log_M(t+τ) + log_c(t+τ)), 0, (T-t))[1] + exp(-ρ*(T-t))*(g_T + ρ*(log_c_T + g_T * T))/(ρ^2) # (C.83)
+    π_rat(t) = θ*(1-interpolated_z_hat(t)^(-θ+σ-1))/(θ-σ+1) + (1+(N-1)*d^(1-σ))*θ*interpolated_z_hat(t)^(-θ+σ-1)/(θ-σ+1)+(N-1)*κ*interpolated_z_hat(t)^(-θ)/interpolated_π_min(t) # (61)
+
+    # generate clean dataframe 
+    ts = (T >= 20) ? sort(unique([collect(0.0:0.5:20); collect(20.0:T); results.t])) : results.t # add more time steps for the plotting/etc.
+    results = DataFrame(t = ts)
+
+    # Re-apply entry residual at new points 
+    results = @transform(results, entry_residual = entry_residual.(:v_1, Ref(Ξ₁), Ref(parameters)))
+    # Generate the rest of the data 
+    results = @transform(results, g = interpolated_g.(:t))
+    results = @transform(results, z_hat = interpolated_z_hat.(:t))
+    results = @transform(results, Ω = Ω.(:t))
+    results = @transform(results, E = E.(:t))
+    results = @transform(results, v_1 = (t -> (sol(t))[1]).(:t))
+    results = @transform(results, L_tilde = interpolated_L_tilde.(:t))
+    results = @transform(results, λ_ii = λ_ii.(:z_hat, Ref(parameters))) # λ_ii column.
+    results = @transform(results, S = S.(:g, Ref(parameters))) # S column.
+    results = @transform(results, z_bar = z_bar.(:z_hat, :Ω, Ref(parameters))) # z_bar column.
+    results = @transform(results, c = c.(:L_tilde, :Ω, :z_bar)) # c column.
+    results = @transform(results, π_min = π_min.(:L_tilde, :z_bar)) # π_min column.
+    results = @transform(results, log_M = log_M.(:t)) # log_M column
+    results = @transform(results, U = U.(:t)) # U column
+    results = @transform(results, π_rat = π_rat.(:t)) # π_rat column
+    results = @transform(results, L_tilde_a = L_tilde_a.(:Ω, :S, Ref(parameters)))
+    results = @transform(results, L_tilde_x = L_tilde_x.(:z_hat, :Ω, Ref(parameters)))
+    results = @transform(results, L_tilde_E = L_tilde_E.(:Ω, :E, Ref(parameters)))
+    results = @transform(results, w = w.(:z_bar, Ref(parameters)))
+
+    # logic for r
+    results.r = ones(Float64, nrow(results)) # filler, to be overwritten
+    for i in 1:nrow(results)
+        t = results[:t][i]
+        c = results[:c][i]
+        g = results[:g][i]
+        log_c_forward = (i < nrow(results)) ? (log(results[:c][i+1]) - log(c))/(results[:t][i+1] - t) : 0.0
+        if (i != nrow(results)) 
+            @assert results[:t][i+1] > t # ensure that differencing is actually forward
+        end
+        results.r[i] = ρ + γ*(g + log_c_forward) # (C.56)
+    end
+
+    return results 
 end 
