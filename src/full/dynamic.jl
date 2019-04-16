@@ -17,7 +17,7 @@ function f!(residual,du,u,p,t)
     if (t < T)
         t_forward = results[:t][end]
         L_tilde_forward = results[:L_tilde][end]
-        L_tilde_log_derivative = (log(1 - L_tilde_forward) - log(1 - L_tilde_t))/(t_forward - t) # See note under (40)
+        L_tilde_log_derivative = (log(1 - L_tilde_forward) - log(1 - L_tilde))/(t_forward - t) # See note under (40)
     end
 
     # Combine (40) with (52) to get A_t = (ρ + δ + L_tilde_log_derivative - (σ - 1) * (μ - g + (σ - 1) * υ^2 / 2))*I - (μ - g + (σ-1)*υ^2)*L_1 - (υ^2/2)*L_2
@@ -33,7 +33,7 @@ end
 
 # Calculate the transition dynamics given a fixed Ω(t), E(t) function
 # To calculate the full equilibrium, you can solve until Ω(t), E(t) fulfill free-entry conditions
-function solve_dynamics(parameters, sol, settings, Ω, E; detailed_solution = true)
+function solve_dynamics(parameters, stationary_sol_T, settings, Ω, E; detailed_solution = true)
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = parameters
     @unpack z, z_ex, T, tstops = settings
     @assert γ ≈ 1 # These are the only supported parameters for the transition dynamics at this point
@@ -41,7 +41,11 @@ function solve_dynamics(parameters, sol, settings, Ω, E; detailed_solution = tr
     T >= 50 ? nothing : @warn "T < 50 can give erratic behavior."
 
     # unpack the stationary solution 
-    v_T, g_T, z_hat_T, L_tilde_T, Ω_T = (sol.v_tilde, sol.g, sol.z_hat, sol.L_tilde, sol.Ω)
+    v_T = stationary_sol_T.v_tilde 
+    g_T = stationary_sol_T.g 
+    z_hat = stationary_sol_T.z_hat 
+    L_tilde_T = stationary_sol_T.L_tilde 
+    Ω_T = stationary_sol_T.Ω
 
     # Define the results data frame we'll be using and push the stationary onto it.
     results = DataFrame(t = T, g = g_T, z_hat = z_hat_T, Ω = Ω_T, E = δ, v_1 = v_T[1], L_tilde = L_tilde_T)
