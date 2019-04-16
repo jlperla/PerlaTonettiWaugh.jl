@@ -33,10 +33,16 @@ to open a browser with the Jupyter notebooks
 
 ## Weave Instructions
 
-After instantiating, run:
+After installing Weave, run:
 
 ```
 using IJulia, notebook() # Click yes to the install 
 using Conda
 Conda.add("nbconvert")
+```
+
+To generate the notebooks, run 
+
+```
+julia generate.jl
 ```
