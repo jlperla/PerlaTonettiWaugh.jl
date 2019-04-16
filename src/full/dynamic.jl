@@ -13,7 +13,7 @@ function store_static_callback(u, t, integrator, p)
     push!(results, (t = t, g = g_t, z_hat = z_hat_t, Ω = Ω_t, E = E_t, v_1 = v_1_t, L_tilde = L_tilde_t))
 end
 
-# Kernel function for main method.
+# Kernel function 
 function f!(residual,du,u,p,t)
     @unpack results, parameters, settings, L_1, L_2, ω, E, Ω, Ξ₁ = p 
     @unpack z, T = settings 
@@ -94,13 +94,12 @@ function solve_dynamics(parameters, stationary_sol_T, settings, Ω, E; detailed_
     sort!(results) # sort results to be forward in time 
     # define auxiliary functions 
     entry_residual(v_1) = Ξ₁*v_1 - ζ*(1-χ)/χ # (56)  
-    z_bar(Ω_t, z_hat) = ((Ω_t * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ)))^(1/(σ-1))) # (37)
     π_min(L_tilde_t, z_bar) = (1 - L_tilde_t) / ((σ-1)*z_bar^(σ-1)) # (38)
     # define interpolates
     g_interpolated(t) = (sol(t))[P+1]
     z_hat_interpolated(t) = (sol(t))[end]
     L_tilde_interpolated(t) = L_tilde(g_interpolated(t), z_hat_interpolated(t), Ω(t), E(t), S(g_interpolated(t), parameters), parameters)
-    z_bar_interpolated(t) = z_bar(Ω(t), z_hat_interpolated(t))
+    z_bar_interpolated(t) = z_bar(Ω(t), z_hat_interpolated(t), parameters)
     c_interpolated(t) = c(L_tilde_interpolated(t), Ω(t), z_bar_interpolated(t))
     π_min_interpolated(t) = π_min(L_tilde_interpolated(t), z_bar_interpolated(t))
     # use interpolates to compute quantities 
@@ -128,7 +127,7 @@ function solve_dynamics(parameters, stationary_sol_T, settings, Ω, E; detailed_
 
         results = @transform(results, λ_ii = λ_ii.(:z_hat, Ref(parameters))) # λ_ii column.
         results = @transform(results, S = S.(:g, Ref(parameters))) # S column.
-        results = @transform(results, z_bar = z_bar.(:Ω, :z_hat)) # z_bar column.
+        results = @transform(results, z_bar = z_bar.(:Ω, :z_hat, Ref(parameters))) # z_bar column.
         results = @transform(results, c = c.(:L_tilde, :Ω, :z_bar)) # c column.
         results = @transform(results, π_min = π_min.(:L_tilde, :z_bar)) # π_min column.
         results = @transform(results, log_M = log_M.(:t)) # log_M column
