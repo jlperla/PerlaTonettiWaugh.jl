@@ -36,7 +36,7 @@ function z_bar(z_hat, Ω, params)
     return (Ω*θ/(1 + θ - σ) * (1 + (N - 1)*d^(1 - σ)*z_hat^(σ - 1 - θ)))^(1/(σ-1)) # (C.11) and 37 
 end 
 
-# for dynamic model 
+# subset of the above used in the dynamic model 
 function static_equilibrium(Ξ₁, v_1, g, z_hat, E, Ω, z, params)
     @unpack θ, σ, N, d, χ, ζ, κ = params 
     S_t = S(g, params)

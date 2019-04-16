@@ -99,12 +99,12 @@ function solve_dynamics(parameters, stationary_sol_T, settings, Ω, E; detailed_
     g_interpolated(t) = (sol(t))[P+1]
     z_hat_interpolated(t) = (sol(t))[end]
     L_tilde_interpolated(t) = L_tilde(g_interpolated(t), z_hat_interpolated(t), Ω(t), E(t), S(g_interpolated(t), parameters), parameters)
-    z_bar_interpolated(t) = z_bar(Ω(t), z_hat_interpolated(t), parameters)
+    z_bar_interpolated(t) = z_bar(z_hat_interpolated(t), Ω(t), parameters)
     c_interpolated(t) = c(L_tilde_interpolated(t), Ω(t), z_bar_interpolated(t))
     π_min_interpolated(t) = π_min(L_tilde_interpolated(t), z_bar_interpolated(t))
     # use interpolates to compute quantities 
     log_c(t) = log(c_interpolated(t))
-    log_c_T = log(c(L_tilde_T, Ω_T, z_bar(Ω_T, z_hat_T))) # this is a scalar 
+    log_c_T = log(c(L_tilde_T, Ω_T, z_bar(z_hat_T, Ω_T, parameters))) # this is a scalar 
     log_M(t) = quadgk(g_interpolated, 0, t)[1]
     U(t) = quadgk(τ -> exp(-ρ*τ)*(log_M(t+τ) + log_c(t+τ)), 0, (T-t))[1] + exp(-ρ*(T-t))*(g_T + ρ*(log_c_T + g_T * T))/(ρ^2) # (C.83)
     π_rat(t) = θ*(1-z_hat_interpolated(t)^(-θ+σ-1))/(θ-σ+1) + (1+(N-1)*d^(1-σ))*θ*z_hat_interpolated(t)^(-θ+σ-1)/(θ-σ+1)+(N-1)*κ*z_hat_interpolated(t)^(-θ)/π_min_interpolated(t) # (61)
@@ -127,7 +127,7 @@ function solve_dynamics(parameters, stationary_sol_T, settings, Ω, E; detailed_
 
         results = @transform(results, λ_ii = λ_ii.(:z_hat, Ref(parameters))) # λ_ii column.
         results = @transform(results, S = S.(:g, Ref(parameters))) # S column.
-        results = @transform(results, z_bar = z_bar.(:Ω, :z_hat, Ref(parameters))) # z_bar column.
+        results = @transform(results, z_bar = z_bar.(:z_hat, :Ω, Ref(parameters))) # z_bar column.
         results = @transform(results, c = c.(:L_tilde, :Ω, :z_bar)) # c column.
         results = @transform(results, π_min = π_min.(:L_tilde, :z_bar)) # π_min column.
         results = @transform(results, log_M = log_M.(:t)) # log_M column
