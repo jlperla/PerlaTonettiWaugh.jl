@@ -1,3 +1,18 @@
+# Callback for f!
+# Called at end of each time-step in the DAE solver (mainly to calculate L_tilde for derivatives)
+function store_static_callback(u, t, integrator, p)
+    @unpack results, parameters, settings, L_1, L_2, ω, E, Ω, Ξ₁ = p 
+    P = length(u) - 2
+    g_t = u[P+1]
+    z_hat_t = u[P+2]
+    Ω_t = Ω(t)
+    E_t = E(t)
+    v_1_t = u[1]
+    S_t = S(g_t, parameters)
+    L_tilde_t = L_tilde(g_t, z_hat_t, Ω_t, E_t, S_t, parameters)
+    push!(results, (t = t, g = g_t, z_hat = z_hat_t, Ω = Ω_t, E = E_t, v_1 = v_1_t, L_tilde = L_tilde_t))
+end
+
 # Kernel function for main method.
 function f!(residual,du,u,p,t)
     @unpack results, parameters, settings, L_1, L_2, ω, E, Ω, Ξ₁ = p 
@@ -43,7 +58,7 @@ function solve_dynamics(parameters, stationary_sol_T, settings, Ω, E; detailed_
     # unpack the stationary solution 
     v_T = stationary_sol_T.v_tilde 
     g_T = stationary_sol_T.g 
-    z_hat = stationary_sol_T.z_hat 
+    z_hat_T = stationary_sol_T.z_hat 
     L_tilde_T = stationary_sol_T.L_tilde 
     Ω_T = stationary_sol_T.Ω
 
@@ -67,20 +82,8 @@ function solve_dynamics(parameters, stationary_sol_T, settings, Ω, E; detailed_
 
     dae_prob = DAEProblem(f!, du0, u0, (T, 0.0), p, differential_vars = [trues(P); false; false])
 
-    # called at end of each time-step in the DAE solver (primiarly to calculate L_tilde for derivatives)
-    function cb_aux(u, t, integrator)
-        g_t = u[P+1]
-        z_hat_t = u[P+2]
-        Ω_t = Ω(t)
-        E_t = E(t)
-        v_1_t = u[1]
-        S_t = S(g_t, parameters)
-        L_tilde_t = L_tilde(g_t, z_hat_t, Ω_t, E_t, S_t, parameters)
-        push!(results, (t = t, g = g_t, z_hat = z_hat_t, Ω = Ω_t, E = E_t, v_1 = v_1_t, L_tilde = L_tilde_t))
-    end
-
     # Solve that DAE passing in the callbacks to store "future" L_tilde
-    cb = FunctionCallingCallback(cb_aux, tdir = -1, func_start = false) # Callback object.
+    cb = FunctionCallingCallback((u, t, integrator) -> store_static_callback(u, t, integrator, p), tdir = -1, func_start = false) # Callback object.
     if (tstops == nothing)
         sol = DifferentialEquations.solve(dae_prob, callback = cb)
     else
