@@ -139,10 +139,16 @@ function detailed_output(solve_dynamics_output, stationary_sol_T)
     U(t) = quadgk(τ -> exp(-ρ*τ)*(log_M(t+τ) + log_c(t+τ)), 0, (T-t))[1] + exp(-ρ*(T-t))*(g_T + ρ*(log_c_T + g_T * T))/(ρ^2) # (C.83)
     π_rat(t) = θ*(1-interpolated_z_hat(t)^(-θ+σ-1))/(θ-σ+1) + (1+(N-1)*d^(1-σ))*θ*interpolated_z_hat(t)^(-θ+σ-1)/(θ-σ+1)+(N-1)*κ*interpolated_z_hat(t)^(-θ)/interpolated_π_min(t) # (61)
 
-    # generate clean dataframe 
+    # generate clean dataframe with the union of new and old time points
     ts = (T >= 20) ? sort(unique([collect(0.0:0.5:20); collect(20.0:T); results.t])) : results.t # add more time steps for the plotting/etc.
     results = DataFrame(t = ts)
 
+    # Interpolated "base quantities"
+    results = @transform(results, g = interpolated_g.(:t))
+    results = @transform(results, z_hat = interpolated_z_hat.(:t))
+    results = @transform(results, Ω = Ω.(:t))
+    results = @transform(results, E = E.(:t))
+    results = @transform(results, v_1 = (t -> (sol(t))[1]).(:t))
     # Re-apply entry residual at new points 
     results = @transform(results, entry_residual = entry_residual.(:v_1, Ref(Ξ₁), Ref(parameters)))
     # Generate the rest of the data 
