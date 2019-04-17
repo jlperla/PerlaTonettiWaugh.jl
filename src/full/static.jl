@@ -43,14 +43,15 @@ function static_equilibrium(Ξ₁, v_1, g, z_hat, E, Ω, z, params)
     @unpack θ, σ, N, d, χ, ζ, κ = params 
     S_t = S(g, params)
     L_tilde_t = L_tilde(g, z_hat, Ω, E, S_t, params)
-    z_bar = (Ω * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ)))^(1/(σ-1))  # (37)
-    w_t = w(z_bar, params)
-    π_min = (1 - L_tilde_t) / ((σ-1)*z_bar^(σ-1))  # (38)
+    z_bar_t = (Ω * (θ / (1 + θ - σ)) * (1 + (N-1) * d^(1-σ) * z_hat^(σ-1-θ)))^(1/(σ-1))  # (37)
+    w_t = w(z_bar_t, params)
+    π_min_t = (1 - L_tilde_t) / ((σ-1)*z_bar_t^(σ-1))  # (38)
 
     i_vectorized = z .>= log(z_hat) # Vectorized indicator function
-    π = π_min * (1.0.+(N-1)*d^(1-σ)*i_vectorized) - (N-1)*κ*exp.(-(σ-1).*z).*i_vectorized  # (39)
-    entry_residual = Ξ₁*v_1 - ζ * (1-χ) / χ  # (56)
-    return (S = S_t, L_tilde = L_tilde_t, z_bar = z_bar, π_min = π_min, π = π, entry_residual = entry_residual,
+    π_t = π_min_t * (1.0.+(N-1)*d^(1-σ)*i_vectorized) - (N-1)*κ*exp.(-(σ-1).*z).*i_vectorized  # (39)
+    entry_residual_t = entry_residual(v_1, Ξ₁, params)
+    
+    return (S = S_t, L_tilde = L_tilde_t, z_bar = z_bar_t, π_min = π_min_t, π = π_t, entry_residual = entry_residual,
             w = w_t)
 end
 

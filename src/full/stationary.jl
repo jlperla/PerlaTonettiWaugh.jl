@@ -58,11 +58,11 @@ function staticvals(vals, params)
     z_bar_T = z_bar(z_hat, Ω, params)
     w_T = w(z_bar_T, params)
     x_T = x(w_T, params)
-    π_min = (d^(σ-1) * κ)/(z_hat^(σ-1)) # (C.12, inverted to express π_min as a function of parameters and z_hat)
-    π_rat = (θ + (N-1)*(σ-1)*d^(-θ)*((κ/ζ) * χ/(ρ*(1-χ)))^(1 - θ/(σ - 1)))/(1 + θ - σ) # (C.17)
+    π_min_T = (d^(σ-1) * κ)/(z_hat^(σ-1)) # (C.12, inverted to express π_min as a function of parameters and z_hat)
+    π_rat_T = (θ + (N-1)*(σ-1)*d^(-θ)*((κ/ζ) * χ/(ρ*(1-χ)))^(1 - θ/(σ - 1)))/(1 + θ - σ) # (C.17)
 
     return (F = F, r = r, ν = ν, a = a, b = b, S = S_T, L_tilde = L_tilde_T, L_tilde_x = L_tilde_x_T, L_tilde_E = L_tilde_E_T, L_tilde_a = L_tilde_a_T,
-            z_bar = z_bar_T, w = w_T, x = x_T, π_min = π_min, π_rat = π_rat)
+            z_bar = z_bar_T, w = w_T, x = x_T, π_min = π_min_T, π_rat = π_rat_T)
 end
 
 # Numerical method checking the stationary solution to the ODE.  In general, use the analtyic when only looking at steady states but this provides guidance on the convergence and accuracy of the finite-difference methods.
