@@ -47,8 +47,8 @@ function solve_transition(parameters, settings)
                     iterations = settings.transition_iterations)
     
     # solve, cache, and return 
-    solution = solve_model_from_E_nodes(E_nodes, parameters, settings; detailed_solution = true)
-    return (solution = solution, results = solution.results, E_nodes = E_nodes)
+    solution = solve_model_from_E_nodes(E_nodes, parameters, settings)
+    return (solve_dynamics_output = solution, results = solution.results, E_nodes = E_nodes)
 end
 
 function weighted_residuals(E_nodes_interior, parameters, settings)
@@ -63,7 +63,7 @@ function weighted_residuals(E_nodes_interior, parameters, settings)
 end
 
 # Returns model solution (i.e., solve_dynamics output) given a set of E nodes. Used by all solvers.
-function solve_model_from_E_nodes(E_nodes_interior, parameters, settings; detailed_solution = true)
+function solve_model_from_E_nodes(E_nodes_interior, parameters, settings)
     @unpack T, interp, z_ex = settings 
     @unpack d_0, d_T = parameters 
     
@@ -76,15 +76,7 @@ function solve_model_from_E_nodes(E_nodes_interior, parameters, settings; detail
     
     # formulate and solve the DAEproblem
     @unpack Ω, E = Ω_E_funcs(E_nodes_interior, Ω_T, Ω_0, parameters, settings)
-    solve_dynamics_output = solve_dynamics(params_T, stationary_sol_T, settings, Ω, E)
-    results = solve_dynamics_output.results 
-
-    if detailed_solution == false 
-        return solve_dynamics_output 
-    else 
-        new_results = detailed_output(solve_dynamics_output, stationary_sol_T) # add new DataFrame columns 
-        return (sol = solve_dynamics_output.sol, p = solve_dynamics_output.p, results = new_results)
-    end 
+    return solve_dynamics(params_T, stationary_sol_T, settings, Ω, E)
 end
 
 function Ω_E_funcs(E_nodes_interior, Ω_T, Ω_0, parameters, settings)
@@ -109,7 +101,7 @@ function Ω_E_funcs(E_nodes_interior, Ω_T, Ω_0, parameters, settings)
 end 
 
 # Adds detailed output to a results dataframe 
-function detailed_output(solve_dynamics_output, stationary_sol_T)
+function prepare_results(solve_dynamics_output, stationary_sol_T)
     @unpack results, sol, p = solve_dynamics_output 
     @unpack Ω, E, parameters, settings, Ξ₁ = p
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = parameters

@@ -38,7 +38,7 @@
 @testset "Regression Tests with constant Ω" begin
   # Run the solver.
     sol = solve_dynamics(params_T, stationary_T, settings, Ω, E)
-    sol = merge(sol, (results = detailed_output(sol, stationary_T),))
+    sol = merge(sol, (results = prepare_results(sol, stationary_T),))
     
     # Spot-checks.
     @test sol.sol.t[5] ≈ 19.840000000000003 atol = 1e-5
@@ -75,7 +75,7 @@ end
     E_t(t) = (log(Ω_t(t + Δ_E)) - (log(Ω_t(t - Δ_E))))/(2*Δ_E) + params.δ # central differences.
     settings = (z = z, z_ex = z_ex, tstops = tstops, Δ_E = Δ_E, T = T)
     sol = solve_dynamics(params_T, stationary_T, settings, Ω_t, E_t)
-    sol = merge(sol, (results = detailed_output(sol, stationary_T),))
+    sol = merge(sol, (results = prepare_results(sol, stationary_T),))
 
     # Spot-checks.
     @test sol.sol.t[5] ≈ 3.532316848641289 atol = 1e-5
@@ -108,7 +108,7 @@ end
 @testset "Correctness Tests" begin # Here, we compare the DAE output to known correct values, such as MATLAB output or analytical results.
   # First case.
   sol = solve_dynamics(params_T, stationary_T, settings, Ω, E)
-  sol = merge(sol, (results = detailed_output(sol, stationary_T),))
+  sol = merge(sol, (results = prepare_results(sol, stationary_T),))
   @test all([isapprox(x, 0.0, atol = 1e-6) for x in sol.results[:entry_residual]]) # Free-entry condition holds ∀ t.
 end
 
