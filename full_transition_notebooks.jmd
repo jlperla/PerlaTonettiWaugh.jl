@@ -2,17 +2,14 @@ First, load the package and instantiate the dependencies.
 
 ```julia
 using Pkg
-pkg"activate ."
-pkg"instantiate" # may take a long time the first time this is run
-pkg"precompile"
-using CSV, Plots, JSON, BenchmarkTools
-gr(fmt = :png) # for plot displays
+pkg"activate .; instantiate; precompile" # may take a long time the first time this is run
 ```
 
-And load the actual PTW package
+And load the deps
 
 ```julia
-using PerlaTonettiWaugh
+using using CSV, Plots, JSON, BenchmarkTools, Parameters, PerlaTonettiWaugh
+gr(fmt = :png) # for plot displays
 ```
 
 ## Stationary Solutions
