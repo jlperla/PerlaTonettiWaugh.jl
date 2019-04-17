@@ -1,6 +1,6 @@
 # DAE kernel, defined for each time ∈ t.
 function f!_simple(resid,du,u,p,t)
-    @unpack Ξ₁, L_1, L_2, z, r, μ, g, υ, π, T, P, x, ω = p
+    @unpack Ξ₁, L_1, L_2, z, r, μ, υ, π, T, P, x, ω = p
 
     # Carry out calculations.
     v_t = u[1:P]
@@ -17,7 +17,7 @@ end
 function simpleDAE(params, settings)
     # Unpack necessary objects
     @unpack μ, υ, θ, r, x, π = params
-    @unpack z_ex, T, g = settings
+    @unpack z_ex, T = settings
 
     @assert z_ex[1] == 0.0 && issorted(z_ex) # validate grid
     z = z_ex[2:end-1]
@@ -31,13 +31,13 @@ function simpleDAE(params, settings)
     L_2 = L₂bc(z_ex, bc)
 
     # Calculate the stationary solution.
-    stationary = stationary_numerical_simple(params, settings)
+    stationary = stationary_numerical_simple(merge(params, (r = r(T), π = x -> π(T, x))), settings)
     g_T = stationary.g
     v_T = stationary.v
 
     # Bundle as before.
     Ξ₁ = 1/(1 - 1*(z[1] - 0.0)) # (24)
-    p = (Ξ₁ = Ξ₁, L_1 = L_1_minus, L_2 = L_2, z = z, g = g, r = r, υ = υ, π = π, T = T, μ = μ, g_T = g_T, P = P, x = x, ω = ω)
+    p = (Ξ₁ = Ξ₁, L_1 = L_1_minus, L_2 = L_2, z = z, r = r, υ = υ, π = π, T = T, μ = μ, g_T = g_T, P = P, x = x, ω = ω)
 
     # Other objects
     u_T = [v_T; g_T]
