@@ -31,10 +31,9 @@ function simpleDAE(params, settings)
     L_2 = L₂bc(z_ex, bc)
 
     # Calculate the stationary solution.
-    r_T = r(T)
-    g_T = g(T)
-    A_T = (r_T - μ - υ^2/2)*I - (μ + υ^2 - g_T)*L_1_minus - υ^2/2 * L_2 # (19)
-    v_T = A_T \ π.(T, z) # (30)
+    stationary = stationary_numerical_simple(params, settings)
+    g_T = stationary.g
+    v_T = stationary.v
 
     # Bundle as before.
     Ξ₁ = 1/(1 - 1*(z[1] - 0.0)) # (24)
@@ -46,11 +45,13 @@ function simpleDAE(params, settings)
     return DAEProblem(f!_simple, resid_M1, u_T, (T, 0.0), differential_vars = [fill(true, P); false], p)
 end
 
-function solve_simple_dae(ode_prob, x, ω, ode_solve_algorithm, ts) # To keep the params consistent with other tuples.
+function solve_simple_transition(params, settings) # To keep the params consistent with other tuples.
+    # create ODE, etc. 
+    ode_prob = simpleDAE(params, settings)
+    @unpack ω, x, Ξ₁, P = ode_prob.p 
+    @unpack ts, ode_solve_algorithm = settings
     # Solve ode
     sol = Sundials.solve(ode_prob, ode_solve_algorithm, tstops = ts)
-    P = length(ω)
-    Ξ₁ = ode_prob.p.Ξ₁
     # Calculate the residual at each time point
     residuals = zeros(length(ts))
     v_ts = zeros(P, length(ts))
