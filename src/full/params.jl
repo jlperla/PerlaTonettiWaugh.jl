@@ -30,4 +30,5 @@ settings_defaults = @with_kw (z_ex = unique([range(0., 0.1, length = 150)' range
                                 tstops = nothing,
                                 impose_E_monotonicity_constraints = true,
                                 run_global = true,
-                                stationary_x0 = [0.02; 2; .57])
+                                stationary_x0 = [0.02; 2; .57],
+                                pre_shock_times = [-1, -5, -10, -15, -20])

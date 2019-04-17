@@ -1,6 +1,7 @@
 using PerlaTonettiWaugh
 using Test, LinearAlgebra, Statistics, Compat
 using Sundials, BenchmarkTools, Interpolations, Parameters, SimpleDifferentialOperators
+using DataFrames, DataFramesMeta
 
 @elapsed begin
   @time @testset "Simple Stationary" begin include("simple/stationarytest.jl") end

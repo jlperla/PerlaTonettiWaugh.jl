@@ -16,7 +16,7 @@
 # Construct intermediate objects.
   z_ex = range(z_min, stop = z_max, length = P+2)
   z = z_ex[2:end-1]
-  settings = (z = z, z_ex = z_ex, tstops = tstops, Δ_E = Δ_E, T = T_default)
+  settings = settings_defaults(z = z, z_ex = z_ex, tstops = tstops, T = T_default)
   params_0 = merge(params, (d = d_0,))
   params_T = merge(params, (d = d_T,))
 
@@ -38,8 +38,9 @@
 @testset "Regression Tests with constant Ω" begin
   # Run the solver.
     sol = solve_dynamics(params_T, stationary_T, settings, Ω, E)
-    sol = merge(sol, (results = prepare_results(sol, stationary_T),))
-    
+    sol = merge(sol, (results = prepare_results(sol, stationary_T, stationary_0),))
+    dropmissing!(sol.results) # drop pre-shock values
+
     # Spot-checks.
     @test sol.sol.t[5] ≈ 19.840000000000003 atol = 1e-5
     @test sol.results[:λ_ii][end] ≈ 0.8205696009690461 atol = 1e-5
@@ -73,9 +74,10 @@ end
     T = sqrt(2*(log(Ω_0) - log(Ω_T)) / params.δ)
     Ω_t(t) = t < T ? Ω_0 * exp(-params.δ*T*t + params.δ*t*t/2) : Ω_T # Exponential Ω with time smoothing
     E_t(t) = (log(Ω_t(t + Δ_E)) - (log(Ω_t(t - Δ_E))))/(2*Δ_E) + params.δ # central differences.
-    settings = (z = z, z_ex = z_ex, tstops = tstops, Δ_E = Δ_E, T = T)
+    settings = settings_defaults(z = z, z_ex = z_ex, tstops = tstops, T = T)
     sol = solve_dynamics(params_T, stationary_T, settings, Ω_t, E_t)
-    sol = merge(sol, (results = prepare_results(sol, stationary_T),))
+    sol = merge(sol, (results = prepare_results(sol, stationary_T, stationary_0),))
+    dropmissing!(sol.results) # drop pre-shock values
 
     # Spot-checks.
     @test sol.sol.t[5] ≈ 3.532316848641289 atol = 1e-5
@@ -108,7 +110,8 @@ end
 @testset "Correctness Tests" begin # Here, we compare the DAE output to known correct values, such as MATLAB output or analytical results.
   # First case.
   sol = solve_dynamics(params_T, stationary_T, settings, Ω, E)
-  sol = merge(sol, (results = prepare_results(sol, stationary_T),))
+  sol = merge(sol, (results = prepare_results(sol, stationary_T, stationary_0),))
+  dropmissing!(sol.results) # drop pre-shock values
   @test all([isapprox(x, 0.0, atol = 1e-6) for x in sol.results[:entry_residual]]) # Free-entry condition holds ∀ t.
 end
 

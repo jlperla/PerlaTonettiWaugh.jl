@@ -101,18 +101,18 @@ function Ω_E_funcs(E_nodes_interior, Ω_T, Ω_0, parameters, settings)
 end 
 
 # Adds detailed output to a results dataframe 
-function prepare_results(solve_dynamics_output, stationary_sol_T)
+function prepare_results(solve_dynamics_output, stationary_sol_T, stationary_sol_0)
     @unpack results, sol, p = solve_dynamics_output 
     @unpack Ω, E, parameters, settings, Ξ₁ = p
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = parameters
     @unpack z, z_ex, T, tstops = settings
 
-    # unpack stationary solution 
+    # unpack time-T stationary solution 
     g_T = stationary_sol_T.g 
     z_hat_T = stationary_sol_T.z_hat 
     L_tilde_T = stationary_sol_T.L_tilde 
     Ω_T = stationary_sol_T.Ω
-
+    
     π_min(L_tilde_t, z_bar) = (1 - L_tilde_t) / ((σ-1)*z_bar^(σ-1)) # (38)
 
     # define interpolates 
@@ -144,11 +144,6 @@ function prepare_results(solve_dynamics_output, stationary_sol_T)
     # Re-apply entry residual at new points 
     results = @transform(results, entry_residual = entry_residual.(:v_1, Ref(Ξ₁), Ref(parameters)))
     # Generate the rest of the data 
-    results = @transform(results, g = interpolated_g.(:t))
-    results = @transform(results, z_hat = interpolated_z_hat.(:t))
-    results = @transform(results, Ω = Ω.(:t))
-    results = @transform(results, E = E.(:t))
-    results = @transform(results, v_1 = (t -> (sol(t))[1]).(:t))
     results = @transform(results, L_tilde = interpolated_L_tilde.(:t))
     results = @transform(results, λ_ii = λ_ii.(:z_hat, Ref(parameters))) # λ_ii column.
     results = @transform(results, S = S.(:g, Ref(parameters))) # S column.
@@ -176,5 +171,36 @@ function prepare_results(solve_dynamics_output, stationary_sol_T)
         results.r[i] = ρ + γ*(g + log_c_forward) # (C.56)
     end
 
-    return results 
+    # add time-0 (pre-shock) steady state 
+    # unpack stationary_sol_0  
+    g_0 = stationary_sol_0.g
+    z_hat_0 = stationary_sol_0.z_hat 
+    Ω_0 = stationary_sol_0.L_tilde 
+    π_min_0 = stationary_sol_0.π_min 
+    π_rat_0 = stationary_sol_0.π_rat 
+    x_0 = stationary_sol_0.x
+    S_0 = stationary_sol_0.S 
+    w_0 = stationary_sol_0.w 
+    z_bar_0 = stationary_sol_0.z_bar 
+    λ_ii_0 = stationary_sol_0.λ_ii 
+    c_0 = stationary_sol_0.c 
+    L_tilde_0 = stationary_sol_0.L_tilde 
+    L_tilde_a_0 = stationary_sol_0.L_tilde_a 
+    L_tilde_x_0 = stationary_sol_0.L_tilde_x
+    L_tilde_E_0 = stationary_sol_0.L_tilde_E 
+    r_0 = stationary_sol_0.r
+    v_0 = stationary_sol_0.v_tilde
+
+    # add to dataframe 
+    ts_0 = settings.pre_shock_times 
+    allowmissing!(results) # to allow for discrepancies in fields 
+    for t in ts_0
+        push!(results, (t = t, g = g_0, z_hat = z_hat_0, Ω = Ω_0, E = missing, v_1 = v_0[1], 
+                        L_tilde = L_tilde_0, entry_residual = missing, r = r_0, 
+                        λ_ii = λ_ii_0, S = S_0, z_bar = z_bar_0, c = c_0, π_min = π_min_0, log_M = missing, U = missing,
+                        π_rat = π_rat_0, L_tilde_a = L_tilde_a_0, L_tilde_x = L_tilde_x_0, L_tilde_E = L_tilde_E_0,
+                        w = w_0)) 
+    end 
+
+    return sort!(results) # sort results again to keep time in the right order 
 end 
