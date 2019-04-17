@@ -27,7 +27,7 @@ export solve_simple_dae
 export stationary_algebraic, stationary_numerical, simpleDAE, stationary_algebraic_simple, stationary_numerical_simple, ω_weights, solve_dynamics, welfare
 export weighted_residuals
 export solve_transition, prepare_results
-export consumption_equivalent, display_stationary_sol
+export consumption_equivalent
 export f!, f!_simple, solve_system
 
 end # module
