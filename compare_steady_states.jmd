@@ -1,0 +1,180 @@
+This is a direct port of the old `growth_gbm` notebook. So any analysis/parameters/other objects which were
+outdated in that notebook will also be outdated here.
+
+We can decide at merge-time which words to keep from the notebook.
+
+```julia
+using Pkg
+pkg"activate .; instantiate; precompile"
+```
+
+And load particular packages
+
+```julia
+using CSV, Plots, JSON, BenchmarkTools, Parameters, PerlaTonettiWaugh
+```
+
+## First Experiment
+
+```julia
+parameters = parameter_defaults(ρ = 0.0195, d_0 = 5.0672, θ = 3.2941, κ = 0.1152, χ = 1/4.7847, υ = 0.0819, μ = -0.0289, σ = 2.3664);
+settings = settings_defaults()
+
+@unpack stationary_0, stationary_T, change_welfare, change_trade = compare_steady_states(parameters, settings);
+
+println("SS to SS Welfare gain: $(change_welfare)")
+println("Change in Trade: $(change_trade)")
+println("Growth Rates across SS: $(100*stationary_T.g) (time T) vs $(100*stationary_0.g) (time 0).")
+```
+
+## Second Experiment
+
+Here, we turn off the drift (i.e., set ``\mu = 0.``) We also make some other parameter tweaks to compensate.
+
+```julia
+parameters = parameter_defaults(ρ = 0.0195, d_0 = 5.0623, θ = 3.2944, κ = 0.0633, χ = 1/3.3966, υ = 0.0819, μ = 0.0, σ = 2.3664);
+@unpack stationary_0, stationary_T, change_welfare, change_trade = compare_steady_states(parameters, settings);
+
+println("SS to SS Welfare gain: $(change_welfare)")
+println("Change in Trade: $(change_trade)")
+println("Growth Rates across SS: $(100*stationary_T.g) (time T) vs $(100*stationary_0.g) (time 0).")
+```
+
+## Third Experiment
+
+```julia
+parameters = parameter_defaults(ρ = 0.0195, d_0 = 5.0684, θ = 3.2941,  κ = 0.0636, χ = 1/3.1965, υ = 0.06, μ = 0.0, σ = 2.3664);
+@unpack stationary_0, stationary_T, change_welfare, change_trade = compare_steady_states(parameters, settings);
+
+
+println("SS to SS Welfare gain: $(change_welfare)")
+println("Change in Trade: $(change_trade)")
+println("Growth Rates across SS: $(100*stationary_T.g) (time T) vs $(100*stationary_0.g) (time 0).")
+```
+
+## Fourth Experiment
+
+```julia
+parameters = parameter_defaults(ρ = 0.0195, d_0 = 5.0679, θ = 3.2943,  κ = 0.0624, χ = 1/2.9368, υ = 0.03, μ = 0.0, σ = 2.3664);
+@unpack stationary_0, stationary_T, change_welfare, change_trade = compare_steady_states(parameters, settings);
+
+
+println("SS to SS Welfare gain: $(change_welfare)")
+println("Change in Trade: $(change_trade)")
+println("Growth Rates across SS: $(100*stationary_T.g) (time T) vs $(100*stationary_0.g) (time 0).")
+```
+
+## Fifth Experiment
+
+```julia
+parameters = parameter_defaults(ρ = 0.0195, d_0 = 5.0678, θ = 3.2943,  κ = 0.0610, χ = 1/2.7949, υ = 0.005, μ = 0.0, σ = 2.3664);
+@unpack stationary_0, stationary_T, change_welfare, change_trade = compare_steady_states(parameters, settings);
+
+
+println("SS to SS Welfare gain: $(change_welfare)")
+println("Change in Trade: $(change_trade)")
+println("Growth Rates across SS: $(100*stationary_T.g) (time T) vs $(100*stationary_0.g) (time 0).")
+```
+
+## Sixth Experiment
+
+```julia
+parameters = parameter_defaults(ρ = 0.0195, d_0 = 7.5097, θ = 2.4071,  κ = 0.1165, χ = 1/4.0249, υ = 0.0819, μ = -0.0289, σ = 2.0);
+@unpack stationary_0, stationary_T, change_welfare, change_trade = compare_steady_states(parameters, settings);
+
+
+println("SS to SS Welfare gain: $(change_welfare)")
+println("Change in Trade: $(change_trade)")
+println("Growth Rates across SS: $(100*stationary_T.g) (time T) vs $(100*stationary_0.g) (time 0).")
+```
+
+## Seventh Experiment
+
+```julia
+parameters = parameter_defaults(ρ = 0.0195, d_0 = 3.0307, θ = 4.8219,  κ = 0.1417, χ = 1/5.9260, υ = 0.0819, μ = -0.0289, σ = 3.0);
+@unpack stationary_0, stationary_T, change_welfare, change_trade = compare_steady_states(parameters, settings);
+
+
+println("SS to SS Welfare gain: $(change_welfare)")
+println("Change in Trade: $(change_trade)")
+println("Growth Rates across SS: $(100*stationary_T.g) (time T) vs $(100*stationary_0.g) (time 0).")
+```
+
+## Eighth Experiment
+
+```julia
+parameters = parameter_defaults(ρ = 0.0195, d_0 = 2.0942, θ = 7.2329,  κ = 0.1748, χ = 1/7.6963, υ = 0.0819, μ = -0.0289, σ = 4.0);
+@unpack stationary_0, stationary_T, change_welfare, change_trade = compare_steady_states(parameters, settings);
+
+
+println("SS to SS Welfare gain: $(change_welfare)")
+println("Change in Trade: $(change_trade)")
+println("Growth Rates across SS: $(100*stationary_T.g) (time T) vs $(100*stationary_0.g) (time 0).")
+```
+
+## Ninth Experiment
+
+```julia
+# automatically applies the d_T = 1 + (d_0 - 1)*0.9 tariff, based on d_0
+parameters = parameter_defaults(ρ = 0.0195, d_0 = 1.7410, θ = 9.6431,  κ = 0.1977, χ = 1/9.4262, υ = 0.0819, μ = -0.0289, σ = 5.0);
+@unpack stationary_0, stationary_T, change_welfare, change_trade = compare_steady_states(parameters, settings);
+
+println("SS to SS Welfare gain: $(change_welfare)")
+println("Change in Trade: $(change_trade)")
+println("Growth Rates across SS: $(100*stationary_T.g) (time T) vs $(100*stationary_0.g) (time 0).")
+```
+
+## Tenth Experiment
+
+```julia
+parameters = parameter_defaults(ρ = 0.0195, d_0 = 5.0684, θ = 3.2941,  κ = 0.1496, χ = 1/3.8343, υ = 0.0819, μ = -0.0289, σ = 2.3664, δ = 0.10);
+@unpack stationary_0, stationary_T, change_welfare, change_trade = compare_steady_states(parameters, settings);
+
+println("SS to SS Welfare gain: $(change_welfare)")
+println("Change in Trade: $(change_trade)")
+println("Growth Rates across SS: $(100*stationary_T.g) (time T) vs $(100*stationary_0.g) (time 0).")
+```
+
+## Eleventh Experiment
+
+```julia
+parameters = parameter_defaults(ρ = 0.0195, d_0 = 5.0684, θ = 3.2941,  κ = 0.0872, χ = 1/7.8101, υ = 0.0819, μ = -0.0289, σ = 2.3664, δ = 0.010)
+@unpack stationary_0, stationary_T, change_welfare, change_trade = compare_steady_states(parameters, settings);
+
+println("SS to SS Welfare gain: $(change_welfare)")
+println("Change in Trade: $(change_trade)")
+println("Growth Rates across SS: $(100*stationary_T.g) (time T) vs $(100*stationary_0.g) (time 0).")
+```
+
+## Twelfth Experiment
+
+```julia
+parameters = parameter_defaults(ρ = 0.0195, d_0 = 5.0684, θ = 3.2941,  κ = 0.0841, χ = 1/8.7525, υ = 0.0819, μ = -0.0289, σ = 2.3664, δ = 0.0055)
+@unpack stationary_0, stationary_T, change_welfare, change_trade = compare_steady_states(parameters, settings);
+
+println("SS to SS Welfare gain: $(change_welfare)")
+println("Change in Trade: $(change_trade)")
+println("Growth Rates across SS: $(100*stationary_T.g) (time T) vs $(100*stationary_0.g) (time 0).")
+```
+
+## Thirteenth Experiment
+
+```julia
+parameters = parameter_defaults(ρ = 0.0195, d_0 = 3.0065, θ = 5.0404,  κ = 0.0775, χ = 1/6.4481, υ = 0.0487, μ = -0.0188, σ = 3.1893, δ = 0.02)
+@unpack stationary_0, stationary_T, change_welfare, change_trade = compare_steady_states(parameters, settings);
+
+println("SS to SS Welfare gain: $(change_welfare)")
+println("Change in Trade: $(change_trade)")
+println("Growth Rates across SS: $(100*stationary_T.g) (time T) vs $(100*stationary_0.g) (time 0).")
+```
+
+## Fourteenth Experiment
+
+```julia
+parameters = parameter_defaults(ρ = 0.0195, d_0 = 3.8015, θ = 4.1015,  κ = 0.0860, χ = 1/10.0355, υ = 0.0631, μ = -0.0328 , σ = 2.7821, δ = 0.006)
+@unpack stationary_0, stationary_T, change_welfare, change_trade = compare_steady_states(parameters, settings);
+
+println("SS to SS Welfare gain: $(change_welfare)")
+println("Change in Trade: $(change_trade)")
+println("Growth Rates across SS: $(100*stationary_T.g) (time T) vs $(100*stationary_0.g) (time 0).")
+```

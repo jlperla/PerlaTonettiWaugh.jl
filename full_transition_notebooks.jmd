@@ -1,30 +1,30 @@
 First, load the package and instantiate the dependencies.
 
 ```julia
-using Pkg 
+using Pkg
 pkg"activate ."
-pkg"instantiate" # may take a long time the first time this is run 
-pkg"precompile" 
+pkg"instantiate" # may take a long time the first time this is run
+pkg"precompile"
 using CSV, Plots, JSON, BenchmarkTools
 gr(fmt = :png) # for plot displays
 ```
 
 And load the actual PTW package
 
-```julia 
+```julia
 using PerlaTonettiWaugh
 ```
 
-## Stationary Solutions 
+## Stationary Solutions
 
-First, define common objects for the full model 
+First, define common objects for the full model
 
-```julia 
+```julia
 parameters = parameter_defaults(); # model parameters
 settings = settings_defaults(run_global = false); # numerical solution settings
 ```
 
-To solve for time 0 and ``T`` stationary solutions, simply: 
+To solve for time 0 and ``T`` stationary solutions, simply:
 
 ```julia
 params_0 = parameter_defaults(d = parameters.d_0)
@@ -36,41 +36,41 @@ stationary_sol_T = stationary_algebraic(params_T, settings);
 We can inspect each:
 
 ```julia
-display_stationary_sol(stationary_sol_0)
+foreach(println, pairs(stationary_sol_0))
 ```
 
-And 
+And
 
-```julia 
-display_stationary_sol(stationary_sol_T)
+```julia
+foreach(println, pairs(stationary_sol_T))
 ```
 
-## Transition Dynamics 
+## Transition Dynamics
 
 The code is
 
-```julia 
+```julia
 cachename = join(hash((parameters = parameters, settings = settings))) # uniquely identify the run by parameters + settings
 cachepath = joinpath(pwd(), "data", cachename * ".csv")
 use_cache = true # change this to false if you don't want to use the cache for a run
 write_cache = true # change this to false if you don't want to generate *any* cache files for a run
 
 # reading
-if isfile(cachepath) && use_cache 
+if isfile(cachepath) && use_cache
     println("using cache.")
-    solved = CSV.read(cachepath); 
+    solved = CSV.read(cachepath);
 else
     println("solving without cache.")
     @time solution = solve_transition(parameters, settings);
     solved = solution.results;
 end
-    
-# writing 
+
+# writing
 if write_cache
     mkpath(joinpath(pwd(), "data")) # if this doesn't eist for whatever reason
-    CSV.write(cachepath, solved) # write DataFrame 
+    CSV.write(cachepath, solved) # write DataFrame
     write(joinpath(pwd(), "data", cachename * ".json"), JSON.json((parameters = parameters, settings = merge(settings, (interp = typeof(settings.interp),))))) # write parameters
 else
-    # nothing 
+    # nothing
 end
 ```
