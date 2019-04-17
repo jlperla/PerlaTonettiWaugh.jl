@@ -51,7 +51,7 @@ function static_equilibrium(Ξ₁, v_1, g, z_hat, E, Ω, z, params)
     π_t = π_min_t * (1.0.+(N-1)*d^(1-σ)*i_vectorized) - (N-1)*κ*exp.(-(σ-1).*z).*i_vectorized  # (39)
     entry_residual_t = entry_residual(v_1, Ξ₁, params)
     
-    return (S = S_t, L_tilde = L_tilde_t, z_bar = z_bar_t, π_min = π_min_t, π = π_t, entry_residual = entry_residual,
+    return (S = S_t, L_tilde = L_tilde_t, z_bar = z_bar_t, π_min = π_min_t, π = π_t, entry_residual = entry_residual_t,
             w = w_t)
 end
 
