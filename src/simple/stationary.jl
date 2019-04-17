@@ -1,5 +1,5 @@
 # Algebraically solve for the stationary solution.
-function stationary_algebraic_simple(params)
+function stationary_algebraic_simple(params, settings)
     # Unpack parameters.
     @unpack μ, υ, θ, r, ζ = params
     # Calculate g.
@@ -14,12 +14,11 @@ function stationary_algebraic_simple(params)
 end
 
 # Numerically solve for the stationary solution as a system of equations.
-function stationary_numerical_simple(params, z_ex)
+function stationary_numerical_simple(params, settings)
+    @unpack z_ex, x0 = settings
+    @unpack μ, υ, θ, r, ζ, π = params
     @assert z_ex[1] == 0.0 && issorted(z_ex)  # validate grid
     z = z_ex[2:end-1]
-
-    # Unpack parameters
-    @unpack μ, υ, θ, r, ζ, π = params
 
     # Define the pdf of the truncated exponential distribution
     ω = ω_weights(z_ex, θ, 1) # (26), see utils/quadrature.jl
@@ -42,7 +41,7 @@ function stationary_numerical_simple(params, z_ex)
     end
 
     # Find and validate the root
-    sol = solve_system(stationary_numerical_given_g, [0.1])
+    sol = solve_system(stationary_numerical_given_g, x0)
     g_T = sol[1]
     @assert(μ + υ^2/2 - g_T < 0) # Negative drift condition (20)
 

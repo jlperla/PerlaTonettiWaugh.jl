@@ -2,7 +2,7 @@
 simple_params = @with_kw (μ = 0.0048, υ = 0.02, θ = 2.1, r = 0.05, ζ = 14.5, ξ = 1.0, π = x -> 1)
 
 # Algebraic Tests
-results_algebraic = stationary_algebraic_simple(simple_params());
+results_algebraic = stationary_algebraic_simple(simple_params(), settings_simple());
 @test results_algebraic.g ≈ 0.020727753490265812; # from updating the eq in stationary
 @test results_algebraic.ν ≈ 1.797254207263066;
 @test results_algebraic.v(0) ≈ 34.58676260411018;
@@ -33,6 +33,6 @@ gs = [
 ]
 
 for i in 1:length(gs)
-    results = stationary_numerical_simple(simple_params(), grids[i])
+    results = stationary_numerical_simple(simple_params(), settings_simple(z_ex = grids[i]))
     @test results.g ≈ gs[i] # regression
 end 
