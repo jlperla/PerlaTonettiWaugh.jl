@@ -109,9 +109,26 @@ function stationary_numerical(params, settings)
 end
 
 # Utilities for comparison, display, etc. 
+
+# better display of named tuples 
 import Base: print
 function Base.print(data::NamedTuple)
    for el in zip(keys(data), values(data))
         println("$(el[1]) = $(el[2])")
    end 
 end
+
+function compare_steady_states(params, settings)
+    params_0 = merge(params, (d = params.d_0,))
+    params_T = merge(params, (d = params.d_T,))
+
+    stationary_0 = stationary_numerical(params_0, settings)
+    stationary_T = stationary_numerical(params_T, settings)
+    change_welfare = 100*(consumption_equivalent(stationary_T.U_bar, stationary_0.U_bar, params)-1),
+    change_trade = (1-stationary_T.λ_ii) - (1-stationary_0.λ_ii)
+
+    return (stationary_0 = stationary_0,
+            stationary_T = stationary_T,
+            change_welfare = change_welfare,
+            change_trade = change_trade)
+end 

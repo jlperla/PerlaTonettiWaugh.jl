@@ -25,6 +25,7 @@ export parameter_defaults, settings_defaults
 export params_simple, settings_simple
 export solve_simple_dae
 export stationary_algebraic, stationary_numerical, simpleDAE, stationary_algebraic_simple, stationary_numerical_simple, ω_weights, solve_dynamics, welfare
+export compare_steady_states
 export weighted_residuals
 export solve_transition, prepare_results
 export consumption_equivalent
