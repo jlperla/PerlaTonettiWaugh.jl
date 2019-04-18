@@ -116,7 +116,6 @@ end
 function compare_steady_states(parameters, settings)
     parameters_0 = merge(parameters, (d = parameters.d_0,))
     parameters_T = merge(parameters, (d = parameters.d_T,))
-
     stationary_0 = stationary_algebraic(parameters_0, settings)
     stationary_T = stationary_algebraic(parameters_T, settings)
     change_welfare = 100*(consumption_equivalent(stationary_T.U_bar, stationary_0.U_bar, parameters)-1)
@@ -126,4 +125,27 @@ function compare_steady_states(parameters, settings)
             stationary_T = stationary_T,
             change_welfare = change_welfare,
             change_trade = change_trade)
+end
+
+function display_stationary(parameters, settings; comparison = false)
+    if comparison == false
+        println("displaying time T steady-state.");
+        parameters_T = merge(parameters, (d = parameters.d_T,));
+        stationary_T = stationary_algebraic(parameters_T, settings);
+        foreach(println, pairs(stationary_T))
+    else
+        println("displaying comparison between time-0 and time-T steady states.")
+        parameters_0 = merge(parameters, (d = parameters.d_0,));
+        parameters_T = merge(parameters, (d = parameters.d_T,));
+        stationary_0 = stationary_algebraic(parameters_0, settings);
+        stationary_T = stationary_algebraic(parameters_T, settings);
+        change_welfare = 100*(consumption_equivalent(stationary_T.U_bar, stationary_0.U_bar, parameters)-1);
+        change_trade = (1-stationary_T.λ_ii) - (1-stationary_0.λ_ii);
+
+        println("SS to SS welfare gain: $(change_welfare)")
+        println("Change in Trade: $(change_trade)")
+        println("Growth Rates across SS: $(100*stationary_T.g) (time T) vs $(100*stationary_0.g) (time 0)")
+    end
+
+    return nothing
 end
