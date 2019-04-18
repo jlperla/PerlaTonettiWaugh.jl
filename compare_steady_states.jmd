@@ -10,6 +10,7 @@ And load particular packages
 
 ```julia
 using CSV, Plots, JSON, BenchmarkTools, Parameters, PerlaTonettiWaugh
+gr(fmt = :png)
 ```
 
 Define a default parameters object

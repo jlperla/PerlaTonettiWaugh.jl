@@ -9,6 +9,7 @@ And load the deps
 
 ```julia
 using Plots, Parameters, BenchmarkTools, PerlaTonettiWaugh
+gr(fmt = :png)
 ```
 
 ## Stationary Solutions
