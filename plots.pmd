@@ -168,6 +168,8 @@ plt.show()
 
 ### Domestic Variety 
 
+This one looks a little different with the new parameters. 
+
 ```python 
 fig, ax = plt.subplots(figsize = (10,7))
 

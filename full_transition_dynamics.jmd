@@ -58,11 +58,10 @@ Let's also define and inspect the autarky steady state
 defaults = parameter_defaults()
 params_autarky = merge(defaults, (d_T = 1 + (defaults.d_0-1)*2.5,))
 
-display_stationary(params_autarky, settings, comparison = true)
-
+@unpack stationary_0, stationary_T, change_trade_autarky, change_welfare_autarky = compare_steady_states(params_autarky, settings, verbose = true);
 # quantities we need for later analysis
-stationary_autarky = stationary_algebraic(params_autarky, settings) # solution at t = T
-lambda_ss_autarky = 100*(consumption_equivalent(stationary_autarky.U_bar, stationary_0.U_bar, parameter_defaults())-1)
+stationary_autarky = stationary_T
+lambda_ss_autarky = change_welfare_autarky;
 ```
 
 ## Transition Dynamics
