@@ -95,8 +95,8 @@ ax.spines["top"].set_visible(False)
 ax.spines["right"].set_visible(False)
 
 ax.set_ylabel("Total Factor Productivity Growth", fontsize = 14) 
-ax.set_xlim(-20,50)
-ax.set_ylim(0.75,1.30)
+# ax.set_xlim(-20,50)
+# ax.set_ylim(0.75,1.30)
 
 plt.savefig(fig_path + "/growth.pdf", bbox_inches = "tight", dip = 3600)
 
@@ -115,8 +115,8 @@ ax.spines["top"].set_visible(False)
 ax.spines["right"].set_visible(False)
 
 ax.set_ylabel("Imports/GDP", fontsize = 14) 
-ax.set_xlim(-20,50)
-ax.set_ylim(9,15)
+# ax.set_xlim(-20,50)
+# ax.set_ylim(9,15)
 
 plt.savefig(fig_path + "/trade.pdf", bbox_inches = "tight", dip = 3600)
 
@@ -134,8 +134,8 @@ ax.plot(df.t, df.π_rat/df.π_rat.iloc[0], color = "black", lw = 5,
 ax.spines["top"].set_visible(False)
 ax.spines["right"].set_visible(False)
 
-ax.set_ylim(0.95,1.30)
-ax.set_xlim(-20,50)
+# ax.set_ylim(0.95,1.30)
+# ax.set_xlim(-20,50)
 
 ax.set_ylabel("π ratio \n Normalized, Initial S.S. = 1", fontsize = 14) 
 
@@ -157,9 +157,9 @@ ax.spines["right"].set_visible(False)
 
 ax.set_ylabel("Consumption \n Normalized, Initial S.S. = 1", fontsize = 14) 
 
-ax.set_ylim(0.98,1.04)
+# ax.set_ylim(0.98,1.04)
 
-ax.set_xlim(-20,50)
+# ax.set_xlim(-20,50)
 
 plt.savefig(fig_path + "/consumption.pdf", bbox_inches = "tight", dip = 3600)
 
@@ -179,9 +179,9 @@ ax.spines["right"].set_visible(False)
 
 ax.set_ylabel("Domestic Variety \n Normalized, Initial S.S. = 1", fontsize = 14) 
 
-ax.set_ylim(0.94,1.04)
+# ax.set_ylim(0.94,1.04)
 
-ax.set_xlim(-20,50)
+# ax.set_xlim(-20,50)
 
 plt.savefig(fig_path + "/omega.pdf", bbox_inches = "tight", dip = 3600)
 
@@ -207,8 +207,8 @@ ax.spines["right"].set_visible(False)
 
 ax.set_ylabel("Labor Outside of Production,\n Percentage Point Change relative to SS", fontsize = 14) 
 
-ax.set_xlim(-20,50)
-ax.set_ylim(-2.05,2.05)
+# ax.set_xlim(-20,50)
+# ax.set_ylim(-2.05,2.05)
 
 ax.text(50, 1.15, "Labor used in adoption and exporting", horizontalalignment='right', fontsize = 12) 
 
@@ -239,7 +239,7 @@ ax.spines["right"].set_visible(False)
 
 ax.set_ylabel("Labor Outside of Production,\n Percentage Point Change relative to SS", fontsize = 14) 
 
-ax.set_xlim(-20,50)
+# ax.set_xlim(-20,50)
 #ax.set_ylim(-2.05,2.05)
 
 #ax.text(50, 1.15, "Labor used in adoption and exporting", horizontalalignment='right', fontsize = 12) 
