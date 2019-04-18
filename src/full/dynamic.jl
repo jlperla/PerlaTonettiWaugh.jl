@@ -1,4 +1,3 @@
-# Callback for f!
 # Called at end of each time-step in the DAE solver (mainly to calculate L_tilde for derivatives)
 function store_static_callback(u, t, integrator, p)
     @unpack results, parameters, settings, L_1, L_2, ω, E, Ω, Ξ₁ = p
@@ -13,7 +12,6 @@ function store_static_callback(u, t, integrator, p)
     push!(results, (t = t, g = g_t, z_hat = z_hat_t, Ω = Ω_t, E = E_t, v_1 = v_1_t, L_tilde = L_tilde_t))
 end
 
-# Kernel function
 function f!(residual,du,u,p,t)
     @unpack results, parameters, settings, L_1, L_2, ω, E, Ω, Ξ₁ = p
     @unpack z, T = settings

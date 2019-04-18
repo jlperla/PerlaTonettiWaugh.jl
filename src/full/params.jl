@@ -12,7 +12,6 @@ parameter_defaults = @with_kw (ρ = 0.0215,
                                 υ = 0.0484 ,
                                 μ = -0.0189,
                                 δ = 0.02,
-                                d = NaN, # must be explicitly set to use this
                                 d_0 = 3.0426,
                                 d_T = 1 + (d_0-1)*0.9)
 

@@ -1,4 +1,4 @@
-# Functions to solve the model (i.e., return equilibrium quantities and a set of E nodes to interpolate) on a transition from one steady state to another.
+# Functions to solve the model on a transition from one steady state to another.
 # Global solver.
 function solve_transition_global(parameters, settings)
     @assert size(settings.transition_lb) == size(settings.transition_ub) "Lower and upper bound vector lengths disagree."
@@ -102,7 +102,7 @@ end
 
 # Adds detailed output to a results dataframe
 function prepare_results(solve_dynamics_output, stationary_sol_T, stationary_sol_0)
-    @unpack results, sol, p = solve_dynamics_output
+    @unpack results, sol, dae_parameters = solve_dynamics_output
     @unpack Ω, E, parameters, settings, Ξ₁ = dae_parameters
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = parameters
     @unpack z, z_ex, T, tstops = settings

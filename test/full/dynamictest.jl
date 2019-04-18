@@ -121,7 +121,7 @@ end
     u = [v_T..., g_T, z_hat_T]
     resid = zeros(P+2)
     t = T_default
-    p = solve_dynamics(params_T, stationary_T, settings, Ω, E).p
+    p = solve_dynamics(params_T, stationary_T, settings, Ω, E).dae_parameters
   # Fill the residuals vector
     f!(resid, du, u, p, t)
   # Tests
