@@ -46,9 +46,9 @@ function simpleDAE(params, settings)
 end
 
 function solve_simple_transition(params, settings) # To keep the params consistent with other tuples.
-    # create ODE, etc. 
+    # create ODE, etc.
     ode_prob = simpleDAE(params, settings)
-    @unpack ω, x, Ξ₁, P = ode_prob.p 
+    @unpack ω, x, Ξ₁, P = ode_prob.p
     @unpack ts, ode_solve_algorithm = settings
     # Solve ode
     sol = Sundials.solve(ode_prob, ode_solve_algorithm, tstops = ts)

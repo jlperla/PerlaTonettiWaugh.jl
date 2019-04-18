@@ -4,7 +4,7 @@ module PerlaTonettiWaugh
 using DifferentialEquations, Sundials, LinearAlgebra, DataFrames, DataFramesMeta, DiffEqCallbacks, Interpolations, QuadGK, NLopt, LeastSquaresOptim, BlackBoxOptim, CSV
 using NLSolversBase
 using SimpleDifferentialOperators
-using JSON 
+using JSON
 import Parameters: @with_kw, @unpack
 
 # General utilities files.
@@ -24,7 +24,7 @@ include("full/transition.jl")
 export parameter_defaults, settings_defaults
 export params_simple, settings_simple
 export solve_simple_transition
-export stationary_algebraic, stationary_numerical, simpleDAE, stationary_algebraic_simple, stationary_numerical_simple, ω_weights, solve_dynamics, welfare
+export stationary_algebraic, stationary_numerical, stationary_algebraic_simple, stationary_numerical_simple, ω_weights, solve_dynamics, welfare
 export compare_steady_states
 export weighted_residuals
 export solve_transition, prepare_results
