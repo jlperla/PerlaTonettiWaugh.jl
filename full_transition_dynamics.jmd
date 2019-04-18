@@ -216,7 +216,7 @@ consumption_equivalent(solved.U[1], stationary_0.U_bar, parameter_defaults())
 Save welfare and autarky dataframes.
 
 ```julia
-df_welfare = DataFrame(steady_state = lambda_ss, transition_path = lambda_tpath, growth_rate = stationary_T.g, theta = parameter_defaults().θ);
+df_welfare = DataFrame(steady_state = change_welfare, transition_path = lambda_tpath, growth_rate = stationary_T.g, theta = parameter_defaults().θ);
 write_cache && CSV.write("data/welfare_results-" * cachename * ".csv", df_welfare)
 ```
 

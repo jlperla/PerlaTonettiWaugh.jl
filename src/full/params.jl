@@ -1,6 +1,6 @@
-# Full model objects 
+# Full model objects
 parameter_defaults = @with_kw (ρ = 0.0215,
-                                σ = 3.1725, 
+                                σ = 3.1725,
                                 N = 10,
                                 θ = 5.0018,
                                 γ = 1.00,
@@ -8,11 +8,11 @@ parameter_defaults = @with_kw (ρ = 0.0215,
                                 ζ = 1.0,
                                 η = 0.,
                                 Theta = 1,
-                                χ = 1/5.9577, 
-                                υ = 0.0484 , 
+                                χ = 1/5.9577,
+                                υ = 0.0484 ,
                                 μ = -0.0189,
                                 δ = 0.02,
-                                d = NaN, # must be explicitly set to use this 
+                                d = NaN, # must be explicitly set to use this
                                 d_0 = 3.0426,
                                 d_T = 1 + (d_0-1)*0.9)
 
@@ -31,4 +31,5 @@ settings_defaults = @with_kw (z_ex = unique([range(0., 0.1, length = 150)' range
                                 impose_E_monotonicity_constraints = true,
                                 run_global = true,
                                 stationary_x0 = [0.02; 2; .57],
-                                pre_shock_times = [-1, -5, -10, -15, -20])
+                                pre_shock_times = [-1, -5, -10, -15, -20],
+                                detailed_ts = [collect(0.0:0.5:20); collect(20.0:T)])

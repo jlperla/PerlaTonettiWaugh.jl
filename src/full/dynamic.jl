@@ -1,7 +1,7 @@
 # Callback for f!
 # Called at end of each time-step in the DAE solver (mainly to calculate L_tilde for derivatives)
 function store_static_callback(u, t, integrator, p)
-    @unpack results, parameters, settings, L_1, L_2, ω, E, Ω, Ξ₁ = p 
+    @unpack results, parameters, settings, L_1, L_2, ω, E, Ω, Ξ₁ = p
     P = length(u) - 2
     g_t = u[P+1]
     z_hat_t = u[P+2]
@@ -13,10 +13,10 @@ function store_static_callback(u, t, integrator, p)
     push!(results, (t = t, g = g_t, z_hat = z_hat_t, Ω = Ω_t, E = E_t, v_1 = v_1_t, L_tilde = L_tilde_t))
 end
 
-# Kernel function 
+# Kernel function
 function f!(residual,du,u,p,t)
-    @unpack results, parameters, settings, L_1, L_2, ω, E, Ω, Ξ₁ = p 
-    @unpack z, T = settings 
+    @unpack results, parameters, settings, L_1, L_2, ω, E, Ω, Ξ₁ = p
+    @unpack z, T = settings
     @unpack ρ, δ, σ, μ, υ, κ, d, ζ = parameters
     residual .= 0
     P = length(residual) - 2 # note u[1:P]  = v(t) in the solution iterators
@@ -52,11 +52,11 @@ function solve_dynamics(parameters, stationary_sol_T, settings, Ω, E)
     @assert η == 0
     T >= 50 ? nothing : @warn "T < 50 can give erratic behavior."
 
-    # unpack the stationary solution 
-    v_T = stationary_sol_T.v_tilde 
-    g_T = stationary_sol_T.g 
-    z_hat_T = stationary_sol_T.z_hat 
-    L_tilde_T = stationary_sol_T.L_tilde 
+    # unpack the stationary solution
+    v_T = stationary_sol_T.v_tilde
+    g_T = stationary_sol_T.g
+    z_hat_T = stationary_sol_T.z_hat
+    L_tilde_T = stationary_sol_T.L_tilde
     Ω_T = stationary_sol_T.Ω
 
     # Define the results data frame we'll be using and push the stationary onto it.
@@ -74,7 +74,7 @@ function solve_dynamics(parameters, stationary_sol_T, settings, Ω, E)
     u0 = [v_T; g_T; z_hat_T]
     du0 = zeros(P+2)
 
-    p = (results = results, parameters = parameters, settings = settings, 
+    p = (results = results, parameters = parameters, settings = settings,
         L_1 = L_1, L_2 = L_2, ω = ω, Ξ₁ = Ξ₁, E = E, Ω = Ω)
 
     dae_prob = DAEProblem(f!, du0, u0, (T, 0.0), p, differential_vars = [trues(P); false; false])
@@ -87,11 +87,11 @@ function solve_dynamics(parameters, stationary_sol_T, settings, Ω, E)
         sol = DifferentialEquations.solve(dae_prob, callback = cb, tstops = tstops)
     end
 
-    # postprocess and return 
-    sort!(results) # sort results to be forward in time 
+    # postprocess and return
+    sort!(results) # sort results to be forward in time
     results = @transform(results, entry_residual = entry_residual.(:v_1, Ref(Ξ₁), Ref(parameters)))
 
-    return (results = results, # dataframe of results  
+    return (results = results, # dataframe of results
             sol = sol, # DAE solver output
-            p = p) # parameters bundle we passed to the DAE 
+            dae_parameters = p) # parameters bundle we passed to the DAE
 end
