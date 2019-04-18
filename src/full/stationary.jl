@@ -7,10 +7,21 @@ function stationary_algebraic(params, settings)
     g, z_hat, Ω = solve_system(x -> stationary_algebraic_aux(x, params), stationary_x0)
     @assert z_hat > 1 && Ω > 0 && g > 0 # validate solution
     staticvalues = staticvals([g, z_hat, Ω], params)
-    return merge(staticvalues, merge((g = g, z_hat = z_hat, Ω = Ω), welfare([g, z_hat, Ω], params))) # calculate quantities and return
+
+    # calculate value function
+    @unpack z_ex = settings
+    @unpack θ, σ = params
+    bc = (Mixed(σ-1), Mixed(σ-1)) # boundary conditions for differential operators
+    L_1_minus = L₁₋bc(z_ex, bc) # use backward difference as the drift is negative
+    L_2 = L₂bc(z_ex, bc)
+    ω = ω_weights(z_ex, θ, σ-1) # Get quadrature weights for the distribution on the rescaled grid.
+    Ξ₁ = 1/(1 - (σ-1)*(z[1] - z_ex[1])) # (24), with ξ = (σ-1)
+    p = (L_1_minus = L_1_minus, L_2 = L_2, ω = ω, Ξ₁ = Ξ₁)
+    v_tilde = stationary_numerical_given_vals([g, z_hat, Ω], p, params, settings).v_tilde
+    
+    return merge(staticvalues, merge((g = g, z_hat = z_hat, Ω = Ω, v_tilde = v_tilde), welfare([g, z_hat, Ω], params))) # calculate quantities and return
 end
 
-# Welfare function
 function welfare(vals, params)
     g, z_hat, Ω = vals
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params
@@ -22,7 +33,7 @@ function welfare(vals, params)
             U_bar = γ == 1 ? (ρ*log(c_T) + g) / ρ^2 : 1/(1-γ) * (c_T^(1-γ))/(ρ + (γ-1)*g)) # (C.16)
 end
 
-# Gives us the residuals for a point x in state-space and a set of params.
+# Kernel for the algebraic stationary.
 function stationary_algebraic_aux(vals, params)
     # Grab values and intermediate quantities.
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params
@@ -65,7 +76,28 @@ function staticvals(vals, params)
             z_bar = z_bar_T, w = w_T, x = x_T, π_min = π_min_T, π_rat = π_rat_T)
 end
 
-# Numerical method checking the stationary solution to the ODE.  In general, use the analtyic when only looking at steady states but this provides guidance on the convergence and accuracy of the finite-difference methods.
+# Kernel of the stationary numerical.
+function stationary_numerical_given_vals(vals, p, params, settings)
+    g, z_hat, Ω = vals
+    @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x, π_min = staticvals([g, z_hat, Ω], params)
+    @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params
+    @unpack z = settings
+    @unpack Ξ₁, L_1_minus, L_2, ω, z = p
+    r_tilde = r - g - 0 # (C.59, and g_w = 0 at steady state)
+    ρ_tilde = r_tilde - (σ - 1)*(μ - g + (σ-1)*(υ^2/2)) # (C.41)
+    A_T = ρ_tilde * I - (μ - g + (σ-1)*υ^2)*L_1_minus - υ^2/2 * L_2 # (52)
+    i(z) = z >= log(z_hat) ? 1 : 0 # indicator function for next equation.
+    π(z) = π_min * (1 + (N-1)*d^(1-σ)*i(z)) - (N-1)*κ*exp(-(σ-1)*z)*i(z) # (39)
+    v_tilde = A_T \ π.(z) # discretized system of ODE for v, where v'(T) = 0 (53)
+
+    # System of equations, given the numerically solved ODE
+    return (residuals = [Ξ₁*v_tilde[1] - dot(v_tilde, ω) + ζ, # (54)
+            Ξ₁*v_tilde[1] - ζ*(1-χ)/χ, # (56)
+            π_min - (1 - L_tilde)/((σ-1)*z_bar^(σ-1))], # (38), from the static equilibrium
+            v_tilde = v_tilde)
+end
+
+# Solve the ODE by root-finding. Should use the analytic most of the time, but this is a useful check.
 function stationary_numerical(params, settings)
     @unpack z_ex, stationary_x0 = settings
     # Unpack params and settings.
@@ -80,31 +112,11 @@ function stationary_numerical(params, settings)
     ω = ω_weights(z_ex, θ, σ-1) # Get quadrature weights for the distribution on the rescaled grid.
     Ξ₁ = 1/(1 - (σ-1)*(z[1] - z_ex[1])) # (24), with ξ = (σ-1)
 
-    # Define the system of equations we're solving.
-    function stationary_numerical_given_vals(vals)
-        g, z_hat, Ω = vals
-        @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x, π_min = staticvals([g, z_hat, Ω], params) # Grab static values.
-        r_tilde = r - g - 0 # (C.59, and g_w = 0 at steady state)
-        ρ_tilde = r_tilde - (σ - 1)*(μ - g + (σ-1)*(υ^2/2)) # (C.41)
-        A_T = ρ_tilde * I - (μ - g + (σ-1)*υ^2)*L_1_minus - υ^2/2 * L_2 # (52)
-        i(z) = z >= log(z_hat) ? 1 : 0 # indicator function for next equation.
-        π(z) = π_min * (1 + (N-1)*d^(1-σ)*i(z)) - (N-1)*κ*exp(-(σ-1)*z)*i(z) # (39)
-        v_tilde = A_T \ π.(z) # discretized system of ODE for v, where v'(T) = 0 (53)
+    p = (Ξ₁ = Ξ₁, L_1_minus = L_1_minus, L_2 = L_2, ω = ω)
+    g_T, z_hat_T, Ω_T = solve_system(vals -> stationary_numerical_given_vals(vals, p, params, settings).residuals, stationary_x0)
 
-        # System of equations, given the numerically solved ODE
-        return (residuals = [Ξ₁*v_tilde[1] - dot(v_tilde, ω) + ζ, # (54)
-                Ξ₁*v_tilde[1] - ζ*(1-χ)/χ, # (56)
-                π_min - (1 - L_tilde)/((σ-1)*z_bar^(σ-1))], # (38), from the static equilibrium
-                v_tilde = v_tilde)
-    end
-
-    g_T, z_hat_T, Ω_T = solve_system(vals -> stationary_numerical_given_vals(vals).residuals, stationary_x0)
-
-    # Grab static objects at steady-state and recreate the steady-state objects using the g, z_hat, Ω.
     staticvalues = staticvals([g_T, z_hat_T, Ω_T], params)
-    @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x, π_min = staticvalues
-    v_tilde = stationary_numerical_given_vals([g_T, z_hat_T, Ω_T]).v_tilde
-
+    v_tilde = stationary_numerical_given_vals([g_T, z_hat_T, Ω_T], p, params, settings).v_tilde
     return merge(staticvalues, merge((g = g_T, z_hat = z_hat_T, Ω = Ω_T, v_tilde = v_tilde), welfare([g_T; z_hat_T; Ω_T], params)))
 end
 
