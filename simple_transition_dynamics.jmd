@@ -28,8 +28,8 @@ First, let's inspect the stationary solution:
 
 ```julia
 @unpack g, v = stationary_algebraic_simple(params, settings);
-@show algebraic_g; # algebraic growth rate
-plot(settings.z, v) # algebraic value function
+@show g; # algebraic growth rate
+plot(settings.z_ex[2:end-1], v) # algebraic value function
 ```
 
 The above is computed using an analytical expression from the paper (see equations 9, 10, and 11). We also have a numerical
@@ -38,7 +38,7 @@ method based on root-finding.
 ```julia
 @unpack g, v = stationary_numerical_simple(params, settings);
 @show g; # numerical growth rate
-plot(settings.z, v) # numerical value function
+plot(settings.z_ex[2:end-1], v) # numerical value function
 ```
 
 ## Transition Dynamics
