@@ -186,6 +186,7 @@ function prepare_results(solve_dynamics_output, stationary_sol_T, stationary_sol
                         U = U, 
                         π_rat = π_rat, 
                         L_tilde_a = L_tilde_a, 
+                        c = c,
                         L_tilde_x = L_tilde_x, 
                         L_tilde_E = L_tilde_E, 
                         w = w))
