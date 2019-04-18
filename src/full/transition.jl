@@ -94,7 +94,7 @@ end
 # Adds detailed output to a results dataframe
 function prepare_results(solve_dynamics_output, stationary_sol_T, stationary_sol_0)
     @unpack results, sol, dae_parameters = solve_dynamics_output
-    @unpack Ω, E, parameters, settings, Ξ₁ = dae_parameters
+    @unpack Ω, E, parameters, settings, Ξ₁, ω = dae_parameters
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = parameters
     @unpack z, z_ex, T, tstops = settings
 
@@ -159,35 +159,36 @@ function prepare_results(solve_dynamics_output, stationary_sol_T, stationary_sol
         results.r[i] = ρ + γ*(g + log_c_forward) # (C.56)
     end
 
-    # add time-0 (pre-shock) steady state
-    # unpack stationary_sol_0
-    g_0 = stationary_sol_0.g
-    z_hat_0 = stationary_sol_0.z_hat
-    Ω_0 = stationary_sol_0.L_tilde
-    π_min_0 = stationary_sol_0.π_min
-    π_rat_0 = stationary_sol_0.π_rat
-    x_0 = stationary_sol_0.x
-    S_0 = stationary_sol_0.S
-    w_0 = stationary_sol_0.w
-    z_bar_0 = stationary_sol_0.z_bar
-    λ_ii_0 = stationary_sol_0.λ_ii
-    c_0 = stationary_sol_0.c
-    L_tilde_0 = stationary_sol_0.L_tilde
-    L_tilde_a_0 = stationary_sol_0.L_tilde_a
-    L_tilde_x_0 = stationary_sol_0.L_tilde_x
-    L_tilde_E_0 = stationary_sol_0.L_tilde_E
-    r_0 = stationary_sol_0.r
-    v_0 = stationary_sol_0.v_tilde
-
-    # add to dataframe
+    # prepend pre-shock steadystate to dataframe
     ts_0 = settings.pre_shock_times
     allowmissing!(results) # to allow for discrepancies in fields
     for t in ts_0
-        push!(results, (t = t, g = g_0, z_hat = z_hat_0, Ω = Ω_0, E = missing, v_1 = v_0[1],
-                        L_tilde = L_tilde_0, entry_residual = missing, r = r_0,
-                        λ_ii = λ_ii_0, S = S_0, z_bar = z_bar_0, c = c_0, π_min = π_min_0, log_M = missing, U = missing,
-                        π_rat = π_rat_0, L_tilde_a = L_tilde_a_0, L_tilde_x = L_tilde_x_0, L_tilde_E = L_tilde_E_0,
-                        w = w_0))
+        E = stationary_sol_0.δ
+        U = stationary_sol_0.U_bar
+        v = stationary_sol_0.v_tilde 
+        @unpack g, z_hat, Ω, L_tilde, π_min, π_rat, x, S, w, z_bar, λ_ii, c, L_tilde_x, L_tilde_a, L_tilde_E, r = stationary_sol_0
+        Ξ₁ = 1/(1 - (σ-1)*(z[1] - z_ex[1]))
+
+        push!(results, (t = t, 
+                        g = g, 
+                        z_hat = z_hat, 
+                        Ω = Ω, 
+                        E = E, 
+                        v_1 = v[1],
+                        L_tilde = L_tilde, 
+                        entry_residual = Ξ₁*v[1] - dot(v, ω) + ζ, 
+                        r = r, 
+                        λ_ii = λ_ii, 
+                        S = S, 
+                        z_bar = z_bar, 
+                        π_min = π_min, 
+                        log_M = missing, 
+                        U = U, 
+                        π_rat = π_rat, 
+                        L_tilde_a = L_tilde_a, 
+                        L_tilde_x = L_tilde_x, 
+                        L_tilde_E = L_tilde_E, 
+                        w = w))
     end
 
     return sort!(results) # sort results again to keep time in the right order
