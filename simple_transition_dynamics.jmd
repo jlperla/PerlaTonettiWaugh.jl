@@ -16,7 +16,7 @@ gr(fmt = :png) # for displays
 
 First, define our common objects
 
-```
+```julia
 params = params_simple()
 settings = settings_simple()
 ```
