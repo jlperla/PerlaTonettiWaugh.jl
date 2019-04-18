@@ -1,5 +1,5 @@
-function stationary_algebraic_simple(params, settings)
-    @unpack μ, υ, θ, r, ζ = params
+function stationary_algebraic_simple(parameters, settings)
+    @unpack μ, υ, θ, r, ζ = parameters
     @unpack T = settings
     g = μ + (1 - (θ - 1)*ζ*(r(T) - μ))/((θ - 1)^2 * ζ) + υ^2/2 * (θ*(θ*(θ - 1)*(r(T) - μ - υ^2/2)*ζ - 2) + 1)/((θ - 1)*((θ - 1)*(r(T) - μ - υ^2/2)*ζ - 1)); # (9)
     ν = (μ-g)/υ^2 + √(((g-μ)/υ^2)^2 + (r(T) - g)/(υ^2/2)); # (11)
@@ -7,10 +7,10 @@ function stationary_algebraic_simple(params, settings)
     return (g = g, ν = ν, v = v)
 end
 
-# Minimizes value-matching condition (31.)
-function stationary_numerical_simple(params, settings)
+# Minimizes value-matching condition (31)
+function stationary_numerical_simple(parameters, settings)
     @unpack z_ex, x0, T = settings
-    @unpack μ, υ, θ, r, ζ, π = params
+    @unpack μ, υ, θ, r, ζ, π = parameters
     @assert z_ex[1] == 0.0 && issorted(z_ex)  # validate grid
     z = z_ex[2:end-1]
     r_T = r(T)

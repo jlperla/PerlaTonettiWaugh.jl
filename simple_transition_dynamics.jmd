@@ -9,7 +9,6 @@ And load the deps
 
 ```julia
 using Plots, Parameters, BenchmarkTools, PerlaTonettiWaugh
-gr(fmt = :png) # for displays
 ```
 
 ## Stationary Solutions
@@ -17,7 +16,7 @@ gr(fmt = :png) # for displays
 First, define our common objects
 
 ```julia
-params = params_simple()
+params = parameters_simple()
 settings = settings_simple()
 ```
 
@@ -54,7 +53,7 @@ r = t -> (0.05 - 1e-02 * (1 - t / 100.0))
 To solve for the dynamics:
 
 ```julia
-params = params_simple(r = r)
+params = parameters_simple(r = r)
 
 @unpack g_ts, v_ts, residuals = solve_simple_transition(params, settings)
 ```

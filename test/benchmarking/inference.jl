@@ -24,7 +24,7 @@ end
 # MODEL OBJECTS
 # simpleDAE
 function test_simpleDAE()
-    params = params_simple() # Arbitrary parameter set
+    params = parameters_simple() # Arbitrary parameter set
     settings = settings_simple()
     PerlaTonettiWaugh.simpleDAE(params, settings) # non-inferrable because of the constructor call
 end

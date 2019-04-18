@@ -1,5 +1,5 @@
 # Generate default parameters.
-params = params_simple()
+params = parameters_simple()
 
 # Algebraic Tests
 results_algebraic = stationary_algebraic_simple(params, settings_simple());

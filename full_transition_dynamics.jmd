@@ -9,7 +9,6 @@ And load the deps
 
 ```julia
 using CSV, Plots, JSON, BenchmarkTools, Parameters, PerlaTonettiWaugh, DataFrames
-gr(fmt = :png) # for plot displays
 ```
 
 ## Stationary Solutions
@@ -55,7 +54,8 @@ Let's also define and inspect the autarky steady state
 
 ```julia
 # Solve for the autarky case
-params_autarky = parameter_defaults(d = 1 + (parameters.d_0-1)*2.5)
+defaults = parameter_defaults()
+params_autarky = merge(defaults, (d = 1 + (defaults.d_0-1)*2.5,))
 stationary_autarky = stationary_algebraic(params_autarky, settings) # solution at t = T
 lambda_ss_autarky = 100*(consumption_equivalent(stationary_autarky.U_bar, stationary_0.U_bar, parameter_defaults())-1)
 

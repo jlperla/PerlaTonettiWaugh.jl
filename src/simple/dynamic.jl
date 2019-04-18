@@ -12,8 +12,8 @@ function f!_simple(resid,du,u,p,t)
 end
 
 # DAE constructor
-function simpleDAE(params, settings)
-    @unpack μ, υ, θ, r, x, π = params
+function simpleDAE(parameters, settings)
+    @unpack μ, υ, θ, r, x, π = parameters
     @unpack z_ex, T = settings
 
     @assert z_ex[1] == 0.0 && issorted(z_ex) # validate grid
@@ -26,7 +26,7 @@ function simpleDAE(params, settings)
     L_1_minus = L₁₋bc(z_ex, bc) # use backward difference as the drift is negative
     L_2 = L₂bc(z_ex, bc)
 
-    stationary = stationary_numerical_simple(params, settings)
+    stationary = stationary_numerical_simple(parameters, settings)
     g_T = stationary.g
     v_T = stationary.v
 
@@ -38,8 +38,8 @@ function simpleDAE(params, settings)
     return DAEProblem(f!_simple, resid_M1, u_T, (T, 0.0), differential_vars = [fill(true, P); false], p)
 end
 
-function solve_simple_transition(params, settings) # To keep the params consistent with other tuples.
-    ode_prob = simpleDAE(params, settings)
+function solve_simple_transition(parameters, settings)
+    ode_prob = simpleDAE(parameters, settings)
     @unpack ω, x, Ξ₁, P = ode_prob.p
     @unpack ts, ode_solve_algorithm = settings
     sol = Sundials.solve(ode_prob, ode_solve_algorithm, tstops = ts)
@@ -49,7 +49,7 @@ function solve_simple_transition(params, settings) # To keep the params consiste
     v_ts = zeros(P, length(ts))
     g_ts = zeros(length(ts))
     for (i, t) in enumerate(ts)
-        v_t = sol(t)[1:P] # i.e., the value function at the point.
+        v_t = sol(t)[1:P] # i.e., the value function at the point-in-time.
         residuals[i] = Ξ₁*v_t[1] + x(t) - dot(ω, v_t) # value matching condition (29)
         v_ts[:,i] = v_t
         g_ts[i] = sol(t)[end]

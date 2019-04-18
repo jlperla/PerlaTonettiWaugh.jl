@@ -5,7 +5,7 @@ settings = settings_simple(
     ts = range(0.0, stop = 100, length = 10) 
 ) # everything unmentioned is default 
 
-params = params_simple(
+params = parameters_simple(
     υ = 0.1,
     θ = 2.1,
     ζ = 14.5,
@@ -13,7 +13,7 @@ params = params_simple(
     ξ = 1.0
 )
 
-params_func = params_simple(
+params_func = parameters_simple(
     μ = 0.0,
     υ = 0.1, 
     θ = 2.1,

@@ -6,18 +6,15 @@ function solve_transition_global(parameters, settings)
     @assert size(settings.transition_x0) == size(settings.transition_lb) "x0 and bound vector lengths disagree."
     ranges = map(i->(settings.transition_lb[i], settings.transition_ub[i]), 1:length(settings.transition_ub))
 
-    # define objective function
     ssr(residuals) = sum(residuals.^2) + settings.transition_penalty_coefficient * sum(max.(-diff(residuals), 0.0)) # add penalty for non-increasing sol
     bb_objective(x) = (settings.impose_E_monotonicity_constraints) ? ssr(weighted_residuals(sort(x), parameters, settings)) : ssr(weighted_residuals(x, parameters, settings))
 
-    # run solver, postprocess, and return
     result = bboptimize(bb_objective, SearchRange = ranges, NumDimensions = length(ranges), MaxSteps = settings.transition_iterations)
     E_nodes_found = settings.impose_E_monotonicity_constraints ? sort(best_candidate(result)) : best_candidate(result)
     return E_nodes_found
 end
 
 function solve_transition(parameters, settings)
-    # run global if requested
     if settings.run_global
         x0 = solve_transition_global(parameters, settings)
     else
@@ -37,7 +34,6 @@ function solve_transition(parameters, settings)
         h .= A*x
     end
 
-    # run the local (NLopt) solver
     nlopt_objective(x) =  weighted_residuals(x, parameters, settings)
     E_nodes = solve_system(nlopt_objective, x0;
                     lb = nothing,
@@ -46,7 +42,6 @@ function solve_transition(parameters, settings)
                     algorithm = settings.impose_E_monotonicity_constraints ? :LD_SLSQP : :LD_LBFGS,
                     iterations = settings.transition_iterations)
 
-    # solve, cache, and return
     solution = solve_model_from_E_nodes(E_nodes, parameters, settings)
     return (solve_dynamics_output = solution, results = solution.results, E_nodes = E_nodes)
 end
@@ -54,7 +49,7 @@ end
 function weighted_residuals(E_nodes_interior, parameters, settings)
     entry_residuals_nodes_count = length(E_nodes_interior)
 
-    # solve the model using E_nodes
+    # returns a residual of 10e20 if solve_dynamics call is invalid
     solved = try solve_model_from_E_nodes(E_nodes_interior, parameters, settings).results catch; return fill(10e20, entry_residuals_nodes_count) end
     entry_residual_interpolated = LinearInterpolation(solved.t, solved.entry_residual)
     entry_residuals_nodes = range(0, stop = solved.t[end], length = entry_residuals_nodes_count + 2)
@@ -67,14 +62,12 @@ function solve_model_from_E_nodes(E_nodes_interior, parameters, settings)
     @unpack T, interp, z_ex = settings
     @unpack d_0, d_T = parameters
 
-    # calculate stationary objects
     params_T = merge(parameters, (d = d_T,))
     params_0 = merge(parameters, (d = d_0,))
     stationary_sol_T = stationary_numerical(params_T, settings)
     Ω_0 = stationary_numerical(params_0, settings).Ω
     Ω_T = stationary_sol_T.Ω
 
-    # formulate and solve the DAEproblem
     @unpack Ω, E = Ω_E_funcs(E_nodes_interior, Ω_T, Ω_0, parameters, settings)
     return solve_dynamics(params_T, stationary_sol_T, settings, Ω, E)
 end
@@ -85,14 +78,12 @@ function Ω_E_funcs(E_nodes_interior, Ω_T, Ω_0, parameters, settings)
     E_nodes = [-1.0; E_nodes_interior; 0.0] # See footnote 19.  Without pinning a corner there is an extra degree of freedom in the scale
     ts = range(0.0, T, length=length(E_nodes))
 
-    # calculate E
     E_hat_interpolation = interp(ts, E_nodes) # might worth trying cubic spline
     E_hat(t) = E_hat_interpolation(t)
     E_hat_integral = quadgk(E_hat, 0, T)[1] # (42)
     Q = log(Ω_T/Ω_0) / E_hat_integral # (42) when Ω_T = Ω_0, then Q = 0 so that E(t) is constant with δ as expected
     E(t) = Q*E_hat(t) + δ # (43)
 
-    # calculate Ω
     Ω_derivative(Ω,p,t) = Q*E_hat(t)*Ω # (44)
     Ω_solution = DifferentialEquations.solve(ODEProblem(Ω_derivative, Ω_0, (0.0, T)), reltol = 1e-15) # if this fails, error will be thrown
     Ω(t) = t <= T ? Ω_solution(t) : Ω_solution(T)
@@ -107,7 +98,6 @@ function prepare_results(solve_dynamics_output, stationary_sol_T, stationary_sol
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = parameters
     @unpack z, z_ex, T, tstops = settings
 
-    # unpack time-T stationary solution
     g_T = stationary_sol_T.g
     z_hat_T = stationary_sol_T.z_hat
     L_tilde_T = stationary_sol_T.L_tilde
@@ -115,7 +105,6 @@ function prepare_results(solve_dynamics_output, stationary_sol_T, stationary_sol
 
     π_min(L_tilde_t, z_bar) = (1 - L_tilde_t) / ((σ-1)*z_bar^(σ-1)) # (38)
 
-    # define interpolates
     P = length(z)
     interpolated_g(t) = sol(t)[P+1]
     interpolated_z_hat(t) = sol(t)[P+2]
@@ -124,7 +113,7 @@ function prepare_results(solve_dynamics_output, stationary_sol_T, stationary_sol
     interpolated_c(t) = c(interpolated_L_tilde(t), Ω(t), interpolated_z_bar(t))
     interpolated_π_min(t) = π_min(interpolated_L_tilde(t), interpolated_z_bar(t))
 
-    # define welfare quantities based on interpolates
+    # define welfare quantities based on interpolates and time-T steady state
     log_c(t) = log(interpolated_c(t))
     log_c_T = log(c(L_tilde_T, Ω_T, z_bar(z_hat_T, Ω_T, parameters))) # this is a scalar
     log_M(t) = quadgk(interpolated_g, 0, t)[1]
@@ -135,30 +124,29 @@ function prepare_results(solve_dynamics_output, stationary_sol_T, stationary_sol
     ts = (T >= 20) ? sort(unique([settings.detailed_ts; results.t])) : results.t # add more time steps for the plotting/etc.
     results = DataFrame(t = ts)
 
-    # Interpolated "base quantities"
+    # Apply interpolates and static formulas at new time points
     results = @transform(results, g = interpolated_g.(:t))
     results = @transform(results, z_hat = interpolated_z_hat.(:t))
     results = @transform(results, Ω = Ω.(:t))
     results = @transform(results, E = E.(:t))
     results = @transform(results, v_1 = (t -> (sol(t))[1]).(:t))
-    # Re-apply entry residual at new points
+
     results = @transform(results, entry_residual = entry_residual.(:v_1, Ξ₁, Ref(parameters)))
-    # Generate the rest of the data
+
     results = @transform(results, L_tilde = interpolated_L_tilde.(:t))
-    results = @transform(results, λ_ii = λ_ii.(:z_hat, Ref(parameters))) # λ_ii column.
-    results = @transform(results, S = S.(:g, Ref(parameters))) # S column.
-    results = @transform(results, z_bar = z_bar.(:z_hat, :Ω, Ref(parameters))) # z_bar column.
-    results = @transform(results, c = c.(:L_tilde, :Ω, :z_bar)) # c column.
-    results = @transform(results, π_min = π_min.(:L_tilde, :z_bar)) # π_min column.
-    results = @transform(results, log_M = log_M.(:t)) # log_M column
-    results = @transform(results, U = U.(:t)) # U column
-    results = @transform(results, π_rat = π_rat.(:t)) # π_rat column
+    results = @transform(results, λ_ii = λ_ii.(:z_hat, Ref(parameters)))
+    results = @transform(results, S = S.(:g, Ref(parameters)))
+    results = @transform(results, z_bar = z_bar.(:z_hat, :Ω, Ref(parameters)))
+    results = @transform(results, c = c.(:L_tilde, :Ω, :z_bar))
+    results = @transform(results, π_min = π_min.(:L_tilde, :z_bar))
+    results = @transform(results, log_M = log_M.(:t))
+    results = @transform(results, U = U.(:t))
+    results = @transform(results, π_rat = π_rat.(:t))
     results = @transform(results, L_tilde_a = L_tilde_a.(:Ω, :S, Ref(parameters)))
     results = @transform(results, L_tilde_x = L_tilde_x.(:z_hat, :Ω, Ref(parameters)))
     results = @transform(results, L_tilde_E = L_tilde_E.(:Ω, :E, Ref(parameters)))
     results = @transform(results, w = w.(:z_bar, Ref(parameters)))
 
-    # logic for r
     results.r = ones(Float64, nrow(results)) # filler, to be overwritten
     for i in 1:nrow(results)
         t = results[:t][i]
@@ -166,7 +154,7 @@ function prepare_results(solve_dynamics_output, stationary_sol_T, stationary_sol
         g = results[:g][i]
         log_c_forward = (i < nrow(results)) ? (log(results[:c][i+1]) - log(c))/(results[:t][i+1] - t) : 0.0
         if (i != nrow(results))
-            @assert results[:t][i+1] > t # ensure that differencing is actually forward
+            @assert results[:t][i+1] > t
         end
         results.r[i] = ρ + γ*(g + log_c_forward) # (C.56)
     end
