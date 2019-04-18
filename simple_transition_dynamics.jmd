@@ -46,7 +46,7 @@ plot(settings.z_ex[2:end-1], v) # numerical value function
 Let's add some movement to the parameters.
 
 ```julia
-r = t -> (0.05 - 1e-02 * (1 - t / 100.0)
+r = t -> (0.05 - 1e-02 * (1 - t / 100.0))
 ```
 
 (As our default `T` is 100, and default `r` is a flat `t -> 0.05`, this doesn't change the stationary solution.)
