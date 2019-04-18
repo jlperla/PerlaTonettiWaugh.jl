@@ -31,7 +31,7 @@ function simpleDAE(params, settings)
     L_2 = L₂bc(z_ex, bc)
 
     # Calculate the stationary solution.
-    stationary = stationary_numerical_simple(merge(params, (r = r(T), π = x -> π(T, x))), settings)
+    stationary = stationary_numerical_simple(params, settings)
     g_T = stationary.g
     v_T = stationary.v
 
