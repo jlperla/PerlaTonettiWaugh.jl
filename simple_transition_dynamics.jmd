@@ -68,5 +68,5 @@ plot(settings.ts, v_ts[1, :], xlabel = "t", ylabel = "v_t0", lw = 3, title = "va
 ```
 
 ```julia
-plot(settings.ts, residuals, xlabel = "t", ylabel = "Ξ₁*v_t[1] + x(t) - ω ⋅ v_t", lw = 3, title = "residuals", legend = false)
+plot(settings.ts, residuals, xlabel = "t", lw = 3, title = "value-matching residuals", legend = false)
 ```
