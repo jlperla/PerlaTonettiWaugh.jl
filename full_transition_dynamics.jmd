@@ -58,10 +58,10 @@ Let's also define and inspect the autarky steady state
 defaults = parameter_defaults()
 params_autarky = merge(defaults, (d_T = 1 + (defaults.d_0-1)*2.5,))
 
-@unpack stationary_0, stationary_T, change_trade_autarky, change_welfare_autarky = compare_steady_states(params_autarky, settings, verbose = true);
+autarky_results = compare_steady_states(params_autarky, settings, verbose = true);
 # quantities we need for later analysis
-stationary_autarky = stationary_T
-lambda_ss_autarky = change_welfare_autarky;
+stationary_autarky = autarky_results.stationary_T;
+lambda_ss_autarky = autarky_results.change_welfare;
 ```
 
 ## Transition Dynamics

@@ -10,7 +10,7 @@ import os as os
 And set constants 
 
 ```python
-hash = "10083861952447744220" # uniquely identifies a run
+hash = "12172183189819941049" # uniquely identifies a run
 fig_path = "figures"
 ```
 
