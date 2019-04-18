@@ -20,6 +20,7 @@ function stationary_numerical_simple(params, settings)
     @unpack μ, υ, θ, r, ζ, π = params
     @assert z_ex[1] == 0.0 && issorted(z_ex)  # validate grid
     z = z_ex[2:end-1]
+    r_T = r(T)
 
     # Define the pdf of the truncated exponential distribution
     ω = ω_weights(z_ex, θ, 1) # (26), see utils/quadrature.jl
@@ -35,7 +36,7 @@ function stationary_numerical_simple(params, settings)
     function stationary_numerical_given_g(in)
         g = in[1]
         # Construct the aggregate operator.
-        A = (r - μ - υ^2/2)*I - (μ + υ^2 - g)*L_1_minus - υ^2/2 * L_2 # (19)
+        A = (r_T - μ - υ^2/2)*I - (μ + υ^2 - g)*L_1_minus - υ^2/2 * L_2 # (19)
         v = A \ π.(T, z) # discretized system of ODE for v, where v'(T) = 0 (30)
         diff = Ξ₁*v[1] - dot(ω, v) + ζ # value matching condition (31)
         return diff
@@ -47,7 +48,7 @@ function stationary_numerical_simple(params, settings)
     @assert(μ + υ^2/2 - g_T < 0) # Negative drift condition (20)
 
     # Use the g_T to recreate L_T and v_T
-    A_T = (r - μ - υ^2/2)*I - (μ + υ^2 - g_T)*L_1_minus - υ^2/2 * L_2 # (19)
+    A_T = (r_T - μ - υ^2/2)*I - (μ + υ^2 - g_T)*L_1_minus - υ^2/2 * L_2 # (19)
     v_T = A_T \ π.(T, z) # (30)
     return (g = g_T, v = v_T)
 end
