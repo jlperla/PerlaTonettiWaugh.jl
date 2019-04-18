@@ -163,7 +163,7 @@ function prepare_results(solve_dynamics_output, stationary_sol_T, stationary_sol
     ts_0 = settings.pre_shock_times
     allowmissing!(results) # to allow for discrepancies in fields
     for t in ts_0
-        E = stationary_sol_0.δ
+        E = δ
         U = stationary_sol_0.U_bar
         v = stationary_sol_0.v_tilde 
         @unpack g, z_hat, Ω, L_tilde, π_min, π_rat, x, S, w, z_bar, λ_ii, c, L_tilde_x, L_tilde_a, L_tilde_E, r = stationary_sol_0
