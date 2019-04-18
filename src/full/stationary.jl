@@ -10,15 +10,16 @@ function stationary_algebraic(params, settings)
 
     # calculate value function
     @unpack z_ex = settings
+    z = z_ex[2:end-1]
     @unpack θ, σ = params
     bc = (Mixed(σ-1), Mixed(σ-1)) # boundary conditions for differential operators
     L_1_minus = L₁₋bc(z_ex, bc) # use backward difference as the drift is negative
     L_2 = L₂bc(z_ex, bc)
     ω = ω_weights(z_ex, θ, σ-1) # Get quadrature weights for the distribution on the rescaled grid.
     Ξ₁ = 1/(1 - (σ-1)*(z[1] - z_ex[1])) # (24), with ξ = (σ-1)
-    p = (L_1_minus = L_1_minus, L_2 = L_2, ω = ω, Ξ₁ = Ξ₁)
+    p = (L_1_minus = L_1_minus, L_2 = L_2, ω = ω, Ξ₁ = Ξ₁, z = z)
     v_tilde = stationary_numerical_given_vals([g, z_hat, Ω], p, params, settings).v_tilde
-    
+
     return merge(staticvalues, merge((g = g, z_hat = z_hat, Ω = Ω, v_tilde = v_tilde), welfare([g, z_hat, Ω], params))) # calculate quantities and return
 end
 
@@ -81,7 +82,6 @@ function stationary_numerical_given_vals(vals, p, params, settings)
     g, z_hat, Ω = vals
     @unpack F, r, ν, a, b, S, L_tilde, z_bar, w, x, π_min = staticvals([g, z_hat, Ω], params)
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = params
-    @unpack z = settings
     @unpack Ξ₁, L_1_minus, L_2, ω, z = p
     r_tilde = r - g - 0 # (C.59, and g_w = 0 at steady state)
     ρ_tilde = r_tilde - (σ - 1)*(μ - g + (σ-1)*(υ^2/2)) # (C.41)
@@ -112,7 +112,7 @@ function stationary_numerical(params, settings)
     ω = ω_weights(z_ex, θ, σ-1) # Get quadrature weights for the distribution on the rescaled grid.
     Ξ₁ = 1/(1 - (σ-1)*(z[1] - z_ex[1])) # (24), with ξ = (σ-1)
 
-    p = (Ξ₁ = Ξ₁, L_1_minus = L_1_minus, L_2 = L_2, ω = ω)
+    p = (Ξ₁ = Ξ₁, L_1_minus = L_1_minus, L_2 = L_2, ω = ω, z = z)
     g_T, z_hat_T, Ω_T = solve_system(vals -> stationary_numerical_given_vals(vals, p, params, settings).residuals, stationary_x0)
 
     staticvalues = staticvals([g_T, z_hat_T, Ω_T], params)
