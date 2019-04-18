@@ -95,7 +95,7 @@ function stationary_numerical(params, settings)
         return (residuals = [Ξ₁*v_tilde[1] - dot(v_tilde, ω) + ζ, # (54)
                 Ξ₁*v_tilde[1] - ζ*(1-χ)/χ, # (56)
                 π_min - (1 - L_tilde)/((σ-1)*z_bar^(σ-1))], # (38), from the static equilibrium
-                v_tilde = v_tilde) 
+                v_tilde = v_tilde)
     end
 
     g_T, z_hat_T, Ω_T = solve_system(vals -> stationary_numerical_given_vals(vals).residuals, stationary_x0)
@@ -108,13 +108,13 @@ function stationary_numerical(params, settings)
     return merge(staticvalues, merge((g = g_T, z_hat = z_hat_T, Ω = Ω_T, v_tilde = v_tilde), welfare([g_T; z_hat_T; Ω_T], params)))
 end
 
-# Utilities for comparison, display, etc. 
+# Utilities for comparison, display, etc.
 function compare_steady_states(params, settings)
     params_0 = merge(params, (d = params.d_0,))
     params_T = merge(params, (d = params.d_T,))
 
-    stationary_0 = stationary_numerical(params_0, settings)
-    stationary_T = stationary_numerical(params_T, settings)
+    stationary_0 = stationary_algebraic(params_0, settings)
+    stationary_T = stationary_algebraic(params_T, settings)
     change_welfare = 100*(consumption_equivalent(stationary_T.U_bar, stationary_0.U_bar, params)-1)
     change_trade = (1-stationary_T.λ_ii) - (1-stationary_0.λ_ii)
 
@@ -122,4 +122,4 @@ function compare_steady_states(params, settings)
             stationary_T = stationary_T,
             change_welfare = change_welfare,
             change_trade = change_trade)
-end 
+end
