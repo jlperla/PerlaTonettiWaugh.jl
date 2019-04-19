@@ -67,6 +67,7 @@
     @test sol.results[:z_bar][3] ≈ 1.702354537311347 atol = 1e-5
     @test sol.results[:π_min][2] ≈ 0.04423572434773227 atol = 1e-5
     @test sol.results[:entry_residual][12] ≈ 2.7166018323754315e-9 atol = 1e-5
+    @test sol.results[:r][19] ≈ 0.0793325164566891 atol = 1e-5
 end
 
 @testset "Regression Tests with time-varying Ω" begin
@@ -103,6 +104,7 @@ end
     @test sol.results[:z_bar][3] ≈ 1.8501628840220694 atol = 1e-5
     @test sol.results[:π_min][2] ≈ 0.04861652751120392 atol = 1e-5
     @test sol.results[:entry_residual][12] ≈ 0.013589358773159477 atol = 1e-5
+    @test sol.results[:r][19] ≈ 0.07779216191723524 atol = 1e-5
     # Sub-pieces of L_tilde
     @test sol.results[:L_tilde_a] + sol.results[:L_tilde_x] + sol.results[:L_tilde_E] ≈ sol.results[:L_tilde]
 end
