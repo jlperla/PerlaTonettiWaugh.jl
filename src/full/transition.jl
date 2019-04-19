@@ -1,69 +1,25 @@
-#=
-  Functions to solve the model (i.e., return equilibrium quantities and a set of E nodes to interpolate) on a transition from one steady state to another.
-
-  The first set of functions are caller functions, which users would interact with. Then come the auxiliary functions used by the callers.
-=#
-
+# Functions to solve the model on a transition from one steady state to another.
 # Global solver.
-function solve_full_model_global(settings; impose_E_monotonicity_constraints = true, front_nodes_appended = nothing)
-    # replace invalid initial conditions
-    if (length(settings.transition_lb) != length(settings.transition_ub))
-        @error "length(settings.transition_lb) != length(settings.transition_ub)"
-    end
-    if (length(settings.transition_x0) != length(settings.transition_ub) )
-        @warn "transition_x0 and transition_ub sizes differ; setting ub to zeros(size(transition_x0))"
-        settings = merge(settings, (transition_ub = fill(0.0, length(settings.transition_x0)),))
-    end
-    if (length(settings.transition_x0) != length(settings.transition_lb))
-        @warn "transition_x0 and transition_lb sizes differ; setting lb to -1*ones(size(transition_x0))"
-        settings = merge(settings, (transition_lb = fill(-1.0, length(settings.transition_x0)),))
-    end
-    if (length(settings.transition_x0) != length(settings.weights))
-        @warn "transition_x0 and weights sizes differ; setting weights to default function"
-        settings = merge(settings, (weights = (x -> x < 10 ? 10. - x : 1.).(1:1:length(settings.transition_x0)),))
-    end
-
-    # setup range and objective for bboptimize
+function solve_transition_global(parameters, settings)
+    @assert size(settings.transition_lb) == size(settings.transition_ub) "Lower and upper bound vector lengths disagree."
+    @assert size(settings.transition_x0) == size(settings.weights) "x0 and weight vector lengths disagree."
+    @assert size(settings.transition_x0) == size(settings.transition_lb) "x0 and bound vector lengths disagree."
     ranges = map(i->(settings.transition_lb[i], settings.transition_ub[i]), 1:length(settings.transition_ub))
-    # run solver and process result
-    ssr(residuals) = sum(residuals.^2) + settings.transition_penalty_coefficient * sum(max.(-diff(residuals), 0.0)) # add penalty for non-increasing sol
-    
-    function bb_objective(x)
-        if (impose_E_monotonicity_constraints)
-            sort!(x)
-        end
-        return ssr(weighted_residuals_given_E_nodes_interior(x, settings,front_nodes_appended = front_nodes_appended))
-    end
-  
-    result = bboptimize(bb_objective, SearchRange = ranges, NumDimensions = length(ranges), MaxSteps = settings.transition_iterations)
 
-    E_nodes_found = best_candidate(result)
-    E_nodes_found = impose_E_monotonicity_constraints ? sort(E_nodes_found) : E_nodes_found
-    # return
-    return (solution = solve_model_from_E_nodes(E_nodes_found, settings; detailed_solution = true), E_nodes = E_nodes_found)
+    ssr(residuals) = sum(residuals.^2) + settings.transition_penalty_coefficient * sum(max.(-diff(residuals), 0.0)) # add penalty for non-increasing sol
+    bb_objective(x) = (settings.impose_E_monotonicity_constraints) ? ssr(weighted_residuals(sort(x), parameters, settings)) : ssr(weighted_residuals(x, parameters, settings))
+
+    result = bboptimize(bb_objective, SearchRange = ranges, NumDimensions = length(ranges), MaxSteps = settings.transition_iterations)
+    E_nodes_found = settings.impose_E_monotonicity_constraints ? sort(best_candidate(result)) : best_candidate(result)
+    return E_nodes_found
 end
 
-function solve_full_model(settings; impose_E_monotonicity_constraints = true, datadir = "data", write_data = true, run_global = true, front_nodes_appended = nothing, read_data = true)
-
-    # check for inputs and solution  
-    datapath = joinpath(pwd(), datadir)
-    if isdir(datapath) == true && read_data == true
-        list = readdir(datapath)
-        cachename = join(hash(settings.params_T))
-        if cachename * ".csv" in list 
-            println("Cache found; returning data.")
-            return (data = CSV.read(joinpath(datapath, string(cachename) * ".csv")),) # return the cache. different name reflects different code branch.
-        else 
-            @warn "no cache found in $datapath, or it doesn't exist."
-        end
-    elseif settings.transition_iterations < 1 # bail out with solution on supplied nodes 
-        E_nodes_interior = settings.transition_x0
-        return (solution = solve_model_from_E_nodes(E_nodes_interior, settings, detailed_solution = true), E_nodes = E_nodes_interior)
-    elseif run_global # run global solver if asked for 
-        result = solve_full_model_global(settings, impose_E_monotonicity_constraints = impose_E_monotonicity_constraints, front_nodes_appended = front_nodes_appended)
-        E_nodes = result.E_nodes
-        settings = merge(settings, (transition_x0 = E_nodes, ))
-    end 
+function solve_transition(parameters, settings)
+    if settings.run_global
+        x0 = solve_transition_global(parameters, settings)
+    else
+        x0 = settings.transition_x0
+    end
 
     # linear constraint for increasing E nodes
     function constraints_increasing_E!(h, x, jacobian_t)
@@ -77,64 +33,164 @@ function solve_full_model(settings; impose_E_monotonicity_constraints = true, da
         end
         h .= A*x
     end
-    # run the local (NLopt) solver
-    nlopt_objective(x) =  weighted_residuals_given_E_nodes_interior(x, settings; front_nodes_appended = front_nodes_appended)
-    E_nodes = solve_system(nlopt_objective, settings.transition_x0;
-                    lb = nothing, 
-                    ub = fill(0.0, length(settings.transition_x0)),
-                    constraints_fg! = impose_E_monotonicity_constraints ? constraints_increasing_E! : nothing,
-                    algorithm = impose_E_monotonicity_constraints ? :LD_SLSQP : :LD_LBFGS,
+
+    nlopt_objective(x) =  weighted_residuals(x, parameters, settings)
+    E_nodes = solve_system(nlopt_objective, x0;
+                    lb = nothing,
+                    ub = fill(0.0, length(x0)),
+                    constraints_fg! = settings.impose_E_monotonicity_constraints ? constraints_increasing_E! : nothing,
+                    algorithm = settings.impose_E_monotonicity_constraints ? :LD_SLSQP : :LD_LBFGS,
                     iterations = settings.transition_iterations)
-    # append front_nodes_appended in front if needed
-    E_nodes = front_nodes_appended == nothing ? E_nodes : [front_nodes_appended; E_nodes]
-    solution = solve_model_from_E_nodes(E_nodes, settings; detailed_solution = true, interp = settings.transition_interpolation_function)
-    # output caching
-    if write_data && datadir isa String
-        filename = joinpath(datadir, cachename * ".csv")
-        paramsname = joinpath(datadir, cachename * ".json")
-        CSV.write(filename, solution.results)
-        println("Results written to $(filename)")
-        write(paramsname, JSON.json(settings))
-        println("Settings written to $(paramsname)")
-    end
-    
-    # return
-    return (solution = solution, E_nodes = E_nodes)
+
+    solution = solve_model_from_E_nodes(E_nodes, parameters, settings)
+    return (solve_dynamics_output = solution, results = solution.results, E_nodes = E_nodes)
+end
+
+function weighted_residuals(E_nodes_interior, parameters, settings)
+    entry_residuals_nodes_count = length(E_nodes_interior)
+
+    # returns a residual of 10e20 if solve_dynamics call is invalid
+    solved = try solve_model_from_E_nodes(E_nodes_interior, parameters, settings).results catch; return fill(10e20, entry_residuals_nodes_count) end
+    entry_residual_interpolated = LinearInterpolation(solved.t, solved.entry_residual)
+    entry_residuals_nodes = range(0, stop = solved.t[end], length = entry_residuals_nodes_count + 2)
+
+    return settings.weights .* entry_residual_interpolated.(entry_residuals_nodes[2:(end-1)])
 end
 
 # Returns model solution (i.e., solve_dynamics output) given a set of E nodes. Used by all solvers.
-function solve_model_from_E_nodes(E_nodes_interior, settings; detailed_solution = false, interp = LinearInterpolation)
-    @unpack T, params_T, stationary_sol_T, Ω_0 = settings
-    δ = params_T.δ
+function solve_model_from_E_nodes(E_nodes_interior, parameters, settings)
+    @unpack T, interp, z_ex = settings
+    @unpack d_0, d_T = parameters
+
+    params_T = merge(parameters, (d = d_T,))
+    params_0 = merge(parameters, (d = d_0,))
+    stationary_sol_T = stationary_numerical(params_T, settings)
+    Ω_0 = stationary_numerical(params_0, settings).Ω
     Ω_T = stationary_sol_T.Ω
 
-    # fix the point at T to be zero and sort candidate if needed
+    @unpack Ω, E = Ω_E_funcs(E_nodes_interior, Ω_T, Ω_0, parameters, settings)
+    return solve_dynamics(params_T, stationary_sol_T, settings, Ω, E)
+end
+
+function Ω_E_funcs(E_nodes_interior, Ω_T, Ω_0, parameters, settings)
+    @unpack δ = parameters
+    @unpack T, interp = settings
     E_nodes = [-1.0; E_nodes_interior; 0.0] # See footnote 19.  Without pinning a corner there is an extra degree of freedom in the scale
     ts = range(0.0, T, length=length(E_nodes))
+
     E_hat_interpolation = interp(ts, E_nodes) # might worth trying cubic spline
     E_hat(t) = E_hat_interpolation(t)
     E_hat_integral = quadgk(E_hat, 0, T)[1] # (42)
-
-    # Formulate and solve ODEProblem
     Q = log(Ω_T/Ω_0) / E_hat_integral # (42) when Ω_T = Ω_0, then Q = 0 so that E(t) is constant with δ as expected
-    Ω_derivative(Ω,p,t) = Q*E_hat(t)*Ω # (44)
-    Ω_solution = DifferentialEquations.solve(ODEProblem(Ω_derivative,Ω_0,(0.0, T)), reltol = 1e-15) # if this fails, error will be thrown
-    Ω(t) = t <= T ? Ω_solution(t) : Ω_solution(T)
     E(t) = Q*E_hat(t) + δ # (43)
 
-    # solve the dynamics and get the resulting entry_residual vector; if solution is not valid, return Inf
-    return solve_dynamics(params_T, stationary_sol_T, settings, T, Ω, E; detailed_solution = detailed_solution)
+    Ω_derivative(Ω,p,t) = Q*E_hat(t)*Ω # (44)
+    Ω_solution = DifferentialEquations.solve(ODEProblem(Ω_derivative, Ω_0, (0.0, T)), reltol = 1e-15) # if this fails, error will be thrown
+    Ω(t) = t <= T ? Ω_solution(t) : Ω_solution(T)
+
+    return (Ω = Ω, E = E)
 end
 
-function weighted_residuals_given_E_nodes_interior(E_nodes_interior, settings; front_nodes_appended = nothing)
-  entry_residuals_nodes_count = length(E_nodes_interior)
-  # append front_nodes_appended in front if needed
-  E_nodes_interior = front_nodes_appended == nothing ? E_nodes_interior : [front_nodes_appended; E_nodes_interior]
+# Adds detailed output to a results dataframe
+function prepare_results(solve_dynamics_output, stationary_sol_T, stationary_sol_0)
+    @unpack results, sol, dae_parameters = solve_dynamics_output
+    @unpack Ω, E, parameters, settings, Ξ₁, ω = dae_parameters
+    @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = parameters
+    @unpack z, z_ex, T, tstops = settings
 
-  # solve the model using E_nodes_interior received
-  solved = try solve_model_from_E_nodes(E_nodes_interior, settings).results catch; return fill(10e20, entry_residuals_nodes_count) end
-  entry_residual_interpolated = LinearInterpolation(solved.t, solved.entry_residual)
-  entry_residuals_nodes = range(0, stop = solved.t[end], length = entry_residuals_nodes_count + 2)
+    g_T = stationary_sol_T.g
+    z_hat_T = stationary_sol_T.z_hat
+    L_tilde_T = stationary_sol_T.L_tilde
+    Ω_T = stationary_sol_T.Ω
 
-  return settings.weights .* entry_residual_interpolated.(entry_residuals_nodes[2:(end-1)])
+    π_min(L_tilde_t, z_bar) = (1 - L_tilde_t) / ((σ-1)*z_bar^(σ-1)) # (38)
+
+    P = length(z)
+    interpolated_g(t) = sol(t)[P+1]
+    interpolated_z_hat(t) = sol(t)[P+2]
+    interpolated_L_tilde(t) = L_tilde(interpolated_g(t), interpolated_z_hat(t), Ω(t), E(t), S(interpolated_g(t), parameters), parameters)
+    interpolated_z_bar(t) = z_bar(interpolated_z_hat(t), Ω(t), parameters)
+    interpolated_c(t) = c(interpolated_L_tilde(t), Ω(t), interpolated_z_bar(t))
+    interpolated_π_min(t) = π_min(interpolated_L_tilde(t), interpolated_z_bar(t))
+
+    # define welfare quantities based on interpolates and time-T steady state
+    log_c(t) = log(interpolated_c(t))
+    log_c_T = log(c(L_tilde_T, Ω_T, z_bar(z_hat_T, Ω_T, parameters))) # this is a scalar
+    log_M(t) = quadgk(interpolated_g, 0, t)[1]
+    U(t) = quadgk(τ -> exp(-ρ*τ)*(log_M(t+τ) + log_c(t+τ)), 0, (T-t))[1] + exp(-ρ*(T-t))*(g_T + ρ*(log_c_T + g_T * T))/(ρ^2) # (C.83)
+    π_rat(t) = θ*(1-interpolated_z_hat(t)^(-θ+σ-1))/(θ-σ+1) + (1+(N-1)*d^(1-σ))*θ*interpolated_z_hat(t)^(-θ+σ-1)/(θ-σ+1)+(N-1)*κ*interpolated_z_hat(t)^(-θ)/interpolated_π_min(t) # (61)
+
+    # generate clean dataframe with the union of new and old time points
+    ts = (T >= 20) ? sort(unique([settings.detailed_ts; results.t])) : results.t # add more time steps for the plotting/etc.
+    results = DataFrame(t = ts)
+
+    # Apply interpolates and static formulas at new time points
+    results = @transform(results, g = interpolated_g.(:t))
+    results = @transform(results, z_hat = interpolated_z_hat.(:t))
+    results = @transform(results, Ω = Ω.(:t))
+    results = @transform(results, E = E.(:t))
+    results = @transform(results, v_1 = (t -> (sol(t))[1]).(:t))
+
+    results = @transform(results, entry_residual = entry_residual.(:v_1, Ξ₁, Ref(parameters)))
+
+    results = @transform(results, L_tilde = interpolated_L_tilde.(:t))
+    results = @transform(results, λ_ii = λ_ii.(:z_hat, Ref(parameters)))
+    results = @transform(results, S = S.(:g, Ref(parameters)))
+    results = @transform(results, z_bar = z_bar.(:z_hat, :Ω, Ref(parameters)))
+    results = @transform(results, c = c.(:L_tilde, :Ω, :z_bar))
+    results = @transform(results, π_min = π_min.(:L_tilde, :z_bar))
+    results = @transform(results, log_M = log_M.(:t))
+    results = @transform(results, U = U.(:t))
+    results = @transform(results, π_rat = π_rat.(:t))
+    results = @transform(results, L_tilde_a = L_tilde_a.(:Ω, :S, Ref(parameters)))
+    results = @transform(results, L_tilde_x = L_tilde_x.(:z_hat, :Ω, Ref(parameters)))
+    results = @transform(results, L_tilde_E = L_tilde_E.(:Ω, :E, Ref(parameters)))
+    results = @transform(results, w = w.(:z_bar, Ref(parameters)))
+
+    results.r = ones(Float64, nrow(results)) # filler, to be overwritten
+    for i in 1:nrow(results)
+        t = results[:t][i]
+        c = results[:c][i]
+        g = results[:g][i]
+        log_c_forward = (i < nrow(results)) ? (log(results[:c][i+1]) - log(c))/(results[:t][i+1] - t) : 0.0
+        if (i != nrow(results))
+            @assert results[:t][i+1] > t
+        end
+        results.r[i] = ρ + γ*(g + log_c_forward) # (C.56)
+    end
+
+    # prepend pre-shock steadystate to dataframe
+    ts_0 = settings.pre_shock_times
+    allowmissing!(results) # to allow for discrepancies in fields
+    for t in ts_0
+        E = δ
+        U = stationary_sol_0.U_bar
+        v = stationary_sol_0.v_tilde 
+        @unpack g, z_hat, Ω, L_tilde, π_min, π_rat, x, S, w, z_bar, λ_ii, c, L_tilde_x, L_tilde_a, L_tilde_E, r = stationary_sol_0
+        Ξ₁ = 1/(1 - (σ-1)*(z[1] - z_ex[1]))
+
+        push!(results, (t = t, 
+                        g = g, 
+                        z_hat = z_hat, 
+                        Ω = Ω, 
+                        E = E, 
+                        v_1 = v[1],
+                        L_tilde = L_tilde, 
+                        entry_residual = Ξ₁*v[1] - dot(v, ω) + ζ, 
+                        r = r, 
+                        λ_ii = λ_ii, 
+                        S = S, 
+                        z_bar = z_bar, 
+                        π_min = π_min, 
+                        log_M = missing, 
+                        U = U, 
+                        π_rat = π_rat, 
+                        L_tilde_a = L_tilde_a, 
+                        c = c,
+                        L_tilde_x = L_tilde_x, 
+                        L_tilde_E = L_tilde_E, 
+                        w = w))
+    end
+
+    return sort!(results) # sort results again to keep time in the right order
 end

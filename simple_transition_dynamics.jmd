@@ -1,0 +1,72 @@
+First, load the package and install the dependencies (may take a while if this is run for the first time, and the dependencies aren't on the machine.)
+
+```julia
+using Pkg
+pkg"activate .; instantiate; precompile"
+```
+
+And load the deps
+
+```julia
+using Plots, Parameters, BenchmarkTools, PerlaTonettiWaugh
+gr(fmt = :png)
+```
+
+## Stationary Solutions
+
+First, define our common objects
+
+```julia
+params = parameters_simple()
+settings = settings_simple()
+```
+
+These work for both the dynamic problem (where the functions ``r`` and ``\pi`` are evaluated at each time point),
+and the static one (where we work with ``r(T)`` and ``\pi(T)``.)
+
+First, let's inspect the stationary solution:
+
+```julia
+@unpack g, v = stationary_algebraic_simple(params, settings);
+@show g; # algebraic growth rate
+plot(settings.z_ex[2:end-1], v) # algebraic value function
+```
+
+The above is computed using an analytical expression from the paper (see equations 9, 10, and 11). We also have a numerical
+method based on root-finding.
+
+```julia
+@unpack g, v = stationary_numerical_simple(params, settings);
+@show g; # numerical growth rate
+plot(settings.z_ex[2:end-1], v) # numerical value function
+```
+
+## Transition Dynamics
+
+Let's add some movement to the parameters.
+
+```julia
+r = t -> (0.05 - 1e-02 * (1 - t / 100.0))
+```
+
+(As our default `T` is 100, and default `r` is a flat `t -> 0.05`, this doesn't change the stationary solution.)
+
+To solve for the dynamics:
+
+```julia
+params = parameters_simple(r = r)
+
+@unpack g_ts, v_ts, residuals = solve_simple_transition(params, settings)
+```
+
+```julia
+plot(settings.ts, g_ts, xlabel = "t", ylabel = "g_t", lw = 3, title = "growth rates", legend = false)
+```
+
+```julia
+plot(settings.ts, v_ts[1, :], xlabel = "t", ylabel = "v_t0", lw = 3, title = "values", legend = false)
+```
+
+```julia
+plot(settings.ts, residuals, xlabel = "t", lw = 3, title = "value-matching residuals", legend = false)
+```

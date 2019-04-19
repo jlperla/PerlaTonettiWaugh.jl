@@ -1,0 +1,34 @@
+# Full model objects
+parameter_defaults = @with_kw (ρ = 0.0215,
+                                σ = 3.1725,
+                                N = 10,
+                                θ = 5.0018,
+                                γ = 1.00,
+                                κ = 0.0732,
+                                ζ = 1.0,
+                                η = 0.,
+                                Theta = 1,
+                                χ = 1/5.9577,
+                                υ = 0.0484 ,
+                                μ = -0.0189,
+                                δ = 0.02,
+                                d_0 = 3.0426,
+                                d_T = 1 + (d_0-1)*0.9)
+
+settings_defaults = @with_kw (z_ex = unique([range(0., 0.1, length = 150)' range(0.1, 1., length = 100)' range(1., 5, length = 50)']),
+                                z = z_ex[2:end-1], # changes based on what we define as `z_ex`
+                                T = 75.0,
+                                t = range(0.0, T, length = 10),
+                                weights = [10.0; ones(7)],
+                                transition_x0 = [-0.8614905788913748, -0.44926517491157925, -0.283795655883632, -0.0651727069993808, -0.050745349310809824, -0.01213734877329569, -0.005088513022818065, -0.004779208323042127],
+                                transition_lb = transition_x0 .- 1e-4,
+                                transition_ub = transition_x0 .+ 1e-4,
+                                transition_iterations = 10000,
+                                transition_penalty_coefficient = 1.0, # coefficient to be used for a penalty function for constraints on increasing E
+                                interp = Interpolations.LinearInterpolation,
+                                tstops = nothing,
+                                impose_E_monotonicity_constraints = true,
+                                run_global = true,
+                                stationary_x0 = [0.02; 2; .57],
+                                pre_shock_times = [-1, -5, -10, -15, -20],
+                                detailed_ts = [collect(0.0:0.5:20); collect(20.0:T)])

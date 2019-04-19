@@ -1,0 +1,226 @@
+First, load the package and instantiate the dependencies.
+
+```julia
+using Pkg
+pkg"activate .; instantiate; precompile" # may take a long time the first time this is run
+```
+
+And load the deps
+
+```julia
+using CSV, Plots, JSON, BenchmarkTools, Parameters, PerlaTonettiWaugh, DataFrames
+gr(fmt = :png)
+```
+
+## Stationary Solutions
+
+First, define common objects for the full model
+
+```julia
+parameters = parameter_defaults(); # model parameters
+settings = settings_defaults(run_global = false); # numerical solution settings
+```
+
+To solve for time 0 and ``T`` stationary solutions, simply:
+
+```julia
+@unpack stationary_T, stationary_0, change_welfare, change_trade = compare_steady_states(parameters, settings)
+```
+
+We can inspect each:
+
+```julia
+foreach(println, pairs(stationary_0))
+```
+
+And
+
+```julia
+foreach(println, pairs(stationary_T))
+```
+
+And display the other objects:
+
+```julia
+@show change_welfare;
+```
+
+```julia
+@show change_trade;
+```
+
+## Autarky
+
+Let's also define and inspect the autarky steady state
+
+```julia
+# Solve for the autarky case
+defaults = parameter_defaults()
+params_autarky = merge(defaults, (d_T = 1 + (defaults.d_0-1)*2.5,))
+
+autarky_results = compare_steady_states(params_autarky, settings, verbose = true);
+# quantities we need for later analysis
+stationary_autarky = autarky_results.stationary_T;
+lambda_ss_autarky = autarky_results.change_welfare;
+```
+
+## Transition Dynamics
+
+The code is
+
+```julia
+cachename = join(hash((parameters = parameters, settings = settings))) # uniquely identify the run by parameters + settings
+cachepath = joinpath(pwd(), "data", cachename * ".csv")
+use_cache = true # change this to false if you don't want to use the cache for a run
+write_cache = true # change this to false if you don't want to generate *any* cache files for a run
+
+# reading
+if isfile(cachepath) && use_cache
+    println("using cache.")
+    solved = CSV.read(cachepath);
+else
+    println("solving without cache.")
+    @time solution = solve_transition(parameters, settings);
+    solved = prepare_results(solution.solve_dynamics_output, stationary_T, stationary_0) # since these are the steady-states we're using
+end
+
+# writing
+if write_cache
+    mkpath(joinpath(pwd(), "data")) # if this doesn't eist for whatever reason
+    CSV.write(cachepath, solved) # write DataFrame
+    write(joinpath(pwd(), "data", cachename * ".json"), JSON.json((parameters = parameters, settings = merge(settings, (interp = typeof(settings.interp),))))) # write parameters
+else
+    # nothing
+end
+
+dropmissing!(solved) # don't plot pre-shock values
+```
+
+## Welfare
+
+Here's welfare inclusive of the transition path:
+
+```julia
+lambda_tpath = 100*(consumption_equivalent(solved.U[1], stationary_0.U_bar, parameter_defaults())-1);
+@show lambda_tpath;
+```
+
+## Plots
+
+
+```julia
+U_steady_0(t) = stationary_0.U_bar
+U_steady_T(t) = stationary_T.U_bar
+
+plot(solved.t,
+   [solved.U, U_steady_0, U_steady_T],
+   label = ["U_transition", "U_steady_0", "U_steady_T"] ,
+   title = "U(t)", linestyle = :auto, lw = 3)
+```
+
+```julia
+plot_Ω = plot(solved.t, solved.Ω, label = "Omega", lw = 3)
+plot_residual = plot(solved.t, solved.entry_residual, label = "entry_residual", lw = 3)
+plot(plot_Ω, plot_residual, layout = (2,1))
+```
+
+Here are the static equations
+
+```julia
+plot1 = plot(solved.t, solved.L_tilde, label = "L_tilde", lw = 3)
+plot2 = plot(solved.t, solved.z_bar, label = "z_bar", lw = 3)
+plot3 = plot(solved.t, solved.π_min, label = "pi_min", lw = 3)
+plot4 = plot(solved.t, solved.λ_ii, label = "lambda_ii", lw = 3)
+plot5 = plot(solved.t, solved.c, label = "c", lw = 3)
+plot6 = plot(solved.t, solved.E, label = "E", lw = 3)
+plot7 = plot(solved.t, solved.log_M, label = "log_M", lw = 3)
+plot8 = plot(solved.t, solved.U, label = "U", lw = 3)
+plot9 = plot(solved.t, solved.π_rat, label = "pi_rat", lw = 3)
+plot(plot1, plot2, plot3, plot4, plot5, plot6, plot7, plot8, plot9, layout=(3,3), size = (1000, 1000))
+```
+
+And a more granular look at welfare
+
+```julia
+log_M_steady_0(t) = stationary_0.g * t
+log_M_steady_T(t) = stationary_T.g * t
+
+plot(solved.t,
+    [solved.log_M, log_M_steady_0, log_M_steady_T],
+    label = ["log_M_transition_0", "log_M_steady_0", "log_M_steady_T"] ,
+    title = "log_M(t)", linestyle = :auto, lw = 3)
+```
+
+```julia
+Ω_steady_0(t) = stationary_0.Ω
+Ω_steady_T(t) = stationary_T.Ω
+
+plot(solved.t,
+    [solved.Ω, Ω_steady_0, Ω_steady_T],
+    label = ["Omega_transition_0", "Omega_steady_0", "Omega_steady_T"] ,
+    title = "Omega(t)", linestyle = :auto, lw = 3)
+```
+
+```julia
+c_steady_0(t) = stationary_0.c
+c_steady_T(t) = stationary_T.c
+
+plot(solved.t,
+    [solved.c, c_steady_0, c_steady_T],
+    label = ["c_transition_0", "c_steady_0", "c_steady_T"] ,
+    title = "c(t)", linestyle = :auto, lw = 3)
+```
+
+```julia
+U_steady_0(t) = stationary_0.U_bar
+U_steady_T(t) = stationary_T.U_bar
+
+plot(solved.t,
+    [solved.U, U_steady_0, U_steady_T],
+    label = ["U_transition", "U_steady_0", "U_steady_T"] ,
+    title = "U(t)", linestyle = :auto, lw = 3)
+```
+
+```julia
+plot(solved.r, legend = false, title = "r over time", xlabel = "T", ylabel = "r")
+```
+
+```julia
+plot(solved.w, legend = false, title = "w over time", xlabel = "T", ylabel = "w")
+```
+
+Here's the labor share breakdown
+
+```julia
+plot(solved.L_tilde_a, legend = false, xlabel = "T", title = "Labor Share: Adoption")
+```
+
+```julia
+plot(solved.L_tilde_E, legend = false, xlabel = "T", title = "Labor Share: Entrycosts")
+```
+
+```julia
+plot(solved.L_tilde_x, legend = false, xlabel = "T", title = "Labor Share: Export")
+```
+
+And the consumption equivalent
+
+```julia
+T = solved.t[end]
+consumption_equivalent(solved.U[1], stationary_0.U_bar, parameter_defaults())
+```
+
+
+## Writing Data
+
+Save welfare and autarky dataframes.
+
+```julia
+df_welfare = DataFrame(steady_state = change_welfare, transition_path = lambda_tpath, growth_rate = stationary_T.g, theta = parameter_defaults().θ);
+write_cache && CSV.write("data/welfare_results-" * cachename * ".csv", df_welfare)
+```
+
+```julia
+df_autarky = DataFrame(steady_state = lambda_ss_autarky, growth_rate = stationary_autarky.g, theta = parameter_defaults().θ);
+write_cache && CSV.write("data/autarky_results-" * cachename * ".csv", df_autarky)
+```

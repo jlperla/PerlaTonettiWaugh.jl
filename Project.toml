@@ -25,6 +25,7 @@ QuadGK = "1fd47b50-473d-5c70-9696-f719f8f3bcdc"
 SimpleDifferentialOperators = "7ccca996-40d6-5c2f-be7f-4eb2934af9c4"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 Sundials = "c3572dad-4567-51f8-b174-8c6c989267f4"
+Weave = "44d3d7a6-8a23-5bf8-98c5-b353f8df5ec9"
 
 [extras]
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
