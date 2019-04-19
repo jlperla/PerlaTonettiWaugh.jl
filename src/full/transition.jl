@@ -156,7 +156,7 @@ function prepare_results(solve_dynamics_output, stationary_sol_T, stationary_sol
         if (i != nrow(results))
             @assert results[:t][i+1] > t
         end
-        results.r[i] = ρ + γ*(g + log_c_forward) # (C.56)
+        results.r[i] = ρ +  δ + γ*(g + log_c_forward) # (C.56)
     end
 
     # prepend pre-shock steadystate to dataframe
@@ -165,30 +165,30 @@ function prepare_results(solve_dynamics_output, stationary_sol_T, stationary_sol
     for t in ts_0
         E = δ
         U = stationary_sol_0.U_bar
-        v = stationary_sol_0.v_tilde 
+        v = stationary_sol_0.v_tilde
         @unpack g, z_hat, Ω, L_tilde, π_min, π_rat, x, S, w, z_bar, λ_ii, c, L_tilde_x, L_tilde_a, L_tilde_E, r = stationary_sol_0
         Ξ₁ = 1/(1 - (σ-1)*(z[1] - z_ex[1]))
 
-        push!(results, (t = t, 
-                        g = g, 
-                        z_hat = z_hat, 
-                        Ω = Ω, 
-                        E = E, 
+        push!(results, (t = t,
+                        g = g,
+                        z_hat = z_hat,
+                        Ω = Ω,
+                        E = E,
                         v_1 = v[1],
-                        L_tilde = L_tilde, 
-                        entry_residual = Ξ₁*v[1] - dot(v, ω) + ζ, 
-                        r = r, 
-                        λ_ii = λ_ii, 
-                        S = S, 
-                        z_bar = z_bar, 
-                        π_min = π_min, 
-                        log_M = missing, 
-                        U = U, 
-                        π_rat = π_rat, 
-                        L_tilde_a = L_tilde_a, 
+                        L_tilde = L_tilde,
+                        entry_residual = Ξ₁*v[1] - dot(v, ω) + ζ,
+                        r = r,
+                        λ_ii = λ_ii,
+                        S = S,
+                        z_bar = z_bar,
+                        π_min = π_min,
+                        log_M = missing,
+                        U = U,
+                        π_rat = π_rat,
+                        L_tilde_a = L_tilde_a,
                         c = c,
-                        L_tilde_x = L_tilde_x, 
-                        L_tilde_E = L_tilde_E, 
+                        L_tilde_x = L_tilde_x,
+                        L_tilde_E = L_tilde_E,
                         w = w))
     end
 
