@@ -16,7 +16,6 @@ parameter_defaults = @with_kw (ρ = 0.0215,
                                 d_T = 1 + (d_0-1)*0.9)
 
 settings_defaults = @with_kw (z_ex = unique([range(0., 0.1, length = 150)' range(0.1, 1., length = 100)' range(1., 5, length = 50)']),
-                                z = z_ex[2:end-1], # changes based on what we define as `z_ex`
                                 T = 75.0,
                                 t = range(0.0, T, length = 10),
                                 weights = [10.0; ones(7)],
