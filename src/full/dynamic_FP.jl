@@ -102,9 +102,9 @@ function solve_dynamics_FP(parameters, stationary_sol_T, settings, Ω)
 end
 
 # takes an E_hat guess and spits out a new E_hat guess
-function dynamics_fixedpoint(E_nodes_interior, parameters, stationary_sol_0, stationary_sol_T, settings)
-    # calculate the Ω(t) from the E_hat.  Throws away the E (which the DAE calculates)
-    @unpack Ω = Ω_E_funcs(E_nodes_interior, stationary_sol_T.Ω, stationary_sol_0.Ω, parameters, settings)
+function dynamics_fixedpoint(E_nodes_interior, params_T, stationary_sol_0, stationary_sol_T, settings)
+    # calculate the Ω(t) from the E_hat. Throws away the E (which the DAE calculates)
+    @unpack Ω = Ω_E_funcs(E_nodes_interior, stationary_sol_T.Ω, stationary_sol_0.Ω, params_T, settings)
     @unpack δ = parameters
     solution = solve_dynamics_FP(params_T, stationary_sol_T, settings, Ω)
 
@@ -118,17 +118,17 @@ end
 
 
 function solve_transition_FP(parameters, settings)
-    @unpack T, tstops = settings
+    @unpack fp_x0, T, tstops = settings
     @unpack d_0, d_T = parameters
 
     # calculate the steady states at 0 and T
     params_T = merge(parameters, (d = d_T,))
     params_0 = merge(parameters, (d = d_0,))
     stationary_sol_T = stationary_numerical(params_T, settings)
-    stationary_sol_0 = stationary_numerical(params_0, settings).Ω
+    stationary_sol_0 = stationary_numerical(params_0, settings)
 
     @assert tstops[1] ≈ 0.0
     @assert tstops[end] ≈ T
 
-    return fixedpoint(E_nodes_interior -> dynamics_fixedpoint(E_nodes_interior, parameters, stationary_sol_0, stationary_sol_T, settings), fp_x0)
+    return fixedpoint(E_nodes_interior -> dynamics_fixedpoint(E_nodes_interior, params_T, stationary_sol_0, stationary_sol_T, settings), fp_x0)
 end
