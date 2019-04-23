@@ -161,7 +161,6 @@ function prepare_results(solve_dynamics_output, stationary_sol_T, stationary_sol
 
     # prepend pre-shock steadystate to dataframe
     ts_0 = settings.pre_shock_times
-    allowmissing!(results) # to allow for discrepancies in fields
     for t in ts_0
         E = δ
         U = stationary_sol_0.U_bar
@@ -182,7 +181,7 @@ function prepare_results(solve_dynamics_output, stationary_sol_T, stationary_sol
                         S = S,
                         z_bar = z_bar,
                         π_min = π_min,
-                        log_M = missing,
+                        log_M = t * g,
                         U = U,
                         π_rat = π_rat,
                         L_tilde_a = L_tilde_a,

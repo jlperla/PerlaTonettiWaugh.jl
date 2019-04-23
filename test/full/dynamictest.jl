@@ -39,7 +39,7 @@
   # Run the solver.
     sol = solve_dynamics(params_T, stationary_T, settings, Ω, E)
     sol = merge(sol, (results = prepare_results(sol, stationary_T, stationary_0),))
-    dropmissing!(sol.results) # drop pre-shock values
+    filter!(row -> row.t >= 0, sol.results) # get rid of pre-shock values 
 
     # Spot-checks.
     @test sol.sol.t[5] ≈ 19.840000000000003 atol = 1e-5
@@ -78,7 +78,7 @@ end
     settings = settings_defaults(z = z, z_ex = z_ex, tstops = tstops, T = T)
     sol = solve_dynamics(params_T, stationary_T, settings, Ω_t, E_t)
     sol = merge(sol, (results = prepare_results(sol, stationary_T, stationary_0),))
-    dropmissing!(sol.results) # drop pre-shock values
+    filter!(row -> row.t >= 0, sol.results)
 
     # Spot-checks.
     @test sol.sol.t[5] ≈ 3.532316848641289 atol = 1e-5
@@ -113,7 +113,7 @@ end
   # First case.
   sol = solve_dynamics(params_T, stationary_T, settings, Ω, E)
   sol = merge(sol, (results = prepare_results(sol, stationary_T, stationary_0),))
-  dropmissing!(sol.results) # drop pre-shock values
+  filter!(row -> row.t >= 0, sol.results)
   @test all([isapprox(x, 0.0, atol = 1e-6) for x in sol.results[:entry_residual]]) # Free-entry condition holds ∀ t.
 end
 

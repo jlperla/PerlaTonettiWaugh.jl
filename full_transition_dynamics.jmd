@@ -93,7 +93,7 @@ else
     # nothing
 end
 
-dropmissing!(solved) # don't plot pre-shock values
+filter!(row -> row.t >= 0, solved) # don't plot pre-shock values 
 ```
 
 ## Welfare
