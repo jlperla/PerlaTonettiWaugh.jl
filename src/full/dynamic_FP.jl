@@ -1,12 +1,12 @@
 # Called at end of each time-step in the DAE solver (mainly to calculate L_tilde for derivatives)
 function store_static_callback_FP(u, t, integrator, p)
-    @unpack results, parameters, settings, L_1, L_2, ω, E, Ω, Ξ₁ = p
-    P = length(u) - 2
+    @unpack results, parameters, settings, L_1, L_2, ω, Ω, Ξ₁ = p
+    P = length(u) - 3
+    v_1_t = u[1]
     g_t = u[P+1]
     z_hat_t = u[P+2]
     E_t = u[P+3]
     Ω_t = Ω(t)
-    v_1_t = u[1]
     S_t = S(g_t, parameters)
     L_tilde_t = L_tilde(g_t, z_hat_t, Ω_t, E_t, S_t, parameters)
     entry_residual_t = entry_residual(v_1_t, Ξ₁, parameters)
@@ -19,10 +19,10 @@ function f_FP!(residual,du,u,p,t)
     @unpack ρ, δ, σ, μ, υ, κ, d, ζ = parameters
     residual .= 0
     P = length(residual) - 3 # note u[1:P]  = v(t) in the solution iterators
+    v_1 = u[1]
     g = u[P+1]
     z_hat = u[P+2]
     E = u[P+3]
-    v_1 = u[1]
 
     # Get static equilibrium values and calculate the L_tilde growth rate
     @unpack S, L_tilde, z_bar, π_min, π = static_equilibrium(Ξ₁, v_1, g, z_hat, E, Ω(t), z, parameters)
@@ -56,7 +56,9 @@ end
 # Calculate the transition dynamics given a fixed Ω(t) function
 function solve_dynamics_FP(parameters, stationary_sol_T, settings, Ω)
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = parameters
-    @unpack z, z_ex, T, tstops = settings
+    @unpack z_ex, T, tstops = settings
+    z = z_ex[2:end-1]
+    P = length(z)
     @assert γ ≈ 1 # These are the only supported parameters for the transition dynamics at this point
     @assert η == 0
     T >= 50 ? nothing : @warn "T < 50 can give erratic behavior."
@@ -72,7 +74,6 @@ function solve_dynamics_FP(parameters, stationary_sol_T, settings, Ω)
     results = DataFrame(t = T, g = g_T, z_hat = z_hat_T, Ω = Ω_T, E = δ, v_1 = v_T[1], L_tilde = L_tilde_T)
 
     # Define intermediate quantitities.
-    P = length(z)
     ω = ω_weights(z_ex, θ, σ-1) # Quadrature weights.
     bc = (Mixed(σ-1), Mixed(σ-1)) # boundary conditions for differential operators
     L_1 = L₁₋bc(z_ex, bc) # use backward difference as the drift is negative
@@ -86,11 +87,11 @@ function solve_dynamics_FP(parameters, stationary_sol_T, settings, Ω)
     p = (results = results, parameters = parameters, settings = settings,
         L_1 = L_1, L_2 = L_2, ω = ω, Ξ₁ = Ξ₁, Ω = Ω)
 
-    dae_prob = DAEProblem(f!, du0, u0, (T, 0.0), p, differential_vars = [trues(P); false; false; false])
+    dae_prob = DAEProblem(f_FP!, du0, u0, (T, 0.0), p, differential_vars = [trues(P); false; false; false])
 
     # Solve that DAE passing in the callbacks to store "future" L_tilde
-    cb = FunctionCallingCallback((u, t, integrator) -> store_static_callback(u, t, integrator, p), tdir = -1, func_start = false) # Callback object.
-    sol = DifferentialEquations.solve(dae_prob, callback = cb, isoutofdomain = DAE_outofdomain, tstops = tstops)
+    cb = FunctionCallingCallback((u, t, integrator) -> store_static_callback_FP(u, t, integrator, p), tdir = -1, func_start = false) # Callback object.
+    sol = DifferentialEquations.solve(dae_prob, callback = cb, tstops = tstops, isoutofdomain = DAE_outofdomain)
 
     # postprocess and return
     sort!(results) # sort results to be forward in time
@@ -104,16 +105,15 @@ end
 function dynamics_fixedpoint(E_nodes_interior, parameters, stationary_sol_0, stationary_sol_T, settings)
     # calculate the Ω(t) from the E_hat.  Throws away the E (which the DAE calculates)
     @unpack Ω = Ω_E_funcs(E_nodes_interior, stationary_sol_T.Ω, stationary_sol_0.Ω, parameters, settings)
+    @unpack δ = parameters
     solution = solve_dynamics_FP(params_T, stationary_sol_T, settings, Ω)
 
-    # turn the DAE solution for the E into a new E_hat
-    #TODO: Summarizing the algorithm, which you can remove after implementation
-    # (1) get solution.results.E or solution.sol.
-    # (2) get the E values at tstops into a vector
-    # (3) rescale on [-1, 0] by subtracting delta and then dividing everything by - E(0)
-    # (4) After that, return the new E_nodes_interior from this function
+    # turn the DAE solution E into an E_hat (i.e., scale it to [-1, 0])
+    filter!(row -> row.t ∈ settings.tstops, solution.results) # cut down to tstops
+    E = solution.results[:E]
+    E_hat = (E .- δ)/(-1 * E[1])
 
-
+    return E_hat[2:end-1] # new E_nodes_interior
 end
 
 
@@ -127,15 +127,8 @@ function solve_transition_FP(parameters, settings)
     stationary_sol_T = stationary_numerical(params_T, settings)
     stationary_sol_0 = stationary_numerical(params_0, settings).Ω
 
-    # construct initial guess on the E_nodes if not given
     @assert tstops[1] ≈ 0.0
     @assert tstops[end] ≈ T
 
-    # TODO: add in a setting for the initial condition of E_nodes_interior_0
-    # TODO: I didn't want to clash with the current one, so call it something different for now
-    # Start with a linear E_hat between -1 and 0, then throw out the ends.
-
-    # TODO: use NLsolve at some point with Anderson
-    fixedpoint( E_nodes_interior -> dynamics_fixedpoint(E_nodes_interior, parameters, stationary_sol_0, stationary_sol_T, settings), E_nodes_interior_0)
-
+    return fixedpoint(E_nodes_interior -> dynamics_fixedpoint(E_nodes_interior, parameters, stationary_sol_0, stationary_sol_T, settings), fp_x0)
 end
