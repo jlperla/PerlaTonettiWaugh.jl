@@ -233,6 +233,26 @@ Of these, the only significant change is that the $\Omega(t)$ must be solved sep
 	\item Update the guess on $\Omega(t)$ until the residuals are minimized.
 \end{enumerate}
 
+\paragraph{General Algorithm (Fixed Point)}
+
+The iteration begins with an (irregular) grid of time-stops $\tau \in \R^S$ where $\tau_1 = 0$ and $\tau_S = T$, for a large $T$.
+
+Guess an initial $\hat{E}$ such that $\Omega(0) = \Omega_0$ and $\Omega(T) = \Omega_T$ 
+
+\begin{enumerate}
+	\item Use the current $\hat{E}$ guess to solve for the $\Omega(t)$ function from \cref{sec:entry-ODE}
+	\item With the $\Omega(t)$ function, solve the DAE with the ODE, the value matching, the free-entry residual, and the export threshold (i.e. of length $P + 3$).
+	\begin{itemize}
+		\item The additional algebraic variables are $g, E, \hat{z}$ where the $E$ is used in all calculations instead of the guessed $\hat{E}$.  In particular, the $\hat{L}(t)$ calculation.
+		\item Make sure the time-stops used for the $\hat{E}$ calculation are passed to the DAE solver
+		\item Check to ensure that $E(t) > 0$ from the passed in function, and potentially pin it to $0$ if it does to ensure the DAE iteration works
+	\end{itemize}
+	\item Extract the $E(t)$ exactly at the time-stops used in the $\hat{E}$ guess from the DAE solution
+	\item Convert the $E(t)$ to an implied $\hat{E}(t)$ by subtracting $\delta$ and then rescaling so that $\hat{E}(0) = -1$ and $\hat{E}(T) = 0$ by dividing everything by $-\hat{E}(0)$
+	\item Stop the iteration when $\hat{E}$ converges.  Consider alternative fixed point iterations such as Anderson iteration.
+\end{enumerate}
+
+
 \paragraph{Transition Dynamics Experiment}
 
 Assume $\delta > 0$. The experiment is to examine a one-time unanticipated \textit{decrease} in $d$ as the trade liberalization.  We calculate the two steady states and examine the transition dynamics.
@@ -260,7 +280,7 @@ To calculate the $\D[t]\log\left(1 - \tilde{L}(t)\right)$ we need to reference t
 where the $\Delta_t$ is that periods (potentially adaptive) step-size in the time-stepping algorithm of the DAE solver.
 
 
-\subsection{Number of Varieties and Entry in Transition}
+\subsection{Number of Varieties and Entry in Transition}\label{sec:entry-ODE}
 
 
 When making a guess for the varieties over the transition path, in principle we could have chosen either the $\Omega(t)$ or the $E(t)$ (for $t \in [0,T]$) and converted between them using \cref{eq:E-defined-by-Omega}.\footnote{In practice, though, the model does not solve effectively with guesses on $\Omega(t)$ since small changes in the guess can lead to large deviations in $E(t)$, which enter the growth calculations directly.}  Analytically, we know that any guess for $E(t)$ on $t \in [0,T]$ is one where $E(T) = \delta$ and where $\Omega(T) = \Omega_T$ from the new steady state.  Since choosing a guess on an $E(t)$ which fulfills these conditions is difficult, we instead do the change of variables to guess a $\widehat{E}(t)$ such that $\widehat{E}(T) = 0$, and $\widehat{E}(0)$ is \textit{indeterminate}.  See \cref{sec:Omega-E} for the detailed derivation.
