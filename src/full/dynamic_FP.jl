@@ -24,10 +24,6 @@ function f_FP!(residual,du,u,p,t)
     E = u[P+3]
     v_1 = u[1]
 
-    #TODO: The DAE solver may choose crazy z_hat, E, and g.... we may want to constrain them
-    # if there are issues with the convergence.
-    # For example, doing an E = max(E, 0.0), g = max(g, 0.0), etc.?
-
     # Get static equilibrium values and calculate the L_tilde growth rate
     @unpack S, L_tilde, z_bar, π_min, π = static_equilibrium(Ξ₁, v_1, g, z_hat, E, Ω(t), z, parameters)
     L_tilde_log_derivative = 0.0 # Default to Float literal.
@@ -47,6 +43,14 @@ function f_FP!(residual,du,u,p,t)
     residual[P+1] = Ξ₁*v_1 + ζ - dot(ω, u[1:P])  # (54)
     residual[P+2] = z_hat^(σ-1) - κ * d^(σ-1) / π_min  # (55)
     residual[P+3] = entry_residual(v_1, Ξ₁, parameters)  # (56)
+end
+
+function DAE_outofdomain(u, p, t)
+    v_1 = u[1]
+    g = u[end - 2]
+    z_hat = u[end - 1]
+    E = u[end]
+    return (v_1 < 0 || g < 0 || z_hat < 1 || E < 0) ? true : false
 end
 
 # Calculate the transition dynamics given a fixed Ω(t) function
@@ -86,7 +90,7 @@ function solve_dynamics_FP(parameters, stationary_sol_T, settings, Ω)
 
     # Solve that DAE passing in the callbacks to store "future" L_tilde
     cb = FunctionCallingCallback((u, t, integrator) -> store_static_callback(u, t, integrator, p), tdir = -1, func_start = false) # Callback object.
-    sol = DifferentialEquations.solve(dae_prob, callback = cb, tstops = tstops)
+    sol = DifferentialEquations.solve(dae_prob, callback = cb, isoutofdomain = DAE_outofdomain, tstops = tstops)
 
     # postprocess and return
     sort!(results) # sort results to be forward in time
