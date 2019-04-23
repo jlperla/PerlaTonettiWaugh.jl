@@ -15,7 +15,8 @@ end
 
 function f_FP!(residual,du,u,p,t)
     @unpack results, parameters, settings, L_1, L_2, ω, Ω, Ξ₁ = p
-    @unpack z, T = settings
+    @unpack z_ex, T = settings
+    z = z_ex[2:end-1]
     @unpack ρ, δ, σ, μ, υ, κ, d, ζ = parameters
     residual .= 0
     P = length(residual) - 3 # note u[1:P]  = v(t) in the solution iterators
@@ -105,15 +106,15 @@ end
 function dynamics_fixedpoint(E_nodes_interior, params_T, stationary_sol_0, stationary_sol_T, settings)
     # calculate the Ω(t) from the E_hat. Throws away the E (which the DAE calculates)
     @unpack Ω = Ω_E_funcs(E_nodes_interior, stationary_sol_T.Ω, stationary_sol_0.Ω, params_T, settings)
-    @unpack δ = parameters
+    @unpack δ = params_T
     solution = solve_dynamics_FP(params_T, stationary_sol_T, settings, Ω)
 
     # turn the DAE solution E into an E_hat (i.e., scale it to [-1, 0])
     filter!(row -> row.t ∈ settings.tstops, solution.results) # cut down to tstops
     E = solution.results[:E]
-    E_hat = (E .- δ)/(-1 * E[1])
+    E_hat = (E .- δ)/(δ - E[1])
 
-    return E_hat[2:end-1] # new E_nodes_interior
+    return E_hat[2:end-1]
 end
 
 
@@ -130,5 +131,12 @@ function solve_transition_FP(parameters, settings)
     @assert tstops[1] ≈ 0.0
     @assert tstops[end] ≈ T
 
-    return fixedpoint(E_nodes_interior -> dynamics_fixedpoint(E_nodes_interior, params_T, stationary_sol_0, stationary_sol_T, settings), fp_x0)
+    fp_sol = fixedpoint(E_nodes_interior -> dynamics_fixedpoint(E_nodes_interior, params_T, stationary_sol_0, stationary_sol_T, settings), fp_x0[2:end-1], iterations = settings.transition_iterations)
+    converged(fp_sol) || @warn "fixed point didn't converge."
+    E_nodes_interior = fp_sol.zero
+
+    # regenerate full solution from the E_nodes_interior 
+    @unpack Ω = Ω_E_funcs(E_nodes_interior, stationary_sol_T.Ω, stationary_sol_0.Ω, params_T, settings)
+    @unpack δ = params_T
+    return (dynamics_output = solve_dynamics_FP(params_T, stationary_sol_T, settings, Ω), nodes = E_nodes_interior)
 end

@@ -86,8 +86,17 @@ function Ω_E_funcs(E_nodes_interior, Ω_T, Ω_0, parameters, settings)
 
     Ω_derivative(Ω,p,t) = Q*E_hat(t)*Ω # (44)
     Ω_solution = DifferentialEquations.solve(ODEProblem(Ω_derivative, Ω_0, (0.0, T)), reltol = 1e-15) # if this fails, error will be thrown
-    Ω(t) = t <= T ? Ω_solution(t) : Ω_solution(T)
-
+    
+    function Ω(t)
+        if t > T 
+            return Ω_T
+        elseif t > 0 && t <= T 
+            return Ω_solution(t)
+        else # useful for fixed point approach 
+            return Ω_0
+        end 
+    end 
+    
     return (Ω = Ω, E = E)
 end
 
