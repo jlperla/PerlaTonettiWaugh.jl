@@ -14,7 +14,7 @@ end
 
 function f!(residual,du,u,p,t)
     @unpack results, parameters, settings, L_1, L_2, ω, E, Ω, Ξ₁ = p
-    @unpack z, T = settings
+    @unpack z_ex, T = settings
     @unpack ρ, δ, σ, μ, υ, κ, d, ζ = parameters
     residual .= 0
     P = length(residual) - 2 # note u[1:P]  = v(t) in the solution iterators
@@ -22,7 +22,7 @@ function f!(residual,du,u,p,t)
     z_hat = u[P+2]
 
     # Get static equilibrium values and calculate the L_tilde growth rate
-    @unpack S, L_tilde, z_bar, π_min, π = static_equilibrium(Ξ₁, u[1], g, z_hat, E(t), Ω(t), z, parameters)
+    @unpack S, L_tilde, z_bar, π_min, π = static_equilibrium(Ξ₁, u[1], g, z_hat, E(t), Ω(t), z_ex[2:end-1], parameters)
     L_tilde_log_derivative = 0.0 # Default to Float literal.
     if (t < T)
         t_forward = results[:t][end]
@@ -45,7 +45,8 @@ end
 # To calculate the full equilibrium, you can solve until Ω(t), E(t) fulfill free-entry conditions
 function solve_dynamics(parameters, stationary_sol_T, settings, Ω, E)
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = parameters
-    @unpack z, z_ex, T, tstops = settings
+    @unpack z_ex, T, tstops = settings
+    z = z_ex[2:end-1]
     @assert γ ≈ 1 # These are the only supported parameters for the transition dynamics at this point
     @assert η == 0
     T >= 50 ? nothing : @warn "T < 50 can give erratic behavior."

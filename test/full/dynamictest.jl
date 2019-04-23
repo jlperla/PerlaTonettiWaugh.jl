@@ -16,7 +16,7 @@
 # Construct intermediate objects.
   z_ex = range(z_min, stop = z_max, length = P+2)
   z = z_ex[2:end-1]
-  settings = settings_defaults(z = z, z_ex = z_ex, tstops = tstops, T = T_default)
+  settings = settings_defaults(z_ex = z_ex, tstops = tstops, T = T_default)
   params_0 = merge(params, (d = d_0,))
   params_T = merge(params, (d = d_T,))
 
@@ -75,7 +75,7 @@ end
     T = sqrt(2*(log(Ω_0) - log(Ω_T)) / params.δ)
     Ω_t(t) = t < T ? Ω_0 * exp(-params.δ*T*t + params.δ*t*t/2) : Ω_T # Exponential Ω with time smoothing
     E_t(t) = (log(Ω_t(t + Δ_E)) - (log(Ω_t(t - Δ_E))))/(2*Δ_E) + params.δ # central differences.
-    settings = settings_defaults(z = z, z_ex = z_ex, tstops = tstops, T = T)
+    settings = settings_defaults(z_ex = z_ex, tstops = tstops, T = T)
     sol = solve_dynamics(params_T, stationary_T, settings, Ω_t, E_t)
     sol = merge(sol, (results = prepare_results(sol, stationary_T, stationary_0),))
     filter!(row -> row.t >= 0, sol.results)

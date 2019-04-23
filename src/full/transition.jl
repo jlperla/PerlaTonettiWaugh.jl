@@ -96,7 +96,8 @@ function prepare_results(solve_dynamics_output, stationary_sol_T, stationary_sol
     @unpack results, sol, dae_parameters = solve_dynamics_output
     @unpack Ω, E, parameters, settings, Ξ₁, ω = dae_parameters
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = parameters
-    @unpack z, z_ex, T, tstops = settings
+    @unpack z_ex, T, tstops = settings
+    z = z_ex[2:end-1]
 
     g_T = stationary_sol_T.g
     z_hat_T = stationary_sol_T.z_hat
