@@ -119,7 +119,7 @@ end
 
 
 function solve_transition_FP(parameters, settings)
-    @unpack fp_x0, fp_iterations, m, T, tstops = settings
+    @unpack fp_x0, fp_iterations, anderson_m, anderson_beta, T, tstops = settings
     @unpack d_0, d_T = parameters
     @assert d_0 !== d_T "Will lead to a divide by 0 error."
 
@@ -132,7 +132,8 @@ function solve_transition_FP(parameters, settings)
     @assert tstops[1] ≈ 0.0
     @assert tstops[end] ≈ T
 
-    fp_sol = fixedpoint(E_nodes_interior -> dynamics_fixedpoint(E_nodes_interior, params_T, stationary_sol_0, stationary_sol_T, settings), fp_x0[2:end-1], iterations = fp_iterations, m = m)
+    fp_sol = fixedpoint(E_nodes_interior -> dynamics_fixedpoint(E_nodes_interior, params_T, stationary_sol_0, stationary_sol_T, settings), fp_x0[2:end-1], 
+                        iterations = fp_iterations, m = anderson_m, beta = anderson_beta)
     converged(fp_sol) || @warn "fixed point didn't converge."
     E_nodes_interior = fp_sol.zero
 
@@ -140,4 +141,108 @@ function solve_transition_FP(parameters, settings)
     @unpack Ω = Ω_E_funcs(E_nodes_interior, stationary_sol_T.Ω, stationary_sol_0.Ω, params_T, settings)
     @unpack δ = params_T
     return (dynamics_output = solve_dynamics_FP(params_T, stationary_sol_T, settings, Ω), nodes = E_nodes_interior)
+end
+
+function prepare_results_FP(solve_dynamics_output, stationary_sol_T, stationary_sol_0)
+    @unpack results, sol, dae_parameters = solve_dynamics_output
+    @unpack Ω, parameters, settings, Ξ₁, ω = dae_parameters
+    @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = parameters
+    @unpack z_ex, T, tstops = settings
+    z = z_ex[2:end-1]
+
+    g_T = stationary_sol_T.g
+    z_hat_T = stationary_sol_T.z_hat
+    L_tilde_T = stationary_sol_T.L_tilde
+    Ω_T = stationary_sol_T.Ω
+
+    π_min(L_tilde_t, z_bar) = (1 - L_tilde_t) / ((σ-1)*z_bar^(σ-1)) # (38)
+
+    P = length(z)
+    interpolated_g(t) = sol(t)[P+1]
+    interpolated_z_hat(t) = sol(t)[P+2]
+    interpolated_E(t) = sol(t)[P+3] # new solution dimension
+    interpolated_L_tilde(t) = L_tilde(interpolated_g(t), interpolated_z_hat(t), Ω(t), interpolated_E(t), S(interpolated_g(t), parameters), parameters)
+    interpolated_z_bar(t) = z_bar(interpolated_z_hat(t), Ω(t), parameters)
+    interpolated_c(t) = c(interpolated_L_tilde(t), Ω(t), interpolated_z_bar(t))
+    interpolated_π_min(t) = π_min(interpolated_L_tilde(t), interpolated_z_bar(t))
+
+    # define welfare quantities based on interpolates and time-T steady state
+    log_c(t) = log(interpolated_c(t))
+    log_c_T = log(c(L_tilde_T, Ω_T, z_bar(z_hat_T, Ω_T, parameters))) # this is a scalar
+    log_M(t) = quadgk(interpolated_g, 0, t)[1]
+    U(t) = quadgk(τ -> exp(-ρ*τ)*(log_M(t+τ) + log_c(t+τ)), 0, (T-t))[1] + exp(-ρ*(T-t))*(g_T + ρ*(log_c_T + g_T * T))/(ρ^2) # (C.83)
+    π_rat(t) = θ*(1-interpolated_z_hat(t)^(-θ+σ-1))/(θ-σ+1) + (1+(N-1)*d^(1-σ))*θ*interpolated_z_hat(t)^(-θ+σ-1)/(θ-σ+1)+(N-1)*κ*interpolated_z_hat(t)^(-θ)/interpolated_π_min(t) # (61)
+
+    # generate clean dataframe with the union of new and old time points
+    ts = (T >= 20) ? sort(unique([settings.detailed_ts; results.t])) : results.t # add more time steps for the plotting/etc.
+    results = DataFrame(t = ts)
+
+    # Apply interpolates and static formulas at new time points
+    results = @transform(results, g = interpolated_g.(:t))
+    results = @transform(results, z_hat = interpolated_z_hat.(:t))
+    results = @transform(results, Ω = Ω.(:t))
+    results = @transform(results, E = interpolated_E.(:t))
+    results = @transform(results, v_1 = (t -> (sol(t))[1]).(:t))
+
+    results = @transform(results, entry_residual = entry_residual.(:v_1, Ξ₁, Ref(parameters)))
+
+    results = @transform(results, L_tilde = interpolated_L_tilde.(:t))
+    results = @transform(results, λ_ii = λ_ii.(:z_hat, Ref(parameters)))
+    results = @transform(results, S = S.(:g, Ref(parameters)))
+    results = @transform(results, z_bar = z_bar.(:z_hat, :Ω, Ref(parameters)))
+    results = @transform(results, c = c.(:L_tilde, :Ω, :z_bar))
+    results = @transform(results, π_min = π_min.(:L_tilde, :z_bar))
+    results = @transform(results, log_M = log_M.(:t))
+    results = @transform(results, U = U.(:t))
+    results = @transform(results, π_rat = π_rat.(:t))
+    results = @transform(results, L_tilde_a = L_tilde_a.(:Ω, :S, Ref(parameters)))
+    results = @transform(results, L_tilde_x = L_tilde_x.(:z_hat, :Ω, Ref(parameters)))
+    results = @transform(results, L_tilde_E = L_tilde_E.(:Ω, :E, Ref(parameters)))
+    results = @transform(results, w = w.(:z_bar, Ref(parameters)))
+
+    results.r = ones(Float64, nrow(results)) # filler, to be overwritten
+    for i in 1:nrow(results)
+        t = results[:t][i]
+        c = results[:c][i]
+        g = results[:g][i]
+        log_c_forward = (i < nrow(results)) ? (log(results[:c][i+1]) - log(c))/(results[:t][i+1] - t) : 0.0
+        if (i != nrow(results))
+            @assert results[:t][i+1] > t
+        end
+        results.r[i] = ρ +  δ + γ*(g + log_c_forward) # (C.56)
+    end
+
+    # prepend pre-shock steadystate to dataframe
+    ts_0 = settings.pre_shock_times
+    for t in ts_0
+        E = δ
+        U = stationary_sol_0.U_bar
+        v = stationary_sol_0.v_tilde
+        @unpack g, z_hat, Ω, L_tilde, π_min, π_rat, x, S, w, z_bar, λ_ii, c, L_tilde_x, L_tilde_a, L_tilde_E, r = stationary_sol_0
+        Ξ₁ = 1/(1 - (σ-1)*(z[1] - z_ex[1]))
+
+        push!(results, (t = t,
+                        g = g,
+                        z_hat = z_hat,
+                        Ω = Ω,
+                        E = E,
+                        v_1 = v[1],
+                        L_tilde = L_tilde,
+                        entry_residual = Ξ₁*v[1] - dot(v, ω) + ζ,
+                        r = r,
+                        λ_ii = λ_ii,
+                        S = S,
+                        z_bar = z_bar,
+                        π_min = π_min,
+                        log_M = t * g,
+                        U = U,
+                        π_rat = π_rat,
+                        L_tilde_a = L_tilde_a,
+                        c = c,
+                        L_tilde_x = L_tilde_x,
+                        L_tilde_E = L_tilde_E,
+                        w = w))
+    end
+
+    return sort!(results) # sort results again to keep time in the right order
 end

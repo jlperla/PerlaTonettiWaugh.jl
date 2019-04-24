@@ -33,4 +33,5 @@ settings_defaults = @with_kw (z_ex = unique([range(0., 0.1, length = 150)' range
                                 stationary_x0 = [0.02; 2; .57],
                                 pre_shock_times = [-1, -5, -10, -15, -20],
                                 detailed_ts = [collect(0.0:0.5:20); collect(20.0:T)],
-                                m = 5)
+                                anderson_m = 5,
+                                anderson_beta = 1)

@@ -32,6 +32,6 @@ export weighted_residuals
 export solve_transition, prepare_results
 export consumption_equivalent
 export f!, f!_simple, solve_system
-export solve_transition_FP, solve_dynamics_FP
+export solve_transition_FP, solve_dynamics_FP, prepare_results_FP
 
 end # module
