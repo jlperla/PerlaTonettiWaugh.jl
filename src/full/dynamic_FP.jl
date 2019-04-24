@@ -121,6 +121,7 @@ end
 function solve_transition_FP(parameters, settings)
     @unpack fp_x0, T, tstops = settings
     @unpack d_0, d_T = parameters
+    @assert d_0 !== d_T "Will lead to a divide by 0 error."
 
     # calculate the steady states at 0 and T
     params_T = merge(parameters, (d = d_T,))
@@ -131,7 +132,7 @@ function solve_transition_FP(parameters, settings)
     @assert tstops[1] ≈ 0.0
     @assert tstops[end] ≈ T
 
-    fp_sol = fixedpoint(E_nodes_interior -> dynamics_fixedpoint(E_nodes_interior, params_T, stationary_sol_0, stationary_sol_T, settings), fp_x0[2:end-1], iterations = settings.transition_iterations, m = settings.m)
+    fp_sol = fixedpoint(E_nodes_interior -> dynamics_fixedpoint(E_nodes_interior, params_T, stationary_sol_0, stationary_sol_T, settings), fp_x0[2:end-1], iterations = settings.fp_iterations, m = settings.m)
     converged(fp_sol) || @warn "fixed point didn't converge."
     E_nodes_interior = fp_sol.zero
 

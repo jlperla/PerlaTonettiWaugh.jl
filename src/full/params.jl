@@ -25,8 +25,9 @@ settings_defaults = @with_kw (z_ex = unique([range(0., 0.1, length = 150)' range
                                 transition_iterations = 10000,
                                 transition_penalty_coefficient = 1.0, # coefficient to be used for a penalty function for constraints on increasing E
                                 interp = Interpolations.LinearInterpolation,
-                                tstops = range(0.0, T, length = 30), # used for fixed point iteration and DAE solver
+                                tstops = unique([collect(0.0:0.25:10); collect(10: 0.5: 20.); collect(20.0:T)]), # used for fixed point iteration and DAE solver
                                 fp_x0 = range(-1, 0, length = length(tstops)),
+                                fp_iterations = 100,
                                 impose_E_monotonicity_constraints = true,
                                 run_global = true,
                                 stationary_x0 = [0.02; 2; .57],

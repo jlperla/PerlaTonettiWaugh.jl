@@ -1,0 +1,32 @@
+Usual package boilerplate 
+
+```julia 
+pkg"activate .; instantiate; precompile"
+using CSV, Plots, JSON, BenchmarkTools, Parameters, PerlaTonettiWaugh, DataFrames
+gr(fmt = :png)
+```
+
+We can instantiate our parameters and settings 
+
+```julia 
+parameters = parameter_defaults();
+settings = settings_defaults();
+```
+
+We can inspect the experiment 
+
+```julia 
+@show parameters.d_0, parameters.d_T; 
+```
+
+```julia 
+histogram(settings.tstops)
+```
+
+As we can see, the `tstops` are front-loaded. 
+
+Let's run the experiment. 
+
+```julia 
+sol = solve_transition_FP(
+```
