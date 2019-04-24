@@ -4,7 +4,7 @@ function store_static_callback_FP(u, t, integrator, p)
     P = length(u) - 3
     v_1_t = u[1]
     g_t = u[P+1]
-    z_hat_t = u[P+2]
+    z_hat_t = max(u[P+2], 1.)
     E_t = u[P+3]
     Ω_t = Ω(t)
     S_t = S(g_t, parameters)
@@ -22,7 +22,7 @@ function f_FP!(residual,du,u,p,t)
     P = length(residual) - 3 # note u[1:P]  = v(t) in the solution iterators
     v_1 = u[1]
     g = u[P+1]
-    z_hat = u[P+2]
+    z_hat = max(u[P+2], 1.)
     E = u[P+3]
 
     # Get static equilibrium values and calculate the L_tilde growth rate
@@ -119,7 +119,7 @@ end
 
 
 function solve_transition_FP(parameters, settings)
-    @unpack fp_x0, T, tstops = settings
+    @unpack fp_x0, fp_iterations, m, T, tstops = settings
     @unpack d_0, d_T = parameters
     @assert d_0 !== d_T "Will lead to a divide by 0 error."
 
@@ -132,7 +132,7 @@ function solve_transition_FP(parameters, settings)
     @assert tstops[1] ≈ 0.0
     @assert tstops[end] ≈ T
 
-    fp_sol = fixedpoint(E_nodes_interior -> dynamics_fixedpoint(E_nodes_interior, params_T, stationary_sol_0, stationary_sol_T, settings), fp_x0[2:end-1], iterations = settings.fp_iterations, m = settings.m)
+    fp_sol = fixedpoint(E_nodes_interior -> dynamics_fixedpoint(E_nodes_interior, params_T, stationary_sol_0, stationary_sol_T, settings), fp_x0[2:end-1], iterations = fp_iterations, m = m)
     converged(fp_sol) || @warn "fixed point didn't converge."
     E_nodes_interior = fp_sol.zero
 

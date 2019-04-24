@@ -27,7 +27,7 @@ settings_defaults = @with_kw (z_ex = unique([range(0., 0.1, length = 150)' range
                                 interp = Interpolations.LinearInterpolation,
                                 tstops = unique([collect(0.0:0.25:10); collect(10: 0.5: 20.); collect(20.0:T)]), # used for fixed point iteration and DAE solver
                                 fp_x0 = range(-1, 0, length = length(tstops)),
-                                fp_iterations = 100,
+                                fp_iterations = 500,
                                 impose_E_monotonicity_constraints = true,
                                 run_global = true,
                                 stationary_x0 = [0.02; 2; .57],

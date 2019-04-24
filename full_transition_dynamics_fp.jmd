@@ -19,6 +19,8 @@ We can inspect the experiment
 @show parameters.d_0, parameters.d_T; 
 ```
 
+And
+
 ```julia 
 histogram(settings.tstops)
 ```
@@ -28,5 +30,24 @@ As we can see, the `tstops` are front-loaded.
 Let's run the experiment. 
 
 ```julia 
-sol = solve_transition_FP(
+sol = @time solve_transition_FP(parameters, settings);
+solved = sol.dynamics_output.results;
+```
+
+## Plots 
+
+```julia 
+plot(solved.g, legend = false, title = "g")
+```
+
+```julia 
+plot(solved.Ω, legend = false, title = "Omega")
+```
+
+```julia 
+plot(solved.z_hat, legend = false, title = "z_hat")
+```
+
+```julia 
+plot(solved.L_tilde, legend = false, title = "L_tilde")
 ```
