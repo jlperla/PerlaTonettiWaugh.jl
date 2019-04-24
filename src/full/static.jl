@@ -30,13 +30,18 @@ function λ_ii(z_hat, parameters)
 end
 
 c(L_tilde, Ω, z_bar) = (1 - L_tilde)*z_bar # (C.15) and (58)
+entry_residual(v_1, Ξ₁, parameters) = Ξ₁*v_1 - parameters.ζ*(1-parameters.χ)/parameters.χ # (56)
+π_min(L_tilde, z_bar, parameters) = (1 - L_tilde) / ((parameters.σ-1)*z_bar^(parameters.σ-1)) # (38)
+
+function π_rat(z_hat, π_min, parameters)
+    @unpack θ, σ, d, κ, N = parameters 
+    return θ*(1-z_hat^(-θ+σ-1))/(θ-σ+1) + (1+(N-1)*d^(1-σ))*θ*z_hat^(-θ+σ-1)/(θ-σ+1)+(N-1)*κ*z_hat^(-θ)/π_min # (61)
+end 
 
 function z_bar(z_hat, Ω, parameters)
     @unpack θ, σ, N, d = parameters
     return (Ω*θ/(1 + θ - σ) * (1 + (N - 1)*d^(1 - σ)*z_hat^(σ - 1 - θ)))^(1/(σ-1)) # (C.11) and 37
 end
-
-entry_residual(v_1, Ξ₁, parameters) = Ξ₁*v_1 - parameters.ζ*(1-parameters.χ)/parameters.χ # (56)
 
 # subset of the above used in the dynamic model
 function static_equilibrium(Ξ₁, v_1, g, z_hat, E, Ω, z, parameters)

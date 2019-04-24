@@ -63,16 +63,17 @@ function solve_dynamics(parameters, stationary_sol_T, settings, Ω)
     z_hat_T = stationary_sol_T.z_hat
     L_tilde_T = stationary_sol_T.L_tilde
     Ω_T = stationary_sol_T.Ω
+    Ξ₁ = 1/(1 - (σ-1)*(z[1] - z_ex[1]))  # (24), with ξ = (σ-1)
+    entry_residual_T = entry_residual(v_T[1], Ξ₁, parameters)
 
     # Define the results data frame we'll be using and push the stationary onto it.
-    results = DataFrame(t = T, g = g_T, z_hat = z_hat_T, Ω = Ω_T, E = δ, v_1 = v_T[1], L_tilde = L_tilde_T)
+    results = DataFrame(t = T, g = g_T, z_hat = z_hat_T, Ω = Ω_T, E = δ, v_1 = v_T[1], L_tilde = L_tilde_T, entry_residual = entry_residual_T)
 
     # Define intermediate quantitities.
     ω = ω_weights(z_ex, θ, σ-1) # Quadrature weights.
     bc = (Mixed(σ-1), Mixed(σ-1)) # boundary conditions for differential operators
     L_1 = L₁₋bc(z_ex, bc) # use backward difference as the drift is negative
     L_2 = L₂bc(z_ex, bc)
-    Ξ₁ = 1/(1 - (σ-1)*(z[1] - z_ex[1]))  # (24), with ξ = (σ-1)
 
     # initial conditions and parameters for the solver
     u0 = [v_T; g_T; z_hat_T; δ] # i.e. E(T) = δ
@@ -110,9 +111,8 @@ function dynamics_fixedpoint(E_nodes_interior, params_T, stationary_sol_0, stati
     return E_hat[2:end-1]
 end
 
-
 function solve_transition(parameters, settings)
-    @unpack transition_x0, transition_iterations, anderson_m, anderson_beta, T, tstops = settings
+    @unpack T, tstops, fixedpoint_beta, fixedpoint_ftol, fixedpoint_iterations, fixedpoint_show_trace, fixedpoint_m, fixedpoint_x0  = settings
     @unpack d_0, d_T = parameters
     @assert d_0 !== d_T "Will lead to a divide by 0 error."
 
@@ -125,8 +125,13 @@ function solve_transition(parameters, settings)
     @assert tstops[1] ≈ 0.0
     @assert tstops[end] ≈ T
 
-    fp_sol = fixedpoint(E_nodes_interior -> dynamics_fixedpoint(E_nodes_interior, params_T, stationary_sol_0, stationary_sol_T, settings), transition_x0[2:end-1],
-                        iterations = transition_iterations, m = anderson_m, beta = anderson_beta)
+    fp_sol = fixedpoint(E_nodes_interior -> dynamics_fixedpoint(E_nodes_interior, params_T, stationary_sol_0, stationary_sol_T, settings), 
+                        fixedpoint_x0,
+                        iterations = fixedpoint_iterations,
+                        ftol = fixedpoint_ftol,
+                        m = fixedpoint_m, 
+                        beta = fixedpoint_beta,
+                        show_trace = fixedpoint_show_trace)
     converged(fp_sol) || @warn "fixed point didn't converge."
     E_nodes_interior = fp_sol.zero
 
@@ -143,9 +148,6 @@ function prepare_results(solve_dynamics_output, stationary_T, stationary_0)
     @unpack z_ex, T, tstops = settings
     z = z_ex[2:end-1]
     P = length(z)
-
-    π_min(L_tilde, z_bar) = (1 - L_tilde) / ((σ-1)*z_bar^(σ-1)) # (38)
-    π_rat(z_hat, π_min) = θ*(1-z_hat^(-θ+σ-1))/(θ-σ+1) + (1+(N-1)*d^(1-σ))*θ*z_hat^(-θ+σ-1)/(θ-σ+1)+(N-1)*κ*z_hat^(-θ)/π_min # (61)
 
     L_tilde_T = stationary_T.L_tilde
     g_T = stationary_T.g
@@ -171,10 +173,10 @@ function prepare_results(solve_dynamics_output, stationary_T, stationary_0)
     results = @transform(results, S = S.(:g, Ref(parameters)))
     results = @transform(results, z_bar = z_bar.(:z_hat, :Ω, Ref(parameters)))
     results = @transform(results, c = c.(:L_tilde, :Ω, :z_bar))
-    results = @transform(results, π_min = π_min.(:L_tilde, :z_bar))
+    results = @transform(results, π_min = π_min.(:L_tilde, :z_bar, Ref(parameters)))
     results = @transform(results, log_M = log_M.(:t))
     results = @transform(results, U = U.(:t))
-    results = @transform(results, π_rat = π_rat.(:z_hat, :π_min))
+    results = @transform(results, π_rat = π_rat.(:z_hat, :π_min, Ref(parameters)))
     results = @transform(results, L_tilde_a = L_tilde_a.(:Ω, :S, Ref(parameters)))
     results = @transform(results, L_tilde_x = L_tilde_x.(:z_hat, :Ω, Ref(parameters)))
     results = @transform(results, L_tilde_E = L_tilde_E.(:Ω, :E, Ref(parameters)))
@@ -245,7 +247,7 @@ function Ω_from_E_hat(E_nodes_interior, Ω_T, Ω_0, parameters, settings)
     function Ω(t)
         if t > T
             return Ω_T
-        elseif t < 0
+        elseif t <= 0
             return Ω_0
         else
             return Ω_solution(t)

@@ -1,7 +1,7 @@
 module PerlaTonettiWaugh
 
 # Dependencies.
-using DifferentialEquations, Sundials, LinearAlgebra, DataFrames, DataFramesMeta, DiffEqCallbacks, Interpolations, QuadGK, NLopt, LeastSquaresOptim, BlackBoxOptim, CSV
+using DifferentialEquations, Sundials, LinearAlgebra, DataFrames, DataFramesMeta, DiffEqCallbacks, Interpolations, QuadGK, NLopt, CSV
 import NLsolve: fixedpoint, converged
 using NLSolversBase
 using SimpleDifferentialOperators
