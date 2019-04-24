@@ -13,6 +13,7 @@ function store_static_callback_FP(u, t, integrator, p)
     push!(results, (t = t, g = g_t, z_hat = z_hat_t, Ω = Ω_t, E = E_t, v_1 = v_1_t, L_tilde = L_tilde_t, entry_residual = entry_residual_t))
 end
 
+# Dynamic kernel
 function f_FP!(residual,du,u,p,t)
     @unpack results, parameters, settings, L_1, L_2, ω, Ω, Ξ₁ = p
     @unpack z_ex, T = settings

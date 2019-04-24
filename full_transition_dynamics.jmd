@@ -24,7 +24,7 @@ settings = settings_defaults(run_global = false, detailed_ts = []); # numerical 
 To solve for time 0 and ``T`` stationary solutions, simply:
 
 ```julia
-@unpack stationary_T, stationary_0, change_welfare, change_trade = compare_steady_states(parameters, settings)
+@unpack stationary_T, stationary_0, change_welfare, change_trade = compare_steady_states(parameters, settings);
 ```
 
 We can inspect each:

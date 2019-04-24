@@ -51,6 +51,15 @@ solved = prepare_results_FP(sol.dynamics_output, stationary_T, stationary_0);
 filter!(row -> row.t >= 0, solved); # don't plot pre-shock values 
 ```
 
+## Welfare
+
+Here's welfare inclusive of the transition path:
+
+```julia
+lambda_tpath = 100*(consumption_equivalent(solved.U[1], stationary_0.U_bar, parameter_defaults())-1);
+@show lambda_tpath;
+```
+
 ## Plots 
 
 ```julia
