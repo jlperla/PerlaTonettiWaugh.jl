@@ -8,7 +8,7 @@ pkg"activate .; instantiate; precompile" # may take a long time the first time t
 And load the deps
 
 ```julia
-using CSV, Plots, JSON, BenchmarkTools, Parameters, PerlaTonettiWaugh, DataFrames
+using CSV, Plots, JSON, BenchmarkTools, Parameters, PerlaTonettiWaugh, DataFrames, Suppressor
 gr(fmt = :png)
 ```
 
@@ -18,7 +18,7 @@ First, define common objects for the full model
 
 ```julia
 parameters = parameter_defaults(); # model parameters
-settings = settings_defaults(run_global = false, detailed_ts = []); # numerical solution settings
+settings = settings_defaults(); # numerical solution settings
 ```
 
 To solve for time 0 and ``T`` stationary solutions, simply:
@@ -30,13 +30,13 @@ To solve for time 0 and ``T`` stationary solutions, simply:
 We can inspect each:
 
 ```julia
-foreach(println, pairs(stationary_0))
+@show (stationary_0.g, stationary_0.z_hat, stationary_0.Ω, stationary_0.L_tilde)
 ```
 
 And
 
 ```julia
-foreach(println, pairs(stationary_T))
+@show (stationary_T.g, stationary_T.z_hat, stationary_T.Ω, stationary_T.L_tilde)
 ```
 
 And display the other objects:
@@ -80,8 +80,8 @@ if isfile(cachepath) && use_cache
     solved = CSV.read(cachepath);
 else
     println("solving without cache.")
-    @time solution = solve_transition(parameters, settings);
-    solved = prepare_results(solution.solve_dynamics_output, stationary_T, stationary_0) # since these are the steady-states we're using
+    @time solution = @suppress solve_transition(parameters, settings);
+    solved = prepare_results(solution.solve_dynamics_output, stationary_T, stationary_0); # since these are the steady-states we're using
 end
 
 # writing
@@ -93,7 +93,7 @@ else
     # nothing
 end
 
-filter!(row -> row.t >= 0, solved) # don't plot pre-shock values 
+filter!(row -> row.t >= 0, solved) # don't plot pre-shock values
 ```
 
 ## Welfare

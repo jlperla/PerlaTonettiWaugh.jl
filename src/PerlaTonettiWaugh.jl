@@ -20,18 +20,14 @@ include("full/params.jl")
 include("full/static.jl")
 include("full/stationary.jl")
 include("full/dynamic.jl")
-include("full/dynamic_FP.jl")
-include("full/transition.jl")
 
 export parameter_defaults, settings_defaults
 export parameters_simple, settings_simple
 export solve_simple_transition
 export stationary_algebraic, stationary_numerical, stationary_algebraic_simple, stationary_numerical_simple, ω_weights, solve_dynamics, welfare
 export compare_steady_states
-export weighted_residuals
 export solve_transition, prepare_results
 export consumption_equivalent
 export f!, f!_simple, solve_system
-export solve_transition_FP, solve_dynamics_FP, prepare_results_FP
 
 end # module

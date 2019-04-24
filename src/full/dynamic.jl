@@ -1,28 +1,33 @@
 # Called at end of each time-step in the DAE solver (mainly to calculate L_tilde for derivatives)
 function store_static_callback(u, t, integrator, p)
-    @unpack results, parameters, settings, L_1, L_2, ω, E, Ω, Ξ₁ = p
-    P = length(u) - 2
-    g_t = u[P+1]
-    z_hat_t = u[P+2]
-    Ω_t = Ω(t)
-    E_t = E(t)
+    @unpack results, parameters, settings, L_1, L_2, ω, Ω, Ξ₁ = p
+    P = length(u) - 3
     v_1_t = u[1]
+    g_t = u[P+1]
+    z_hat_t = max(u[P+2], 1.)
+    E_t = u[P+3]
+    Ω_t = Ω(t)
     S_t = S(g_t, parameters)
     L_tilde_t = L_tilde(g_t, z_hat_t, Ω_t, E_t, S_t, parameters)
-    push!(results, (t = t, g = g_t, z_hat = z_hat_t, Ω = Ω_t, E = E_t, v_1 = v_1_t, L_tilde = L_tilde_t))
+    entry_residual_t = entry_residual(v_1_t, Ξ₁, parameters)
+    push!(results, (t = t, g = g_t, z_hat = z_hat_t, Ω = Ω_t, E = E_t, v_1 = v_1_t, L_tilde = L_tilde_t, entry_residual = entry_residual_t))
 end
 
+# Dynamic kernel
 function f!(residual,du,u,p,t)
-    @unpack results, parameters, settings, L_1, L_2, ω, E, Ω, Ξ₁ = p
+    @unpack results, parameters, settings, L_1, L_2, ω, Ω, Ξ₁ = p
     @unpack z_ex, T = settings
+    z = z_ex[2:end-1]
     @unpack ρ, δ, σ, μ, υ, κ, d, ζ = parameters
     residual .= 0
-    P = length(residual) - 2 # note u[1:P]  = v(t) in the solution iterators
+    P = length(residual) - 3 # note u[1:P]  = v(t) in the solution iterators
+    v_1 = u[1]
     g = u[P+1]
-    z_hat = u[P+2]
+    z_hat = max(u[P+2], 1.)
+    E = u[P+3]
 
     # Get static equilibrium values and calculate the L_tilde growth rate
-    @unpack S, L_tilde, z_bar, π_min, π = static_equilibrium(Ξ₁, u[1], g, z_hat, E(t), Ω(t), z_ex[2:end-1], parameters)
+    @unpack S, L_tilde, z_bar, π_min, π = static_equilibrium(Ξ₁, v_1, g, z_hat, E, Ω(t), z, parameters)
     L_tilde_log_derivative = 0.0 # Default to Float literal.
     if (t < T)
         t_forward = results[:t][end]
@@ -37,16 +42,17 @@ function f!(residual,du,u,p,t)
     residual[1:P] .-= (υ^2/2)*L_2*u[1:P] # (52) third term in (53)
     residual[1:P] .-= π # (53) final term
     residual[1:P] .-= du[1:P] # (53) subtracting the v'(t) to form the residual
-    residual[P+1] = Ξ₁*u[1] + ζ - dot(ω, u[1:P])  # (54)
+    residual[P+1] = Ξ₁*v_1 + ζ - dot(ω, u[1:P])  # (54)
     residual[P+2] = z_hat^(σ-1) - κ * d^(σ-1) / π_min  # (55)
+    residual[P+3] = entry_residual(v_1, Ξ₁, parameters)  # (56)
 end
 
-# Calculate the transition dynamics given a fixed Ω(t), E(t) function
-# To calculate the full equilibrium, you can solve until Ω(t), E(t) fulfill free-entry conditions
-function solve_dynamics(parameters, stationary_sol_T, settings, Ω, E)
+# Calculate the transition dynamics given a fixed Ω(t) function
+function solve_dynamics(parameters, stationary_sol_T, settings, Ω)
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = parameters
     @unpack z_ex, T, tstops = settings
     z = z_ex[2:end-1]
+    P = length(z)
     @assert γ ≈ 1 # These are the only supported parameters for the transition dynamics at this point
     @assert η == 0
     T >= 50 ? nothing : @warn "T < 50 can give erratic behavior."
@@ -62,7 +68,6 @@ function solve_dynamics(parameters, stationary_sol_T, settings, Ω, E)
     results = DataFrame(t = T, g = g_T, z_hat = z_hat_T, Ω = Ω_T, E = δ, v_1 = v_T[1], L_tilde = L_tilde_T)
 
     # Define intermediate quantitities.
-    P = length(z)
     ω = ω_weights(z_ex, θ, σ-1) # Quadrature weights.
     bc = (Mixed(σ-1), Mixed(σ-1)) # boundary conditions for differential operators
     L_1 = L₁₋bc(z_ex, bc) # use backward difference as the drift is negative
@@ -70,27 +75,182 @@ function solve_dynamics(parameters, stationary_sol_T, settings, Ω, E)
     Ξ₁ = 1/(1 - (σ-1)*(z[1] - z_ex[1]))  # (24), with ξ = (σ-1)
 
     # initial conditions and parameters for the solver
-    u0 = [v_T; g_T; z_hat_T]
-    du0 = zeros(P+2)
+    u0 = [v_T; g_T; z_hat_T; δ] # i.e. E(T) = δ
+    du0 = zeros(P+3)
 
     p = (results = results, parameters = parameters, settings = settings,
-        L_1 = L_1, L_2 = L_2, ω = ω, Ξ₁ = Ξ₁, E = E, Ω = Ω)
+        L_1 = L_1, L_2 = L_2, ω = ω, Ξ₁ = Ξ₁, Ω = Ω)
 
-    dae_prob = DAEProblem(f!, du0, u0, (T, 0.0), p, differential_vars = [trues(P); false; false])
+    dae_prob = DAEProblem(f!, du0, u0, (T, 0.0), p, differential_vars = [trues(P); false; false; false])
 
     # Solve that DAE passing in the callbacks to store "future" L_tilde
     cb = FunctionCallingCallback((u, t, integrator) -> store_static_callback(u, t, integrator, p), tdir = -1, func_start = false) # Callback object.
-    if (tstops == nothing)
-        sol = DifferentialEquations.solve(dae_prob, callback = cb)
-    else
-        sol = DifferentialEquations.solve(dae_prob, callback = cb, tstops = tstops)
-    end
+    sol = DifferentialEquations.solve(dae_prob, callback = cb, tstops = tstops)
 
     # postprocess and return
     sort!(results) # sort results to be forward in time
-    results = @transform(results, entry_residual = entry_residual.(:v_1, Ref(Ξ₁), Ref(parameters)))
 
     return (results = results, # dataframe of results
             sol = sol, # DAE solver output
             dae_parameters = p) # parameters bundle we passed to the DAE
+end
+
+# takes an E_hat guess and spits out a new E_hat guess
+function dynamics_fixedpoint(E_nodes_interior, params_T, stationary_sol_0, stationary_sol_T, settings)
+    # calculate the Ω(t) from the E_hat. Throws away the E (which the DAE calculates)
+    Ω = Ω_from_E_hat(E_nodes_interior, stationary_sol_T.Ω, stationary_sol_0.Ω, params_T, settings)
+    @unpack δ = params_T
+    solution = solve_dynamics(params_T, stationary_sol_T, settings, Ω)
+
+    # turn the DAE solution E into an E_hat (i.e., scale it to [-1, 0])
+    filter!(row -> row.t ∈ settings.tstops, solution.results) # cut down to tstops
+    E = solution.results[:E]
+    E_hat = (E .- δ)/(δ - E[1])
+
+    return E_hat[2:end-1]
+end
+
+
+function solve_transition(parameters, settings)
+    @unpack transition_x0, transition_iterations, anderson_m, anderson_beta, T, tstops = settings
+    @unpack d_0, d_T = parameters
+    @assert d_0 !== d_T "Will lead to a divide by 0 error."
+
+    # calculate the steady states at 0 and T
+    params_T = merge(parameters, (d = d_T,))
+    params_0 = merge(parameters, (d = d_0,))
+    stationary_sol_T = stationary_numerical(params_T, settings)
+    stationary_sol_0 = stationary_numerical(params_0, settings)
+
+    @assert tstops[1] ≈ 0.0
+    @assert tstops[end] ≈ T
+
+    fp_sol = fixedpoint(E_nodes_interior -> dynamics_fixedpoint(E_nodes_interior, params_T, stationary_sol_0, stationary_sol_T, settings), transition_x0[2:end-1],
+                        iterations = transition_iterations, m = anderson_m, beta = anderson_beta)
+    converged(fp_sol) || @warn "fixed point didn't converge."
+    E_nodes_interior = fp_sol.zero
+
+    # regenerate full solution from the E_nodes_interior
+    Ω = Ω_from_E_hat(E_nodes_interior, stationary_sol_T.Ω, stationary_sol_0.Ω, params_T, settings)
+    @unpack δ = params_T
+    return (solve_dynamics_output = solve_dynamics(params_T, stationary_sol_T, settings, Ω), nodes = E_nodes_interior)
+end
+
+function prepare_results(solve_dynamics_output, stationary_T, stationary_0)
+    @unpack results, sol, dae_parameters = solve_dynamics_output
+    @unpack Ω, parameters, settings, Ξ₁, ω = dae_parameters
+    @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = parameters
+    @unpack z_ex, T, tstops = settings
+    z = z_ex[2:end-1]
+    P = length(z)
+
+    π_min(L_tilde, z_bar) = (1 - L_tilde) / ((σ-1)*z_bar^(σ-1)) # (38)
+    π_rat(z_hat, π_min) = θ*(1-z_hat^(-θ+σ-1))/(θ-σ+1) + (1+(N-1)*d^(1-σ))*θ*z_hat^(-θ+σ-1)/(θ-σ+1)+(N-1)*κ*z_hat^(-θ)/π_min # (61)
+
+    L_tilde_T = stationary_T.L_tilde
+    g_T = stationary_T.g
+    z_hat_T = stationary_T.z_hat
+    Ω_T = stationary_T.Ω
+
+    # interpolates for welfare integrals
+    interpolated_g(t) = sol(t)[P+1]
+    interpolated_z_hat(t) = sol(t)[P+2]
+    interpolated_E(t) = sol(t)[P+3]
+    interpolated_L_tilde(t) = L_tilde(interpolated_g(t), interpolated_z_hat(t), Ω(t), interpolated_E(t), S(interpolated_g(t), parameters), parameters)
+    interpolated_z_bar(t) = z_bar(interpolated_z_hat(t), Ω(t), parameters)
+    interpolated_c(t) = c(interpolated_L_tilde(t), Ω(t), interpolated_z_bar(t))
+
+    # define welfare quantities based on interpolates and time-T steady state
+    log_c(t) = log(interpolated_c(t))
+    log_c_T = log(c(L_tilde_T, Ω_T, z_bar(z_hat_T, Ω_T, parameters))) # this is a scalar
+    log_M(t) = quadgk(interpolated_g, 0, t)[1]
+    U(t) = quadgk(τ -> exp(-ρ*τ)*(log_M(t+τ) + log_c(t+τ)), 0, (T-t))[1] + exp(-ρ*(T-t))*(g_T + ρ*(log_c_T + g_T * T))/(ρ^2) # (C.83)
+
+    # build out dataframe
+    results = @transform(results, λ_ii = λ_ii.(:z_hat, Ref(parameters)))
+    results = @transform(results, S = S.(:g, Ref(parameters)))
+    results = @transform(results, z_bar = z_bar.(:z_hat, :Ω, Ref(parameters)))
+    results = @transform(results, c = c.(:L_tilde, :Ω, :z_bar))
+    results = @transform(results, π_min = π_min.(:L_tilde, :z_bar))
+    results = @transform(results, log_M = log_M.(:t))
+    results = @transform(results, U = U.(:t))
+    results = @transform(results, π_rat = π_rat.(:z_hat, :π_min))
+    results = @transform(results, L_tilde_a = L_tilde_a.(:Ω, :S, Ref(parameters)))
+    results = @transform(results, L_tilde_x = L_tilde_x.(:z_hat, :Ω, Ref(parameters)))
+    results = @transform(results, L_tilde_E = L_tilde_E.(:Ω, :E, Ref(parameters)))
+    results = @transform(results, w = w.(:z_bar, Ref(parameters)))
+
+    results.r = ones(Float64, nrow(results)) # filler, to be overwritten
+    for i in 1:nrow(results)
+        t = results[:t][i]
+        c = results[:c][i]
+        g = results[:g][i]
+        log_c_forward = (i < nrow(results)) ? (log(results[:c][i+1]) - log(c))/(results[:t][i+1] - t) : 0.0
+        if (i != nrow(results))
+            @assert results[:t][i+1] > t
+        end
+        results.r[i] = ρ +  δ + γ*(g + log_c_forward) # (C.56)
+    end
+
+    # prepend pre-shock steadystate to dataframe
+    ts_0 = settings.pre_shock_times
+    for t in ts_0
+        E = δ
+        U = stationary_0.U_bar
+        v = stationary_0.v_tilde
+        @unpack g, z_hat, Ω, L_tilde, π_min, π_rat, x, S, w, z_bar, λ_ii, c, L_tilde_x, L_tilde_a, L_tilde_E, r = stationary_0
+        Ξ₁ = 1/(1 - (σ-1)*(z[1] - z_ex[1]))
+
+        push!(results, (t = t,
+                        g = g,
+                        z_hat = z_hat,
+                        Ω = Ω,
+                        E = E,
+                        v_1 = v[1],
+                        L_tilde = L_tilde,
+                        entry_residual = Ξ₁*v[1] - dot(v, ω) + ζ,
+                        r = r,
+                        λ_ii = λ_ii,
+                        S = S,
+                        z_bar = z_bar,
+                        π_min = π_min,
+                        log_M = t * g,
+                        U = U,
+                        π_rat = π_rat,
+                        L_tilde_a = L_tilde_a,
+                        c = c,
+                        L_tilde_x = L_tilde_x,
+                        L_tilde_E = L_tilde_E,
+                        w = w))
+    end
+
+    return sort!(results) # sort results again to keep time in the right order
+end
+
+function Ω_from_E_hat(E_nodes_interior, Ω_T, Ω_0, parameters, settings)
+    @unpack δ = parameters
+    @unpack T, tstops, interp = settings
+    E_nodes = [-1.0; E_nodes_interior; 0.0] # See footnote 19.  Without pinning a corner there is an extra degree of freedom in the scale
+
+    ts = range(0.0, T, length=length(E_nodes))
+    E_hat_interpolation = interp(ts, E_nodes)
+    E_hat(t) = E_hat_interpolation(t)
+    E_hat_integral = quadgk(E_hat, 0, T)[1] # (42)
+    Q = log(Ω_T/Ω_0) / E_hat_integral # (42) when Ω_T = Ω_0, then Q = 0 so that E(t) is constant with δ as expected
+    E(t) = Q*E_hat(t) + δ # (43)
+
+    Ω_derivative(Ω,p,t) = Q*E_hat(t)*Ω # (44)
+    Ω_solution = DifferentialEquations.solve(ODEProblem(Ω_derivative, Ω_0, (0.0, T)), reltol = 1e-15, tstops = tstops)
+
+    function Ω(t)
+        if t > T
+            return Ω_T
+        elseif t < 0
+            return Ω_0
+        else
+            return Ω_solution(t)
+        end
+    end
+
+    return Ω
 end
