@@ -1,6 +1,7 @@
 Usual package boilerplate 
 
 ```julia 
+using Pkg
 pkg"activate .; instantiate; precompile"
 using CSV, Plots, JSON, BenchmarkTools, Parameters, PerlaTonettiWaugh, DataFrames
 gr(fmt = :png)
