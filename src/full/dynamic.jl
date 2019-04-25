@@ -196,36 +196,14 @@ function prepare_results(solve_dynamics_output, stationary_T, stationary_0)
     end
 
     # prepend pre-shock steadystate to dataframe
+    reduced_stationary = delete(stationary_0, :F, :a, :b, :ν, :x, :y, :U_bar, :v_tilde)
+    Ξ₁ = 1/(1 - (σ-1)*(z[1] - z_ex[1])) # (24) (see note above (54) for why we can use this from Sec. 1)
+    stationary_data = merge(reduced_stationary, (E = δ, U = stationary_0.U_bar, v_1 = stationary_0.v_tilde[1],  Ξ₁*stationary_0.v_tilde[1] - dot(stationary_0.v_tilde, ω) + ζ))
+    
     ts_0 = settings.pre_shock_times
     for t in ts_0
-        E = δ
-        U = stationary_0.U_bar
-        v = stationary_0.v_tilde
-        @unpack g, z_hat, Ω, L_tilde, π_min, π_rat, x, S, w, z_bar, λ_ii, c, L_tilde_x, L_tilde_a, L_tilde_E, r = stationary_0
-        Ξ₁ = 1/(1 - (σ-1)*(z[1] - z_ex[1]))
-
-        push!(results, (t = t,
-                        g = g,
-                        z_hat = z_hat,
-                        Ω = Ω,
-                        E = E,
-                        v_1 = v[1],
-                        L_tilde = L_tilde,
-                        entry_residual = Ξ₁*v[1] - dot(v, ω) + ζ,
-                        r = r,
-                        λ_ii = λ_ii,
-                        S = S,
-                        z_bar = z_bar,
-                        π_min = π_min,
-                        log_M = t * g,
-                        U = U,
-                        π_rat = π_rat,
-                        L_tilde_a = L_tilde_a,
-                        c = c,
-                        L_tilde_x = L_tilde_x,
-                        L_tilde_E = L_tilde_E,
-                        w = w))
-    end
+        push!(results, merge(stationary_data, (t = t,)))
+    end 
 
     return sort!(results) # sort results again to keep time in the right order
 end

@@ -6,7 +6,7 @@ using DifferentialEquations, Sundials, SimpleDifferentialOperators, DiffEqCallba
 using DataFrames, DataFramesMeta, CSV, JSON # results caching 
 using Interpolations, QuadGK # integration
 using NLsolve # root-finding 
-import Parameters: @with_kw, @unpack
+using NamedTupleTools, Parameters # named tuples 
 
 # General utilities files.
 include("utils/quadrature.jl")
