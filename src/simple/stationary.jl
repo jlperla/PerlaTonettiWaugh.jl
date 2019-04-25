@@ -9,7 +9,8 @@ end
 
 # Minimizes value-matching condition (31)
 function stationary_numerical_simple(parameters, settings)
-    @unpack z_ex, stationary_x0, T = settings
+    @unpack z_ex, T = settings
+    x0 = settings.stationary_x0(parameters, settings)
     @unpack μ, υ, θ, r, ζ, π = parameters
     @assert z_ex[1] == 0.0 && issorted(z_ex)  # validate grid
     z = z_ex[2:end-1]
@@ -30,7 +31,7 @@ function stationary_numerical_simple(parameters, settings)
         return Ξ₁*v[1] - dot(ω, v) + ζ # value matching condition (31)
     end
 
-    sol = nlsolve(stationary_numerical_given_g, stationary_x0, inplace = false)
+    sol = nlsolve(stationary_numerical_given_g, x0, inplace = false)
     g_T = sol.zero[1]
     @assert converged(sol) "The solver didn't converge; exiting now."
     @assert (μ + υ^2/2 - g_T < 0) # Negative drift condition (20)

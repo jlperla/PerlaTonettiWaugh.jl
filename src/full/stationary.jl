@@ -1,7 +1,7 @@
 function stationary_algebraic(parameters, settings)
-    stationary_x0 = settings.stationary_x0
+    x0 = settings.stationary_x0(parameters, settings)
     @assert parameters.υ > 0 && parameters.κ > 0
-    sol = nlsolve(x -> stationary_algebraic_aux(x, parameters), stationary_x0, inplace = false)
+    sol = nlsolve(x -> stationary_algebraic_aux(x, parameters), x0, inplace = false)
     converged(sol) || error("Solver didn't converge.")
     g, z_hat, Ω = sol.zero 
     @assert z_hat > 1 && Ω > 0 && g > 0
@@ -94,7 +94,8 @@ end
 
 # Solve the ODE by root-finding. Should use the analytic most of the time, but this is a useful check.
 function stationary_numerical(parameters, settings)
-    @unpack z_ex, stationary_x0 = settings
+    @unpack z_ex = settings
+    x0 = settings.stationary_x0(parameters, settings)
     @unpack ρ, σ, N, θ, γ, d, κ, ζ, η, Theta, χ, υ, μ, δ = parameters
     @assert parameters.υ > 0 && parameters.κ > 0 # Parameter validation
     z = z_ex[2:end-1] # form a uniform extended grid
@@ -107,7 +108,7 @@ function stationary_numerical(parameters, settings)
     Ξ₁ = 1/(1 - (σ-1)*(z[1] - z_ex[1])) # (24), with ξ = (σ-1)
 
     p = (Ξ₁ = Ξ₁, L_1_minus = L_1_minus, L_2 = L_2, ω = ω, z = z)
-    sol = nlsolve(vals -> stationary_numerical_given_vals(vals, p, parameters, settings).residuals, stationary_x0, inplace = false)
+    sol = nlsolve(vals -> stationary_numerical_given_vals(vals, p, parameters, settings).residuals, x0, inplace = false)
     converged(sol) || error("Solver didn't converge.")
     g_T, z_hat_T, Ω_T = sol.zero 
 

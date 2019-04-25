@@ -19,11 +19,14 @@ settings_defaults = @with_kw (z_ex = unique([range(0., 0.1, length = 150)' range
                                 T = 75.0,
                                 tstops = unique([collect(0.0:0.25:10); collect(10: 0.5: 20.); collect(20.0:T)]),
                                 interp = Interpolations.LinearInterpolation,
-                                stationary_x0 = [0.02; 2; .57],
+                                stationary_x0 = default_stationary_x0,
                                 pre_shock_times = [-1, -5, -10, -15, -20],
                                 fixedpoint_ftol = 1e-8,
                                 fixedpoint_show_trace = false,
                                 fixedpoint_m = 5,
                                 fixedpoint_beta = 1.0,
                                 fixedpoint_iterations = 500,
-                                fixedpoint_x0 = range(-1, 0, length = length(tstops))[2:end-1])
+                                fixedpoint_x0 = default_fixedpoint_x0)
+
+default_fixedpoint_x0(parameters, settings) = range(-1, 0, length = length(settings.tstops))[2:end-1]
+default_stationary_x0(parameters, settings) = [parameters.ρ * 0.75; 2.0; 0.57]
