@@ -1,7 +1,9 @@
 function stationary_algebraic(parameters, settings)
     stationary_x0 = settings.stationary_x0
     @assert parameters.υ > 0 && parameters.κ > 0
-    g, z_hat, Ω = nlsolve(x -> stationary_algebraic_aux(x, parameters), stationary_x0, inplace = false)
+    sol = nlsolve(x -> stationary_algebraic_aux(x, parameters), stationary_x0, inplace = false)
+    converged(sol) || error("Solver didn't converge.")
+    g, z_hat, Ω = sol.zero 
     @assert z_hat > 1 && Ω > 0 && g > 0
     staticvalues = staticvals([g, z_hat, Ω], parameters)
 
@@ -105,7 +107,9 @@ function stationary_numerical(parameters, settings)
     Ξ₁ = 1/(1 - (σ-1)*(z[1] - z_ex[1])) # (24), with ξ = (σ-1)
 
     p = (Ξ₁ = Ξ₁, L_1_minus = L_1_minus, L_2 = L_2, ω = ω, z = z)
-    g_T, z_hat_T, Ω_T = nlsolve(vals -> stationary_numerical_given_vals(vals, p, parameters, settings).residuals, stationary_x0, inplace = false)
+    sol = nlsolve(vals -> stationary_numerical_given_vals(vals, p, parameters, settings).residuals, stationary_x0, inplace = false)
+    converged(sol) || error("Solver didn't converge.")
+    g_T, z_hat_T, Ω_T = sol.zero 
 
     staticvalues = staticvals([g_T, z_hat_T, Ω_T], parameters)
     v_tilde = stationary_numerical_given_vals([g_T, z_hat_T, Ω_T], p, parameters, settings).v_tilde

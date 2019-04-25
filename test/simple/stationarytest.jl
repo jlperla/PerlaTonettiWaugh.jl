@@ -14,7 +14,6 @@ grids = [
     unique([range(0.0, stop = 1.0, length = 500)' range(1.0, stop = 5.0, length = 201)']),
     unique([range(0.0, stop = 1.0, length = 1000)' range(1.0, stop = 2.0, length = 11)' range(2.0, stop = 5.0, length = 20)']),
     unique([range(0.0, stop = 1.0, length = 300)' range(1.0, stop = 2.0, length = 50)' range(2.0, stop = 7.0, length = 50)']),
-    unique([range(0., stop = 1., length = 400)' range(1., stop = 5., length = 400)']),
     unique([range(0., stop = 0.1, length = 20)' range(0.1, stop = 1., length = 20)' range(1., stop = 5., length = 20)'])
 ]
 
@@ -22,11 +21,10 @@ gs = [
     0.019903560646302203,
     0.02008477004627781,
     0.020440266030220186,
-    0.016640422891475392,
-    0.02080684556396779
+    0.02080684556396779 # this is the most accurate, and uses the least gridpoints
 ]
 
-@test var(gs) < 1e-5 # correctness
+@test var(gs) < 1e-6 # consistency
 
 for i in 1:length(grids)
     results = stationary_numerical_simple(params, settings_simple(z_ex = grids[i]))

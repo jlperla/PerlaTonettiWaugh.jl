@@ -34,7 +34,7 @@ function stationary_numerical_simple(parameters, settings)
     g_T = sol.zero[1]
     @assert converged(sol) "The solver didn't converge; exiting now."
     @assert (μ + υ^2/2 - g_T < 0) # Negative drift condition (20)
-    @assert g_T < r_T "We require g_T < r_T"
+    @assert r_T > g_T "r_T > g_T is required for convergence" # From (19)
 
     # Use the g_T to recreate L_T and v_T
     A_T = (r_T - μ - υ^2/2)*I - (μ + υ^2 - g_T)*L_1_minus - υ^2/2 * L_2 # (19)
