@@ -1,16 +1,14 @@
 module PerlaTonettiWaugh
 
 # Dependencies.
-using DifferentialEquations, Sundials, LinearAlgebra, DataFrames, DataFramesMeta, DiffEqCallbacks, Interpolations, QuadGK, NLopt, CSV
-import NLsolve: fixedpoint, converged
-using NLSolversBase
+using DifferentialEquations, Sundials, LinearAlgebra, DataFrames, DataFramesMeta, DiffEqCallbacks, Interpolations, QuadGK, CSV
+using NLsolve
 using SimpleDifferentialOperators
 using JSON
 import Parameters: @with_kw, @unpack
 
 # General utilities files.
 include("utils/quadrature.jl")
-include("utils/solve-system.jl")
 # Simple model.
 include("simple/params.jl")
 include("simple/dynamic.jl")
@@ -28,6 +26,6 @@ export stationary_algebraic, stationary_numerical, stationary_algebraic_simple, 
 export compare_steady_states
 export solve_transition, prepare_results
 export consumption_equivalent
-export f!, f!_simple, solve_system
+export f!, f!_simple
 
 end # module

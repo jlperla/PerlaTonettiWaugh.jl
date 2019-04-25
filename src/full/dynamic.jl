@@ -158,6 +158,7 @@ function prepare_results(solve_dynamics_output, stationary_T, stationary_0)
     interpolated_g(t) = sol(t)[P+1]
     interpolated_z_hat(t) = sol(t)[P+2]
     interpolated_E(t) = sol(t)[P+3]
+
     interpolated_L_tilde(t) = L_tilde(interpolated_g(t), interpolated_z_hat(t), Ω(t), interpolated_E(t), S(interpolated_g(t), parameters), parameters)
     interpolated_z_bar(t) = z_bar(interpolated_z_hat(t), Ω(t), parameters)
     interpolated_c(t) = c(interpolated_L_tilde(t), Ω(t), interpolated_z_bar(t))
