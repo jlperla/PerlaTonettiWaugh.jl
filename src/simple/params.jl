@@ -13,4 +13,4 @@ settings_simple = @with_kw (z_ex = unique([range(0., 0.1, length = 20)' range(0.
                             stationary_x0 = default_simple_stationary_x0, 
                             ode_solve_algorithm = IDA())
 
-default_simple_stationary_x0(parameters, settings) = parameters.r/2 # or something like that
+default_simple_stationary_x0(parameters, settings) = [parameters.r(settings.T)/2] # or something like that

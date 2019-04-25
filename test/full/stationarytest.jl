@@ -15,7 +15,7 @@
 # Execute tests.
 @testset "Tests with Vanilla Parameters" begin
     # Compute algebraic solutions.
-    algebraic_sols = [stationary_algebraic(baseline, settings_defaults(z_ex = grid, stationary_x0 = iv)) for grid in grids, iv in initial_values]
+    algebraic_sols = [stationary_algebraic(baseline, settings_defaults(z_ex = grid, stationary_x0 = (x, y) -> iv)) for grid in grids, iv in initial_values]
     # Test algebraic equilibrium quantities.
     # Growth rate tests.
     algebraic_gs = (x -> x.g).(algebraic_sols)
@@ -61,7 +61,7 @@ end
     # Generate new parameters.
     newparams = params(σ = 4.0) # Arbitrary change.
     # Compute algebraic solutions.
-    algebraic_sols = [stationary_algebraic(newparams, settings_defaults(z_ex = grid, stationary_x0 = iv)) for grid in grids, iv in initial_values]
+    algebraic_sols = [stationary_algebraic(newparams, settings_defaults(z_ex = grid, stationary_x0 = (x, y) -> iv)) for grid in grids, iv in initial_values]
     # Test consistency.
     algebraic_gs = (x -> x.g).(algebraic_sols)
     algebraic_Ωs = (x -> x.Ω).(algebraic_sols)
