@@ -75,7 +75,7 @@ function solve_dynamics(parameters, stationary_sol_T, settings, Ω)
     L_1 = L₁₋bc(z_ex, bc) # use backward difference as the drift is negative
     L_2 = L₂bc(z_ex, bc)
 
-    # initial conditions and parameters for the solver
+    # initial conditions and parameters for the solver (under backwards time)
     u0 = [v_T; g_T; z_hat_T; δ] # i.e. E(T) = δ
     du0 = zeros(P+3)
 
