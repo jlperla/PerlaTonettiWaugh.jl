@@ -210,7 +210,7 @@ end
 
 function Ω_from_E_hat(E_nodes_interior, Ω_T, Ω_0, parameters, settings)
     @unpack δ = parameters
-    @unpack T, interp = settings
+    @unpack T, tstops, interp = settings
     E_nodes = [-1.0; E_nodes_interior; 0.0] # See footnote 19.  Without pinning a corner there is an extra degree of freedom in the scale
     ts = range(0.0, T, length=length(E_nodes))
 
@@ -221,7 +221,7 @@ function Ω_from_E_hat(E_nodes_interior, Ω_T, Ω_0, parameters, settings)
     E(t) = Q*E_hat(t) + δ # (43)
 
     Ω_derivative(Ω,p,t) = Q*E_hat(t)*Ω # (44)
-    Ω_solution = DifferentialEquations.solve(ODEProblem(Ω_derivative, Ω_0, (0.0, T)), reltol = 1e-15) # if this fails, error will be thrown
+    Ω_solution = DifferentialEquations.solve(ODEProblem(Ω_derivative, Ω_0, (0.0, T)), reltol = 1e-15, tstops = tstops) # if this fails, error will be thrown
 
     function Ω(t)
         if t > T 

@@ -81,7 +81,7 @@ if isfile(cachepath) && use_cache
 else
     println("solving without cache.")
     @time solution = @suppress solve_transition(parameters, settings);
-    solved = solution.results # since these are the steady-states we're using
+    solved = solution.results 
 end
 
 # writing
