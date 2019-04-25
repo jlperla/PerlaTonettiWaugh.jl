@@ -30,3 +30,10 @@ settings_defaults = @with_kw (z_ex = unique([range(0., 0.1, length = 150)' range
 
 default_fixedpoint_x0(parameters, settings) = range(-1, 0, length = length(settings.tstops))[2:end-1]
 default_stationary_x0(parameters, settings) = [parameters.ρ * 0.75; 2.0; 0.57]
+
+model_cachename(parameters, settings) = join(hash((
+        parameters = parameters, 
+        settings = merge(settings, (interp = typeof(settings.interp), 
+                                    stationary_x0 = typeof(settings.stationary_x0), 
+                                    fixedpoint_x0 = typeof(settings.fixedpoint_x0)))
+)))

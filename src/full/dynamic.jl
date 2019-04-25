@@ -113,6 +113,7 @@ end
 
 function solve_transition(parameters, settings)
     @unpack T, tstops, fixedpoint_beta, fixedpoint_ftol, fixedpoint_iterations, fixedpoint_show_trace, fixedpoint_m, fixedpoint_x0  = settings
+    x0 = fixedpoint_x0(parameters, settings)
     @unpack d_0, d_T = parameters
     @assert d_0 !== d_T "Will lead to a divide by 0 error."
 
@@ -126,7 +127,7 @@ function solve_transition(parameters, settings)
     @assert tstops[end] ≈ T
 
     fp_sol = fixedpoint(E_nodes_interior -> dynamics_fixedpoint(E_nodes_interior, params_T, stationary_sol_0, stationary_sol_T, settings), 
-                        fixedpoint_x0,
+                        x0,
                         iterations = fixedpoint_iterations,
                         ftol = fixedpoint_ftol,
                         m = fixedpoint_m, 
@@ -167,6 +168,7 @@ function prepare_results(solve_dynamics_output, stationary_T, stationary_0)
     U(t) = quadgk(τ -> exp(-ρ*τ)*(log_M(t+τ) + log_c(t+τ)), 0, (T-t))[1] + exp(-ρ*(T-t))*(g_T + ρ*(log_c_T + g_T * T))/(ρ^2) # (C.83)
 
     # build out dataframe
+    results = @transform(results, Ω = Ω.(:t))
     results = @transform(results, λ_ii = λ_ii.(:z_hat, Ref(parameters)))
     results = @transform(results, S = S.(:g, Ref(parameters)))
     results = @transform(results, z_bar = z_bar.(:z_hat, :Ω, Ref(parameters)))
@@ -205,7 +207,7 @@ end
 
 function Ω_from_E_hat(E_nodes_interior, Ω_T, Ω_0, parameters, settings)
     @unpack δ = parameters
-    @unpack T, tstops, interp = settings
+    @unpack T, interp = settings
     E_nodes = [-1.0; E_nodes_interior; 0.0] # See footnote 19.  Without pinning a corner there is an extra degree of freedom in the scale
 
     ts = range(0.0, T, length=length(E_nodes))
@@ -216,7 +218,7 @@ function Ω_from_E_hat(E_nodes_interior, Ω_T, Ω_0, parameters, settings)
     E(t) = Q*E_hat(t) + δ # (43)
 
     Ω_derivative(Ω,p,t) = Q*E_hat(t)*Ω # (44)
-    Ω_solution = DifferentialEquations.solve(ODEProblem(Ω_derivative, Ω_0, (0.0, T)), reltol = 1e-15, tstops = tstops)
+    Ω_solution = DifferentialEquations.solve(ODEProblem(Ω_derivative, Ω_0, (0.0, T)), reltol = 1e-15)
 
     function Ω(t)
         if t > T

@@ -69,7 +69,7 @@ lambda_ss_autarky = autarky_results.change_welfare;
 The code is
 
 ```julia
-cachename = join(hash((parameters = parameters, settings = merge(settings, (interp = typeof(settings.interp),))))) # uniquely identify the run by parameters + settings
+cachename = model_cachename(parameters, settings) # uniquely identify the run by parameters + settings
 cachepath = joinpath(pwd(), "data", cachename * ".csv")
 use_cache = true # change this to false if you don't want to use the cache for a run
 write_cache = true # change this to false if you don't want to generate *any* cache files for a run
@@ -88,7 +88,7 @@ end
 if write_cache
     mkpath(joinpath(pwd(), "data")) # if this doesn't eist for whatever reason
     CSV.write(cachepath, solved) # write DataFrame
-    write(joinpath(pwd(), "data", cachename * ".json"), JSON.json((parameters = parameters, settings = merge(settings, (interp = typeof(settings.interp),))))) # write parameters
+    write(joinpath(pwd(), "data", cachename * ".json"), JSON.json((parameters = parameters, settings = merge(settings, (interp = typeof(settings.interp), stationary_x0 = typeof(settings.stationary_x0), fixedpoint_x0 = typeof(settings.fixedpoint_x0) ))))) # write parameters
 else
     # nothing
 end
