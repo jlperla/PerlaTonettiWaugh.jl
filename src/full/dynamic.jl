@@ -149,24 +149,21 @@ function prepare_results(solve_dynamics_output, stationary_T, stationary_0)
     z = z_ex[2:end-1]
     P = length(z)
 
+    # time-T values for welfare integrals
     L_tilde_T = stationary_T.L_tilde
     g_T = stationary_T.g
     z_hat_T = stationary_T.z_hat
     Ω_T = stationary_T.Ω
+    log_c_T = log(c(L_tilde_T, Ω_T, z_bar(z_hat_T, Ω_T, parameters))) 
 
     # interpolates for welfare integrals
-    interpolated_g(t) = sol(t)[P+1]
-    interpolated_z_hat(t) = sol(t)[P+2]
-    interpolated_E(t) = sol(t)[P+3]
-
-    interpolated_L_tilde(t) = L_tilde(interpolated_g(t), interpolated_z_hat(t), Ω(t), interpolated_E(t), S(interpolated_g(t), parameters), parameters)
-    interpolated_z_bar(t) = z_bar(interpolated_z_hat(t), Ω(t), parameters)
+    interpolated_L_tilde(t) = L_tilde(sol(t)[P+1], sol(t)[P+2], Ω(t), sol(t)[P+3], S(sol(t)[P+1], parameters), parameters) # recall that the P+1-th element of sol is g, P+2-nd is z_hat, P+3-rd is E 
+    interpolated_z_bar(t) = z_bar(sol(t)[P+2], Ω(t), parameters)
     interpolated_c(t) = c(interpolated_L_tilde(t), Ω(t), interpolated_z_bar(t))
-
-    # define welfare quantities based on interpolates and time-T steady state
     log_c(t) = log(interpolated_c(t))
-    log_c_T = log(c(L_tilde_T, Ω_T, z_bar(z_hat_T, Ω_T, parameters))) # this is a scalar
-    log_M(t) = quadgk(interpolated_g, 0, t)[1]
+    
+    # welfare rows for dataframe 
+    log_M(t) = quadgk(t -> sol(t)[P+1], 0, t)[1]
     U(t) = quadgk(τ -> exp(-ρ*τ)*(log_M(t+τ) + log_c(t+τ)), 0, (T-t))[1] + exp(-ρ*(T-t))*(g_T + ρ*(log_c_T + g_T * T))/(ρ^2) # (C.83)
 
     # build out dataframe
@@ -197,12 +194,10 @@ function prepare_results(solve_dynamics_output, stationary_T, stationary_0)
 
     # prepend pre-shock steadystate to dataframe
     reduced_stationary = delete(stationary_0, :F, :a, :b, :ν, :x, :y, :U_bar, :v_tilde)
-    Ξ₁ = 1/(1 - (σ-1)*(z[1] - z_ex[1])) # (24) (see note above (54) for why we can use this from Sec. 1)
     stationary_data = merge(reduced_stationary, (E = δ, U = stationary_0.U_bar, v_1 = stationary_0.v_tilde[1], entry_residual = Ξ₁*stationary_0.v_tilde[1] - dot(stationary_0.v_tilde, ω) + ζ))
-    
     ts_0 = settings.pre_shock_times
     for t in ts_0
-        push!(results, merge(stationary_data, (t = t,)))
+        push!(results, merge(stationary_data, (t = t, log_M = t * stationary_data.g)))
     end 
 
     return sort!(results) # sort results again to keep time in the right order
