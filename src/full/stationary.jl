@@ -121,8 +121,8 @@ end
 function compare_steady_states(parameters, settings; verbose = false)
     parameters_0 = merge(parameters, (d = parameters.d_0,))
     parameters_T = merge(parameters, (d = parameters.d_T,))
-    stationary_0 = stationary_algebraic(parameters_0, settings)
-    stationary_T = stationary_algebraic(parameters_T, settings)
+    stationary_0 = stationary_numerical(parameters_0, settings)
+    stationary_T = stationary_numerical(parameters_T, settings)
     change_welfare = 100*(consumption_equivalent(stationary_T.U_bar, stationary_0.U_bar, parameters)-1)
     change_trade = (1-stationary_T.λ_ii) - (1-stationary_0.λ_ii)
 

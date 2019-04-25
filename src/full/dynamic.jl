@@ -139,7 +139,10 @@ function solve_transition(parameters, settings)
     # regenerate full solution from the E_nodes_interior
     Ω = Ω_from_E_hat(E_nodes_interior, stationary_sol_T.Ω, stationary_sol_0.Ω, params_T, settings)
     @unpack δ = params_T
-    return (solve_dynamics_output = solve_dynamics(params_T, stationary_sol_T, settings, Ω), nodes = E_nodes_interior)
+    solve_dynamics_output = solve_dynamics(params_T, stationary_sol_T, settings, Ω)
+    return (solve_dynamics_output = solve_dynamics_output, 
+            nodes = E_nodes_interior, 
+            results = prepare_results(solve_dynamics_output, stationary_sol_T, stationary_sol_0))
 end
 
 function prepare_results(solve_dynamics_output, stationary_T, stationary_0)
@@ -209,26 +212,26 @@ function Ω_from_E_hat(E_nodes_interior, Ω_T, Ω_0, parameters, settings)
     @unpack δ = parameters
     @unpack T, interp = settings
     E_nodes = [-1.0; E_nodes_interior; 0.0] # See footnote 19.  Without pinning a corner there is an extra degree of freedom in the scale
-
     ts = range(0.0, T, length=length(E_nodes))
-    E_hat_interpolation = interp(ts, E_nodes)
+
+    E_hat_interpolation = interp(ts, E_nodes) # might worth trying cubic spline
     E_hat(t) = E_hat_interpolation(t)
     E_hat_integral = quadgk(E_hat, 0, T)[1] # (42)
     Q = log(Ω_T/Ω_0) / E_hat_integral # (42) when Ω_T = Ω_0, then Q = 0 so that E(t) is constant with δ as expected
     E(t) = Q*E_hat(t) + δ # (43)
 
     Ω_derivative(Ω,p,t) = Q*E_hat(t)*Ω # (44)
-    Ω_solution = DifferentialEquations.solve(ODEProblem(Ω_derivative, Ω_0, (0.0, T)), reltol = 1e-15)
+    Ω_solution = DifferentialEquations.solve(ODEProblem(Ω_derivative, Ω_0, (0.0, T)), reltol = 1e-15) # if this fails, error will be thrown
 
     function Ω(t)
-        if t > T
+        if t > T 
             return Ω_T
-        elseif t <= 0
-            return Ω_0
-        else
+        elseif t > 0 && t <= T 
             return Ω_solution(t)
-        end
-    end
+        else # useful for fixed point approach 
+            return Ω_0
+        end 
+    end 
 
     return Ω
 end
