@@ -14,24 +14,21 @@ grids = [
     unique([range(0.0, stop = 1.0, length = 500)' range(1.0, stop = 5.0, length = 201)']),
     unique([range(0.0, stop = 1.0, length = 1000)' range(1.0, stop = 2.0, length = 11)' range(2.0, stop = 5.0, length = 20)']),
     unique([range(0.0, stop = 1.0, length = 300)' range(1.0, stop = 2.0, length = 50)' range(2.0, stop = 7.0, length = 50)']),
-    range(0., stop = 5., length = 100),
-    range(0., stop = 5., length = 500),
     unique([range(0., stop = 1., length = 400)' range(1., stop = 5., length = 400)']),
     unique([range(0., stop = 0.1, length = 20)' range(0.1, stop = 1., length = 20)' range(1., stop = 5., length = 20)'])
 ]
 
 gs = [
-    0.019903560646320612,
-    0.020084770046224866,
-    0.020440266069327622,
-    0.01664042289147539,
-    0.01933522927174661,
-    0.019862262497972627,
-    0.02080684556400637,
+    0.019903560646302203,
+    0.02008477004627781,
+    0.020440266030220186,
+    0.016640422891475392,
+    0.02080684556396779
 ]
+
+@test var(gs) < 1e-5 # correctness
 
 for i in 1:length(grids)
     results = stationary_numerical_simple(params, settings_simple(z_ex = grids[i]))
-    @show results.g
-    @test results.g ≈ gs[i] # regression
+    @test results.g ≈ gs[i] # invariance
 end
