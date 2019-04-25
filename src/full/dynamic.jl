@@ -198,7 +198,7 @@ function prepare_results(solve_dynamics_output, stationary_T, stationary_0)
     # prepend pre-shock steadystate to dataframe
     reduced_stationary = delete(stationary_0, :F, :a, :b, :ν, :x, :y, :U_bar, :v_tilde)
     Ξ₁ = 1/(1 - (σ-1)*(z[1] - z_ex[1])) # (24) (see note above (54) for why we can use this from Sec. 1)
-    stationary_data = merge(reduced_stationary, (E = δ, U = stationary_0.U_bar, v_1 = stationary_0.v_tilde[1],  Ξ₁*stationary_0.v_tilde[1] - dot(stationary_0.v_tilde, ω) + ζ))
+    stationary_data = merge(reduced_stationary, (E = δ, U = stationary_0.U_bar, v_1 = stationary_0.v_tilde[1], entry_residual = Ξ₁*stationary_0.v_tilde[1] - dot(stationary_0.v_tilde, ω) + ζ))
     
     ts_0 = settings.pre_shock_times
     for t in ts_0
