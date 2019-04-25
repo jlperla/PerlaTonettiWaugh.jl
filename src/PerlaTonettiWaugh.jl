@@ -1,10 +1,11 @@
 module PerlaTonettiWaugh
 
 # Dependencies.
-using DifferentialEquations, Sundials, LinearAlgebra, DataFrames, DataFramesMeta, DiffEqCallbacks, Interpolations, QuadGK, CSV
-using NLsolve
-using SimpleDifferentialOperators
-using JSON
+using LinearAlgebra 
+using DifferentialEquations, Sundials, SimpleDifferentialOperators, DiffEqCallbacks 
+using DataFrames, DataFramesMeta, CSV, JSON # results caching 
+using Interpolations, QuadGK # integration
+using NLsolve # root-finding 
 import Parameters: @with_kw, @unpack
 
 # General utilities files.
