@@ -2,7 +2,7 @@
 
 # Overview
 
-This repository has the complete code for the steady-state and transition dynamics of Perla, Tonetti, and Waugh "Equilibrium Technology Diffusion, Trade, and Growth".
+This repository has the complete code for the steady-state and transition dynamics of Perla, Tonetti, and Waugh [Equilibrium Technology Diffusion, Trade, and Growth](http://christophertonetti.com/files/papers/PerlaTonettiWaugh_DiffusionTradeAndGrowth.pdf)
 
 The [derivation document](/docs/numerical_algorithm.pdf) has the complete set of equations implemented for the model, where all equation numbers in the code refer to this document.  General code and derivations for upwind finite difference methods are in the [SimpleDifferentialOperators.jl](https://github.com/QuantEcon/SimpleDifferentialOperators.jl) package with [detailed derivations](https://quantecon.github.io/SimpleDifferentialOperators.jl/stable/generated/discretized-differential-operator-derivation.pdf).
 
