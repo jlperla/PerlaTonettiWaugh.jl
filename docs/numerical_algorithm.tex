@@ -134,7 +134,7 @@ After discretizing, we abuse notation and denote the grid by the variable name, 
 
 To discretize the system, we use upwind finite differences.  In particular, we need to discretize the differential operator in \cref{eq:simple-summary5-numerical} subject to the \cref{eq:simple-summary3-numerical,eq:simple-summary4-numerical} boundary conditions.  Crucially, since these boundary conditions are homogeneous, we can decompose the linear $A(t)$ operator into additive parts where: the $\D[z]$ is discretized as $L^{-}_1$ using backwards first differences, and the $\D[zz]$ is discretized as $L_2$ using central second difference.   Furthermore, the $L^{-}_1$ and $L_2$ linear operators \textit{impose the boundary conditions \cref{eq:simple-summary3-numerical,eq:simple-summary4-numerical} for any vector} they operator on.
 
-See \cref{sec:discretized-operators} for the formulas for $L_1^-$ and $L_2$, and \url{https://quantecon.github.io/SimpleDifferentialOperators.jl/stable/generated/discretized-differential-operator-derivation.pdf} for the derivations.  While the full equations are complicated by the irregular grids and boundary conditions, for intuition note that the discretization of the $L_1^-$ backwards first difference operator is such that in the interior
+See \cref{sec:discretized-operators} for the formulas for $L_1^-$ and $L_2$, and \url{https://github.com/QuantEcon/SimpleDifferentialOperators.jl/releases/download/dev/discretized-differential-operator-derivation.pdf} for the derivations.  While the full equations are complicated by the irregular grids and boundary conditions, for intuition note that the discretization of the $L_1^-$ backwards first difference operator is such that in the interior
 $$
 \D[z] v(z_i) \approx L_1^{-}\, v(z_i) = \frac{v_i - v_{i-1}}{z_i - z_{i-1}},\text{ for } i = 2, \ldots P-1
 $$
@@ -408,7 +408,7 @@ Rearrange and use definitions of the vectors to find expressions for the extrapo
 
 
 \subsection{Discretized Operators}\label{sec:discretized-operators}
-For completeness: From \url{https://quantecon.github.io/SimpleDifferentialOperators.jl/stable/generated/discretized-differential-operator-derivation.pdf} the discretizations for first and second derivatives with the irregular grid are (where $\underline{\xi}  = \bar{\xi}  = \sigma - 1$)
+For completeness: From \url{https://github.com/QuantEcon/SimpleDifferentialOperators.jl/releases/download/dev/discretized-differential-operator-derivation.pdf} the discretizations for first and second derivatives with the irregular grid are (where $\underline{\xi}  = \bar{\xi}  = \sigma - 1$)
 \begin{align}
 	L_{1}^- &\equiv \begin{psmallmatrix}
 	\Delta_{1,-}^{-1} [1 + (-1 + \underline{\xi} \Delta_{1,-})]^{-1} &0&0&\dots&0&0&0\\
