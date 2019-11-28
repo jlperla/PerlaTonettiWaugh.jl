@@ -51,18 +51,6 @@ git-tree-sha1 = "5b08ed6036d9d3f0ee6369410b830f8873d4024c"
 uuid = "b99e7846-7c00-51b0-8f62-c81ae34c0232"
 version = "0.5.8"
 
-[[BlockArrays]]
-deps = ["LinearAlgebra"]
-git-tree-sha1 = "991b73d29f2166fb8acc2ac9e0093a8b9143cc96"
-uuid = "8e7c35d0-a365-5155-bbbb-fb81a777f24e"
-version = "0.10.2"
-
-[[BlockBandedMatrices]]
-deps = ["ArrayLayouts", "BandedMatrices", "BlockArrays", "Distributed", "FillArrays", "LinearAlgebra", "MatrixFactorizations", "Pkg", "Random", "SharedArrays", "SparseArrays", "Statistics", "Test"]
-git-tree-sha1 = "084f081acb27a315f55d49e74be03337fa65da08"
-uuid = "ffab5731-97b5-5995-9138-79e8c1846df0"
-version = "0.6.0"
-
 [[BoundaryValueDiffEq]]
 deps = ["BandedMatrices", "DiffEqBase", "DiffEqDiffTools", "ForwardDiff", "LinearAlgebra", "NLsolve", "Reexport", "SparseArrays"]
 git-tree-sha1 = "a8f90377cbed43aa583c19471d34d9653853c52d"
@@ -401,12 +389,6 @@ version = "0.5.2"
 deps = ["Base64"]
 uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
 
-[[MatrixFactorizations]]
-deps = ["ArrayLayouts", "LinearAlgebra", "Random"]
-git-tree-sha1 = "f9c83c8ffb0399575106fc6349aed8608d98134b"
-uuid = "a3b82374-2e81-5b9e-98ce-41277c0e4c87"
-version = "0.2.1"
-
 [[Measures]]
 deps = ["Test"]
 git-tree-sha1 = "ddfd6d13e330beacdde2c80de27c1c671945e7d9"
@@ -618,10 +600,11 @@ uuid = "992d4aef-0814-514b-bc4d-f2e9a6c4116f"
 version = "0.3.1"
 
 [[SimpleDifferentialOperators]]
-deps = ["BandedMatrices", "BlockBandedMatrices", "LazyArrays", "LinearAlgebra", "Parameters", "SparseArrays"]
-git-tree-sha1 = "6fa87703d4bff23a469780363c3a32d49e25e034"
+deps = ["LinearAlgebra", "Random", "SparseArrays", "Statistics", "Test"]
+git-tree-sha1 = "f223bd20302d19de13f6b0c101ce63fca3176985"
+pinned = true
 uuid = "7ccca996-40d6-5c2f-be7f-4eb2934af9c4"
-version = "0.6.1"
+version = "0.4.1"
 
 [[SimpleTraits]]
 deps = ["InteractiveUtils", "MacroTools"]
