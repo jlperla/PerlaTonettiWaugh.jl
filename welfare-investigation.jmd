@@ -1,0 +1,46 @@
+
+```julia
+using PerlaTonettiWaugh, Plots
+```
+
+```julia
+params_base = parameter_defaults();
+settings = settings_defaults();
+```
+
+### Cross Section of Zeta at Default Chi
+
+```julia
+ζ_grid = range(0.5, 1.5, length = 30);
+welfare_grid = similar(ζ_grid)
+
+for i in 1:length(ζ_grid)
+    params = merge(params_base, (ζ = ζ_grid[i], d = params_base.d_0))
+    sol = stationary_algebraic(params, settings);
+    welfare_grid[i] = sol.U_bar
+end
+```
+
+```julia
+plot(ζ_grid, welfare_grid, legend = false, title = "U_bar against Zeta, Chi Fixed")
+```
+
+### Cross Section of Chi at Default Zeta
+
+```julia
+χ_grid = range(0.1, 0.19, length = 30);
+welfare_grid = similar(χ_grid)
+
+for i in 1:length(ζ_grid)
+    params = merge(params_base, (χ = χ_grid[i], d = params_base.d_0))
+    sol = stationary_algebraic(params, settings);
+    welfare_grid[i] = sol.U_bar
+end
+```
+
+```julia
+plot(χ_grid, welfare_grid, legend = false, title = "U_bar against Chi, Zeta Fixed")
+```
+
+```julia
+```
