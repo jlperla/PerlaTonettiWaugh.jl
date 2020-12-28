@@ -1,0 +1,13 @@
+*.jl.cov
+*.jl.*.cov
+*.jl.mem
+*.vscode
+*.log
+*.aux
+*.gz
+.DS_Store
+**/.ipynb_checkpoints
+*.bbl
+*.bak
+*.blg
+*.synctex(busy)
